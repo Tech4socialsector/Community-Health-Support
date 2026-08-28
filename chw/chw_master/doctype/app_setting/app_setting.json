@@ -1,0 +1,167 @@
+{
+ "actions": [],
+ "creation": "2026-08-27 12:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "app_name",
+  "app_logo",
+  "section_break_login",
+  "login_headline",
+  "login_description",
+  "modules",
+  "dashboard_cards",
+  "section_break_ai",
+  "ai_assistant_enabled",
+  "ai_bot_name",
+  "ai_daily_message_limit",
+  "column_break_ai",
+  "ai_provider",
+  "ai_api_base_url",
+  "ai_model",
+  "ai_api_key"
+ ],
+ "fields": [
+  {
+   "default": "CHW",
+   "description": "Shown in the CHW Vue app's header, next to the logo.",
+   "fieldname": "app_name",
+   "fieldtype": "Data",
+   "label": "App Name"
+  },
+  {
+   "description": "Shown in the CHW Vue app's header. Falls back to a plain initial-letter mark if left blank.",
+   "fieldname": "app_logo",
+   "fieldtype": "Attach Image",
+   "label": "App Logo"
+  },
+  {
+   "fieldname": "section_break_login",
+   "fieldtype": "Section Break",
+   "label": "Login Page"
+  },
+  {
+   "default": "Care coordination for every household you serve.",
+   "description": "Short headline shown on the CHW Vue app's login page.",
+   "fieldname": "login_headline",
+   "fieldtype": "Small Text",
+   "label": "Login Headline"
+  },
+  {
+   "default": "Track visits, follow-ups, and growth monitoring in one place — built for community health workers on the ground.",
+   "description": "Supporting text shown below the headline on the login page.",
+   "fieldname": "login_description",
+   "fieldtype": "Small Text",
+   "label": "Login Description"
+  },
+  {
+   "description": "Deprecated - replaced by the standalone App Module Setting doctype. Kept only until the migration patch that copies these rows over has run; safe to remove after that.",
+   "fieldname": "modules",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Modules (deprecated)",
+   "options": "CHW App Module"
+  },
+  {
+   "description": "Controls which stat cards appear on the CHW Vue app's Dashboard, and which roles can see each one.",
+   "fieldname": "dashboard_cards",
+   "fieldtype": "Table",
+   "label": "Dashboard Cards",
+   "options": "CHW Dashboard Card"
+  },
+  {
+   "fieldname": "section_break_ai",
+   "fieldtype": "Section Break",
+   "label": "AI Assistant"
+  },
+  {
+   "default": "0",
+   "description": "Turns the floating AI assistant on or off for every user of the app.",
+   "fieldname": "ai_assistant_enabled",
+   "fieldtype": "Check",
+   "label": "Enable AI Assistant"
+  },
+  {
+   "default": "Assistant",
+   "description": "Shown as the chat panel's title and greeting.",
+   "fieldname": "ai_bot_name",
+   "fieldtype": "Data",
+   "label": "Assistant Name"
+  },
+  {
+   "default": "50",
+   "description": "Maximum number of assistant messages a single user can send per day. Protects against unexpected API costs.",
+   "fieldname": "ai_daily_message_limit",
+   "fieldtype": "Int",
+   "label": "Daily Message Limit Per User",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "column_break_ai",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Custom",
+   "description": "Convenience label only - the actual request always uses the Base URL below, so any OpenAI-compatible endpoint works.",
+   "fieldname": "ai_provider",
+   "fieldtype": "Select",
+   "label": "Provider Preset",
+   "options": "Custom\nOpenAI\nGemini\nGroq\nOpenRouter\nOllama (self-hosted)"
+  },
+  {
+   "description": "OpenAI-compatible chat completions endpoint, e.g. https://api.groq.com/openai/v1",
+   "fieldname": "ai_api_base_url",
+   "fieldtype": "Data",
+   "label": "API Base URL",
+   "mandatory_depends_on": "eval:doc.ai_assistant_enabled"
+  },
+  {
+   "description": "Model name as expected by the provider, e.g. llama-3.1-8b-instant, gemini-flash-latest, gpt-4o-mini. Check the provider's docs for their current model names - they change these over time.",
+   "fieldname": "ai_model",
+   "fieldtype": "Data",
+   "label": "Model",
+   "mandatory_depends_on": "eval:doc.ai_assistant_enabled"
+  },
+  {
+   "description": "Stored encrypted, never sent to the browser. Leave blank for providers that don't require a key (e.g. local Ollama).",
+   "fieldname": "ai_api_key",
+   "fieldtype": "Password",
+   "label": "API Key"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-27 22:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "CHW Master",
+ "name": "App Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

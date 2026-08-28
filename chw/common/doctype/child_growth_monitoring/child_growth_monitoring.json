@@ -1,0 +1,197 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "CGM-.#####",
+ "creation": "2026-08-25 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "familymember_id",
+  "village",
+  "household_id",
+  "first_name",
+  "gender",
+  "date_of_birth",
+  "phone_number",
+  "age",
+  "age_in_months",
+  "care_stage",
+  "column_break_cgm01",
+  "health_worker_name",
+  "next_followup_date",
+  "next_followup_date_auto",
+  "section_break_growth_followup",
+  "growth_followup"
+ ],
+ "fields": [
+  {
+   "fieldname": "familymember_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Family Member Id",
+   "options": "Family members",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "familymember_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village"
+  },
+  {
+   "fetch_from": "familymember_id.hhid",
+   "fetch_if_empty": 1,
+   "fieldname": "household_id",
+   "fieldtype": "Link",
+   "label": "HouseHold ID",
+   "options": "Household profile"
+  },
+  {
+   "fetch_from": "familymember_id.family_member",
+   "fetch_if_empty": 1,
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Child's Name"
+  },
+  {
+   "fetch_from": "familymember_id.gender",
+   "fieldname": "gender",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gender"
+  },
+  {
+   "fetch_from": "familymember_id.date_of_birth",
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fetch_from": "familymember_id.phone_number",
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "description": "Auto-calculated from Date of Birth and refreshed daily, so it keeps advancing on the child's birthday without anyone opening this record.",
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Age (Years)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "age_in_months",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Age (Months)",
+   "read_only": 1
+  },
+  {
+   "description": "Auto-calculated from Age: 0-6 Months, 6 Months to 5 Years, or 5 Years to 11 Years.",
+   "fieldname": "care_stage",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Care Stage",
+   "options": "\n0-6 Months\n6 Months to 5 Years\n5 Years to 11 Years\nAbove 11 Years",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cgm01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Health Worker Name",
+   "options": "Health Worker"
+  },
+  {
+   "fieldname": "next_followup_date",
+   "fieldtype": "Date",
+   "label": "Next Follow-up Date"
+  },
+  {
+   "description": "Auto-calculated from the earliest pending follow-up, or from the last completed visit's stage-based interval. Enter a date here to override it, or clear it to let it auto-calculate again.",
+   "fieldname": "next_followup_date_auto",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Next Follow-up Date (auto-calculated, internal)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_growth_followup",
+   "fieldtype": "Section Break",
+   "label": "Follow-up"
+  },
+  {
+   "fieldname": "growth_followup",
+   "fieldtype": "Table",
+   "label": "Growth Followup",
+   "options": "Child Growth Followup"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-25 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Child Growth Monitoring",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

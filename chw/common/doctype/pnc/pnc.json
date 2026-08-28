@@ -1,0 +1,195 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:name_of_child",
+ "creation": "2026-08-10 15:25:41.737279",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "birth_registration_id",
+  "anc_followup_id",
+  "first_name",
+  "village",
+  "father_husband_name",
+  "name_of_child",
+  "column_break_gvxz",
+  "date_of_delivery",
+  "phone_number",
+  "health_worker_name",
+  "next_pnc_visit_date",
+  "next_pnc_visit_date_auto",
+  "section_break_dmfm",
+  "mother",
+  "section_break_baby",
+  "baby"
+ ],
+ "fields": [
+  {
+   "fieldname": "birth_registration_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Birth Registration ID",
+   "options": "Birth Registration"
+  },
+  {
+   "description": "Best-matched from her Pregnancy Registration (closest estimated due date to actual delivery date) at PNC creation time. Read-only reference back to her ANC care.",
+   "fieldname": "anc_followup_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "ANC Follow-up Reference",
+   "options": "ANC Follow-up",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "birth_registration_id.first_name",
+   "fetch_if_empty": 1,
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Mother's Name"
+  },
+  {
+   "fetch_from": "birth_registration_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village"
+  },
+  {
+   "fetch_from": "birth_registration_id.husbands_name",
+   "fetch_if_empty": 1,
+   "fieldname": "father_husband_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Father's Name"
+  },
+  {
+   "fetch_from": "birth_registration_id.baby_name",
+   "fetch_if_empty": 1,
+   "fieldname": "name_of_child",
+   "fieldtype": "Data",
+   "label": "Name of the child ",
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_gvxz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "birth_registration_id.date_of_delivery",
+   "fieldname": "date_of_delivery",
+   "fieldtype": "Date",
+   "label": "Delivery Date "
+  },
+  {
+   "fetch_from": "birth_registration_id.phone_number",
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "length": 10
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Health Worker Name",
+   "options": "Health Worker",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_dmfm",
+   "fieldtype": "Section Break",
+   "label": "Mother"
+  },
+  {
+   "fieldname": "mother",
+   "fieldtype": "Table",
+   "label": "Mother",
+   "options": "PNC Followup Child"
+  },
+  {
+   "fieldname": "section_break_baby",
+   "fieldtype": "Section Break",
+   "label": "Baby"
+  },
+  {
+   "fieldname": "baby",
+   "fieldtype": "Table",
+   "label": "Baby",
+   "options": "Baby PNC Followup Child"
+  },
+  {
+   "description": "Auto-calculated from the last PNC follow-up date and the PNC Visit Interval Master. Enter a date here to override it, or clear it to let it auto-calculate again.",
+   "fieldname": "next_pnc_visit_date",
+   "fieldtype": "Date",
+   "label": "Next PNC Visit date"
+  },
+  {
+   "fieldname": "next_pnc_visit_date_auto",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Next PNC Visit Date (auto-calculated, internal)",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-25 17:34:27.794886",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "PNC",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,319 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "BR-.#####",
+ "creation": "2026-08-10 14:55:47.270728",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "family_member_id",
+  "first_name",
+  "hh_id",
+  "village",
+  "husbands_name",
+  "age",
+  "phone_number",
+  "type_of_delivery",
+  "date_of_delivery",
+  "place_of_birth",
+  "phc_address",
+  "delivery_doneby",
+  "column_break_gjta",
+  "complication_identified",
+  "specify_complication",
+  "family_planning",
+  "if_yes_specify_the_method",
+  "delivery_outcome",
+  "birth_status",
+  "mother_weight",
+  "section_break_yrgg",
+  "baby_name",
+  "gender",
+  "date_of_birth",
+  "baby_cry",
+  "pre_term_born",
+  "babybirth_month",
+  "admitted_for_complications",
+  "column_break_vgrr",
+  "birth_weight",
+  "low_birth_status",
+  "breastfeed_after_delivery",
+  "jaundice",
+  "which_child_is_it",
+  "health_worker_name"
+ ],
+ "fields": [
+  {
+   "fetch_if_empty": 1,
+   "fieldname": "family_member_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": " Family Member Id",
+   "options": "Family members"
+  },
+  {
+   "fetch_from": "family_member_id.family_member",
+   "fetch_if_empty": 1,
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Name"
+  },
+  {
+   "fetch_from": "family_member_id.hhid",
+   "fetch_if_empty": 1,
+   "fieldname": "hh_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "HH ID"
+  },
+  {
+   "fetch_from": "family_member_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "label": "Village",
+   "options": "Village",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "family_member_id.father_husband_name",
+   "fetch_if_empty": 1,
+   "fieldname": "husbands_name",
+   "fieldtype": "Data",
+   "label": "Husband's Name"
+  },
+  {
+   "fetch_from": "family_member_id.age",
+   "fetch_if_empty": 1,
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "label": "Age"
+  },
+  {
+   "fetch_from": "family_member_id.phone_number",
+   "fetch_if_empty": 1,
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "length": 10,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "type_of_delivery",
+   "fieldtype": "Select",
+   "label": "Type of Delivery",
+   "options": "\nNormal Delivery\nC-Section"
+  },
+  {
+   "fieldname": "date_of_delivery",
+   "fieldtype": "Date",
+   "label": "Date of Delivery"
+  },
+  {
+   "fieldname": "place_of_birth",
+   "fieldtype": "Select",
+   "label": "Place of Birth",
+   "options": "\nHome\nPrivate Hospital\nPHC\nGovernment Hospital\nTribal Hospital"
+  },
+  {
+   "fieldname": "phc_address",
+   "fieldtype": "Small Text",
+   "label": "Address of Hospital/PHC"
+  },
+  {
+   "fieldname": "delivery_doneby",
+   "fieldtype": "Select",
+   "label": "Who Attended the Delivery?",
+   "options": "\nSkilled birth attendant (Doctor)\nTraditional attendant"
+  },
+  {
+   "fieldname": "column_break_gjta",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "complication_identified",
+   "fieldtype": "Select",
+   "label": "Did the mother have any complications during/since delivery?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval: doc.complication_identified == \"Yes\"",
+   "fieldname": "specify_complication",
+   "fieldtype": "Data",
+   "label": "If Yes, specify the complication"
+  },
+  {
+   "fieldname": "family_planning",
+   "fieldtype": "Select",
+   "label": "Did the mother accept postpartum family planning services?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval: doc.family_planning == \"Yes\"",
+   "fieldname": "if_yes_specify_the_method",
+   "fieldtype": "Select",
+   "label": "If Yes, specify the method",
+   "options": "\nTemporary method\nPermanent method"
+  },
+  {
+   "fieldname": "delivery_outcome",
+   "fieldtype": "Select",
+   "label": "Delivery Outcome",
+   "options": "\nNormal\nHigh Risk"
+  },
+  {
+   "fieldname": "birth_status",
+   "fieldtype": "Select",
+   "label": "Birth Status",
+   "options": "\nLive Birth\nStill Birth"
+  },
+  {
+   "fieldname": "mother_weight",
+   "fieldtype": "Data",
+   "label": "Mother's Weight After Delivery"
+  },
+  {
+   "fieldname": "section_break_yrgg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "baby_name",
+   "fieldtype": "Data",
+   "label": "Baby Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale"
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "baby_cry",
+   "fieldtype": "Select",
+   "label": "Did the baby cry immediately after birth?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "pre_term_born",
+   "fieldtype": "Select",
+   "label": "Was the baby born pre-term?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval: doc.pre_term_born == \"Yes\"",
+   "fieldname": "babybirth_month",
+   "fieldtype": "Select",
+   "label": "In which month was the baby born?",
+   "options": "\n10\n9\n8\n7\nLess then 7"
+  },
+  {
+   "fieldname": "admitted_for_complications",
+   "fieldtype": "Select",
+   "label": "Was the baby admitted to SNCU/ICU/PICU due to any complications?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_vgrr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "birth_weight",
+   "fieldtype": "Data",
+   "label": "Birth Weight"
+  },
+  {
+   "fieldname": "low_birth_status",
+   "fieldtype": "Select",
+   "label": "Low Birth Weight Status",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "breastfeed_after_delivery",
+   "fieldtype": "Select",
+   "label": "Was the baby breastfed within 1 hour?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "jaundice",
+   "fieldtype": "Select",
+   "label": "Did the baby have jaundice at birth?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "label": "Community Health Worker Name",
+   "options": "Health Worker",
+   "read_only": 1
+  },
+  {
+   "fieldname": "which_child_is_it",
+   "fieldtype": "Select",
+   "label": " Which child is it?",
+   "options": "\n1\n2\n3\n4\n5\n6\n7 and Above"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-11 10:41:57.267918",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Birth Registration",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

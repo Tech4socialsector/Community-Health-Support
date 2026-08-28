@@ -1,0 +1,214 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:patient_name",
+ "creation": "2026-07-29 14:37:12.318075",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient_name",
+  "age",
+  "gender",
+  "village",
+  "family_members",
+  "household_profile",
+  "phone_number",
+  "guardian_name",
+  "emergency_contact",
+  "column_break_khpm",
+  "illness",
+  "date_of_registration",
+  "assigned_health_worker",
+  "remarks",
+  "status",
+  "risk_flag",
+  "consent_obtained",
+  "symptoms_section",
+  "symptoms",
+  "medicines",
+  "follow_up_section",
+  "mental_health_followup_child"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale\nOther"
+  },
+  {
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Village",
+   "options": "Village"
+  },
+  {
+   "fieldname": "family_members",
+   "fieldtype": "Link",
+   "label": "Family members",
+   "options": "Family members"
+  },
+  {
+   "fieldname": "household_profile",
+   "fieldtype": "Link",
+   "label": "Household profile",
+   "options": "Household profile"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "length": 10
+  },
+  {
+   "fieldname": "guardian_name",
+   "fieldtype": "Data",
+   "label": "Guardian Name"
+  },
+  {
+   "fieldname": "emergency_contact",
+   "fieldtype": "Data",
+   "label": "Emergency contact"
+  },
+  {
+   "fieldname": "column_break_khpm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "illness",
+   "fieldtype": "Data",
+   "label": "Illness"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date_of_registration",
+   "fieldtype": "Date",
+   "label": "Date of Registration"
+  },
+  {
+   "fieldname": "assigned_health_worker",
+   "fieldtype": "Link",
+   "label": "Assigned Health Worker",
+   "options": "Health Worker"
+  },
+  {
+   "default": "0",
+   "fieldname": "consent_obtained",
+   "fieldtype": "Check",
+   "label": "Consent Obtained"
+  },
+  {
+   "fieldname": "symptoms_section",
+   "fieldtype": "Section Break",
+   "label": "Symptoms"
+  },
+  {
+   "fieldname": "symptoms",
+   "fieldtype": "Table",
+   "label": "Mental Health Symptom",
+   "options": "Mental Health Symptom"
+  },
+  {
+   "fieldname": "medicines",
+   "fieldtype": "Table",
+   "label": "Medicines",
+   "options": "Medicine and frequency"
+  },
+  {
+   "fieldname": "mental_health_followup_child",
+   "fieldtype": "Table",
+   "label": "Mental Health Followup Child",
+   "options": "Mental Health Followup Child"
+  },
+  {
+   "fieldname": "follow_up_section",
+   "fieldtype": "Section Break",
+   "label": "Follow up"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nActive\nStable\nRelapsed\nDischarged\nLost to Follow-up"
+  },
+  {
+   "fieldname": "risk_flag",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "High Risk",
+   "options": "\nNone\nSelf-harm Risk\nSuicide Risk\nViolence Risk"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-03 17:35:43.120931",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Mental Health",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

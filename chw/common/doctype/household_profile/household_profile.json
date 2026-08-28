@@ -1,0 +1,269 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "HH-.#####",
+ "creation": "2026-07-16 13:19:52.632670",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_rmhx",
+  "village",
+  "household_head_name",
+  "total_family_members",
+  "members_added",
+  "pending_members",
+  "status",
+  "caste",
+  "others_caste",
+  "house",
+  "phone_no",
+  "survay_date",
+  "farming",
+  "drinkingwater",
+  "hereditarydisease",
+  "toilet",
+  "cattles",
+  "column_break_kkvt",
+  "village_short_code",
+  "address",
+  "geo_location",
+  "latitude",
+  "longitude",
+  "household_id",
+  "health_worker_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_rmhx",
+   "fieldtype": "Section Break",
+   "label": "Repondent Details "
+  },
+  {
+   "fieldname": "household_head_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Head of the Family ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_family_members",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Family Members in the Family",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "members_added",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Family Members Added",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pending_members",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Pending Family Members",
+   "read_only": 1
+  },
+  {
+   "fieldname": "caste",
+   "fieldtype": "Select",
+   "label": "Caste the family belongs to ",
+   "options": "\nGeneral\nSC\nST\nOBC\nNot Applicable\nOthers, specify"
+  },
+  {
+   "depends_on": "eval: doc.caste == \"Others, specify\"",
+   "fieldname": "others_caste",
+   "fieldtype": "Data",
+   "label": "Others, Please Specify"
+  },
+  {
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village",
+   "reqd": 1
+  },
+  {
+   "fieldname": "phone_no",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "length": 10,
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "survay_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Survay Date"
+  },
+  {
+   "fieldname": "house",
+   "fieldtype": "Select",
+   "label": "House",
+   "options": "\nHut\nTiled house\nTerraced house"
+  },
+  {
+   "fieldname": "farming",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Farming",
+   "options": "\norganic\ninorganic\nNo farm",
+   "reqd": 1
+  },
+  {
+   "fieldname": "drinkingwater",
+   "fieldtype": "Select",
+   "label": "Drinking Water",
+   "options": "\nWell water\nBorewell water\nPanchayat water"
+  },
+  {
+   "fieldname": "hereditarydisease",
+   "fieldtype": "Select",
+   "label": "Hereditary Disease",
+   "options": "\nNo\nNCD - HTN, DM, Heart disease\nThalassemia\nSickle cell disease"
+  },
+  {
+   "fieldname": "toilet",
+   "fieldtype": "Select",
+   "label": "Toilet",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "cattles",
+   "fieldtype": "Select",
+   "label": "Cattles",
+   "options": "\nNo\ncow, goat\ncow only\ngoat only"
+  },
+  {
+   "fieldname": "column_break_kkvt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "village.village_code",
+   "fetch_if_empty": 1,
+   "fieldname": "village_short_code",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Village Code"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "description": "Tap the locate icon on the map to capture this household's GPS coordinates.",
+   "fieldname": "geo_location",
+   "fieldtype": "Geolocation",
+   "label": "Geo Location"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Latitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Longitude",
+   "read_only": 1
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Health Worker",
+   "options": "Health Worker",
+   "read_only": 1
+  },
+  {
+   "fieldname": "household_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Household ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nI live here\nI work outside\nout of town"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "link_doctype": "Family members",
+   "link_fieldname": "hhid"
+  }
+ ],
+ "modified": "2026-08-13 16:41:10.886591",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Household profile",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "household_head_name",
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

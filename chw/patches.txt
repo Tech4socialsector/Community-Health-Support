@@ -1,0 +1,20 @@
+[pre_model_sync]
+# Patches added in this section will be executed before doctypes are migrated
+# Read docs to understand patches: https://frappeframework.com/docs/v14/user/en/database-migrations
+
+[post_model_sync]
+# Patches added in this section will be executed after doctypes are migrated
+chw.patches.v1_0.add_ncd_disease_master
+chw.patches.v1_0.add_type_of_disability_master
+chw.patches.v1_0.backfill_pnc_anc_followup_reference
+chw.patches.v1_0.migrate_malnutrition_to_child_growth_monitoring
+chw.patches.v1_0.set_pnc_visit_interval_to_monthly
+chw.patches.v1_0.seed_chw_app_modules
+chw.patches.v1_0.seed_chw_dashboard_cards
+chw.patches.v1_0.migrate_chw_app_module_to_standalone
+chw.patches.v1_0.migrate_module_settings_to_app_module_setting
+chw.patches.v1_0.backfill_app_module_setting_module_name
+chw.patches.v1_0.rename_chw_app_settings_to_app_setting
+chw.patches.v1_0.link_chw_app_workspace_to_vue_app
+chw.patches.v1_0.link_chw_desktop_icon_to_vue_app
+chw.patches.v1_0.backfill_app_setting_ai_defaults

@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-08-11 12:30:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "status",
+  "blood_sugar_type",
+  "blood_sugar_level",
+  "blood_pressure",
+  "peak_flow_rate",
+  "creatinine_level",
+  "cancer_type",
+  "cancer_stage",
+  "weight",
+  "medication_adherence",
+  "complications",
+  "teaching",
+  "any_other_complaintremark"
+ ],
+ "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nCompleted"
+  },
+  {
+   "depends_on": "eval:parent.disease==\"Diabetes Mellitus\"",
+   "fieldname": "blood_sugar_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Blood Sugar Test Type",
+   "options": "\nFasting\nRandom\nHbA1c"
+  },
+  {
+   "depends_on": "eval:parent.disease==\"Diabetes Mellitus\"",
+   "fieldname": "blood_sugar_level",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Blood Sugar Level (mg/dL)"
+  },
+  {
+   "depends_on": "eval:parent.disease==\"Hypertension\"",
+   "fieldname": "blood_pressure",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Blood Pressure (mmHg)"
+  },
+  {
+   "depends_on": "eval:parent.disease==\"Chronic Obstructive Pulmonary Disease (COPD)\"",
+   "fieldname": "peak_flow_rate",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Peak Flow Rate (L/min)"
+  },
+  {
+   "depends_on": "eval:parent.disease==\"Chronic Kidney Disease (CKD)\"",
+   "fieldname": "creatinine_level",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Creatinine Level (mg/dL)"
+  },
+  {
+   "depends_on": "eval:parent.disease==\"Cancer\"",
+   "fieldname": "cancer_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cancer Type/Site"
+  },
+  {
+   "depends_on": "eval:parent.disease==\"Cancer\"",
+   "fieldname": "cancer_stage",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Cancer Stage",
+   "options": "\nI\nII\nIII\nIV"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Weight"
+  },
+  {
+   "fieldname": "medication_adherence",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "On Medication",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "complications",
+   "fieldtype": "Small Text",
+   "label": "Complications"
+  },
+  {
+   "fieldname": "teaching",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Teaching"
+  },
+  {
+   "fieldname": "any_other_complaintremark",
+   "fieldtype": "Small Text",
+   "label": "Any other complaint/remark"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-11 12:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "NCD Followup Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

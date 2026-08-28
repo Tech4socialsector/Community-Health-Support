@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-07-24 09:09:35.146622",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "status",
+  "bp",
+  "edema",
+  "anemia",
+  "wound_infection",
+  "breast",
+  "teaching",
+  "any_other_complaintremark"
+ ],
+ "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nCompleted"
+  },
+  {
+   "fieldname": "bp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "BP"
+  },
+  {
+   "fieldname": "edema",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Edema",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "anemia",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Anemia",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "wound_infection",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Wound Infection",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "breast",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Breast",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "teaching",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Teaching"
+  },
+  {
+   "fieldname": "any_other_complaintremark",
+   "fieldtype": "Small Text",
+   "label": "Any other complaint/remark"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-11 11:18:52.190872",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "PNC Followup Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

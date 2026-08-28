@@ -1,0 +1,219 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "NCD-.#####",
+ "creation": "2026-07-27 11:33:25.133937",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "familymember_id",
+  "village",
+  "household_id",
+  "first_name",
+  "husband_name_wife_name_father_name",
+  "gender",
+  "phone_number",
+  "age",
+  "column_break_vozv",
+  "treatmentfrom",
+  "disease",
+  "high_risk",
+  "status",
+  "reason_for_death",
+  "next_followup_date",
+  "next_followup_date_auto",
+  "health_worker_name",
+  "section_break_ncd_followup",
+  "ncd_followup"
+ ],
+ "fields": [
+  {
+   "fieldname": "familymember_id",
+   "fieldtype": "Link",
+   "label": "Family Member Id",
+   "options": "Family members",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "familymember_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village"
+  },
+  {
+   "fetch_from": "familymember_id.hhid",
+   "fetch_if_empty": 1,
+   "fieldname": "household_id",
+   "fieldtype": "Link",
+   "label": "HouseHold ID",
+   "options": "Household profile"
+  },
+  {
+   "fetch_from": "familymember_id.family_member",
+   "fetch_if_empty": 1,
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": " Name"
+  },
+  {
+   "fetch_from": "familymember_id.family_member",
+   "fetch_if_empty": 1,
+   "fieldname": "husband_name_wife_name_father_name",
+   "fieldtype": "Data",
+   "label": "Husband Name /Wife Name / Father Name "
+  },
+  {
+   "fetch_from": "familymember_id.gender",
+   "fieldname": "gender",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gender"
+  },
+  {
+   "fetch_from": "familymember_id.phone_number",
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone number"
+  },
+  {
+   "fieldname": "column_break_vozv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "familymember_id.age",
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Age"
+  },
+  {
+   "fieldname": "treatmentfrom",
+   "fieldtype": "Select",
+   "label": "Treatment From ",
+   "options": "\nTribal hospital\nPHC\nOutside"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "label": "Health Woker Name ",
+   "options": "Health Worker"
+  },
+  {
+   "fieldname": "disease",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Disease",
+   "options": "NCD Disease"
+  },
+  {
+   "description": "If Yes, follow-up visits are scheduled every 1 month regardless of the Disease's usual interval.",
+   "fetch_from": "familymember_id.high_risk",
+   "fetch_if_empty": 1,
+   "fieldname": "high_risk",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "High Risk",
+   "options": "\nYes\nNo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nAlive\nDeath"
+  },
+  {
+   "depends_on": "eval:doc.status==\"Death\"",
+   "fieldname": "reason_for_death",
+   "fieldtype": "Small Text",
+   "label": "Reason for Death"
+  },
+  {
+   "depends_on": "eval:doc.status!=\"Death\"",
+   "fieldname": "next_followup_date",
+   "fieldtype": "Date",
+   "label": "Next Follow-up Date"
+  },
+  {
+   "description": "Auto-calculated from the last NCD follow-up date and the selected Disease's follow-up interval. Enter a date here to override it, or clear it to let it auto-calculate again.",
+   "fieldname": "next_followup_date_auto",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Next Follow-up Date (auto-calculated, internal)",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.status!=\"Death\"",
+   "fieldname": "section_break_ncd_followup",
+   "fieldtype": "Section Break",
+   "label": "Follow-up"
+  },
+  {
+   "fieldname": "ncd_followup",
+   "fieldtype": "Table",
+   "label": "NCD Followup",
+   "options": "NCD Followup Child"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-13 14:32:46.465862",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "NCD",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

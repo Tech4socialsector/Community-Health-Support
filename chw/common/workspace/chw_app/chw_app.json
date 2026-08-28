@@ -1,0 +1,102 @@
+{
+ "app": "chw",
+ "charts": [],
+ "content": "[{\"id\": \"QLdidlsGTl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Visit Dashboard\", \"col\": 4}}, {\"id\": \"MfIUhWNivo\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Household Details\", \"col\": 4}}, {\"id\": \"cxs9pjDOiG\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Family Members\", \"col\": 4}}, {\"id\": \"lgNLFGGKLJ\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Birth Registration\", \"col\": 4}}, {\"id\": \"n14mU_LhS-\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pregnancy Registration\", \"col\": 4}}, {\"id\": \"FvhY9VctLN\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"ANC Follow-up\", \"col\": 4}}, {\"id\": \"zfNmA54s-M\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"PNC Followup\", \"col\": 4}}, {\"id\": \"t9QSgUmAGn\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"NCD Follow-up\", \"col\": 4}}, {\"id\": \"WU38WTohby\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"NCD Total Screening\", \"col\": 4}}, {\"id\": \"XGJ1kurUl3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"NCD Deaths\", \"col\": 4}}, {\"id\": \"GyJPDteiHn\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Mental Health Cases\", \"col\": 4}}, {\"id\": \"0GvOiuGivu\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Cases\", \"col\": 4}}, {\"id\": \"s3dY-dUhGv\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"High Risk Cases\", \"col\": 4}}, {\"id\": \"Mn7QaLuT9x\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Malnutrition\", \"col\": 4}}, {\"id\": \"5e3210aeaa\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Current Pregnant Women\", \"col\": 4}}]",
+ "creation": "2026-07-30 16:18:10.119593",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "air-vent",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "CHW App",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-08-14 15:42:01.199690",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "CHW App",
+ "number_cards": [
+  {
+   "label": "Birth Registration",
+   "number_card_name": "Birth Registration"
+  },
+  {
+   "label": "ANC Follow-up",
+   "number_card_name": "ANC Follow-up"
+  },
+  {
+   "label": "NCD Follow-up",
+   "number_card_name": "NCD Follow-up"
+  },
+  {
+   "label": "Mental Health Cases",
+   "number_card_name": "Mental Health Cases"
+  },
+  {
+   "label": "Household Details",
+   "number_card_name": "Household Details"
+  },
+  {
+   "label": "Family Members",
+   "number_card_name": "Family Members"
+  },
+  {
+   "label": "Active Cases",
+   "number_card_name": "Active Cases"
+  },
+  {
+   "label": "High Risk Cases",
+   "number_card_name": "High Risk Cases"
+  },
+  {
+   "label": "Pregnancy Registration",
+   "number_card_name": "Pregnancy Registration"
+  },
+  {
+   "label": "PNC Followup",
+   "number_card_name": "PNC Followup"
+  },
+  {
+   "label": "NCD Total Screening",
+   "number_card_name": "NCD Total Screening"
+  },
+  {
+   "label": "NCD Deaths",
+   "number_card_name": "NCD Deaths"
+  },
+  {
+   "label": "Child Growth Monitoring",
+   "number_card_name": "Malnutrition"
+  },
+  {
+   "label": "Current Pregnant Women",
+   "number_card_name": "Current Pregnant Women"
+  }
+ ],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "CHW Health Worker"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 0.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Visit Dashboard",
+   "link_to": "chw-visit-dashboard",
+   "type": "Page"
+  }
+ ],
+ "title": "CHW App",
+ "type": "Workspace"
+}

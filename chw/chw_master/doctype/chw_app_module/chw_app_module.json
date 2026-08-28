@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "creation": "2026-08-27 12:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "label",
+  "doctype_name",
+  "column_break_icon",
+  "icon",
+  "route",
+  "section_break_roles",
+  "restrict_by_role",
+  "roles"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Label",
+   "reqd": 1
+  },
+  {
+   "description": "The DocType this module manages in the CHW app (list + form).",
+   "fieldname": "doctype_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "DocType",
+   "options": "DocType",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_icon",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Feather icon name (e.g. \"home\", \"users\", \"activity\").",
+   "fieldname": "icon",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Icon"
+  },
+  {
+   "description": "URL-safe route segment for this module in the frontend, e.g. \"households\". Defaults to a slug of the DocType name if left blank.",
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "label": "Route"
+  },
+  {
+   "fieldname": "section_break_roles",
+   "fieldtype": "Section Break",
+   "label": "Visible To"
+  },
+  {
+   "default": "0",
+   "description": "When off, this module is visible to every logged-in user regardless of role.",
+   "fieldname": "restrict_by_role",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Restrict by Role"
+  },
+  {
+   "depends_on": "eval:doc.restrict_by_role",
+   "description": "Comma-separated Role names that can see this module in the CHW app, e.g. \"CHW Health Worker,Program Coordinator\".",
+   "fieldname": "roles",
+   "fieldtype": "Small Text",
+   "label": "Roles",
+   "mandatory_depends_on": "eval:doc.restrict_by_role"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-27 12:00:00",
+ "modified_by": "Administrator",
+ "module": "CHW Master",
+ "name": "CHW App Module",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

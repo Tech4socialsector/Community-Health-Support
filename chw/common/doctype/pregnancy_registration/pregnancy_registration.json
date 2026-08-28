@@ -1,0 +1,322 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "PR-.#####",
+ "creation": "2026-08-10 11:28:56.566517",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "familymember_id",
+  "hh_id",
+  "village",
+  "first_name",
+  "father_husband_name",
+  "age",
+  "phone_number",
+  "gravida",
+  "place_of_health_checkup",
+  "lmp_date",
+  "estimated_date_of_delivery",
+  "edd_ultrasonography",
+  "blood_group",
+  "trimester",
+  "hb_level",
+  "tsh_value",
+  "tt_status",
+  "number_of_living_children",
+  "column_break_tczd",
+  "number_of_children_died",
+  "number_of_abortion",
+  "any_stillbirth",
+  "any_pre_existing_diseases",
+  "availability_of_mcp_card",
+  "previous_delivery_mode",
+  "high_risk",
+  "name_of_highrisk_factor",
+  "pih",
+  "gdm",
+  "health_worker_name",
+  "rch_id",
+  "usg_1",
+  "usg_2",
+  "usg_3",
+  "delivery_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "familymember_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": " Family Member ID",
+   "options": "Family members",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "familymember_id.hhid",
+   "fetch_if_empty": 1,
+   "fieldname": "hh_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "HH ID"
+  },
+  {
+   "fetch_from": "familymember_id.family_member",
+   "fetch_if_empty": 1,
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Name"
+  },
+  {
+   "fetch_from": "familymember_id.father_husband_name",
+   "fetch_if_empty": 1,
+   "fieldname": "father_husband_name",
+   "fieldtype": "Data",
+   "label": "Husband's Name"
+  },
+  {
+   "fetch_from": "familymember_id.age",
+   "fetch_if_empty": 1,
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Age"
+  },
+  {
+   "fetch_from": "familymember_id.phone_number",
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "gravida",
+   "fieldtype": "Select",
+   "label": "Gravida",
+   "options": "\n1\n2\n3\n4 and Above",
+   "reqd": 1
+  },
+  {
+   "fieldname": "place_of_health_checkup",
+   "fieldtype": "Select",
+   "label": "Place of ANC Checkup",
+   "options": "\nPHC\nPHC and Tribal hospital\nPHC and outside hospital"
+  },
+  {
+   "fieldname": "lmp_date",
+   "fieldtype": "Date",
+   "label": "LMP Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "estimated_date_of_delivery",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "EDD"
+  },
+  {
+   "fieldname": "edd_ultrasonography",
+   "fieldtype": "Date",
+   "label": "EDD based on Ultrasonography"
+  },
+  {
+   "fetch_from": "familymember_id.blood_group",
+   "fetch_if_empty": 1,
+   "fieldname": "blood_group",
+   "fieldtype": "Data",
+   "label": "Blood Group"
+  },
+  {
+   "fieldname": "trimester",
+   "fieldtype": "Select",
+   "label": "Trimester at Registration",
+   "options": "\nFirst trimester\nSecond trimester\nThird trimester",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hb_level",
+   "fieldtype": "Data",
+   "label": "HB Level"
+  },
+  {
+   "fieldname": "tsh_value",
+   "fieldtype": "Data",
+   "label": "TSH Value"
+  },
+  {
+   "fieldname": "tt_status",
+   "fieldtype": "Select",
+   "label": "TT Status",
+   "options": "\nOne dose taken\nTwo dose taken\nThree dose taken"
+  },
+  {
+   "fieldname": "number_of_living_children",
+   "fieldtype": "Int",
+   "label": "Number of Living Children"
+  },
+  {
+   "fieldname": "number_of_children_died",
+   "fieldtype": "Int",
+   "label": "Number of Children Died"
+  },
+  {
+   "fieldname": "number_of_abortion",
+   "fieldtype": "Int",
+   "label": "Number of Abortions"
+  },
+  {
+   "fieldname": "column_break_tczd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "any_stillbirth",
+   "fieldtype": "Select",
+   "label": "Any Stillbirth",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "any_pre_existing_diseases",
+   "fieldtype": "Select",
+   "label": "Any Pre-existing Health Problem",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "availability_of_mcp_card",
+   "fieldtype": "Select",
+   "label": "Is MCP Card Available?",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "previous_delivery_mode",
+   "fieldtype": "Select",
+   "label": "Previous Delivery Mode",
+   "options": "\nNormal\nC-section"
+  },
+  {
+   "fieldname": "high_risk",
+   "fieldtype": "Select",
+   "label": "Has the pregnant woman been identified as high risk?",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.high_risk==\"Yes\"",
+   "fieldname": "name_of_highrisk_factor",
+   "fieldtype": "Select",
+   "label": "If Yes, specify the risk factor",
+   "options": "\n1. Age below 18 years (as of LMP date)\n2. Any history of abortion or miscarriage\n3. Gravida more than 3\n4. Any stillbirth\n5. Previous delivery mode \u2013 LSCS (C-section)\n6. Any pre-existing physical health problem\n7. Do you have anemia?\n8. Do you have heart disease?\n9. Do you have sickle cell disease or thalassemia?\n10. Previous delivery \u2013 PIH\n11. Previous delivery \u2013 GDM"
+  },
+  {
+   "fieldname": "pih",
+   "fieldtype": "Select",
+   "label": "PIH \u2013 Pregnancy Induced Hypertension",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "gdm",
+   "fieldtype": "Select",
+   "label": "GDM \u2013 Gestational Diabetes Mellitus",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Community Health Worker Name",
+   "options": "Health Worker",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rch_id",
+   "fieldtype": "Data",
+   "label": "Reproductive and Child Health Identity "
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "label": "Delivery Status",
+   "options": "\nDelivered\nNot Delivered"
+  },
+  {
+   "fieldname": "usg_1",
+   "fieldtype": "Data",
+   "label": "USG 1"
+  },
+  {
+   "fieldname": "usg_2",
+   "fieldtype": "Data",
+   "label": "USG 2"
+  },
+  {
+   "fieldname": "usg_3",
+   "fieldtype": "Data",
+   "label": "USG 3"
+  },
+  {
+   "fetch_from": "familymember_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-13 11:52:42.087442",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Pregnancy Registration",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "first_name"
+}

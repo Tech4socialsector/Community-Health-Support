@@ -1,0 +1,310 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "FM-.#####",
+ "creation": "2026-08-10 10:28:10.171922",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "primary_details_tab",
+  "hhid",
+  "village",
+  "family_member",
+  "relationship",
+  "gender",
+  "date_of_birth",
+  "age",
+  "age_in_months",
+  "age_in_days",
+  "yellow_card",
+  "phone_number",
+  "status",
+  "marital_status",
+  "father_husband_name",
+  "habit",
+  "column_break_zdna",
+  "occupation",
+  "other_occupation",
+  "education",
+  "education_status",
+  "disability",
+  "type_of_disability",
+  "blood_group",
+  "height",
+  "weight",
+  "blood_presuure",
+  "grbs",
+  "high_risk",
+  "date",
+  "health_worker_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "primary_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Primary Details"
+  },
+  {
+   "fieldname": "hhid",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "HHID",
+   "options": "Household profile",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "family_member",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Name of the Family Member",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "relationship",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Relationship with the Head of the Family",
+   "options": "Relationship with the Head of the Family",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gender",
+   "options": "\nMale\nFemale\nTransgender\nNot to specify",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "marital_status",
+   "fieldtype": "Select",
+   "label": "Marital Status",
+   "options": "\nSingle\nMarried\nWidow\nWidower\nDivorced\nSeparated"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Phone number",
+   "length": 10
+  },
+  {
+   "fetch_from": "hhid.village",
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.age >=60;",
+   "fieldname": "yellow_card",
+   "fieldtype": "Select",
+   "label": "Yellow card",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "age_in_months",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Age in Months",
+   "read_only": 1
+  },
+  {
+   "fieldname": "age_in_days",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Age in Days",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nActive\nInactive",
+   "reqd": 1
+  },
+  {
+   "fieldname": "father_husband_name",
+   "fieldtype": "Data",
+   "label": "Father/Husband/Wife Name"
+  },
+  {
+   "fieldname": "habit",
+   "fieldtype": "Link",
+   "label": "Habits",
+   "options": "Habits"
+  },
+  {
+   "fieldname": "column_break_zdna",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.occupation==\"Studying\"",
+   "fieldname": "education",
+   "fieldtype": "Select",
+   "label": "Education",
+   "options": "\nBachelor's Degree\nMaster's Degree\nTechnical Education\nDiploma\n5th Standard Completed\n8th Standard Completed\n10th Standard Completed - SSLC\n12th Standard Completed - HSC\nBelow 5th Standard\nSchool Student (1 - 12)\nLKG\nUKG\nunder 5 years\nNot Studied"
+  },
+  {
+   "depends_on": "eval:doc.occupation==\"Studying\"",
+   "fieldname": "education_status",
+   "fieldtype": "Select",
+   "label": "Education Status",
+   "options": "\nStudying\nCompleted\nDiscontinued"
+  },
+  {
+   "fieldname": "occupation",
+   "fieldtype": "Select",
+   "label": "Occupation",
+   "options": "\nStudying\nWorking\nHomemaker\nUnemployed\nRetired\nOther"
+  },
+  {
+   "depends_on": "eval:doc.occupation==\"Other\"",
+   "fieldname": "other_occupation",
+   "fieldtype": "Data",
+   "label": "If Other, please specify"
+  },
+  {
+   "fieldname": "disability",
+   "fieldtype": "Select",
+   "label": "Person with a Disability",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.disability==\"Yes\"",
+   "fieldname": "type_of_disability",
+   "fieldtype": "Link",
+   "label": "Type Of Disability",
+   "options": "Type Of Disability"
+  },
+  {
+   "fieldname": "blood_group",
+   "fieldtype": "Select",
+   "label": "Blood Group",
+   "options": "\nA+\nA-\nB+\nB-\nO+\nO-\nAB+\nAB-\nUnknown/Not Known"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Data",
+   "label": "Height"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Data",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "blood_presuure",
+   "fieldtype": "Data",
+   "label": "Blood Presuure"
+  },
+  {
+   "fieldname": "grbs",
+   "fieldtype": "Data",
+   "label": "GRBS"
+  },
+  {
+   "description": "Used by NCD tracking to decide follow-up frequency (1 month if Yes).",
+   "fieldname": "high_risk",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "High Risk (NCD)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "label": "Health Worker Name",
+   "options": "Health Worker",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-14 10:11:51.144396",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Family members",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "family_member",
+ "track_changes": 1,
+ "track_seen": 1
+}

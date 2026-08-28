@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-07-22 10:36:50.471607",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "status",
+  "month",
+  "bp",
+  "weight",
+  "anemia",
+  "edema",
+  "grbs",
+  "tt",
+  "hemoglobin_level",
+  "teaching",
+  "monthly_checkup",
+  "ironcal",
+  "any_other_complaitsremark"
+ ],
+ "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nCompleted"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Month"
+  },
+  {
+   "fieldname": "bp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "BP"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Weight"
+  },
+  {
+   "fieldname": "anemia",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Anemia",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edema",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Edema",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "grbs",
+   "fieldtype": "Data",
+   "label": "GRBS"
+  },
+  {
+   "fieldname": "tt",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "TT",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "hemoglobin_level",
+   "fieldtype": "Data",
+   "label": "Hb"
+  },
+  {
+   "fieldname": "teaching",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Teaching"
+  },
+  {
+   "fieldname": "monthly_checkup",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Monthly Checkup",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "ironcal",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Iron/Cal",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "any_other_complaitsremark",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Any other Complaits/Remark"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-07-22 10:46:27.241613",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "ANC Followup Child",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

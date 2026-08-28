@@ -1,0 +1,188 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "field:first_name",
+ "creation": "2026-08-10 13:16:35.612015",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "pregnant_id",
+  "first_name",
+  "hh_id",
+  "village",
+  "age",
+  "column_break_hbdc",
+  "phone_number",
+  "date",
+  "health_worker_name",
+  "gravida",
+  "status",
+  "next_anc_visit_date",
+  "next_anc_visit_date_auto",
+  "section_break_vzey",
+  "anc_followup"
+ ],
+ "fields": [
+  {
+   "fetch_if_empty": 1,
+   "fieldname": "pregnant_id",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Pregnant ID",
+   "options": "Pregnancy Registration"
+  },
+  {
+   "fetch_from": "pregnant_id.first_name",
+   "fetch_if_empty": 1,
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Name",
+   "unique": 1
+  },
+  {
+   "fetch_from": "pregnant_id.hh_id",
+   "fieldname": "hh_id",
+   "fieldtype": "Data",
+   "label": "HH ID"
+  },
+  {
+   "fetch_from": "pregnant_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village"
+  },
+  {
+   "fieldname": "column_break_hbdc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "pregnant_id.age",
+   "fetch_if_empty": 1,
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Age"
+  },
+  {
+   "fetch_from": "pregnant_id.phone_number",
+   "fetch_if_empty": 1,
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fetch_from": "pregnant_id.estimated_date_of_delivery",
+   "fetch_if_empty": 1,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Health Worker Name",
+   "options": "Health Worker"
+  },
+  {
+   "fetch_from": "pregnant_id.gravida",
+   "fieldname": "gravida",
+   "fieldtype": "Data",
+   "label": "Gravida"
+  },
+  {
+   "description": "Automatically set to Closed when this mother's Birth Registration is recorded (she has delivered) - her remaining ANC visits are no longer due.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nActive\nClosed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_vzey",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "anc_followup",
+   "fieldtype": "Table",
+   "label": "ANC Followup",
+   "options": "ANC Followup Child"
+  },
+  {
+   "description": "Auto-calculated from the last follow-up date and the ANC Visit Interval Master. Enter a date here to override it, or clear it to let it auto-calculate again.",
+   "fieldname": "next_anc_visit_date",
+   "fieldtype": "Date",
+   "label": "Next ANC Visit Date"
+  },
+  {
+   "fieldname": "next_anc_visit_date_auto",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Next ANC Visit Date (auto-calculated, internal)",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-10 15:07:07.540864",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "ANC Follow-up",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
