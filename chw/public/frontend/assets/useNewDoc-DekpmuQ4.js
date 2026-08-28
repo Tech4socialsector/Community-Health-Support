@@ -1,0 +1,2 @@
+import{x as f,E as u,L as r,u as d}from"./index-DMH6j8Cd.js";function v(t,s={},i={}){let a=u(s);const n=f({url:`/api/v2/document/${t}`,method:"POST",params(){let e={};for(let m in a){const o=m,c=a[o];e[o]=d(c)}return e},immediate:!1,...i});function l(){return n.submit().then(e=>r.setDoc({doctype:t,...e}).then(()=>r.getDoc(t,e.name.toString()).value))}return u({...n,submit:l,doc:a})}export{v as u};
+//# sourceMappingURL=useNewDoc-DekpmuQ4.js.map

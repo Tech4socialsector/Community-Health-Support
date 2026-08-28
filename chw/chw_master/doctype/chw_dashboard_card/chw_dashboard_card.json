@@ -44,9 +44,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Feather icon name (e.g. \"clock\", \"alert-triangle\", \"users\").",
+   "description": "Icon (e.g. \"clock\", \"triangle-alert\", \"users\").",
    "fieldname": "icon",
-   "fieldtype": "Data",
+   "fieldtype": "Icon",
    "in_list_view": 1,
    "label": "Icon"
   },

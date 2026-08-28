@@ -61,6 +61,14 @@ website_route_rules = [
 	{"from_route": "/chw/<path:app_path>", "to_route": "chw"},
 ]
 
+# Serves the built service worker (and its workbox chunk) at /chw/sw.js
+# instead of their real build location under /assets/chw/frontend/ - a
+# service worker can only control paths at-or-below wherever it's served
+# from, so it has to live at the app's own route for `scope: '/chw/'`
+# registration to be accepted by the browser. Runs before website_route_rules
+# is even consulted, so it isn't shadowed by the catch-all above.
+page_renderer = ["chw.website.sw_renderer.ServiceWorkerRenderer"]
+
 # Home Pages
 # ----------
 

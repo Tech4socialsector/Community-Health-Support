@@ -18,3 +18,5 @@ chw.patches.v1_0.rename_chw_app_settings_to_app_setting
 chw.patches.v1_0.link_chw_app_workspace_to_vue_app
 chw.patches.v1_0.link_chw_desktop_icon_to_vue_app
 chw.patches.v1_0.backfill_app_setting_ai_defaults
+chw.patches.v1_0.rename_ncd_anc_pnc_display_labels
+chw.patches.v1_0.migrate_feather_icon_names_to_lucide

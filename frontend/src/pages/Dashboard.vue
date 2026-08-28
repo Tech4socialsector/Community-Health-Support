@@ -45,7 +45,7 @@
         class="flex items-center gap-4 rounded-lg border bg-white p-4 dark:border-gray-800 dark:bg-gray-800"
       >
         <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg" :class="colorClasses(card.color)">
-          <FeatherIcon :name="card.icon" class="h-5 w-5" />
+          <LucideIcon :name="card.icon" class="h-5 w-5" />
         </span>
         <span>
           <span class="block text-2xl font-semibold text-gray-900 dark:text-gray-100">
@@ -64,6 +64,7 @@ import { FeatherIcon, ErrorMessage, Button } from 'frappe-ui'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import Skeleton from '@/components/Skeleton.vue'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { dashboardCardsResource, dashboardStatsResource, colorClasses } from '@/data/dashboard'
 import { setPageTitle } from '@/data/pageTitle'
 

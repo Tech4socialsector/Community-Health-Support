@@ -33,9 +33,9 @@
    "label": "Label"
   },
   {
-   "description": "Optional feather icon override for this item.",
+   "description": "Optional icon override for this item.",
    "fieldname": "icon",
-   "fieldtype": "Data",
+   "fieldtype": "Icon",
    "label": "Icon"
   },
   {

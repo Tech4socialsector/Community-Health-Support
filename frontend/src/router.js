@@ -44,24 +44,28 @@ const routes = [
     name: 'EmailAccountForm',
     component: () => import('@/pages/EmailAccountForm.vue'),
     props: (route) => ({ name: route.params.name }),
+    meta: { remountOnParamChange: true },
   },
   {
     path: '/:doctypeRoute',
     name: 'DoctypeList',
     component: () => import('@/pages/DoctypeList.vue'),
     props: (route) => ({ doctype: route.meta.resolvedDoctype }),
+    meta: { remountOnParamChange: true },
   },
   {
     path: '/:doctypeRoute/new',
     name: 'DoctypeNew',
     component: () => import('@/pages/DoctypeForm.vue'),
     props: (route) => ({ doctype: route.meta.resolvedDoctype, isNew: true }),
+    meta: { remountOnParamChange: true },
   },
   {
     path: '/:doctypeRoute/:name',
     name: 'DoctypeForm',
     component: () => import('@/pages/DoctypeForm.vue'),
     props: (route) => ({ doctype: route.meta.resolvedDoctype, name: route.params.name }),
+    meta: { remountOnParamChange: true },
   },
 ]
 
@@ -76,13 +80,36 @@ let router = createRouter({
 // out in another tab, expired, revoked) while session.user is still
 // stale-truthy in memory, beforeEach's own !session.user check below would
 // wave the navigation through onto fully-authenticated-looking UI with a
-// dead session underneath it. frappe.auth.get_logged_user is a cheap,
-// single whitelisted call, so re-validating on every navigation (rather
-// than trying to detect "this one is a Back/Forward" or throttling by time,
-// both of which leave a real logged-out-elsewhere window unguarded) is the
-// only version of this check that's actually reliable.
-async function recheckAuth() {
+// dead session underneath it.
+//
+// Awaiting a fresh frappe.auth.get_logged_user call before every single
+// in-app navigation (as an earlier version of this did) makes each round
+// trip's latency part of every click's critical path - fine on localhost,
+// but a real network hop away (e.g. Frappe Cloud) that's enough to make the
+// sidebar feel broken, since nothing renders until it resolves. Instead,
+// re-validate only when it can actually have changed: when the tab regains
+// focus after being hidden (the moment a session could have died
+// elsewhere) or after being idle a while, and do it in the background
+// rather than blocking the navigation that triggered it - a session that
+// really did die gets caught on the very next guard check a moment later,
+// without taxing the common case.
+const REVALIDATE_INTERVAL_MS = 60_000
+let lastCheckedAt = 0
+
+async function recheckAuthIfStale() {
+  const now = Date.now()
+  if (now - lastCheckedAt < REVALIDATE_INTERVAL_MS) return
+  lastCheckedAt = now
   await userResource.fetch().catch(() => {})
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      lastCheckedAt = 0
+      userResource.fetch().catch(() => {})
+    }
+  })
 }
 
 // modulesResource requires an authenticated session (it 403s as Guest), and
@@ -104,12 +131,10 @@ router.beforeEach(async (to, from, next) => {
     // it's only set once the initial frappe.auth.get_logged_user call
     // resolves. Awaiting that here (a no-op after it's settled) avoids
     // treating "not checked yet" as "logged out" and bouncing a real
-    // session to /login. Every subsequent navigation re-checks fresh
-    // instead (see recheckAuth) - re-fetching here too would just be the
-    // same request fired twice back to back.
+    // session to /login.
     await initialUserCheck.catch(() => {})
   } else {
-    await recheckAuth()
+    await recheckAuthIfStale()
   }
 
   if (to.name !== 'Login' && !session.user) {

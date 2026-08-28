@@ -159,16 +159,9 @@ function setRowClassification(row) {
 }
 
 export default {
-  async onLoad(values, ctx) {
-    if (ctx.isNew && !values.health_worker_name) {
-      try {
-        const healthWorker = await ctx.call('chw.api.get_current_health_worker')
-        if (healthWorker) values.health_worker_name = healthWorker
-      } catch {
-        // no linked Health Worker for this user; leave blank
-      }
-    }
-  },
+  // health_worker_name ("Data Collector") is now defaulted generically for
+  // every doctype that has the field - see applyCurrentHealthWorkerDefault
+  // in DoctypeForm.vue - so no onLoad hook is needed here for that anymore.
 
   async onFieldChange(fieldname, values, ctx) {
     if (fieldname === 'familymember_id') {

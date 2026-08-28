@@ -45,9 +45,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Feather icon name (e.g. \"home\", \"users\", \"activity\").",
+   "description": "Icon shown on the Home page tile (e.g. \"house\", \"users\", \"activity\").",
    "fieldname": "icon",
-   "fieldtype": "Data",
+   "fieldtype": "Icon",
    "in_list_view": 1,
    "label": "Icon"
   },

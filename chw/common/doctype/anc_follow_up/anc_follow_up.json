@@ -91,7 +91,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Health Worker Name",
+   "label": "Data Collector",
    "options": "Health Worker"
   },
   {

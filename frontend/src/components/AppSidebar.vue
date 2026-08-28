@@ -52,6 +52,7 @@ import UserHoverCard from '@/components/UserHoverCard.vue'
 import SettingsDialog from '@/components/SettingsDialog.vue'
 import AiAssistant from '@/components/AiAssistant.vue'
 import { session, logoutResource } from '@/data/session'
+import { clearSiteData } from '@/data/clearSiteData'
 import { brandingResource } from '@/data/branding'
 import { activeModule } from '@/data/activeModule'
 import { notificationsResource, unreadCount, toggleNotifications } from '@/data/notifications'
@@ -90,6 +91,15 @@ const header = computed(() => ({
       label: 'Help',
       icon: 'help-circle',
       onClick: () => window.open('https://frappeframework.com/docs', '_blank', 'noopener'),
+    },
+    {
+      label: 'Clear site data',
+      icon: 'refresh-cw',
+      onClick: () => {
+        if (window.confirm('This clears cached app data and reloads the page. Continue?')) {
+          clearSiteData()
+        }
+      },
     },
     {
       label: 'Go to Desk',

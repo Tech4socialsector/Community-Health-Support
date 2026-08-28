@@ -241,7 +241,7 @@
   {
    "fieldname": "health_worker_name",
    "fieldtype": "Link",
-   "label": "Health Worker Name",
+   "label": "Data Collector",
    "options": "Health Worker",
    "read_only": 1
   },

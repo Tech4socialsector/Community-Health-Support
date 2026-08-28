@@ -1,2 +1,0 @@
-import{v as f,C as u,K as r,u as v}from"./index-95eK7Iao.js";function p(t,s={},i={}){let a=u(s);const n=f({url:`/api/v2/document/${t}`,method:"POST",params(){let e={};for(let m in a){const o=m,c=a[o];e[o]=v(c)}return e},immediate:!1,...i});function l(){return n.submit().then(e=>r.setDoc({doctype:t,...e}).then(()=>r.getDoc(t,e.name.toString()).value))}return u({...n,submit:l,doc:a})}export{p as u};
-//# sourceMappingURL=useNewDoc-BWYGUndy.js.map

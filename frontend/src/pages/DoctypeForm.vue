@@ -9,6 +9,11 @@
           Back
         </Button>
       </template>
+      <template #actions>
+        <Button variant="solid" :loading="saving" @click="save">
+          Save
+        </Button>
+      </template>
     </PageHeader>
 
     <div v-if="metaResource.loading && !metaResource.data" class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
@@ -27,11 +32,17 @@
     </div>
 
     <form v-else @submit.prevent="save">
-      <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+      <!-- Two independent columns (CSS multi-column, not a grid) so fields
+      of different heights (e.g. one with a description line, one without)
+      never push the two columns out of alignment with each other - a grid's
+      shared row-tracks would otherwise drift after the first mismatched
+      pair, which is exactly what happened before this. -->
+      <div class="flex flex-col gap-4 sm:block sm:columns-2 sm:gap-x-6 sm:space-y-4">
         <div
           v-for="field in fields"
           :key="field.fieldname"
-          :class="{ 'sm:col-span-2': isWideField(field) }"
+          class="break-inside-avoid"
+          :class="{ 'sm:[column-span:all]': isWideField(field) }"
         >
           <DynamicField
             :field="field"
@@ -52,12 +63,6 @@
       </div>
 
       <ErrorMessage class="mt-4" :message="saveError" />
-
-      <div class="mt-6 flex justify-end gap-2">
-        <Button variant="solid" :loading="saving" @click="save">
-          Save
-        </Button>
-      </div>
     </form>
   </AppLayout>
 </template>
@@ -75,6 +80,7 @@ import ChildTable from '@/components/ChildTable.vue'
 import { useMeta, useFormFields, useTableFields } from '@/data/useMeta'
 import { getDoctypeHooks } from '@/doctype-hooks'
 import { setPageTitle } from '@/data/pageTitle'
+import { currentHealthWorkerResource } from '@/data/currentHealthWorker'
 
 const { doctype, isNew, name } = defineProps({
   doctype: { type: String, required: true },
@@ -213,6 +219,22 @@ watch(
   { deep: true },
 )
 
+// Any doctype whose form has a health_worker_name ("Data Collector") field
+// defaults it to the current user's own linked Health Worker record on a
+// new entry - generic, so it applies across every doctype that has the
+// field without each one needing its own hook for this. Guarded on the
+// field still being empty so it never overwrites a value a doctype-specific
+// hook (or the user) has already set.
+function applyCurrentHealthWorkerDefault() {
+  if (!isNew) return
+  if (!fields.value.some((f) => f.fieldname === 'health_worker_name')) return
+  if (values.health_worker_name) return
+  const healthWorker = currentHealthWorkerResource.data
+  if (healthWorker) values.health_worker_name = healthWorker
+}
+
+watch(() => currentHealthWorkerResource.data, applyCurrentHealthWorkerDefault)
+
 // --- Load doc into `values` -------------------------------------------
 watch(
   () => (isNew ? newDoc?.doc : existingDoc?.doc),
@@ -228,6 +250,7 @@ watch(
       applyingHookChange = false
       initSnapshots()
     }
+    applyCurrentHealthWorkerDefault()
   },
   { immediate: true, deep: true },
 )

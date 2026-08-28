@@ -1,16 +1,18 @@
 <template>
   <button
-    v-if="assistantConfigResource.data?.enabled"
+    v-if="assistantConfigResource.data?.enabled && !show"
     class="fixed bottom-20 right-4 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-gray-900 text-white shadow-lg hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white sm:bottom-6"
     @click="toggleAssistant"
   >
     <SparklesIcon class="h-5 w-5" />
   </button>
 
-  <Dialog v-model="show" :options="{ size: '5xl' }">
+  <Dialog v-model="show" :options="{ size: '5xl', title: 'ai-assistant' }">
     <template #body>
-      <div class="flex h-[46rem] max-h-[88vh] flex-col">
-        <div class="flex items-center justify-between border-b px-5 py-3 dark:border-gray-800">
+      <div class="ai-assistant-panel flex flex-col">
+        <div
+          class="flex items-center justify-between border-b px-4 py-3 dark:border-gray-800 sm:px-5"
+        >
           <div class="flex items-center gap-2">
             <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
               <SparklesIcon class="h-4 w-4 text-gray-600 dark:text-gray-300" />
@@ -20,7 +22,7 @@
           <div class="flex items-center gap-1">
             <Tooltip v-if="conversation.length" text="Clear conversation">
               <button
-                class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                 @click="clearConversation"
               >
                 <FeatherIcon name="trash-2" class="h-4 w-4" />
@@ -28,7 +30,7 @@
             </Tooltip>
             <Tooltip text="Close">
               <button
-                class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="flex h-8 w-8 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                 @click="show = false"
               >
                 <FeatherIcon name="x" class="h-4 w-4" />
@@ -37,7 +39,7 @@
           </div>
         </div>
 
-        <div ref="messagesRef" class="flex-1 space-y-3 overflow-y-auto p-5">
+        <div ref="messagesRef" class="flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
           <div
             v-if="conversation.length === 0"
             class="flex flex-col items-center gap-2 py-16 text-center text-gray-500 dark:text-gray-400"
@@ -71,9 +73,9 @@
           </div>
         </div>
 
-        <ErrorMessage class="mx-5 mb-2" :message="sendError" />
+        <ErrorMessage class="mx-4 mb-2 sm:mx-5" :message="sendError" />
 
-        <div class="border-t p-4 dark:border-gray-800">
+        <div class="border-t p-3 dark:border-gray-800 sm:p-4">
           <div class="flex items-end gap-2">
             <textarea
               v-model="draft"
@@ -105,6 +107,50 @@
     </template>
   </Dialog>
 </template>
+
+<style>
+/* frappe-ui's Dialog has no size prop granular enough for "full-screen on
+mobile, centered card on larger screens" - its outer overlay wrapper
+(px-4 py-4) and DialogContent (my-8, rounded-xl, max-w-*) apply
+unconditionally, leaving this dialog with unusable cramped margins on
+phone-sized viewports. data-dialog is the one hook the component exposes
+for exactly this: it's set from options.title, so title: 'ai-assistant'
+above lets these overrides target only this dialog instance. */
+/* No explicit z-index on the overlay otherwise (it relies on DOM/portal
+paint order), which loses to MobileNav.vue's fixed bottom nav (z-30) on
+small screens - the nav visibly painted over the message input despite
+the input still being on top for hit-testing. */
+[data-dialog='ai-assistant'].dialog-overlay {
+  z-index: 50;
+}
+
+.ai-assistant-panel {
+  width: 100%;
+  height: 46rem;
+  max-height: 85vh;
+}
+
+/* Width-only breakpoints miss short/landscape phones (e.g. 844x390) - a
+squat viewport needs the same full-screen treatment as a narrow one, since
+the centered-card styling's fixed vertical margins leave no room to
+breathe at that height either. */
+@media (max-width: 639px), (max-height: 480px) {
+  [data-dialog='ai-assistant'].dialog-overlay > div {
+    padding: 0;
+  }
+  [data-dialog='ai-assistant'] .dialog-content {
+    margin: 0;
+    max-width: none;
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .ai-assistant-panel {
+    height: 100dvh;
+    max-height: none;
+  }
+}
+</style>
 
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'

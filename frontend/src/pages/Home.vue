@@ -30,7 +30,7 @@
         @click="toggleModule(mod)"
       >
         <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700 sm:h-[4.5rem] sm:w-[4.5rem]">
-          <FeatherIcon :name="mod.icon" class="h-7 w-7 text-gray-600 dark:text-gray-300 sm:h-8 sm:w-8" />
+          <LucideIcon :name="mod.icon" class="h-7 w-7 text-gray-600 dark:text-gray-300 sm:h-8 sm:w-8" />
         </span>
         <span class="line-clamp-2 text-xs font-medium leading-tight text-gray-900 dark:text-gray-100 sm:text-sm">
           {{ mod.label }}
@@ -62,7 +62,7 @@
         :to="{ name: 'DoctypeList', params: { doctypeRoute: item.route } }"
         class="flex items-center gap-3 border-b px-3 py-2.5 text-sm text-gray-700 last:border-0 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-gray-800"
       >
-        <FeatherIcon :name="item.icon || activeModule.icon" class="h-4 w-4 flex-shrink-0 text-gray-400" />
+        <LucideIcon :name="item.icon || activeModule.icon" class="h-4 w-4 flex-shrink-0 text-gray-400" />
         {{ item.label || item.doctype_name }}
       </router-link>
     </div>
@@ -75,6 +75,7 @@ import { FeatherIcon, ErrorMessage } from 'frappe-ui'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import Skeleton from '@/components/Skeleton.vue'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { modulesResource } from '@/data/modules'
 import { activeModule, setActiveModule, clearActiveModule } from '@/data/activeModule'
 import { setPageTitle } from '@/data/pageTitle'

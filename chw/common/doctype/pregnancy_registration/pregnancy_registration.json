@@ -226,7 +226,7 @@
    "fieldname": "health_worker_name",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Community Health Worker Name",
+   "label": "Data Collector",
    "options": "Health Worker",
    "read_only": 1
   },

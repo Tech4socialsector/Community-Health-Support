@@ -178,6 +178,23 @@ onMounted(() => {
   map.on('click', (e) => setPoint({ lat: e.latlng.lat, lng: e.latlng.lng }))
 
   if (point.value) syncMarker()
+
+  // If the map's container hasn't finished its own layout yet when
+  // L.map() measures it (e.g. it's still inside a CSS multi-column form
+  // that reflows after mount), Leaflet bakes in the wrong size and the
+  // view renders zoomed out to nearly the whole world instead of
+  // DEFAULT_ZOOM - it never self-corrects without an explicit
+  // invalidateSize(). Re-measuring on the next frame (after layout has
+  // settled) and once more after a short delay (covers slower reflows)
+  // fixes this without needing to track the container's size continuously.
+  requestAnimationFrame(() => {
+    map?.invalidateSize()
+    map?.setView(
+      point.value ? [point.value.lat, point.value.lng] : DEFAULT_CENTER,
+      point.value ? PIN_ZOOM : DEFAULT_ZOOM,
+    )
+  })
+  setTimeout(() => map?.invalidateSize(), 300)
 })
 
 onBeforeUnmount(() => {

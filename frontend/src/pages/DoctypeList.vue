@@ -22,7 +22,7 @@
 
     <template v-else-if="metaResource.data">
       <div v-if="filterFields.length" class="mb-4 flex flex-wrap items-end gap-3">
-        <div v-for="field in filterFields" :key="field.fieldname" class="w-40">
+        <div v-for="field in filterFields" :key="field.fieldname" class="w-52 flex-shrink-0">
           <FormControl
             v-if="field.fieldtype === 'Select'"
             type="select"
@@ -179,11 +179,15 @@ const pageTitle = findModuleByRoute(route.params.doctypeRoute)?.label || props.d
 setPageTitle(pageTitle)
 
 // `immediate: false` - metaResource.data (and the `columns`/`orderBy` it
-// drives) isn't ready on mount, so an immediate fetch would race a second,
-// metadata-driven one moments later: the first request gets aborted, and
-// that AbortError was leaking into rows.error and rendering as "signal is
-// aborted without reason". Firing exactly once, only after metaResource.data
-// resolves, avoids the race entirely.
+// drives) isn't ready on mount, so an immediate fetch would run with the
+// wrong fields/orderBy. useList's own useFetch already watches its computed
+// URL and auto-refetches whenever it changes (refetch: true, the default) -
+// since that URL is itself derived from columns.value/metaResource.data,
+// the moment metaResource.data resolves is the moment the URL changes and
+// this fires on its own. An explicit rows.fetch() call here used to race
+// that same auto-refetch (both firing in the same tick, one aborting the
+// other), leaking an AbortError into rows.error as "signal is aborted
+// without reason" - removed rather than raced against.
 const rows = useList({
   doctype: props.doctype,
   fields: () => (columns.value.length ? ['name', ...columns.value.map((c) => c.fieldname)] : ['name']),
@@ -195,16 +199,6 @@ const rows = useList({
   limit: 20,
   immediate: false,
 })
-
-const stopMetaWatch = watch(
-  () => metaResource.data,
-  (meta) => {
-    if (!meta) return
-    rows.fetch()
-    stopMetaWatch()
-  },
-  { immediate: true },
-)
 
 function formatValue(value, field) {
   if (value == null || value === '') return '-'
