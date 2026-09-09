@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
  "autoname": "BR-.#####",
  "creation": "2026-08-10 14:55:47.270728",
@@ -267,8 +266,13 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-08-11 10:41:57.267918",
+ "links": [
+  {
+   "link_doctype": "PNC",
+   "link_fieldname": "birth_registration_id"
+  }
+ ],
+ "modified": "2026-09-09 14:33:58.343190",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",

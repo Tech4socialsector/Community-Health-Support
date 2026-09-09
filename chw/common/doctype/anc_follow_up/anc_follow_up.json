@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
  "autoname": "field:first_name",
  "creation": "2026-08-10 13:16:35.612015",
@@ -137,7 +136,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-10 15:07:07.540864",
+ "modified": "2026-09-09 14:30:34.010028",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

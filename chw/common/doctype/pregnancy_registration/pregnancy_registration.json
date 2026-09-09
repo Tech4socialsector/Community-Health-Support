@@ -1,8 +1,7 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
- "autoname": "PR-.#####",
+ "autoname": "PREG-.#####",
  "creation": "2026-08-10 11:28:56.566517",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -269,8 +268,13 @@
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-08-13 11:52:42.087442",
+ "links": [
+  {
+   "link_doctype": "ANC Follow-up",
+   "link_fieldname": "pregnant_id"
+  }
+ ],
+ "modified": "2026-09-09 14:33:14.005860",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",
