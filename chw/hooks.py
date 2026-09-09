@@ -1,3 +1,30 @@
+# Fixtures
+# --------
+# Number Card records the CHW App workspace itself references by name
+# (Household Details, Family Members, etc.) - without this, they only ever
+# exist in this one site's database, so anyone else who installs chw fresh
+# (e.g. from a git pull) gets a workspace pointing at Number Cards that don't
+# exist for them, same blank-dashboard problem this was built to fix.
+fixtures = [
+	{
+		"dt": "Number Card",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Household Details",
+					"Family Members",
+					"Pregnancy Registration",
+					"Birth Registration",
+					"PNC Followup",
+					"ANC Follow-up",
+				],
+			]
+		],
+	}
+]
+
 app_name = "chw"
 app_title = "CHW"
 app_publisher = "tech4socialsector@azimpremjifoundation.org"
