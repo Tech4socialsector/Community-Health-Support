@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
  "autoname": "field:name_of_child",
  "creation": "2026-08-10 15:25:41.737279",
@@ -19,6 +18,7 @@
   "health_worker_name",
   "next_pnc_visit_date",
   "next_pnc_visit_date_auto",
+  "test",
   "section_break_dmfm",
   "mother",
   "section_break_baby",
@@ -139,12 +139,17 @@
    "hidden": 1,
    "label": "Next PNC Visit Date (auto-calculated, internal)",
    "read_only": 1
+  },
+  {
+   "fieldname": "test",
+   "fieldtype": "Data",
+   "label": "test"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-25 17:34:27.794886",
+ "modified": "2026-09-09 11:28:50.147388",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",
