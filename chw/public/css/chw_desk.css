@@ -1,0 +1,11 @@
+/* Frappe core's Icon field control (frappe/public/scss/common/icon_picker.scss)
+positions .selected-icon with `top: calc(50% + 2px)` and no
+`transform: translateY(-50%)` - that only aligns the icon's *top* edge to
+the input's vertical midpoint, not its center, so the 22px-tall icon
+always sits visibly below-center inside the input (see the "small-file"
+Icon field on App Module Setting). Overriding here rather than patching
+frappe core directly. */
+.frappe-control[data-fieldtype='Icon'] .selected-icon {
+	top: 50%;
+	transform: translateY(-50%);
+}

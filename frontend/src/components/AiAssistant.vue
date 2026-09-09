@@ -1,12 +1,8 @@
 <template>
-  <button
-    v-if="assistantConfigResource.data?.enabled && !show"
-    class="fixed bottom-20 right-4 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-gray-900 text-white shadow-lg hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white sm:bottom-6"
-    @click="toggleAssistant"
-  >
-    <SparklesIcon class="h-5 w-5" />
-  </button>
-
+  <!-- Trigger button lives in AppSidebar.vue's footer now (above the user
+  details, labeled so it's clear what it opens) - it used to float over
+  bottom-right of every page, which could sit on top of page content like
+  a form's own Save button. -->
   <Dialog v-model="show" :options="{ size: '5xl', title: 'ai-assistant' }">
     <template #body>
       <div class="ai-assistant-panel flex flex-col">
@@ -163,7 +159,6 @@ import {
   conversation,
   sendAssistantMessage,
   sending,
-  toggleAssistant,
 } from '@/data/aiAssistant'
 import { findModuleByDoctype } from '@/data/modules'
 

@@ -71,26 +71,48 @@
       </table>
     </div>
 
-    <Dialog
-      v-model="showRowEditor"
-      :options="{ title: `${field.label} - Row ${(editingIdx ?? 0) + 1}`, size: 'xl' }"
-    >
-      <template #body-content>
-        <div v-if="editingRow" class="grid grid-cols-1 gap-4">
-          <DynamicField
-            v-for="col in columns"
-            :key="col.fieldname"
-            :field="col"
-            :doctype="doctype"
-            :docname="docname"
-            v-model="editingRow[col.fieldname]"
-          />
+    <Dialog v-model="showRowEditor" :options="{ size: '2xl', title: 'row-editor' }">
+      <template #body>
+        <!-- #body-content (the default slot this used before) sits inside
+        Dialog's own fixed-padding, non-scrollable wrapper alongside the
+        header - fine for a couple of fields, but a child doctype with 15+
+        fields (ANC Followup, for one) just grew the dialog past the
+        viewport with no scroll of its own, spilling content off-screen
+        with only the page behind it able to scroll. Taking over #body
+        entirely (same pattern as SettingsDialog.vue/AiAssistant.vue) is
+        the only way to give the field list its own scroll region instead. -->
+        <div class="row-editor-panel flex flex-col">
+          <div class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800 sm:px-6">
+            <h3 class="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
+              {{ field.label }} - Row {{ (editingIdx ?? 0) + 1 }}
+            </h3>
+            <button
+              class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+              @click="showRowEditor = false"
+            >
+              <FeatherIcon name="x" class="h-4 w-4" />
+            </button>
+          </div>
+
+          <div class="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+            <div v-if="editingRow" class="grid grid-cols-1 gap-4">
+              <DynamicField
+                v-for="col in columns"
+                :key="col.fieldname"
+                :field="col"
+                :doctype="doctype"
+                :docname="docname"
+                v-model="editingRow[col.fieldname]"
+              />
+            </div>
+          </div>
+
+          <div class="flex-shrink-0 border-t p-4 dark:border-gray-800">
+            <Button variant="solid" class="w-full" @click="showRowEditor = false">
+              Done
+            </Button>
+          </div>
         </div>
-      </template>
-      <template #actions>
-        <Button variant="solid" class="w-full" @click="showRowEditor = false">
-          Done
-        </Button>
       </template>
     </Dialog>
 
@@ -108,6 +130,41 @@
     />
   </div>
 </template>
+
+<style>
+/* Same data-dialog/[title] hook as SettingsDialog.vue/AiAssistant.vue -
+frappe-ui's Dialog has no size option granular enough for "scales with
+the viewport, full-screen on mobile" on its own. Sized a bit taller than
+SettingsDialog's 34rem/80vh since child-table rows here can run to 15+
+fields (ANC Followup) - the request was explicitly for a bigger popup,
+scaled to screen size rather than a fixed height regardless of viewport. */
+[data-dialog='row-editor'].dialog-overlay {
+  z-index: 50;
+}
+
+.row-editor-panel {
+  width: 100%;
+  height: 42rem;
+  max-height: 85vh;
+}
+
+@media (max-width: 639px), (max-height: 480px) {
+  [data-dialog='row-editor'].dialog-overlay > div {
+    padding: 0;
+  }
+  [data-dialog='row-editor'] .dialog-content {
+    margin: 0;
+    max-width: none;
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .row-editor-panel {
+    height: 100dvh;
+    max-height: none;
+  }
+}
+</style>
 
 <script setup>
 import { computed, ref } from 'vue'

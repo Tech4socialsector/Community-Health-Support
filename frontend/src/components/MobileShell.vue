@@ -23,6 +23,7 @@
     <MobileNav />
     <NotificationPanel />
     <AiAssistant />
+    <SettingsDialog v-model="showSettingsDialog" />
   </div>
 </template>
 
@@ -32,6 +33,8 @@ import AwesomeBar from '@/components/AwesomeBar.vue'
 import MobileNav from '@/components/MobileNav.vue'
 import NotificationPanel from '@/components/NotificationPanel.vue'
 import AiAssistant from '@/components/AiAssistant.vue'
+import SettingsDialog from '@/components/SettingsDialog.vue'
 import { brandingResource } from '@/data/branding'
 import { pageTitle } from '@/data/pageTitle'
+import { showSettingsDialog } from '@/data/settingsDialog'
 </script>

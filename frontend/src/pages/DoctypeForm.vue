@@ -38,6 +38,16 @@
       shared row-tracks would otherwise drift after the first mismatched
       pair, which is exactly what happened before this. -->
       <div class="flex flex-col gap-4 sm:block sm:columns-2 sm:gap-x-6 sm:space-y-4">
+        <div v-if="isPromptNamed" class="break-inside-avoid">
+          <FormControl
+            type="text"
+            label="Name"
+            required
+            :disabled="!isNew"
+            :model-value="isNew ? newDocName : name"
+            @update:model-value="newDocName = $event"
+          />
+        </div>
         <div
           v-for="field in fields"
           :key="field.fieldname"
@@ -68,10 +78,10 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch, watchEffect } from 'vue'
+import { computed, reactive, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onKeyStroke } from '@vueuse/core'
-import { useDoc, useNewDoc, call, Button, ErrorMessage, FeatherIcon, toast } from 'frappe-ui'
+import { useDoc, useNewDoc, call, Button, ErrorMessage, FeatherIcon, FormControl, toast } from 'frappe-ui'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import Skeleton from '@/components/Skeleton.vue'
@@ -108,6 +118,13 @@ const metaResource = useMeta(doctype)
 const fields = useFormFields(metaResource)
 const tableFields = useTableFields(metaResource)
 const hooks = getDoctypeHooks(doctype)
+
+// "Prompt" autoname doctypes (simple master/lookup tables like Village) have
+// no field backing their name at all - Frappe desk handles this with a
+// "Set Name" popup on create. This generic form has no such popup, so
+// without this the record's name is never collected or shown anywhere.
+const isPromptNamed = computed(() => metaResource.data?.autoname === 'prompt')
+const newDocName = ref('')
 
 const WIDE_FIELDTYPES = new Set([
   'Small Text',
@@ -259,11 +276,16 @@ const saving = ref(false)
 const saveError = ref(null)
 
 async function save() {
+  if (isNew && isPromptNamed.value && !newDocName.value.trim()) {
+    saveError.value = 'Name is required.'
+    return
+  }
   saving.value = true
   saveError.value = null
   try {
     if (isNew) {
       Object.assign(newDoc.doc, values)
+      if (isPromptNamed.value) newDoc.doc.name = newDocName.value.trim()
       const created = await newDoc.submit()
       toast.success('Created')
       if (isGenericRoute) {

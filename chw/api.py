@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import frappe
 from frappe import _
 from frappe.query_builder import Order
@@ -5,6 +7,8 @@ from frappe.query_builder.functions import IfNull
 from pypika.analytics import RowNumber
 from pypika.terms import ExistsCriterion
 from frappe.utils import getdate, add_days, add_months
+from frappe.utils.file_manager import get_file_path
+from PIL import Image
 
 
 PRIVILEGED_ROLES = {'Administrator', 'System Manager', 'Program Coordinator'}
@@ -55,6 +59,170 @@ def get_app_branding():
         'login_headline': settings.login_headline or None,
         'login_description': settings.login_description or None,
     }
+
+
+PWA_ICON_SIZES = [64, 192, 512]
+
+
+@frappe.whitelist(allow_guest=True)
+def get_pwa_manifest():
+    """Serve the Web App Manifest with icons pointing at App Setting.app_logo
+    (resized on request by get_pwa_icon below) instead of the static PNGs
+    vite-plugin-pwa bakes in at build time - so a PWA install picks up
+    whatever logo is actually configured, not whatever was uploaded when the
+    app was last built. Most phones only fetch icons at install time, so
+    changing the logo later won't update an already-installed icon without a
+    reinstall - there's no push mechanism for that on any platform."""
+    settings = frappe.get_single('App Setting')
+    app_name = settings.app_name or 'CHW'
+    icon_version = _app_logo_cache_key(settings.app_logo)
+
+    icons = [
+        {
+            'src': f'/api/method/chw.api.get_pwa_icon?size={size}&v={icon_version}',
+            'sizes': f'{size}x{size}',
+            'type': 'image/png',
+        }
+        for size in PWA_ICON_SIZES
+    ]
+    icons.append({
+        'src': f'/api/method/chw.api.get_pwa_icon?size=512&maskable=1&v={icon_version}',
+        'sizes': '512x512',
+        'type': 'image/png',
+        'purpose': 'maskable',
+    })
+
+    manifest = {
+        'id': '/chw/',
+        'name': app_name,
+        'short_name': app_name,
+        'description': 'Community health worker data capture and follow-up tracking.',
+        'start_url': '/chw/',
+        'scope': '/chw/',
+        'display': 'standalone',
+        'background_color': '#ffffff',
+        'theme_color': '#111827',
+        'icons': icons,
+    }
+
+    frappe.response['type'] = 'download'
+    frappe.response['filename'] = 'manifest.webmanifest'
+    frappe.response['filecontent'] = frappe.as_json(manifest)
+    frappe.response['content_type'] = 'application/manifest+json'
+    frappe.response['display_content_as'] = 'inline'
+
+
+def _app_logo_cache_key(app_logo):
+    """A cache/URL-busting key that changes exactly when the logo does -
+    the logo's own path already changes on every re-upload (Frappe names
+    uploaded files uniquely), so it doubles as a fingerprint with no extra
+    bookkeeping needed."""
+    return frappe.utils.sha256_hash(app_logo or 'default')[:12]
+
+
+@frappe.whitelist(allow_guest=True)
+def get_pwa_icon(size='512', maskable=None):
+    """Resize App Setting.app_logo into a square PNG at the requested size
+    for the PWA manifest (see get_pwa_manifest) - phones expect specific
+    icon sizes in specific formats, so the raw uploaded logo (whatever
+    aspect ratio/format an admin uploaded) can't be linked directly.
+    maskable=1 additionally pads the image to a safe zone on a solid
+    background, per the maskable icon spec, so platforms that crop PWA
+    icons into a circle/squircle don't cut off the logo's edges."""
+    size = frappe.utils.cint(size) or 512
+    if size not in PWA_ICON_SIZES:
+        size = min(PWA_ICON_SIZES, key=lambda s: abs(s - size))
+    is_maskable = frappe.utils.cint(maskable) == 1
+
+    settings = frappe.get_single('App Setting')
+    cache_key = f'pwa-icon:{_app_logo_cache_key(settings.app_logo)}:{size}:{int(is_maskable)}'
+    cached = frappe.cache().get_value(cache_key)
+
+    if cached is None:
+        cached = _render_pwa_icon(settings.app_logo, size, is_maskable)
+        frappe.cache().set_value(cache_key, cached, expires_in_sec=3600)
+
+    frappe.response['type'] = 'download'
+    frappe.response['filename'] = f'pwa-icon-{size}.png'
+    frappe.response['filecontent'] = cached
+    frappe.response['content_type'] = 'image/png'
+    frappe.response['display_content_as'] = 'inline'
+
+
+def _render_pwa_icon(app_logo, size, is_maskable):
+    source = None
+    if app_logo:
+        try:
+            with open(get_file_path(app_logo), 'rb') as f:
+                source = Image.open(f)
+                source.load()
+        except Exception:
+            frappe.log_error(title='PWA icon: failed to read App Setting.app_logo')
+            source = None
+
+    if source is None:
+        # No logo configured (or it failed to load) - a plain colored
+        # square beats a broken image in the install prompt/home screen.
+        canvas = Image.new('RGB', (size, size), '#111827')
+    else:
+        source = source.convert('RGBA')
+        # Center-crop to square before scaling, so an arbitrary-aspect-ratio
+        # upload (a wide logo, a tall one) doesn't get squashed.
+        w, h = source.size
+        edge = min(w, h)
+        left, top = (w - edge) // 2, (h - edge) // 2
+        source = source.crop((left, top, left + edge, top + edge))
+
+        if is_maskable:
+            # Maskable icons must keep their subject inside an ~80% "safe
+            # zone" - platforms that crop into a circle/squircle shape may
+            # cut off anything closer to the edge than that.
+            safe_size = int(size * 0.8)
+            source = source.resize((safe_size, safe_size), Image.LANCZOS)
+            corner = source.getpixel((0, 0))
+            fill = corner[:3] if isinstance(corner, tuple) else (17, 24, 39)
+            canvas = Image.new('RGB', (size, size), fill)
+            offset = (size - safe_size) // 2
+            canvas.paste(source, (offset, offset), source)
+        else:
+            source = source.resize((size, size), Image.LANCZOS)
+            canvas = Image.new('RGB', (size, size), '#ffffff')
+            canvas.paste(source, (0, 0), source)
+
+    buffer = BytesIO()
+    canvas.save(buffer, format='PNG')
+    return buffer.getvalue()
+
+
+@frappe.whitelist()
+def search_list(doctype, search_term, fields, search_fields):
+    """OR-search search_term across search_fields, returning the given
+    fields - the mobile list view's single search box (replacing several
+    stacked per-field filters, which don't fit well on a small screen) needs
+    to match any one of several fields at once. The v2 REST document-list
+    endpoint DoctypeList.vue otherwise uses (/api/v2/document/<doctype>)
+    only takes `filters`, which Frappe always ANDs together field-by-field -
+    there's no way to express "Village OR Head of Family OR ..." through it.
+    frappe.get_list's or_filters parameter (unlike that REST endpoint) does
+    support this directly. Runs with the same permission enforcement as any
+    other list fetch (frappe.get_list checks doctype/row permissions itself,
+    same as DoctypeList's normal query) - no extra doctype allowlist here,
+    since this can't do anything a permitted, filtered list fetch couldn't."""
+    fields = frappe.parse_json(fields)
+    search_fields = frappe.parse_json(search_fields)
+    search_term = (search_term or '').strip()
+
+    if not search_term or not search_fields:
+        return frappe.get_list(doctype, fields=fields, limit_page_length=20, order_by='modified desc')
+
+    or_filters = [[field, 'like', f'%{search_term}%'] for field in search_fields]
+    return frappe.get_list(
+        doctype,
+        fields=fields,
+        or_filters=or_filters,
+        limit_page_length=20,
+        order_by='modified desc',
+    )
 
 
 SYSTEM_ADMIN_ROLES = {'Administrator', 'System Manager'}

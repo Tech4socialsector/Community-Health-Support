@@ -1,7 +1,7 @@
 <template>
-  <Dialog v-model="show" :options="{ size: '5xl' }">
+  <Dialog v-model="show" :options="{ size: '5xl', title: 'settings-dialog' }">
     <template #body>
-      <div class="flex h-[34rem] max-h-[80vh] flex-col">
+      <div class="settings-dialog-panel flex flex-col">
         <div class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800">
           <h1 class="text-base font-semibold text-gray-900 dark:text-gray-100">Settings</h1>
           <button
@@ -12,8 +12,32 @@
           </button>
         </div>
 
+        <!-- Below sm: the side-by-side nav+content layout squeezes the
+        content column down to almost nothing on a phone-width screen
+        (192px of fixed nav width alone leaves barely 100-150px left,
+        truncating every field/button in the panels below to a few
+        characters). A horizontal, scrollable tab strip above the content
+        instead of a left rail solves that the same way MobileNav's own
+        drawer avoids fixed side columns. -->
+        <nav
+          class="flex flex-shrink-0 gap-1 overflow-x-auto border-b px-3 py-2 dark:border-gray-800 sm:hidden"
+        >
+          <button
+            v-for="tab in flatTabs"
+            :key="tab.key"
+            class="flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-1.5 text-sm"
+            :class="activeTab === tab.key
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-600 dark:text-gray-400'"
+            @click="activeTab = tab.key"
+          >
+            <component :is="tab.icon" class="h-4 w-4 flex-shrink-0" />
+            {{ tab.label }}
+          </button>
+        </nav>
+
         <div class="flex min-h-0 flex-1">
-          <nav class="w-48 flex-shrink-0 overflow-y-auto border-r px-3 py-4 dark:border-gray-800 sm:w-56">
+          <nav class="hidden w-48 flex-shrink-0 overflow-y-auto border-r px-3 py-4 dark:border-gray-800 sm:block sm:w-56">
             <div v-for="group in groupedTabs" :key="group.label" class="mb-4">
               <div class="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
                 {{ group.label }}
@@ -34,7 +58,7 @@
           </nav>
 
           <div class="min-w-0 flex-1 overflow-y-auto">
-            <div class="px-6 py-6 sm:px-8">
+            <div class="px-4 py-4 sm:px-8 sm:py-6">
               <ProfilePanel v-if="activeTab === 'profile'" />
               <NotificationSettingsPanel v-else-if="activeTab === 'notifications'" />
 
@@ -74,6 +98,39 @@
     </template>
   </Dialog>
 </template>
+
+<style>
+/* Same reasoning as AiAssistant.vue's ai-assistant-panel/data-dialog hook:
+frappe-ui's Dialog has no size granular enough for "full-screen on mobile,
+centered card on larger screens", and .dialog-overlay/data-dialog (set
+from options.title) is the one hook it exposes for a per-dialog override. */
+[data-dialog='settings-dialog'].dialog-overlay {
+  z-index: 50;
+}
+
+.settings-dialog-panel {
+  width: 100%;
+  height: 34rem;
+  max-height: 80vh;
+}
+
+@media (max-width: 639px), (max-height: 480px) {
+  [data-dialog='settings-dialog'].dialog-overlay > div {
+    padding: 0;
+  }
+  [data-dialog='settings-dialog'] .dialog-content {
+    margin: 0;
+    max-width: none;
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .settings-dialog-panel {
+    height: 100dvh;
+    max-height: none;
+  }
+}
+</style>
 
 <script setup>
 import { computed, ref, watch } from 'vue'
@@ -140,6 +197,11 @@ const groupedTabs = computed(() => {
   }
   return groups
 })
+
+// Same tabs as groupedTabs, without the group headers - the mobile strip
+// scrolls horizontally instead of grouping vertically, so the grouping
+// itself has nowhere to render.
+const flatTabs = computed(() => groupedTabs.value.flatMap((group) => group.tabs))
 
 const themeButtons = [
   { label: 'Light', value: 'light' },

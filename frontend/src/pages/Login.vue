@@ -113,8 +113,16 @@ const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 
+// Trimmed only at submit time, not on every keystroke via v-model - a
+// pasted credential often carries a stray leading/trailing space (copied
+// from an email, a chat message, a password manager's clipboard entry),
+// which Frappe's login compares byte-for-byte and silently rejects as
+// wrong. Trimming while typing would be actively wrong instead: it'd fight
+// a user who legitimately types a trailing space mid-edit. Only the outer
+// whitespace is stripped either way - a real space in the middle of an
+// email local-part or password stays intact.
 function submit() {
-  loginResource.submit({ email: email.value, password: password.value })
+  loginResource.submit({ email: email.value.trim(), password: password.value.trim() })
 }
 
 const showForgotPassword = ref(false)
@@ -131,12 +139,13 @@ function openForgotPassword() {
 }
 
 async function submitForgotPassword() {
-  if (!resetEmail.value) return
+  const user = resetEmail.value.trim()
+  if (!user) return
   resetLoading.value = true
   resetError.value = null
   resetSent.value = false
   try {
-    await call('frappe.core.doctype.user.user.reset_password', { user: resetEmail.value })
+    await call('frappe.core.doctype.user.user.reset_password', { user })
     resetSent.value = true
   } catch (e) {
     resetError.value = e

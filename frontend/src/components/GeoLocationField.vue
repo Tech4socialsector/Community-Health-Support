@@ -2,20 +2,15 @@
   <div>
     <div class="mb-1.5 flex items-center justify-between">
       <label class="text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</label>
-      <div class="flex items-center gap-1">
-        <span v-if="point" class="text-xs text-gray-400 dark:text-gray-500">
-          {{ point.lat.toFixed(5) }}, {{ point.lng.toFixed(5) }}
-        </span>
-        <Tooltip v-if="point" text="Clear location">
-          <button
-            type="button"
-            class="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
-            @click="clearLocation"
-          >
-            <FeatherIcon name="x" class="h-3.5 w-3.5" />
-          </button>
-        </Tooltip>
-      </div>
+      <Tooltip v-if="point" text="Clear location">
+        <button
+          type="button"
+          class="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
+          @click="clearLocation"
+        >
+          <FeatherIcon name="x" class="h-3.5 w-3.5" />
+        </button>
+      </Tooltip>
     </div>
 
     <div class="relative h-64 w-full overflow-hidden rounded-lg border dark:border-gray-800">

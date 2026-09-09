@@ -178,12 +178,17 @@ const selectOptions = computed(() => {
 })
 
 // Link fields don't have a dedicated autocomplete widget in this build - a
-// plain text input, with the linked doctype named in the description, is
-// the fallback so the generic form still works for every fieldtype without
-// hardcoding per-doctype pickers.
+// plain text input, with a "Links to ..." hint in the description, is the
+// fallback so the generic form still works for every fieldtype without
+// hardcoding per-doctype pickers. Named after the field's own label (e.g.
+// "Data Collector"), not field.options (the raw linked doctype name, e.g.
+// "Health Worker") - a field's label is what a user actually sees it
+// called elsewhere on the same form, and health_worker_name in particular
+// was renamed to "Data Collector" precisely so "Health Worker" wouldn't
+// surface anywhere in this app's UI.
 const linkDescription = computed(() => {
   if (props.field.fieldtype === 'Link' && props.field.options) {
-    return `Links to ${props.field.options}`
+    return `Links to ${props.field.label || props.field.options}`
   }
   return props.field.description || undefined
 })

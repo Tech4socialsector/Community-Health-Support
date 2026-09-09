@@ -42,4 +42,17 @@ watch(
   },
   { immediate: true },
 )
+
+// Same reasoning as the favicon above, for the PWA install icon: the
+// manifest vite-plugin-pwa injects at build time (<link rel="manifest">,
+// no id/customization hook available) points at static PNGs baked in from
+// whatever logo existed at build time. chw.api.get_pwa_manifest generates
+// the manifest live from App Setting.app_logo instead - swapping the link
+// here (rather than templating chw.html server-side) matches how the
+// favicon itself is handled, and works from the very first load since it
+// doesn't depend on any other resource resolving first.
+const manifestLink = document.querySelector('link[rel="manifest"]')
+if (manifestLink) {
+  manifestLink.href = '/api/method/chw.api.get_pwa_manifest'
+}
 </script>

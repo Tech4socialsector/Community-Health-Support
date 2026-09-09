@@ -21,7 +21,35 @@
     <ErrorMessage v-else-if="metaResource.error" :message="metaResource.error" />
 
     <template v-else-if="metaResource.data">
-      <div v-if="filterFields.length" class="mb-4 flex flex-wrap items-end gap-3">
+      <!-- Mobile: a row of labeled filter boxes that fits fine on desktop
+      stacks into a tall wall of inputs on a phone, pushing the actual list
+      below the fold. A compact "Filter" pill (tap to open the same
+      per-field inputs in a bottom sheet instead) replaces that inline row
+      there - same AND-per-field semantics as desktop, just tucked behind
+      a tap. -->
+      <div v-if="isMobile && filterFields.length" class="mb-4">
+        <button
+          class="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-300"
+          :class="hasActiveFilters ? 'border-gray-900 dark:border-gray-100' : 'border-gray-200'"
+          @click="showFilterSheet = true"
+        >
+          <FeatherIcon name="filter" class="h-3.5 w-3.5" />
+          Filter
+          <span
+            v-if="activeFilterCount"
+            class="flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-900 px-1 text-[10px] text-white dark:bg-gray-100 dark:text-gray-900"
+          >
+            {{ activeFilterCount }}
+          </span>
+          <FeatherIcon
+            v-if="hasActiveFilters"
+            name="x"
+            class="h-3.5 w-3.5 text-gray-400"
+            @click.stop="clearFilters"
+          />
+        </button>
+      </div>
+      <div v-else-if="!isMobile && filterFields.length" class="mb-4 flex flex-wrap items-end gap-3">
         <div v-for="field in filterFields" :key="field.fieldname" class="w-52 flex-shrink-0">
           <FormControl
             v-if="field.fieldtype === 'Select'"
@@ -61,6 +89,65 @@
         </Button>
       </div>
 
+      <Dialog v-model="showFilterSheet" :options="{ size: 'sm', title: 'filter-sheet' }">
+        <template #body>
+          <div class="filter-sheet-panel flex flex-col">
+            <div class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800">
+              <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">Filter</h3>
+              <button
+                class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                @click="showFilterSheet = false"
+              >
+                <FeatherIcon name="x" class="h-4 w-4" />
+              </button>
+            </div>
+
+            <div class="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
+              <div v-for="field in filterFields" :key="field.fieldname">
+                <FormControl
+                  v-if="field.fieldtype === 'Select'"
+                  type="select"
+                  class="[&_[data-slot=trigger]]:w-full"
+                  :label="field.label"
+                  :options="[{ label: `All ${field.label}`, value: '' }, ...selectOptionsFor(field)]"
+                  v-model="filterValues[field.fieldname]"
+                />
+                <FormControl
+                  v-else-if="field.fieldtype === 'Check'"
+                  type="select"
+                  class="[&_[data-slot=trigger]]:w-full"
+                  :label="field.label"
+                  :options="[{ label: `All ${field.label}`, value: '' }, { label: 'Yes', value: '1' }, { label: 'No', value: '0' }]"
+                  v-model="filterValues[field.fieldname]"
+                />
+                <FormControl
+                  v-else-if="field.fieldtype === 'Date' || field.fieldtype === 'Datetime'"
+                  type="date"
+                  :label="field.label"
+                  v-model="filterValues[field.fieldname]"
+                />
+                <FormControl
+                  v-else
+                  type="text"
+                  :label="field.label"
+                  :placeholder="`Filter by ${field.label}`"
+                  v-model="filterValues[field.fieldname]"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-shrink-0 gap-2 border-t p-4 dark:border-gray-800">
+              <Button v-if="hasActiveFilters" class="flex-1" @click="clearFilters">
+                Clear
+              </Button>
+              <Button variant="solid" class="flex-1" @click="showFilterSheet = false">
+                Done
+              </Button>
+            </div>
+          </div>
+        </template>
+      </Dialog>
+
       <div v-if="rows.loading && !rows.data" class="space-y-2">
         <Skeleton v-for="i in 5" :key="i" height="2.5rem" />
       </div>
@@ -70,6 +157,38 @@
         class="py-10 text-center text-gray-500 dark:text-gray-400"
       >
         No records yet.
+      </div>
+
+      <!-- Mobile: a table forces horizontal scrolling to see anything past
+      the first column or two, which is awkward on a phone - each row
+      becomes its own card instead, with the first list-view column as the
+      card's title and every other column shown as a label/value line. -->
+      <div v-if="isMobile" class="space-y-2">
+        <div
+          v-for="row in rows.data"
+          :key="row.name"
+          class="cursor-pointer rounded-lg border p-3 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800"
+          @click="goToRow(row.name)"
+        >
+          <div class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+            {{ formatValue(row[columns[0]?.fieldname], columns[0]) }}
+          </div>
+          <div v-if="columns.length > 1" class="mt-1.5 space-y-1">
+            <div
+              v-for="col in columns.slice(1)"
+              :key="col.fieldname"
+              class="flex items-baseline justify-between gap-3 text-sm"
+            >
+              <span class="flex-shrink-0 text-gray-500 dark:text-gray-400">{{ col.label }}</span>
+              <span class="truncate text-right text-gray-700 dark:text-gray-300">
+                <UserLinkHoverCard v-if="isUserLink(col) && row[col.fieldname]" :user="row[col.fieldname]" @click.stop>
+                  <span class="underline decoration-dotted">{{ row[col.fieldname] }}</span>
+                </UserLinkHoverCard>
+                <template v-else>{{ formatValue(row[col.fieldname], col) }}</template>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div v-else class="overflow-x-auto rounded-lg border dark:border-gray-800">
@@ -111,10 +230,39 @@
   </AppLayout>
 </template>
 
+<style>
+/* Same data-dialog hook pattern as SettingsDialog.vue/ChildTable.vue's
+row editor. Only used on mobile (the "Filter" pill that opens it is
+isMobile-gated in the template), so this is a bottom sheet outright
+rather than a centered-card/full-screen split by breakpoint like those -
+anchored to the bottom edge and rounded only on top, matching the
+conventional mobile filter-sheet affordance instead of a dialog that
+happens to fill the screen. */
+[data-dialog='filter-sheet'].dialog-overlay {
+  z-index: 50;
+}
+[data-dialog='filter-sheet'].dialog-overlay > div {
+  align-items: flex-end;
+  padding: 0;
+}
+[data-dialog='filter-sheet'] .dialog-content {
+  margin: 0;
+  max-width: none;
+  width: 100vw;
+  border-radius: 1rem 1rem 0 0;
+}
+
+.filter-sheet-panel {
+  width: 100%;
+  max-height: 75vh;
+}
+</style>
+
 <script setup>
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useList, Button, ErrorMessage, FeatherIcon, FormControl } from 'frappe-ui'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { useList, Button, Dialog, ErrorMessage, FeatherIcon, FormControl } from 'frappe-ui'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import UserLinkHoverCard from '@/components/UserLinkHoverCard.vue'
@@ -122,6 +270,9 @@ import Skeleton from '@/components/Skeleton.vue'
 import { useMeta, useListFields, useFilterFields } from '@/data/useMeta'
 import { findModuleByRoute } from '@/data/modules'
 import { setPageTitle } from '@/data/pageTitle'
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isMobile = breakpoints.smaller('sm')
 
 const props = defineProps({
   doctype: { type: String, required: true },
@@ -199,6 +350,16 @@ const rows = useList({
   limit: 20,
   immediate: false,
 })
+
+// The mobile "Filter" pill (see showFilterSheet below) opens the same
+// per-field inputs as desktop instead of a separate single-search-box
+// mechanism - `rows` above is now the one shared data source for both,
+// so there's no separate mobile resource/normalization needed here
+// anymore.
+const showFilterSheet = ref(false)
+const activeFilterCount = computed(
+  () => Object.values(filterValues).filter((v) => v !== '' && v != null).length,
+)
 
 function formatValue(value, field) {
   if (value == null || value === '') return '-'

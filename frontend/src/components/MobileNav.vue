@@ -37,6 +37,17 @@
     </button>
 
     <button
+      v-if="assistantConfigResource.data?.enabled"
+      class="assistant-nav-item flex flex-1 flex-col items-center gap-0.5 py-2 text-xs text-gray-400 dark:text-gray-500"
+      @click="toggleAssistant"
+    >
+      <span class="assistant-nav-badge relative flex h-5 w-5 items-center justify-center">
+        <SparklesIcon class="h-5 w-5" />
+      </span>
+      Assistant
+    </button>
+
+    <button
       class="flex flex-1 flex-col items-center gap-0.5 py-2 text-xs text-gray-400 dark:text-gray-500"
       @click="showMenu = true"
     >
@@ -68,7 +79,10 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { FeatherIcon } from 'frappe-ui'
 import AppSidebar from '@/components/AppSidebar.vue'
+import SparklesIcon from '@/components/SparklesIcon.vue'
 import { unreadCount, toggleNotifications } from '@/data/notifications'
+import { showSettingsDialog } from '@/data/settingsDialog'
+import { assistantState, assistantConfigResource, toggleAssistant } from '@/data/aiAssistant'
 
 const route = useRoute()
 const showMenu = ref(false)
@@ -78,6 +92,22 @@ const showMenu = ref(false)
 // normally dismisses it.
 watch(() => route.fullPath, () => {
   showMenu.value = false
+})
+
+// "Settings" (unlike the nav links above) doesn't navigate - it just flips
+// this shared ref, so the route watch above never fires for it, leaving
+// the drawer open behind the Settings dialog it opens (SettingsDialog
+// lives in MobileShell, outside this drawer's own DOM, so it isn't even
+// affected by the drawer visually - it's just stuck open underneath).
+watch(showSettingsDialog, (open) => {
+  if (open) showMenu.value = false
+})
+
+// Same reasoning as showSettingsDialog above - the new AI assistant
+// trigger in AppSidebar's footer also just flips a shared ref rather than
+// navigating.
+watch(() => assistantState.visible, (open) => {
+  if (open) showMenu.value = false
 })
 </script>
 
@@ -98,5 +128,53 @@ watch(() => route.fullPath, () => {
 .menu-drawer-enter-from,
 .menu-drawer-leave-to {
   transform: translateX(-100%);
+}
+
+/* "Blinking" as a soft breathing glow rather than a literal opacity
+on/off toggle - a hard blink reads as an alert/error state on a button
+that's actually just inviting a tap. This item's icon is plain (same
+gray-400 outline as Home/Worklist/Alerts, no circular fill like the
+desktop sidebar's badge version), so there's no background-color to
+echo in a ping ring the way the sidebar/old floating-button versions
+did - a small colored ring instead, which reads clearly against the
+nav's white/gray-900 background regardless of the icon's own color. */
+.assistant-nav-item .assistant-nav-badge {
+  animation: assistant-nav-breathe 2.4s ease-in-out infinite;
+}
+.assistant-nav-badge::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  border: 1.5px solid #6366f1;
+  animation: assistant-nav-ping 2.4s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes assistant-nav-breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes assistant-nav-ping {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-nav-badge,
+  .assistant-nav-badge::after {
+    animation: none;
+  }
 }
 </style>
