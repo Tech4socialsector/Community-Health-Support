@@ -22,7 +22,12 @@ fixtures = [
 				],
 			]
 		],
-	}
+	},
+	# Belt-and-suspenders alongside the workspace's own module file (which
+	# already syncs on migrate on its own) - added because a teammate still
+	# couldn't see it after pulling, even though the module-file sync alone
+	# should be enough; costs nothing to also carry it as a fixture.
+	{"dt": "Workspace", "filters": [["name", "=", "CHW App"]]},
 ]
 
 app_name = "chw"

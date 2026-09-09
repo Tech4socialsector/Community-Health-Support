@@ -1,0 +1,65 @@
+[
+ {
+  "app": "chw",
+  "charts": [],
+  "content": "[{\"id\":\"MfIUhWNivo\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Household Details\",\"col\":4}},{\"id\":\"cxs9pjDOiG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Family Members\",\"col\":4}},{\"id\":\"n14mU_LhS-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pregnancy Registration\",\"col\":4}},{\"id\":\"ancFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ANC Follow-up\",\"col\":4}},{\"id\":\"lgNLFGGKLJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Birth Registration\",\"col\":4}},{\"id\":\"zfNmA54s-M\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PNC Followup\",\"col\":4}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "external_link": null,
+  "for_user": null,
+  "hide_custom": 0,
+  "icon": "air-vent",
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "CHW App",
+  "link_to": null,
+  "link_type": "DocType",
+  "links": [],
+  "modified": "2026-09-04 15:05:01.214502",
+  "module": "Common",
+  "name": "CHW App",
+  "number_cards": [
+   {
+    "label": "Household Details",
+    "number_card_name": "Household Details"
+   },
+   {
+    "label": "Family Members",
+    "number_card_name": "Family Members"
+   },
+   {
+    "label": "Pregnancy Registration",
+    "number_card_name": "Pregnancy Registration"
+   },
+   {
+    "label": "Birth Registration",
+    "number_card_name": "Birth Registration"
+   },
+   {
+    "label": "PNC Followup",
+    "number_card_name": "PNC Followup"
+   },
+   {
+    "label": "ANC Follow-up",
+    "number_card_name": "ANC Follow-up"
+   }
+  ],
+  "parent_page": null,
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [
+   {
+    "role": "CHW Health Worker"
+   },
+   {
+    "role": "System Manager"
+   }
+  ],
+  "sequence_id": 0.0,
+  "shortcuts": [],
+  "title": "CHW App",
+  "type": "Workspace"
+ }
+]
