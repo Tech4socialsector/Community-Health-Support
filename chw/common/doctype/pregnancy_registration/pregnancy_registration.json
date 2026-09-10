@@ -272,9 +272,13 @@
   {
    "link_doctype": "ANC Follow-up",
    "link_fieldname": "pregnant_id"
+  },
+  {
+   "link_doctype": "Birth Registration",
+   "link_fieldname": "prid"
   }
  ],
- "modified": "2026-09-09 14:33:14.005860",
+ "modified": "2026-09-10 17:00:11.818653",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

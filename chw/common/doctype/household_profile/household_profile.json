@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "HH-.#####",
@@ -53,8 +52,7 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Total Family Members in the Family",
-   "non_negative": 1,
-   "reqd": 1
+   "non_negative": 1
   },
   {
    "fieldname": "members_added",
@@ -95,8 +93,7 @@
    "fieldname": "phone_no",
    "fieldtype": "Data",
    "label": "Phone Number",
-   "length": 10,
-   "reqd": 1
+   "length": 10
   },
   {
    "default": "Today",
@@ -117,8 +114,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Farming",
-   "options": "\norganic\ninorganic\nNo farm",
-   "reqd": 1
+   "options": "\norganic\ninorganic\nNo farm"
   },
   {
    "fieldname": "drinkingwater",
@@ -214,7 +210,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-08-13 16:41:10.886591",
+ "modified": "2026-09-10 16:49:55.482413",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",
