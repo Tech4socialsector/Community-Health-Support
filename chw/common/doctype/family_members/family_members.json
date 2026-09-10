@@ -9,7 +9,6 @@
   "primary_details_tab",
   "hhid",
   "village",
-  "head_of_the_family_member",
   "family_member",
   "relationship",
   "gender",
@@ -250,27 +249,17 @@
    "fieldname": "date",
    "fieldtype": "Date",
    "label": "Date"
-  },
-  {
-   "fetch_from": "hhid.household_head_name",
-   "fieldname": "head_of_the_family_member",
-   "fieldtype": "Data",
-   "label": "Head of the Family Member"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [
   {
-   "link_doctype": "Pregnancy Registration",
-   "link_fieldname": "familymember_id"
-  },
-  {
-   "link_doctype": "Birth Registration",
-   "link_fieldname": "family_member_id"
+   "link_doctype": "Palitive Care Visit Form",
+   "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-09-09 14:36:31.423683",
+ "modified": "2026-09-10 11:53:33.253601",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

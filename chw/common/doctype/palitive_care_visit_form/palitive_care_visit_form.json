@@ -1,0 +1,284 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-10 11:06:38.266266",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "family_member_details_section",
+  "fmid",
+  "hhid",
+  "name1",
+  "age",
+  "gender",
+  "visit_section",
+  "visit_date",
+  "vitals_section",
+  "blood_pressure",
+  "pulse",
+  "spo2",
+  "temperature",
+  "respiratory_rate",
+  "pain",
+  "complaints_section",
+  "complaint_1",
+  "complaint_2",
+  "body_systems_section",
+  "neurological",
+  "cardiac",
+  "respiratory",
+  "gigu",
+  "musculoskeletal",
+  "skin",
+  "pressure_sores_section",
+  "pressure_sores",
+  "mental__emotional_section",
+  "mental__emotional_status",
+  "family_section",
+  "family_needs",
+  "consultation_section",
+  "consultation_needed",
+  "section_break_teiz",
+  "interventions_at_visit_today",
+  "plan",
+  "assessor_section",
+  "assessors_name",
+  "assessors_designation",
+  "assessors_signature"
+ ],
+ "fields": [
+  {
+   "fieldname": "visit_section",
+   "fieldtype": "Section Break",
+   "label": "Visit "
+  },
+  {
+   "fieldname": "visit_date",
+   "fieldtype": "Data",
+   "label": "Visit Date"
+  },
+  {
+   "fieldname": "vitals_section",
+   "fieldtype": "Section Break",
+   "label": "Vitals"
+  },
+  {
+   "fieldname": "blood_pressure",
+   "fieldtype": "Data",
+   "label": "Blood Pressure"
+  },
+  {
+   "fieldname": "pulse",
+   "fieldtype": "Int",
+   "label": "Pulse"
+  },
+  {
+   "fieldname": "spo2",
+   "fieldtype": "Float",
+   "label": "SpO2"
+  },
+  {
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "respiratory_rate",
+   "fieldtype": "Int",
+   "label": "Respiratory Rate"
+  },
+  {
+   "fieldname": "pain",
+   "fieldtype": "Int",
+   "label": "Pain"
+  },
+  {
+   "fieldname": "complaints_section",
+   "fieldtype": "Section Break",
+   "label": "Complaints"
+  },
+  {
+   "fieldname": "complaint_1",
+   "fieldtype": "Small Text",
+   "label": "Complaint 1"
+  },
+  {
+   "fieldname": "complaint_2",
+   "fieldtype": "Small Text",
+   "label": "Complaint 2"
+  },
+  {
+   "fieldname": "body_systems_section",
+   "fieldtype": "Section Break",
+   "label": "Body Systems"
+  },
+  {
+   "fieldname": "neurological",
+   "fieldtype": "Small Text",
+   "label": "Neurological"
+  },
+  {
+   "fieldname": "cardiac",
+   "fieldtype": "Small Text",
+   "label": "Cardiac"
+  },
+  {
+   "fieldname": "respiratory",
+   "fieldtype": "Small Text",
+   "label": "Respiratory"
+  },
+  {
+   "fieldname": "gigu",
+   "fieldtype": "Small Text",
+   "label": "GI/GU"
+  },
+  {
+   "fieldname": "musculoskeletal",
+   "fieldtype": "Small Text",
+   "label": "Musculoskeletal"
+  },
+  {
+   "fieldname": "skin",
+   "fieldtype": "Small Text",
+   "label": "Skin"
+  },
+  {
+   "fieldname": "pressure_sores_section",
+   "fieldtype": "Section Break",
+   "label": "Pressure Sores"
+  },
+  {
+   "fieldname": "pressure_sores",
+   "fieldtype": "Table",
+   "label": "Pressure Sores",
+   "options": "Pressure Sore"
+  },
+  {
+   "fieldname": "mental__emotional_section",
+   "fieldtype": "Section Break",
+   "label": "Mental / Emotional"
+  },
+  {
+   "fieldname": "mental__emotional_status",
+   "fieldtype": "Small Text",
+   "label": "Mental / Emotional Status"
+  },
+  {
+   "fieldname": "family_section",
+   "fieldtype": "Section Break",
+   "label": "Family "
+  },
+  {
+   "fieldname": "family_needs",
+   "fieldtype": "Small Text",
+   "label": "Family Needs"
+  },
+  {
+   "fieldname": "consultation_section",
+   "fieldtype": "Section Break",
+   "label": "Consultation"
+  },
+  {
+   "fieldname": "consultation_needed",
+   "fieldtype": "Table MultiSelect",
+   "label": "Consultation Needed",
+   "options": "Consultation child"
+  },
+  {
+   "fieldname": "section_break_teiz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "interventions_at_visit_today",
+   "fieldtype": "Small Text",
+   "label": "Interventions at Visit Today"
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Small Text",
+   "label": "Plan"
+  },
+  {
+   "fieldname": "assessor_section",
+   "fieldtype": "Section Break",
+   "label": "Assessor"
+  },
+  {
+   "fieldname": "assessors_name",
+   "fieldtype": "Data",
+   "label": "Assessor's Name"
+  },
+  {
+   "fieldname": "assessors_designation",
+   "fieldtype": "Data",
+   "label": "Assessor's Designation"
+  },
+  {
+   "fieldname": "assessors_signature",
+   "fieldtype": "Attach Image",
+   "label": "Assessor's Signature"
+  },
+  {
+   "fieldname": "family_member_details_section",
+   "fieldtype": "Section Break",
+   "label": "Family Member Details"
+  },
+  {
+   "fieldname": "fmid",
+   "fieldtype": "Link",
+   "label": "FMID",
+   "options": "Family members"
+  },
+  {
+   "fetch_from": "fmid.hhid",
+   "fieldname": "hhid",
+   "fieldtype": "Data",
+   "label": "HHID"
+  },
+  {
+   "fetch_from": "fmid.family_member",
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fetch_from": "fmid.age",
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "label": "Age"
+  },
+  {
+   "fetch_from": "fmid.gender",
+   "fieldname": "gender",
+   "fieldtype": "Data",
+   "label": "Gender"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-10 11:53:01.418098",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Palitive Care Visit Form",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
