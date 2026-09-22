@@ -33,6 +33,7 @@
   "date",
   "health_worker_name",
   "status",
+  "hmis_patient_registration",
   "section_break_kdnz",
   "disability",
   "type_of_disability",
@@ -244,6 +245,14 @@
    "label": "Head of the Family Member"
   },
   {
+   "fieldname": "hmis_patient_registration",
+   "fieldtype": "Link",
+   "label": "HMIS HIN",
+   "options": "Patient Registration",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
    "fieldname": "section_break_kdnz",
    "fieldtype": "Section Break"
   },
@@ -329,7 +338,7 @@
    "options": "\nYes\nNo"
   },
   {
-   "depends_on": "doc.marital_status == \"Married\" && doc.gender == \"Female\"",
+   "depends_on": "eval: doc.marital_status == \"Married\" && doc.gender == \"Female\"",
    "fieldname": "is_the_person_currently_pregnant",
    "fieldtype": "Select",
    "label": "Is the person currently pregnant?",
@@ -344,11 +353,15 @@
    "link_fieldname": "familymember_id"
   },
   {
-   "link_doctype": "Palliative care followup",
+   "link_doctype": "Birth Registration",
+   "link_fieldname": "family_member_id"
+  },
+  {
+   "link_doctype": "Palliative Care Initial Assessment Form",
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-09-18 11:34:28.628823",
+ "modified": "2026-09-22 11:51:57.124940",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

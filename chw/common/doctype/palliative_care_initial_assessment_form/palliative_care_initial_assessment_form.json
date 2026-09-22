@@ -1,12 +1,14 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "autoincrement",
+ "autoname": "format:  PCID-{####}",
  "creation": "2026-09-16 17:30:54.567269",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "demographics_section",
+  "fmid",
+  "hhid",
   "name1",
   "gender",
   "date_of_birth",
@@ -15,15 +17,15 @@
   "column_break_pcks",
   "marital_status",
   "occupation",
-  "referred_by",
-  "phonecontact_number_of_primary_caregiver_and_relationship",
+  "phonecontact_number",
   "other_contact_persons_and_number",
+  "referred_by",
   "medical_history_section",
   "history_of_presenting_illness",
   "diagnosis",
   "symptoms",
-  "column_break_nobp",
   "past_medical_history",
+  "column_break_nobp",
   "h5personal_historyh",
   "smoking",
   "chewing_tobacco",
@@ -44,9 +46,10 @@
   "general_examination_section",
   "body_weight_in_kg",
   "body_appearance",
-  "pupils_perrla",
-  "appearance_mark_if_abnormal",
   "skin_note_if_intact_pressure_sores_abrasions_other_wounds",
+  "column_break_kmur",
+  "appearance_mark_if_abnormal",
+  "pupils_perrla",
   "system_evaluation_section",
   "h5cardiovascularh",
   "heart_sounds",
@@ -94,11 +97,9 @@
   "patient_status",
   "familycaregiver_health_concerns",
   "support_status",
-  "communication_status_at_first_visit",
   "column_break_pzps",
+  "communication_status_at_first_visit",
   "primary_caregiver",
-  "family_member_1",
-  "other_family_members",
   "section_break_kxpw",
   "assesment_summary",
   "does_the_patient_need",
@@ -120,39 +121,42 @@
    "label": "Demographics"
   },
   {
+   "fetch_from": "fmid.family_member",
    "fieldname": "name1",
    "fieldtype": "Data",
    "label": "Name"
   },
   {
+   "fetch_from": "fmid.gender",
    "fieldname": "gender",
-   "fieldtype": "Select",
-   "label": "Gender",
-   "options": "\nMale\nFemale\nOthers"
+   "fieldtype": "Data",
+   "label": "Gender"
   },
   {
+   "fetch_from": "fmid.date_of_birth",
    "fieldname": "date_of_birth",
-   "fieldtype": "Date",
+   "fieldtype": "Data",
    "label": "Date of Birth"
   },
   {
+   "fetch_from": "fmid.age",
    "fieldname": "age",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Age"
   },
   {
    "fieldname": "allergies",
    "fieldtype": "Data",
-   "label": "Allergies (Food/Medications)",
-   "options": "\nFood\nMedications"
+   "label": "Allergies (Food/Medications)"
   },
   {
+   "fetch_from": "fmid.marital_status",
    "fieldname": "marital_status",
-   "fieldtype": "Select",
-   "label": "Marital Status",
-   "options": "\nSingle\nMarried"
+   "fieldtype": "Data",
+   "label": "Marital Status"
   },
   {
+   "fetch_from": "fmid.occupation",
    "fieldname": "occupation",
    "fieldtype": "Data",
    "label": "Occupation"
@@ -162,11 +166,6 @@
    "fieldtype": "Select",
    "label": "Referred by ",
    "options": "\nHospital\nDepartment\nVolunteer\nSelf Reference\nPeer Reference"
-  },
-  {
-   "fieldname": "phonecontact_number_of_primary_caregiver_and_relationship",
-   "fieldtype": "Phone",
-   "label": "Phone/contact number of primary caregiver and relationship"
   },
   {
    "fieldname": "other_contact_persons_and_number",
@@ -287,8 +286,7 @@
   {
    "fieldname": "pupils_perrla",
    "fieldtype": "Data",
-   "label": "Pupils",
-   "options": "\nPupils\nEqual\nRound\nReactive\nAccomodation"
+   "label": "Pupils"
   },
   {
    "fieldname": "column_break_pcks",
@@ -384,7 +382,7 @@
   {
    "fieldname": "does_the_patient_need",
    "fieldtype": "Table MultiSelect",
-   "label": "Does the patient need ",
+   "label": "Does the patient need any therapy",
    "options": "Does the patient need Child"
   },
   {
@@ -472,18 +470,6 @@
    "fieldtype": "Table",
    "label": "Primary Caregiver",
    "options": "Primary Caregiver child"
-  },
-  {
-   "fieldname": "family_member_1",
-   "fieldtype": "Table",
-   "label": "Family Member 1 ",
-   "options": "family Member 1"
-  },
-  {
-   "fieldname": "other_family_members",
-   "fieldtype": "Table",
-   "label": "Other family members",
-   "options": "Other family members"
   },
   {
    "fieldname": "support_status",
@@ -669,16 +655,43 @@
    "fieldtype": "Table",
    "label": "Assesment Summary",
    "options": "Assessment Summary Child"
+  },
+  {
+   "fieldname": "fmid",
+   "fieldtype": "Link",
+   "label": "FMID",
+   "options": "Family members"
+  },
+  {
+   "fetch_from": "fmid.hhid",
+   "fieldname": "hhid",
+   "fieldtype": "Data",
+   "label": "HHID"
+  },
+  {
+   "fetch_from": "fmid.phone_number",
+   "fieldname": "phonecontact_number",
+   "fieldtype": "Data",
+   "label": "Phone/contact number of primary caregiver and relationship"
+  },
+  {
+   "fieldname": "column_break_kmur",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-09-21 11:57:38.173900",
+ "links": [
+  {
+   "link_doctype": "Palliative care followup",
+   "link_fieldname": "pcid"
+  }
+ ],
+ "modified": "2026-09-22 11:54:33.723446",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",
- "naming_rule": "Autoincrement",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

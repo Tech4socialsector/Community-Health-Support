@@ -6,11 +6,11 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "prid",
   "family_member_id",
   "hh_id",
   "first_name",
   "village",
+  "specify_complication",
   "husbands_name",
   "age",
   "phone_number",
@@ -22,7 +22,6 @@
   "phc_address",
   "mother_weight",
   "complication_identified",
-  "specify_complication",
   "family_planning",
   "if_yes_specify_the_method",
   "delivery_outcome",
@@ -45,17 +44,16 @@
  ],
  "fields": [
   {
-   "fetch_from": "prid.familymember_id",
    "fetch_if_empty": 1,
    "fieldname": "family_member_id",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "FMID",
    "options": "Family members"
   },
   {
-   "fetch_from": "prid.first_name",
+   "fetch_from": "family_member_id.family_member",
    "fetch_if_empty": 1,
    "fieldname": "first_name",
    "fieldtype": "Data",
@@ -64,7 +62,7 @@
    "label": "Name"
   },
   {
-   "fetch_from": "prid.hh_id",
+   "fetch_from": "family_member_id.hhid",
    "fetch_if_empty": 1,
    "fieldname": "hh_id",
    "fieldtype": "Data",
@@ -73,7 +71,7 @@
    "label": "HH ID"
   },
   {
-   "fetch_from": "prid.village",
+   "fetch_from": "family_member_id.village",
    "fetch_if_empty": 1,
    "fieldname": "village",
    "fieldtype": "Link",
@@ -82,21 +80,20 @@
    "read_only": 1
   },
   {
-   "fetch_from": "prid.father_husband_name",
    "fetch_if_empty": 1,
    "fieldname": "husbands_name",
    "fieldtype": "Data",
    "label": "Husband's Name"
   },
   {
-   "fetch_from": "prid.age",
+   "fetch_from": "family_member_id.age",
    "fetch_if_empty": 1,
    "fieldname": "age",
    "fieldtype": "Data",
    "label": "Age"
   },
   {
-   "fetch_from": "prid.phone_number",
+   "fetch_from": "family_member_id.phone_number",
    "fetch_if_empty": 1,
    "fieldname": "phone_number",
    "fieldtype": "Data",
@@ -263,12 +260,6 @@
    "fieldtype": "Select",
    "label": " Which child is it?",
    "options": "\n1\n2\n3\n4\n5\n6\n7 and Above"
-  },
-  {
-   "fieldname": "prid",
-   "fieldtype": "Link",
-   "label": "PRID",
-   "options": "Pregnancy Registration"
   }
  ],
  "grid_page_length": 50,
@@ -279,7 +270,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-09-10 16:59:05.931813",
+ "modified": "2026-09-22 11:51:34.763420",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",
