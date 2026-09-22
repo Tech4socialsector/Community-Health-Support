@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from frappe.model.document import Document
-from frappe.utils import add_days
+from frappe.utils import add_days, getdate, today
 from chw.api import validate_phone_number
 
 
@@ -11,3 +11,13 @@ class PregnancyRegistration(Document):
 		validate_phone_number(self.phone_number)
 		if self.lmp_date:
 			self.estimated_date_of_delivery = add_days(self.lmp_date, 281)
+		self.calculate_pog()
+
+	def calculate_pog(self):
+		if not self.lmp_date:
+			self.pog = ""
+			return
+
+		days_pregnant = (getdate(today()) - getdate(self.lmp_date)).days
+		weeks, days = divmod(days_pregnant, 7)
+		self.pog = f"{weeks} weeks {days} days"

@@ -19,6 +19,8 @@ fixtures = [
 					"Birth Registration",
 					"PNC Followup",
 					"ANC Follow-up",
+					"Palliative Care Initial Assessment Form-1",
+					"Palliative Care followup-1",
 				],
 			]
 		],

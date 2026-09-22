@@ -21,6 +21,11 @@ frappe.ui.form.on("Pregnancy Registration", {
 	lmp_date(frm) {
 		if (frm.doc.lmp_date) {
 			frm.set_value("estimated_date_of_delivery", frappe.datetime.add_days(frm.doc.lmp_date, 281));
+
+			const days_pregnant = frappe.datetime.get_diff(frappe.datetime.get_today(), frm.doc.lmp_date);
+			const weeks = Math.floor(days_pregnant / 7);
+			const days = days_pregnant % 7;
+			frm.set_value("pog", `${weeks} weeks ${days} days`);
 		}
 	},
 	phone_number(frm) {
