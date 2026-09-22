@@ -1,8 +1,8 @@
 {
  "app": "chw",
  "charts": [],
- "content": "[{\"id\":\"MfIUhWNivo\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Household Details\",\"col\":4}},{\"id\":\"cxs9pjDOiG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Family Members\",\"col\":4}},{\"id\":\"n14mU_LhS-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pregnancy Registration\",\"col\":4}},{\"id\":\"ancFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ANC Follow-up\",\"col\":4}},{\"id\":\"lgNLFGGKLJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Birth Registration\",\"col\":4}},{\"id\":\"zfNmA54s-M\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PNC Followup\",\"col\":4}}]",
- "creation": "2026-09-09 14:28:18.544541",
+ "content": "[{\"id\":\"MfIUhWNivo\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Household Details\",\"col\":4}},{\"id\":\"cxs9pjDOiG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Family Members\",\"col\":4}},{\"id\":\"n14mU_LhS-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pregnancy Registration\",\"col\":4}},{\"id\":\"ancFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ANC Follow-up\",\"col\":4}},{\"id\":\"lgNLFGGKLJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Birth Registration\",\"col\":4}},{\"id\":\"zfNmA54s-M\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PNC Followup\",\"col\":4}},{\"id\":\"kfVraXbodY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care Initial Assessment Form\",\"col\":4}},{\"id\":\"g2JEHutcmC\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care followup\",\"col\":4}}]",
+ "creation": "2026-09-21 15:02:48.609331",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -14,7 +14,7 @@
  "label": "CHW App",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-09-09 14:45:37.469388",
+ "modified": "2026-09-21 15:28:05.164344",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "CHW App",
@@ -22,6 +22,14 @@
   {
    "label": "Household Details",
    "number_card_name": "Household Details"
+  },
+  {
+   "label": "Palliative Care Initial Assessment Form",
+   "number_card_name": "Palliative Care Initial Assessment Form-1"
+  },
+  {
+   "label": "Palliative Care followup",
+   "number_card_name": "Palliative Care followup-1"
   },
   {
    "label": "Family Members",
@@ -53,9 +61,6 @@
   },
   {
    "role": "System Manager"
-  },
-  {
-   "role": "CHW Coordinator"
   }
  ],
  "sequence_id": 0.0,

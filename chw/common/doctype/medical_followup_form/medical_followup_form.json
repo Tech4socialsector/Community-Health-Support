@@ -1,0 +1,265 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-18 15:32:32.039542",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date_section",
+  "visit_date",
+  "vitals_section",
+  "blood_pressure",
+  "pulse",
+  "spo2",
+  "temperature",
+  "respiratory_rate",
+  "pain",
+  "medical_complaints_section",
+  "complaint_1",
+  "complaint_2",
+  "body_system_section",
+  "neurological",
+  "cardiac",
+  "respiratory",
+  "gigu",
+  "column_break_gjtb",
+  "musculoskeletal",
+  "skin",
+  "mental__emotional_status",
+  "family_needs",
+  "consultation_needed_section",
+  "physical_therapy",
+  "occupational_therapy",
+  "doctor_specialist",
+  "social_work",
+  "interventions_at_visit_today",
+  "plan",
+  "assessors_name",
+  "assessors_designation",
+  "assessors_signature"
+ ],
+ "fields": [
+  {
+   "fieldname": "visit_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Visit Date"
+  },
+  {
+   "fieldname": "blood_pressure",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Blood Pressure"
+  },
+  {
+   "fieldname": "pulse",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Pulse"
+  },
+  {
+   "fieldname": "spo2",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "SpO2"
+  },
+  {
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "respiratory_rate",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Respiratory Rate"
+  },
+  {
+   "fieldname": "pain",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Pain"
+  },
+  {
+   "fieldname": "complaint_1",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Complaint 1"
+  },
+  {
+   "fieldname": "complaint_2",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Complaint 2"
+  },
+  {
+   "fieldname": "neurological",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Neurological"
+  },
+  {
+   "fieldname": "cardiac",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Cardiac"
+  },
+  {
+   "fieldname": "respiratory",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Respiratory"
+  },
+  {
+   "fieldname": "gigu",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "GI/GU"
+  },
+  {
+   "fieldname": "musculoskeletal",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Musculoskeletal"
+  },
+  {
+   "fieldname": "skin",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Skin"
+  },
+  {
+   "fieldname": "mental__emotional_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Mental / Emotional Status"
+  },
+  {
+   "fieldname": "family_needs",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Family Needs"
+  },
+  {
+   "fieldname": "consultation_needed_section",
+   "fieldtype": "Section Break",
+   "label": "Consultation Needed"
+  },
+  {
+   "default": "0",
+   "fieldname": "physical_therapy",
+   "fieldtype": "Check",
+   "label": "Physical Therapy"
+  },
+  {
+   "default": "0",
+   "fieldname": "occupational_therapy",
+   "fieldtype": "Check",
+   "label": "Occupational Therapy"
+  },
+  {
+   "default": "0",
+   "fieldname": "doctor_specialist",
+   "fieldtype": "Check",
+   "label": "Doctor/Specialist"
+  },
+  {
+   "default": "0",
+   "fieldname": "social_work",
+   "fieldtype": "Check",
+   "label": "Social Work"
+  },
+  {
+   "fieldname": "interventions_at_visit_today",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Interventions at Visit Today"
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plan",
+   "options": "\nMedication\nwound supplies\ncatheters\nother needs"
+  },
+  {
+   "fieldname": "assessors_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assessor's Name"
+  },
+  {
+   "fieldname": "assessors_designation",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assessor's Designation"
+  },
+  {
+   "fieldname": "assessors_signature",
+   "fieldtype": "Attach Image",
+   "label": "Assessor's Signature"
+  },
+  {
+   "fieldname": "date_section",
+   "fieldtype": "Section Break",
+   "label": "Date"
+  },
+  {
+   "fieldname": "body_system_section",
+   "fieldtype": "Section Break",
+   "label": "Body System"
+  },
+  {
+   "fieldname": "column_break_gjtb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "medical_complaints_section",
+   "fieldtype": "Section Break",
+   "label": "Medical Complaints"
+  },
+  {
+   "fieldname": "vitals_section",
+   "fieldtype": "Section Break",
+   "label": "Vitals"
+  }
+ ],
+ "grid_page_length": 100,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-21 15:17:35.313880",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Medical Followup Form",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 50,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "autoincrement",
+ "creation": "2026-09-18 10:39:12.059040",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_details_section",
+  "fmid",
+  "hhid",
+  "name1",
+  "gender",
+  "date_of_birth",
+  "age",
+  "address",
+  "phone_number",
+  "therapist_followup",
+  "medical_followup_form",
+  "are_pressure_sores_present",
+  "pressure_sore"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "fetch_from": "fmid.family_member",
+   "fetch_if_empty": 1,
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name",
+   "options": "Palliative Care Initial Assessment Form"
+  },
+  {
+   "fetch_from": "fmid.gender",
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale\nOther"
+  },
+  {
+   "fetch_from": "fmid.date_of_birth",
+   "fetch_if_empty": 1,
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fetch_from": "fmid.age",
+   "fetch_if_empty": 1,
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Phone",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "therapist_followup",
+   "fieldtype": "Table",
+   "label": "Therapist Followupv Form",
+   "options": "CHW APF"
+  },
+  {
+   "fetch_from": "hhid.members_added",
+   "fieldname": "fmid",
+   "fieldtype": "Link",
+   "label": "FMID",
+   "options": "Family members"
+  },
+  {
+   "fetch_from": "fmid.hhid",
+   "fetch_if_empty": 1,
+   "fieldname": "hhid",
+   "fieldtype": "Link",
+   "label": "HHID",
+   "options": "Household profile"
+  },
+  {
+   "fieldname": "medical_followup_form",
+   "fieldtype": "Table",
+   "label": "Medical Followup Form",
+   "options": "Medical Followup Form"
+  },
+  {
+   "fieldname": "are_pressure_sores_present",
+   "fieldtype": "Select",
+   "label": "Are pressure sores present ",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.are_pressure_sores_present==\"Yes\"",
+   "fieldname": "pressure_sore",
+   "fieldtype": "Table",
+   "label": "Pressure Sore",
+   "options": "Pressure Sore"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-21 15:16:21.382806",
+ "modified_by": "Administrator",
+ "module": "CHW Master",
+ "name": "Palliative care followup",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PalitiveCareVisitForm(Document):
+class PastMedicalHistoryMaster(Document):
 	pass

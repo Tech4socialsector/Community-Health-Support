@@ -1,0 +1,702 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "autoincrement",
+ "creation": "2026-09-16 17:30:54.567269",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "demographics_section",
+  "name1",
+  "gender",
+  "date_of_birth",
+  "age",
+  "allergies",
+  "column_break_pcks",
+  "marital_status",
+  "occupation",
+  "referred_by",
+  "phonecontact_number_of_primary_caregiver_and_relationship",
+  "other_contact_persons_and_number",
+  "medical_history_section",
+  "history_of_presenting_illness",
+  "diagnosis",
+  "symptoms",
+  "column_break_nobp",
+  "past_medical_history",
+  "h5personal_historyh",
+  "smoking",
+  "chewing_tobacco",
+  "alcohol",
+  "other_substance_abuse",
+  "relevant_investigations_date",
+  "relevant_investigations_with_date",
+  "relevant_investigations_description",
+  "present_medications",
+  "vitals_section",
+  "pulse",
+  "blood_pressure",
+  "respiratory_rate",
+  "column_break_lcbd",
+  "spo2",
+  "temperature",
+  "general_random_blood_sugar",
+  "general_examination_section",
+  "body_weight_in_kg",
+  "body_appearance",
+  "pupils_perrla",
+  "appearance_mark_if_abnormal",
+  "skin_note_if_intact_pressure_sores_abrasions_other_wounds",
+  "system_evaluation_section",
+  "h5cardiovascularh",
+  "heart_sounds",
+  "capillary_refill",
+  "pulses_weakstrong",
+  "h5respiratoryh",
+  "breath_sounds",
+  "respiratory_effort",
+  "chest_expansion",
+  "secretions",
+  "h5neurologicalh",
+  "cognitionorientation",
+  "speech",
+  "sensation",
+  "numbnesstingling",
+  "column_break_vvpb",
+  "h5gastrointestinalh",
+  "abdomen_appearance_flat_distended",
+  "tenderness_upon_palpation",
+  "bowel_sounds",
+  "bowel_movement_frequency_and_appearance",
+  "continent_1",
+  "h5genitourinaryh",
+  "urinary_frequency_and_symptoms",
+  "catheter_or_intermittent_catheterization",
+  "continent_2",
+  "othe_symptoms",
+  "h5musculatory_systemh",
+  "ambulatory__non_ambulatory",
+  "weakness",
+  "system_evaluation",
+  "cardiovascular",
+  "respiratory",
+  "neurological",
+  "column_break_mziq",
+  "gastrointestinal",
+  "genitourinary",
+  "musculatory_system",
+  "mobility_status_ch",
+  "pain_section",
+  "pain",
+  "psychosocial_aspects_section",
+  "family_members",
+  "insight_of_the_patient",
+  "patient_status",
+  "familycaregiver_health_concerns",
+  "support_status",
+  "communication_status_at_first_visit",
+  "column_break_pzps",
+  "primary_caregiver",
+  "family_member_1",
+  "other_family_members",
+  "section_break_kxpw",
+  "assesment_summary",
+  "does_the_patient_need",
+  "column_break_cuoj",
+  "please_explain_why",
+  "anticipated_frequency_of_visit",
+  "select_followup",
+  "assessor_information_section",
+  "name_of_the_assessor",
+  "job_title",
+  "signature",
+  "date",
+  "other_staff_present"
+ ],
+ "fields": [
+  {
+   "fieldname": "demographics_section",
+   "fieldtype": "Section Break",
+   "label": "Demographics"
+  },
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale\nOthers"
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "allergies",
+   "fieldtype": "Data",
+   "label": "Allergies (Food/Medications)",
+   "options": "\nFood\nMedications"
+  },
+  {
+   "fieldname": "marital_status",
+   "fieldtype": "Select",
+   "label": "Marital Status",
+   "options": "\nSingle\nMarried"
+  },
+  {
+   "fieldname": "occupation",
+   "fieldtype": "Data",
+   "label": "Occupation"
+  },
+  {
+   "fieldname": "referred_by",
+   "fieldtype": "Select",
+   "label": "Referred by ",
+   "options": "\nHospital\nDepartment\nVolunteer\nSelf Reference\nPeer Reference"
+  },
+  {
+   "fieldname": "phonecontact_number_of_primary_caregiver_and_relationship",
+   "fieldtype": "Phone",
+   "label": "Phone/contact number of primary caregiver and relationship"
+  },
+  {
+   "fieldname": "other_contact_persons_and_number",
+   "fieldtype": "Phone",
+   "label": "Other contact persons and number"
+  },
+  {
+   "fieldname": "medical_history_section",
+   "fieldtype": "Section Break",
+   "label": "Medical History "
+  },
+  {
+   "fieldname": "history_of_presenting_illness",
+   "fieldtype": "Small Text",
+   "label": "History of presenting illness"
+  },
+  {
+   "fieldname": "diagnosis",
+   "fieldtype": "Data",
+   "label": "Diagnosis"
+  },
+  {
+   "fieldname": "past_medical_history",
+   "fieldtype": "Table MultiSelect",
+   "label": "Past Medical History",
+   "options": "Past Medical History Child"
+  },
+  {
+   "fieldname": "h5personal_historyh",
+   "fieldtype": "Heading",
+   "label": "<h5>Personal History</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "smoking",
+   "fieldtype": "Check",
+   "label": "Smoking"
+  },
+  {
+   "default": "0",
+   "fieldname": "chewing_tobacco",
+   "fieldtype": "Check",
+   "label": "Chewing Tobacco"
+  },
+  {
+   "default": "0",
+   "fieldname": "alcohol",
+   "fieldtype": "Check",
+   "label": "Alcohol"
+  },
+  {
+   "default": "0",
+   "fieldname": "other_substance_abuse",
+   "fieldtype": "Check",
+   "label": "Other substance abuse"
+  },
+  {
+   "fieldname": "relevant_investigations_with_date",
+   "fieldtype": "Attach",
+   "label": "Relevant Investigations with date "
+  },
+  {
+   "fieldname": "present_medications",
+   "fieldtype": "Data",
+   "label": "Present medications"
+  },
+  {
+   "fieldname": "vitals_section",
+   "fieldtype": "Section Break",
+   "label": "Vitals"
+  },
+  {
+   "fieldname": "pulse",
+   "fieldtype": "Int",
+   "label": "Pulse"
+  },
+  {
+   "fieldname": "blood_pressure",
+   "fieldtype": "Int",
+   "label": "Blood pressure"
+  },
+  {
+   "fieldname": "respiratory_rate",
+   "fieldtype": "Int",
+   "label": "Respiratory Rate"
+  },
+  {
+   "fieldname": "temperature",
+   "fieldtype": "Int",
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "spo2",
+   "fieldtype": "Int",
+   "label": "SpO2"
+  },
+  {
+   "fieldname": "general_random_blood_sugar",
+   "fieldtype": "Int",
+   "label": "General Random Blood Sugar"
+  },
+  {
+   "fieldname": "general_examination_section",
+   "fieldtype": "Section Break",
+   "label": "General Examination "
+  },
+  {
+   "fieldname": "body_weight_in_kg",
+   "fieldtype": "Int",
+   "label": "Body Weight in Kg"
+  },
+  {
+   "fieldname": "body_appearance",
+   "fieldtype": "Select",
+   "label": "Body Appearance",
+   "options": "\nObese\nAverage\nEmaciated"
+  },
+  {
+   "fieldname": "pupils_perrla",
+   "fieldtype": "Data",
+   "label": "Pupils",
+   "options": "\nPupils\nEqual\nRound\nReactive\nAccomodation"
+  },
+  {
+   "fieldname": "column_break_pcks",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_nobp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_lcbd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appearance_mark_if_abnormal",
+   "fieldtype": "Select",
+   "label": "Appearance Mark if abnormal",
+   "options": "\nPallor\nJaundice\nClubbing\nCyanosis\nLymph Nodes\nEdema"
+  },
+  {
+   "fieldname": "skin_note_if_intact_pressure_sores_abrasions_other_wounds",
+   "fieldtype": "Data",
+   "label": "Skin (Note if intact, pressure sores, abrasions, other wounds)"
+  },
+  {
+   "fieldname": "symptoms",
+   "fieldtype": "Table MultiSelect",
+   "label": "Symptoms",
+   "options": "Symptoms Child"
+  },
+  {
+   "fieldname": "system_evaluation_section",
+   "fieldtype": "Section Break",
+   "label": "System Evaluation "
+  },
+  {
+   "fieldname": "cardiovascular",
+   "fieldtype": "Table MultiSelect",
+   "label": "Cardiovascular ",
+   "options": "Cardiovascular child"
+  },
+  {
+   "fieldname": "respiratory",
+   "fieldtype": "Table MultiSelect",
+   "label": "Respiratory",
+   "options": "Respiratory Child"
+  },
+  {
+   "fieldname": "neurological",
+   "fieldtype": "Table MultiSelect",
+   "label": "Neurological",
+   "options": "Neurological child"
+  },
+  {
+   "fieldname": "gastrointestinal",
+   "fieldtype": "Table MultiSelect",
+   "label": "Gastrointestinal ",
+   "options": "Gastrointestinal Child"
+  },
+  {
+   "fieldname": "genitourinary",
+   "fieldtype": "Table MultiSelect",
+   "label": "Genitourinary",
+   "options": "Genitourinary Child"
+  },
+  {
+   "fieldname": "musculatory_system",
+   "fieldtype": "Table MultiSelect",
+   "label": "Musculatory System",
+   "options": "Musculatory System Child"
+  },
+  {
+   "fieldname": "column_break_mziq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mobility_status_ch",
+   "fieldtype": "Select",
+   "label": "Mobility Status",
+   "options": "\nMoves independently\nReduced but mobile (uses and aide like walker/support)\nReduced but mobile (uses a wheelchair)\nMainly bedboud or sits with support or walks only for toileting and other essentials\nFully bed ridden"
+  },
+  {
+   "fieldname": "pain_section",
+   "fieldtype": "Section Break",
+   "label": "Pain"
+  },
+  {
+   "fieldname": "pain",
+   "fieldtype": "Table",
+   "label": "Pain in Body",
+   "options": "Pain Child"
+  },
+  {
+   "fieldname": "does_the_patient_need",
+   "fieldtype": "Table MultiSelect",
+   "label": "Does the patient need ",
+   "options": "Does the patient need Child"
+  },
+  {
+   "fieldname": "please_explain_why",
+   "fieldtype": "Small Text",
+   "label": "Please explain why"
+  },
+  {
+   "fieldname": "anticipated_frequency_of_visit",
+   "fieldtype": "Select",
+   "label": "Anticipated frequency of Visit",
+   "options": "\nHome Care\nOutpatient"
+  },
+  {
+   "depends_on": "eval:doc.anticipated_frequency_of_visit==\"Home Care\" || doc.anticipated_frequency_of_visit==\"Outpatient\"",
+   "fieldname": "select_followup",
+   "fieldtype": "Select",
+   "label": "Select Followup",
+   "options": "\n2x week\nweekly\nmonthly\nevery other month"
+  },
+  {
+   "fieldname": "section_break_kxpw",
+   "fieldtype": "Section Break",
+   "label": "Assessment Summary "
+  },
+  {
+   "fieldname": "assessor_information_section",
+   "fieldtype": "Section Break",
+   "label": "Assessor Information"
+  },
+  {
+   "fieldname": "name_of_the_assessor",
+   "fieldtype": "Data",
+   "label": "Name of the Assessor"
+  },
+  {
+   "fieldname": "job_title",
+   "fieldtype": "Data",
+   "label": "Job Title"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "label": "Signature"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "other_staff_present",
+   "fieldtype": "Data",
+   "label": "Other staff present"
+  },
+  {
+   "fieldname": "psychosocial_aspects_section",
+   "fieldtype": "Section Break",
+   "label": "Psychosocial Aspects"
+  },
+  {
+   "fieldname": "family_members",
+   "fieldtype": "Data",
+   "label": "Family Members"
+  },
+  {
+   "fieldname": "insight_of_the_patient",
+   "fieldtype": "Select",
+   "label": "Insight of the Patient",
+   "options": "Diagnosis\nPrognosis, Palliative Care)"
+  },
+  {
+   "fieldname": "patient_status",
+   "fieldtype": "Select",
+   "label": "Patient Status",
+   "options": "\nPsychological\nSocial\nSpiritual Status"
+  },
+  {
+   "fieldname": "familycaregiver_health_concerns",
+   "fieldtype": "Select",
+   "label": "Family/caregiver health concerns"
+  },
+  {
+   "fieldname": "primary_caregiver",
+   "fieldtype": "Table",
+   "label": "Primary Caregiver",
+   "options": "Primary Caregiver child"
+  },
+  {
+   "fieldname": "family_member_1",
+   "fieldtype": "Table",
+   "label": "Family Member 1 ",
+   "options": "family Member 1"
+  },
+  {
+   "fieldname": "other_family_members",
+   "fieldtype": "Table",
+   "label": "Other family members",
+   "options": "Other family members"
+  },
+  {
+   "fieldname": "support_status",
+   "fieldtype": "Select",
+   "label": "Support Status",
+   "options": "\nGood caregiver support\nInadequate caregiver support\nLives alone\nLives with vulnerable caregivers\nLives alone with paid caregiver"
+  },
+  {
+   "fieldname": "communication_status_at_first_visit",
+   "fieldtype": "Data",
+   "label": "Communication status (at first visit)"
+  },
+  {
+   "fieldname": "column_break_pzps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_cuoj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "relevant_investigations_date",
+   "fieldtype": "Date",
+   "label": "Relevant Investigations Date"
+  },
+  {
+   "fieldname": "relevant_investigations_description",
+   "fieldtype": "Data",
+   "label": "Relevant Investigations Description"
+  },
+  {
+   "fieldname": "h5cardiovascularh",
+   "fieldtype": "Heading",
+   "label": "<h5>Cardiovascular</h5>"
+  },
+  {
+   "fieldname": "heart_sounds",
+   "fieldtype": "Data",
+   "label": "Heart sounds"
+  },
+  {
+   "fieldname": "capillary_refill",
+   "fieldtype": "Data",
+   "label": "Capillary Refill"
+  },
+  {
+   "fieldname": "pulses_weakstrong",
+   "fieldtype": "Data",
+   "label": "Pulses (weak/strong)"
+  },
+  {
+   "fieldname": "h5respiratoryh",
+   "fieldtype": "Heading",
+   "label": "<h5>Respiratory</h5>"
+  },
+  {
+   "fieldname": "breath_sounds",
+   "fieldtype": "Data",
+   "label": "Breath Sounds"
+  },
+  {
+   "fieldname": "respiratory_effort",
+   "fieldtype": "Data",
+   "label": "Respiratory Effort"
+  },
+  {
+   "fieldname": "chest_expansion",
+   "fieldtype": "Data",
+   "label": "Chest expansion"
+  },
+  {
+   "fieldname": "secretions",
+   "fieldtype": "Data",
+   "label": "Secretions"
+  },
+  {
+   "fieldname": "h5neurologicalh",
+   "fieldtype": "Heading",
+   "label": "<h5>Neurological</h5>"
+  },
+  {
+   "fieldname": "cognitionorientation",
+   "fieldtype": "Data",
+   "label": "Cognition/Orientation"
+  },
+  {
+   "fieldname": "speech",
+   "fieldtype": "Data",
+   "label": "Speech"
+  },
+  {
+   "fieldname": "sensation",
+   "fieldtype": "Data",
+   "label": "Sensation"
+  },
+  {
+   "fieldname": "numbnesstingling",
+   "fieldtype": "Data",
+   "label": "Numbness/Tingling"
+  },
+  {
+   "fieldname": "column_break_vvpb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "h5gastrointestinalh",
+   "fieldtype": "Heading",
+   "label": "<h5>Gastrointestinal</h5>"
+  },
+  {
+   "fieldname": "abdomen_appearance_flat_distended",
+   "fieldtype": "Data",
+   "label": "Abdomen Appearance (flat, distended)"
+  },
+  {
+   "fieldname": "tenderness_upon_palpation",
+   "fieldtype": "Data",
+   "label": "Tenderness Upon Palpation"
+  },
+  {
+   "fieldname": "bowel_sounds",
+   "fieldtype": "Data",
+   "label": "Bowel sounds"
+  },
+  {
+   "fieldname": "bowel_movement_frequency_and_appearance",
+   "fieldtype": "Data",
+   "label": "Bowel movement frequency and appearance"
+  },
+  {
+   "fieldname": "continent_1",
+   "fieldtype": "Data",
+   "label": "Continent/Incontinent"
+  },
+  {
+   "fieldname": "h5genitourinaryh",
+   "fieldtype": "Heading",
+   "label": "<h5>Genitourinary</h5>"
+  },
+  {
+   "fieldname": "urinary_frequency_and_symptoms",
+   "fieldtype": "Data",
+   "label": "Urinary frequency and symptoms"
+  },
+  {
+   "fieldname": "catheter_or_intermittent_catheterization",
+   "fieldtype": "Data",
+   "label": "Catheter or Intermittent Catheterization?"
+  },
+  {
+   "fieldname": "continent_2",
+   "fieldtype": "Data",
+   "label": "Continent/Incontinent"
+  },
+  {
+   "fieldname": "othe_symptoms",
+   "fieldtype": "Data",
+   "label": "Othe symptoms"
+  },
+  {
+   "fieldname": "h5musculatory_systemh",
+   "fieldtype": "Heading",
+   "label": "<h5>Musculatory System</h5>"
+  },
+  {
+   "fieldname": "ambulatory__non_ambulatory",
+   "fieldtype": "Data",
+   "label": "Ambulatory / Non_ambulatory"
+  },
+  {
+   "fieldname": "weakness",
+   "fieldtype": "Data",
+   "label": "Weakness"
+  },
+  {
+   "fieldname": "system_evaluation",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "System Evaluation Multi"
+  },
+  {
+   "fieldname": "assesment_summary",
+   "fieldtype": "Table",
+   "label": "Assesment Summary",
+   "options": "Assessment Summary Child"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-21 11:57:38.173900",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Palliative Care Initial Assessment Form",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

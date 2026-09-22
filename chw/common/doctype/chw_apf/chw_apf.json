@@ -1,0 +1,552 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-18 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "presenting_condition_details_section",
+  "diagnosis",
+  "prognosis",
+  "current_treatment",
+  "potential_future_treatment",
+  "imaging_summary",
+  "primary_concerns",
+  "history_section",
+  "past_medical_history",
+  "people_living_at_home",
+  "family_primary_concern",
+  "other_psychosocial",
+  "adls_section",
+  "home_setup",
+  "personal_care",
+  "eating_drinking",
+  "bathing",
+  "toileting",
+  "dressing",
+  "household_chores",
+  "community_access",
+  "leisure_activities",
+  "cognitive_function_section",
+  "orientation_person",
+  "orientation_place",
+  "orientation_time",
+  "attention_concentration",
+  "memory",
+  "fatigue",
+  "communication_receptive",
+  "communication_expressive",
+  "vision",
+  "emotional_spiritual_wellbeing_section",
+  "mood",
+  "other_comments_emotional",
+  "physical_section",
+  "rolling",
+  "sit_to_stand",
+  "ambulation",
+  "gait_pattern",
+  "stairs",
+  "balance_sitting",
+  "balance_standing",
+  "outcome_measures",
+  "coordination",
+  "endurance",
+  "breathlessness",
+  "body_build",
+  "nausea",
+  "skin_status",
+  "sensation",
+  "contractures_deformities",
+  "pain",
+  "limbs",
+  "other_comments_physical",
+  "clinical_summary_section",
+  "main_problems",
+  "goals",
+  "plans",
+  "therapy_plan_section",
+  "therapy_input_indicated",
+  "family_training",
+  "input_intensity",
+  "input_duration",
+  "next_review_date",
+  "referrals_indicated",
+  "sign_off_section",
+  "staff_signature"
+ ],
+ "fields": [
+  {
+   "fieldname": "presenting_condition_details_section",
+   "fieldtype": "Section Break",
+   "label": "Presenting condition details"
+  },
+  {
+   "fieldname": "diagnosis",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Diagnosis"
+  },
+  {
+   "fieldname": "prognosis",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Prognosis"
+  },
+  {
+   "fieldname": "current_treatment",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Current treatment"
+  },
+  {
+   "fieldname": "potential_future_treatment",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Potential future treatment"
+  },
+  {
+   "fieldname": "imaging_summary",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Imaging summary"
+  },
+  {
+   "fieldname": "primary_concerns",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient's primary concerns"
+  },
+  {
+   "fieldname": "history_section",
+   "fieldtype": "Section Break",
+   "label": "History"
+  },
+  {
+   "fieldname": "past_medical_history",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Past medical history"
+  },
+  {
+   "fieldname": "people_living_at_home",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "People living at home"
+  },
+  {
+   "fieldname": "family_primary_concern",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Family reported primary concern"
+  },
+  {
+   "fieldname": "other_psychosocial",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Other psychosocial Concerns (financial,relational etc)"
+  },
+  {
+   "fieldname": "adls_section",
+   "fieldtype": "Section Break",
+   "label": "ADLs"
+  },
+  {
+   "fieldname": "home_setup",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Home Set Up (e.g. main access, washroom)"
+  },
+  {
+   "fieldname": "personal_care",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Personal Care (grooming)"
+  },
+  {
+   "fieldname": "eating_drinking",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Eating & Drinking (note coughing post eat/drink)"
+  },
+  {
+   "fieldname": "bathing",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Bathing"
+  },
+  {
+   "fieldname": "toileting",
+   "fieldtype": "Small Text",
+   "label": "Toileting"
+  },
+  {
+   "fieldname": "dressing",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Dressing (lower body & upper body)"
+  },
+  {
+   "fieldname": "household_chores",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Household chores"
+  },
+  {
+   "fieldname": "community_access",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Community access"
+  },
+  {
+   "fieldname": "leisure_activities",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Leisure activities"
+  },
+  {
+   "fieldname": "cognitive_function_section",
+   "fieldtype": "Section Break",
+   "label": "Cognitive function"
+  },
+  {
+   "fieldname": "orientation_person",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Orientation \u2013 person"
+  },
+  {
+   "fieldname": "orientation_place",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Orientation \u2013 place"
+  },
+  {
+   "fieldname": "orientation_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Orientation \u2013 time"
+  },
+  {
+   "fieldname": "attention_concentration",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Attention & concentration"
+  },
+  {
+   "fieldname": "memory",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Memory"
+  },
+  {
+   "fieldname": "fatigue",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fatigue (24 hour pattern, sleep quality)"
+  },
+  {
+   "fieldname": "communication_receptive",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Communication \u2013 receptive"
+  },
+  {
+   "fieldname": "communication_expressive",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Communication \u2013 expressive"
+  },
+  {
+   "fieldname": "vision",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vision"
+  },
+  {
+   "fieldname": "emotional_spiritual_wellbeing_section",
+   "fieldtype": "Section Break",
+   "label": "Emotional / spiritual wellbeing"
+  },
+  {
+   "fieldname": "mood",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Mood"
+  },
+  {
+   "fieldname": "other_comments_emotional",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Other comments"
+  },
+  {
+   "fieldname": "physical_section",
+   "fieldtype": "Section Break",
+   "label": "Physical"
+  },
+  {
+   "fieldname": "rolling",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Rolling"
+  },
+  {
+   "fieldname": "sit_to_stand",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sit to stand"
+  },
+  {
+   "fieldname": "ambulation",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ambulation"
+  },
+  {
+   "fieldname": "gait_pattern",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gait pattern"
+  },
+  {
+   "fieldname": "stairs",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Stairs"
+  },
+  {
+   "fieldname": "balance_sitting",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Balance \u2013 sitting"
+  },
+  {
+   "fieldname": "balance_standing",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Balance \u2013 standing"
+  },
+  {
+   "fieldname": "outcome_measures",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Outcome measures"
+  },
+  {
+   "fieldname": "coordination",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Coordination"
+  },
+  {
+   "fieldname": "endurance",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Endurance"
+  },
+  {
+   "fieldname": "breathlessness",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Breathlessness / respiratory"
+  },
+  {
+   "fieldname": "body_build",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Body build"
+  },
+  {
+   "fieldname": "nausea",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nausea"
+  },
+  {
+   "fieldname": "skin_status",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Skin status"
+  },
+  {
+   "fieldname": "sensation",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sensation"
+  },
+  {
+   "fieldname": "contractures_deformities",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Contractures & deformities"
+  },
+  {
+   "fieldname": "pain",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Pain"
+  },
+  {
+   "fieldname": "limbs",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Limbs"
+  },
+  {
+   "fieldname": "other_comments_physical",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Other comments"
+  },
+  {
+   "fieldname": "clinical_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Clinical summary"
+  },
+  {
+   "fieldname": "main_problems",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Main problems identified"
+  },
+  {
+   "fieldname": "goals",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Goals"
+  },
+  {
+   "fieldname": "plans",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plans"
+  },
+  {
+   "fieldname": "therapy_plan_section",
+   "fieldtype": "Section Break",
+   "label": "Therapy plan"
+  },
+  {
+   "fieldname": "therapy_input_indicated",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Therapy input indicated",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "family_training",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Family training & participation"
+  },
+  {
+   "fieldname": "input_intensity",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Intensity of input recommended"
+  },
+  {
+   "fieldname": "input_duration",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Duration of input recommended"
+  },
+  {
+   "fieldname": "next_review_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Next review date"
+  },
+  {
+   "fieldname": "referrals_indicated",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Referrals indicated"
+  },
+  {
+   "fieldname": "sign_off_section",
+   "fieldtype": "Section Break",
+   "label": "Sign-off"
+  },
+  {
+   "fieldname": "staff_signature",
+   "fieldtype": "Signature",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Staff signature"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-18 17:52:34.783966",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "CHW APF",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
