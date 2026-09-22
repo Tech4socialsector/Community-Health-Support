@@ -1,0 +1,412 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-22 10:43:26.295190",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "visit_logistics_section",
+  "volunteer_name",
+  "date_amd_time_of_visit",
+  "patients_name",
+  "age",
+  "occupation",
+  "column_break_dkvi",
+  "addressvillage",
+  "husbands_name",
+  "husbands_occupation",
+  "phone_number",
+  "cc_section",
+  "patient_symptoms__concerns",
+  "history_section",
+  "h5past_medical_historyh",
+  "diabetes",
+  "high_bp",
+  "anemia",
+  "thyroid",
+  "rh_neg",
+  "others_past",
+  "h5past_surgical_historyh",
+  "cesarean",
+  "other_surgeries",
+  "date_of_surgery",
+  "column_break_hfbz",
+  "h5personal_historyh",
+  "smoking",
+  "alcohol",
+  "drug_use",
+  "others_personal",
+  "birth_details_section",
+  "edd",
+  "pregnancy_risk_factors",
+  "delivery_date",
+  "mode_of_delivery",
+  "facility",
+  "gender",
+  "birth_weight",
+  "birth_length",
+  "labor_or_birth_complications",
+  "column_break_yfqj",
+  "blood_transfusion",
+  "meconium",
+  "difficult_labor_delivery",
+  "fetal_distress",
+  "infection",
+  "episiotomy",
+  "vacuum_assist_delivery",
+  "others",
+  "vital_signs_section",
+  "bp__9560_or_14090_pluse",
+  "hr__60_or_110_pluse",
+  "rr__12_or_24_pluse",
+  "temp_38_c_pluse_",
+  "column_break_byue",
+  "height",
+  "weight",
+  "bmi",
+  "mch_nurse_noti_ed_of_abnormal_vital_signs"
+ ],
+ "fields": [
+  {
+   "fieldname": "visit_logistics_section",
+   "fieldtype": "Section Break",
+   "label": "Visit Logistics"
+  },
+  {
+   "fieldname": "volunteer_name",
+   "fieldtype": "Data",
+   "label": "Volunteer Name"
+  },
+  {
+   "fieldname": "date_amd_time_of_visit",
+   "fieldtype": "Datetime",
+   "label": "Date amd Time of Visit"
+  },
+  {
+   "fieldname": "patients_name",
+   "fieldtype": "Data",
+   "label": "Patient's Name"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "label": "Age"
+  },
+  {
+   "fieldname": "occupation",
+   "fieldtype": "Data",
+   "label": "Occupation"
+  },
+  {
+   "fieldname": "column_break_dkvi",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "addressvillage",
+   "fieldtype": "Small Text",
+   "label": "Address/Village"
+  },
+  {
+   "fieldname": "husbands_name",
+   "fieldtype": "Data",
+   "label": "Husband's Name"
+  },
+  {
+   "fieldname": "husbands_occupation",
+   "fieldtype": "Data",
+   "label": "Husband's Occupation"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Phone",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "cc_section",
+   "fieldtype": "Section Break",
+   "label": "CC"
+  },
+  {
+   "fieldname": "patient_symptoms__concerns",
+   "fieldtype": "Small Text",
+   "label": "Patient symptoms / concerns"
+  },
+  {
+   "fieldname": "history_section",
+   "fieldtype": "Section Break",
+   "label": "History"
+  },
+  {
+   "fieldname": "h5past_medical_historyh",
+   "fieldtype": "Heading",
+   "label": "<h5>Past Medical History</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "diabetes",
+   "fieldtype": "Check",
+   "label": "Diabetes"
+  },
+  {
+   "default": "0",
+   "fieldname": "high_bp",
+   "fieldtype": "Check",
+   "label": "High BP"
+  },
+  {
+   "default": "0",
+   "fieldname": "anemia",
+   "fieldtype": "Check",
+   "label": "Anemia"
+  },
+  {
+   "default": "0",
+   "fieldname": "thyroid",
+   "fieldtype": "Check",
+   "label": "Thyroid"
+  },
+  {
+   "default": "0",
+   "fieldname": "rh_neg",
+   "fieldtype": "Check",
+   "label": "RH neg"
+  },
+  {
+   "default": "0",
+   "fieldname": "others_past",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "h5past_surgical_historyh",
+   "fieldtype": "Heading",
+   "label": "<h5>Past Surgical History</h5>"
+  },
+  {
+   "fieldname": "cesarean",
+   "fieldtype": "Select",
+   "label": "Cesarean",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "other_surgeries",
+   "fieldtype": "Data",
+   "label": "Other Surgeries"
+  },
+  {
+   "fieldname": "date_of_surgery",
+   "fieldtype": "Date",
+   "label": "Date of Surgery"
+  },
+  {
+   "fieldname": "column_break_hfbz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "h5personal_historyh",
+   "fieldtype": "Heading",
+   "label": "<h5>Personal History</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "smoking",
+   "fieldtype": "Check",
+   "label": "Smoking"
+  },
+  {
+   "default": "0",
+   "fieldname": "alcohol",
+   "fieldtype": "Check",
+   "label": "Alcohol"
+  },
+  {
+   "default": "0",
+   "fieldname": "drug_use",
+   "fieldtype": "Check",
+   "label": "Drug use"
+  },
+  {
+   "default": "0",
+   "fieldname": "others_personal",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "birth_details_section",
+   "fieldtype": "Section Break",
+   "label": "Birth Details"
+  },
+  {
+   "fieldname": "edd",
+   "fieldtype": "Data",
+   "label": "EDD"
+  },
+  {
+   "fieldname": "pregnancy_risk_factors",
+   "fieldtype": "Data",
+   "label": "Pregnancy Risk Factors"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date"
+  },
+  {
+   "fieldname": "mode_of_delivery",
+   "fieldtype": "Select",
+   "label": "Mode of delivery"
+  },
+  {
+   "fieldname": "facility",
+   "fieldtype": "Data",
+   "label": "Facility"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "\nMale\nFemale"
+  },
+  {
+   "fieldname": "birth_weight",
+   "fieldtype": "Int",
+   "label": "Birth weight"
+  },
+  {
+   "fieldname": "birth_length",
+   "fieldtype": "Int",
+   "label": "Birth Length"
+  },
+  {
+   "fieldname": "labor_or_birth_complications",
+   "fieldtype": "Data",
+   "label": "Labor or Birth Complications"
+  },
+  {
+   "fieldname": "column_break_yfqj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "blood_transfusion",
+   "fieldtype": "Select",
+   "label": "Blood transfusion",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "meconium",
+   "fieldtype": "Select",
+   "label": "Meconium",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "difficult_labor_delivery",
+   "fieldtype": "Select",
+   "label": "Difficult Labor/ Delivery",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "fetal_distress",
+   "fieldtype": "Select",
+   "label": "Fetal Distress",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "infection",
+   "fieldtype": "Select",
+   "label": "Infection",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "episiotomy",
+   "fieldtype": "Select",
+   "label": "Episiotomy",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "vacuum_assist_delivery",
+   "fieldtype": "Select",
+   "label": "Vacuum Assist Delivery"
+  },
+  {
+   "fieldname": "others",
+   "fieldtype": "Data",
+   "label": "Other"
+  },
+  {
+   "fieldname": "vital_signs_section",
+   "fieldtype": "Section Break",
+   "label": "Vital Signs"
+  },
+  {
+   "fieldname": "bp__9560_or_14090_pluse",
+   "fieldtype": "Int",
+   "label": "BP (< 95/60 or 140/90 Pluse)"
+  },
+  {
+   "fieldname": "hr__60_or_110_pluse",
+   "fieldtype": "Int",
+   "label": "HR (< 60 or 110 Pluse)"
+  },
+  {
+   "fieldname": "rr__12_or_24_pluse",
+   "fieldtype": "Int",
+   "label": "RR (< 12 or 24 Pluse)"
+  },
+  {
+   "fieldname": "temp_38_c_pluse_",
+   "fieldtype": "Int",
+   "label": "Temp (38 C Pluse )"
+  },
+  {
+   "fieldname": "column_break_byue",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Int",
+   "label": "Height"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Int",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "bmi",
+   "fieldtype": "Int",
+   "label": "BMI"
+  },
+  {
+   "fieldname": "mch_nurse_noti_ed_of_abnormal_vital_signs",
+   "fieldtype": "Data",
+   "label": "MCH nurse noti ed of abnormal vital signs"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-22 11:07:49.249273",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "MCH Volunteer Intake Form Postpartum",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
