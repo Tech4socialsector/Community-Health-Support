@@ -1,0 +1,424 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "PPT-.#####",
+ "creation": "2026-09-23 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "visit_logistics_section",
+  "fmid",
+  "hhid",
+  "patient_name",
+  "village",
+  "age",
+  "occupation",
+  "health_worker_name",
+  "column_break_vl1",
+  "date_of_visit",
+  "time_from",
+  "time_to",
+  "husbands_name",
+  "husbands_occupation",
+  "husbands_phone_number",
+  "history_section",
+  "pmh_diabetes",
+  "pmh_high_bp",
+  "pmh_anemia",
+  "pmh_thyroid",
+  "pmh_other",
+  "column_break_hist1",
+  "psh_cesarean",
+  "psh_other_surgeries",
+  "pmh_rh_neg",
+  "psh_date_of_surgery",
+  "personal_history_section",
+  "personal_history_smoking",
+  "personal_history_alcohol",
+  "column_break_pwye",
+  "personal_history_drug_use",
+  "personal_history_other",
+  "birth_details_section",
+  "edd",
+  "pregnancy_risk_factors",
+  "column_break_bd1",
+  "delivery_date",
+  "mode_of_delivery",
+  "facility",
+  "birth_details_section2",
+  "gender",
+  "birth_weight",
+  "birth_length",
+  "labor_birth_complications",
+  "comp_blood_transfusion",
+  "column_break_bd2",
+  "comp_meconium",
+  "comp_difficult_labor_delivery",
+  "comp_fetal_distress",
+  "comp_infection",
+  "comp_episiotomy",
+  "comp_vacuum_assist_delivery",
+  "comp_other",
+  "followup_section",
+  "followup_visits"
+ ],
+ "fields": [
+  {
+   "fieldname": "visit_logistics_section",
+   "fieldtype": "Section Break",
+   "label": "Visit Logistics"
+  },
+  {
+   "fieldname": "fmid",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "FMID",
+   "options": "Family members"
+  },
+  {
+   "fetch_from": "fmid.hhid",
+   "fetch_if_empty": 1,
+   "fieldname": "hhid",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "HHID",
+   "options": "Household profile"
+  },
+  {
+   "fetch_from": "fmid.family_member",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient's Name"
+  },
+  {
+   "fetch_from": "fmid.village",
+   "fieldname": "village",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address / Village"
+  },
+  {
+   "fetch_from": "fmid.age",
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "label": "Age"
+  },
+  {
+   "fetch_from": "fmid.occupation",
+   "fieldname": "occupation",
+   "fieldtype": "Data",
+   "label": "Occupation"
+  },
+  {
+   "fieldname": "column_break_vl1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "label": "Volunteer / Data Collector",
+   "options": "Health Worker"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date_of_visit",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date of Visit"
+  },
+  {
+   "fieldname": "time_from",
+   "fieldtype": "Time",
+   "label": "Time From"
+  },
+  {
+   "fieldname": "time_to",
+   "fieldtype": "Time",
+   "label": "Time To"
+  },
+  {
+   "fieldname": "husbands_name",
+   "fieldtype": "Data",
+   "label": "Husband's Name"
+  },
+  {
+   "fieldname": "husbands_occupation",
+   "fieldtype": "Data",
+   "label": "Husband's Occupation"
+  },
+  {
+   "fieldname": "husbands_phone_number",
+   "fieldtype": "Data",
+   "label": "Husband's Phone Number",
+   "length": 10
+  },
+  {
+   "fieldname": "history_section",
+   "fieldtype": "Section Break",
+   "label": "History (preconception, pregnancy and postnatal)"
+  },
+  {
+   "fieldname": "pmh_diabetes",
+   "fieldtype": "Select",
+   "label": "Diabetes",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "pmh_high_bp",
+   "fieldtype": "Select",
+   "label": "High BP",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "pmh_anemia",
+   "fieldtype": "Select",
+   "label": "Anemia",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "pmh_thyroid",
+   "fieldtype": "Select",
+   "label": "Thyroid",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "pmh_rh_neg",
+   "fieldtype": "Select",
+   "label": "RH Negative",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "pmh_other",
+   "fieldtype": "Data",
+   "label": "Other Past Medical History"
+  },
+  {
+   "fieldname": "column_break_hist1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "psh_cesarean",
+   "fieldtype": "Select",
+   "label": "Past Surgical History: Cesarean",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "psh_other_surgeries",
+   "fieldtype": "Select",
+   "label": "Other Surgeries",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.psh_cesarean == \"Yes\" || doc.psh_other_surgeries == \"Yes\"",
+   "fieldname": "psh_date_of_surgery",
+   "fieldtype": "Date",
+   "label": "Date of Surgery"
+  },
+  {
+   "fieldname": "personal_history_section",
+   "fieldtype": "Section Break",
+   "label": "Personal History"
+  },
+  {
+   "fieldname": "personal_history_smoking",
+   "fieldtype": "Select",
+   "label": "Smoking",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "personal_history_alcohol",
+   "fieldtype": "Select",
+   "label": "Alcohol",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "personal_history_drug_use",
+   "fieldtype": "Select",
+   "label": "Drug Use",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "personal_history_other",
+   "fieldtype": "Data",
+   "label": "Other"
+  },
+  {
+   "fieldname": "birth_details_section",
+   "fieldtype": "Section Break",
+   "label": "Birth Details"
+  },
+  {
+   "fieldname": "edd",
+   "fieldtype": "Date",
+   "label": "EDD"
+  },
+  {
+   "fieldname": "pregnancy_risk_factors",
+   "fieldtype": "Small Text",
+   "label": "Pregnancy Risk Factors"
+  },
+  {
+   "fieldname": "column_break_bd1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date"
+  },
+  {
+   "fieldname": "mode_of_delivery",
+   "fieldtype": "Data",
+   "label": "Mode of Delivery"
+  },
+  {
+   "fieldname": "facility",
+   "fieldtype": "Data",
+   "label": "Facility"
+  },
+  {
+   "fieldname": "birth_details_section2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Baby's Gender",
+   "options": "\nMale\nFemale"
+  },
+  {
+   "fieldname": "birth_weight",
+   "fieldtype": "Data",
+   "label": "Birth Weight"
+  },
+  {
+   "fieldname": "birth_length",
+   "fieldtype": "Data",
+   "label": "Birth Length"
+  },
+  {
+   "fieldname": "labor_birth_complications",
+   "fieldtype": "Small Text",
+   "label": "Labor or Birth Complications"
+  },
+  {
+   "fieldname": "column_break_bd2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "comp_blood_transfusion",
+   "fieldtype": "Select",
+   "label": "Blood Transfusion",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "comp_meconium",
+   "fieldtype": "Select",
+   "label": "Meconium",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "comp_difficult_labor_delivery",
+   "fieldtype": "Select",
+   "label": "Difficult Labor / Delivery",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "comp_fetal_distress",
+   "fieldtype": "Select",
+   "label": "Fetal Distress",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "comp_infection",
+   "fieldtype": "Select",
+   "label": "Infection",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "comp_episiotomy",
+   "fieldtype": "Select",
+   "label": "Episiotomy",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "comp_vacuum_assist_delivery",
+   "fieldtype": "Select",
+   "label": "Vacuum Assist Delivery",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "comp_other",
+   "fieldtype": "Data",
+   "label": "Other Complications"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "followup_section",
+   "fieldtype": "Section Break",
+   "label": "Followup Visits (Vitals, Danger Signs, Education, Referrals)"
+  },
+  {
+   "fieldname": "followup_visits",
+   "fieldtype": "Table",
+   "options": "Postpartum Followup"
+  },
+  {
+   "fieldname": "column_break_pwye",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-09-22 16:34:25.787043",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Postpartum Reg and Followup",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name"
+}

@@ -25,11 +25,6 @@
   "other_occupation",
   "education_status",
   "education",
-  "blood_group",
-  "height",
-  "weight",
-  "blood_presuure",
-  "grbs",
   "date",
   "health_worker_name",
   "status",
@@ -50,7 +45,9 @@
   "does_the_person_require_palliative_care",
   "patient_condition",
   "does_the_person_require_home_visit",
-  "referal_for_the_pallative_care"
+  "referal_for_the_pallative_care",
+  "is_the_patient_postpartum",
+  "is_the_patient_a_child_0_to_1"
  ],
  "fields": [
   {
@@ -200,32 +197,6 @@
    "options": "Type Of Disability"
   },
   {
-   "fieldname": "blood_group",
-   "fieldtype": "Select",
-   "label": "Blood Group",
-   "options": "\nA+\nA-\nB+\nB-\nO+\nO-\nAB+\nAB-\nUnknown/Not Known"
-  },
-  {
-   "fieldname": "height",
-   "fieldtype": "Data",
-   "label": "Height"
-  },
-  {
-   "fieldname": "weight",
-   "fieldtype": "Data",
-   "label": "Weight"
-  },
-  {
-   "fieldname": "blood_presuure",
-   "fieldtype": "Data",
-   "label": "Blood Presuure"
-  },
-  {
-   "fieldname": "grbs",
-   "fieldtype": "Data",
-   "label": "GRBS"
-  },
-  {
    "fieldname": "health_worker_name",
    "fieldtype": "Link",
    "label": "Data Collector",
@@ -263,7 +234,6 @@
    "label": "Referal for the disability"
   },
   {
-   "depends_on": "eval: doc.marital_status == \"Married\"",
    "fieldname": "does_the_person_needs_an_preconception",
    "fieldtype": "Select",
    "label": "Does the person needs an Preconception",
@@ -338,10 +308,24 @@
    "options": "\nYes\nNo"
   },
   {
-   "depends_on": "eval: doc.marital_status == \"Married\" && doc.gender == \"Female\"",
+   "depends_on": "eval: doc.gender == \"Female\"",
    "fieldname": "is_the_person_currently_pregnant",
    "fieldtype": "Select",
    "label": "Is the person currently pregnant?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval: doc.gender == \"Female\"",
+   "description": "Delivered a child in the last 6 weeks.",
+   "fieldname": "is_the_patient_postpartum",
+   "fieldtype": "Select",
+   "label": "Is the patient postpartum?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "is_the_patient_a_child_0_to_1",
+   "fieldtype": "Select",
+   "label": "Is the patient a child (0-1 years)?",
    "options": "\nYes\nNo"
   }
  ],
@@ -359,9 +343,21 @@
   {
    "link_doctype": "Palliative Care Initial Assessment Form",
    "link_fieldname": "fmid"
+  },
+  {
+   "link_doctype": "Preconception Reg and Followup",
+   "link_fieldname": "fmid"
+  },
+  {
+   "link_doctype": "Postpartum Reg and Followup",
+   "link_fieldname": "fmid"
+  },
+  {
+   "link_doctype": "Child 6w to 1 Year Reg and Followup",
+   "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-09-22 11:51:57.124940",
+ "modified": "2026-09-22 12:06:44.005420",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

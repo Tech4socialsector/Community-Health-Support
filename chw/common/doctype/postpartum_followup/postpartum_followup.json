@@ -1,0 +1,534 @@
+{
+ "actions": [],
+ "creation": "2026-09-23 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "vitals_section",
+  "date_of_visit",
+  "health_worker_name",
+  "patient_symptoms_concerns",
+  "general_condition",
+  "column_break_v1",
+  "bp",
+  "temp",
+  "hr",
+  "rr",
+  "height",
+  "weight",
+  "bmi",
+  "nurse_notified_abnormal_vitals",
+  "mothers_condition_section",
+  "mother_good_mood",
+  "mother_breasts_normal",
+  "mother_episiotomy_normal",
+  "column_break_m1",
+  "mother_bleeding_normal",
+  "mother_cesarean_scar_normal",
+  "phq2_score",
+  "mother_notes",
+  "danger_signs_mother_section",
+  "danger_fever",
+  "danger_heavy_bleeding",
+  "danger_severe_headache",
+  "column_break_dm1",
+  "danger_self_harm_thoughts",
+  "danger_cesarean_scar_abnormal",
+  "danger_phq2_high",
+  "nurse_notified_danger_signs_mother",
+  "baby_vitals_section",
+  "baby_age",
+  "column_break_bv1",
+  "baby_current_weight",
+  "baby_length",
+  "babys_condition_section",
+  "baby_active",
+  "baby_skin_warm_dry",
+  "baby_good_color",
+  "column_break_bc1",
+  "feeding_type",
+  "feeding_mixed_specify",
+  "feeding_problems",
+  "baby_notes",
+  "danger_signs_baby_section",
+  "baby_danger_fever",
+  "baby_danger_convulsions",
+  "baby_danger_breathing_difficulty",
+  "baby_danger_jaundice",
+  "column_break_db1",
+  "baby_danger_blue_mouth",
+  "baby_danger_lethargic",
+  "baby_danger_cold",
+  "baby_danger_irritable",
+  "nurse_notified_danger_signs_baby",
+  "support_education_section",
+  "support_care_provided",
+  "edu_postpartum_self_care",
+  "edu_iron_calcium",
+  "edu_exclusive_breastfeeding",
+  "edu_family_planning",
+  "column_break_edu1",
+  "edu_kegel_exercises",
+  "edu_postpartum_depression",
+  "edu_child_immunization_schedule",
+  "edu_child_weight_gain_chart",
+  "referrals_section",
+  "referral_needed",
+  "referral_made_to",
+  "care_plan_created",
+  "reports_sent_to_mch_nurse",
+  "column_break_ref1",
+  "date_of_next_visit",
+  "next_visit_place",
+  "mch_nurse_name",
+  "signature_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "vitals_section",
+   "fieldtype": "Section Break",
+   "label": "Vital Signs (Postpartum)"
+  },
+  {
+   "fieldname": "date_of_visit",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date of Visit"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Volunteer / Data Collector",
+   "options": "Health Worker"
+  },
+  {
+   "fieldname": "patient_symptoms_concerns",
+   "fieldtype": "Small Text",
+   "label": "Patient Symptoms / Concerns"
+  },
+  {
+   "fieldname": "general_condition",
+   "fieldtype": "Select",
+   "label": "Patient's General Condition",
+   "options": "\nResponds Appropriately\nAppears Comfortable\nNot Responding Appropriately\nAppears to be in Pain or Distress"
+  },
+  {
+   "fieldname": "column_break_v1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "< 95/60 or 140/90+",
+   "fieldname": "bp",
+   "fieldtype": "Data",
+   "label": "BP"
+  },
+  {
+   "description": "38° C +",
+   "fieldname": "temp",
+   "fieldtype": "Data",
+   "label": "Temp"
+  },
+  {
+   "description": "< 60 or 110+",
+   "fieldname": "hr",
+   "fieldtype": "Data",
+   "label": "HR"
+  },
+  {
+   "description": "< 12 or 24+",
+   "fieldname": "rr",
+   "fieldtype": "Data",
+   "label": "RR"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Data",
+   "label": "Height"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Data",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "bmi",
+   "fieldtype": "Data",
+   "label": "BMI"
+  },
+  {
+   "fieldname": "nurse_notified_abnormal_vitals",
+   "fieldtype": "Select",
+   "label": "MCH Nurse Notified of Abnormal Vital Signs",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "mothers_condition_section",
+   "fieldtype": "Section Break",
+   "label": "Mother's Condition"
+  },
+  {
+   "fieldname": "mother_good_mood",
+   "fieldtype": "Select",
+   "label": "Good Mood",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "mother_breasts_normal",
+   "fieldtype": "Select",
+   "label": "Breasts Soft Without Redness or Swelling",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "mother_episiotomy_normal",
+   "fieldtype": "Select",
+   "label": "Episiotomy or Repair Without Redness / Swelling",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_m1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mother_bleeding_normal",
+   "fieldtype": "Select",
+   "label": "Bleeding Stopped or Minimal Dark Red Blood",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "mother_cesarean_scar_normal",
+   "fieldtype": "Select",
+   "label": "Cesarean Section Scar Without Redness or Swelling",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "phq2_score",
+   "fieldtype": "Data",
+   "label": "Postpartum Depression Screen (PHQ 2) Score"
+  },
+  {
+   "fieldname": "mother_notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "description": "Highlighted on the paper form - flag immediately if any apply.",
+   "fieldname": "danger_signs_mother_section",
+   "fieldtype": "Section Break",
+   "label": "Danger Signs - Mother"
+  },
+  {
+   "fieldname": "danger_fever",
+   "fieldtype": "Select",
+   "label": "Fever",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "danger_heavy_bleeding",
+   "fieldtype": "Select",
+   "label": "Heavy Bleeding / Bright Red",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "danger_severe_headache",
+   "fieldtype": "Select",
+   "label": "Severe Headache / Blurred Vision",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_dm1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "danger_self_harm_thoughts",
+   "fieldtype": "Select",
+   "label": "Thoughts of Harming Self or Baby",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "danger_cesarean_scar_abnormal",
+   "fieldtype": "Select",
+   "label": "Cesarean Scar with Redness, Swelling or Discharge",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "danger_phq2_high",
+   "fieldtype": "Select",
+   "label": "PHQ 2 Score 3 or More",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "nurse_notified_danger_signs_mother",
+   "fieldtype": "Select",
+   "label": "MCH Nurse Notified of Danger Signs (Mother)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_vitals_section",
+   "fieldtype": "Section Break",
+   "label": "Baby"
+  },
+  {
+   "fieldname": "baby_age",
+   "fieldtype": "Data",
+   "label": "Baby's Age"
+  },
+  {
+   "fieldname": "column_break_bv1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "baby_current_weight",
+   "fieldtype": "Data",
+   "label": "Current Weight"
+  },
+  {
+   "fieldname": "baby_length",
+   "fieldtype": "Data",
+   "label": "Length"
+  },
+  {
+   "fieldname": "babys_condition_section",
+   "fieldtype": "Section Break",
+   "label": "Baby's Condition"
+  },
+  {
+   "fieldname": "baby_active",
+   "fieldtype": "Select",
+   "label": "Active",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_skin_warm_dry",
+   "fieldtype": "Select",
+   "label": "Skin Warm and Dry",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_good_color",
+   "fieldtype": "Select",
+   "label": "Good Color",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_bc1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "feeding_type",
+   "fieldtype": "Select",
+   "label": "Feeding",
+   "options": "\nExclusive Breastfeeding\nMixed"
+  },
+  {
+   "depends_on": "eval:doc.feeding_type==\"Mixed\"",
+   "fieldname": "feeding_mixed_specify",
+   "fieldtype": "Data",
+   "label": "Mixed - Please Specify"
+  },
+  {
+   "fieldname": "feeding_problems",
+   "fieldtype": "Data",
+   "label": "Feeding Problems"
+  },
+  {
+   "fieldname": "baby_notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "description": "Highlighted on the paper form - flag immediately if any apply.",
+   "fieldname": "danger_signs_baby_section",
+   "fieldtype": "Section Break",
+   "label": "Danger Signs - Baby"
+  },
+  {
+   "fieldname": "baby_danger_fever",
+   "fieldtype": "Select",
+   "label": "Fever",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_danger_convulsions",
+   "fieldtype": "Select",
+   "label": "Convulsions",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_danger_breathing_difficulty",
+   "fieldtype": "Select",
+   "label": "Breathing Difficulty",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_danger_jaundice",
+   "fieldtype": "Select",
+   "label": "Yellow Skin (Jaundice)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_db1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "baby_danger_blue_mouth",
+   "fieldtype": "Select",
+   "label": "Blue Mouth",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_danger_lethargic",
+   "fieldtype": "Select",
+   "label": "Lethargic",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_danger_cold",
+   "fieldtype": "Select",
+   "label": "Cold",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_danger_irritable",
+   "fieldtype": "Select",
+   "label": "Irritable",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "nurse_notified_danger_signs_baby",
+   "fieldtype": "Select",
+   "label": "MCH Nurse Notified of Danger Signs (Baby)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "support_education_section",
+   "fieldtype": "Section Break",
+   "label": "Support / Care and Education Provided"
+  },
+  {
+   "fieldname": "support_care_provided",
+   "fieldtype": "Small Text",
+   "label": "Support / Care Provided"
+  },
+  {
+   "fieldname": "edu_postpartum_self_care",
+   "fieldtype": "Select",
+   "label": "Postpartum Self Care: Nutrition, Sleep Counseling (handout)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edu_iron_calcium",
+   "fieldtype": "Select",
+   "label": "Iron and Calcium (postnatal)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edu_exclusive_breastfeeding",
+   "fieldtype": "Select",
+   "label": "Exclusive Breastfeeding 0-6 Months and Complementary Feeding (handout)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edu_family_planning",
+   "fieldtype": "Select",
+   "label": "Family Planning Teaching and Handout",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_edu1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "edu_kegel_exercises",
+   "fieldtype": "Select",
+   "label": "Kegel Exercises (postnatal)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edu_postpartum_depression",
+   "fieldtype": "Select",
+   "label": "Postpartum Depression (handout)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edu_child_immunization_schedule",
+   "fieldtype": "Select",
+   "label": "Child Immunization Schedule (0-1 year)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edu_child_weight_gain_chart",
+   "fieldtype": "Select",
+   "label": "Child Weight Gain Chart (0-1 year)",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "referrals_section",
+   "fieldtype": "Section Break",
+   "label": "Referrals & Action Plan"
+  },
+  {
+   "fieldname": "referral_needed",
+   "fieldtype": "Select",
+   "label": "Was a Referral Needed?",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.referral_needed==\"Yes\"",
+   "fieldname": "referral_made_to",
+   "fieldtype": "Data",
+   "label": "Where was the Referral Made?"
+  },
+  {
+   "fieldname": "care_plan_created",
+   "fieldtype": "Select",
+   "label": "Care Plan Created",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "reports_sent_to_mch_nurse",
+   "fieldtype": "Select",
+   "label": "Reports or Info Sent to MCH Nurse",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_ref1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date_of_next_visit",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date of Next Visit"
+  },
+  {
+   "fieldname": "next_visit_place",
+   "fieldtype": "Data",
+   "label": "Place"
+  },
+  {
+   "fieldname": "mch_nurse_name",
+   "fieldtype": "Data",
+   "label": "Signature of MCH Nurse"
+  },
+  {
+   "fieldname": "signature_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-23 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Postpartum Followup",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -175,8 +175,6 @@
    "label": "EDD based on Ultrasonography"
   },
   {
-   "fetch_from": "familymember_id.blood_group",
-   "fetch_if_empty": 1,
    "fieldname": "blood_group",
    "fieldtype": "Data",
    "label": "Blood Group"

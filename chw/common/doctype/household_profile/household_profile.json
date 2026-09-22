@@ -9,6 +9,8 @@
  "field_order": [
   "section_break_rmhx",
   "village",
+  "gram_panchayat",
+  "subcenter",
   "household_head_name",
   "total_family_members",
   "members_added",
@@ -17,6 +19,8 @@
   "caste",
   "others_caste",
   "house",
+  "type_of_housing",
+  "electricity",
   "phone_no",
   "survay_date",
   "farming",
@@ -90,6 +94,18 @@
    "reqd": 1
   },
   {
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Gram Panchayat"
+  },
+  {
+   "fieldname": "subcenter",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Subcenter"
+  },
+  {
    "fieldname": "phone_no",
    "fieldtype": "Data",
    "label": "Phone Number",
@@ -108,6 +124,18 @@
    "fieldtype": "Select",
    "label": "House",
    "options": "\nHut\nTiled house\nTerraced house"
+  },
+  {
+   "fieldname": "type_of_housing",
+   "fieldtype": "Select",
+   "label": "Type of Housing",
+   "options": "\nTemporary\nPermanent"
+  },
+  {
+   "fieldname": "electricity",
+   "fieldtype": "Select",
+   "label": "Electricity",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "farming",
