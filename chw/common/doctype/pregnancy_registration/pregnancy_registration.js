@@ -37,4 +37,21 @@ frappe.ui.form.on("Pregnancy Registration", {
 			});
 		}
 	},
+	height(frm) {
+		calculate_bmi(frm);
+	},
+	weight(frm) {
+		calculate_bmi(frm);
+	},
 });
+
+function calculate_bmi(frm) {
+	const weight_kg = parseFloat(frm.doc.weight);
+	if (!frm.doc.height || isNaN(weight_kg)) {
+		frm.set_value("bmi_calculation", null);
+		return;
+	}
+
+	const height_m = frm.doc.height / 100;
+	frm.set_value("bmi_calculation", flt(weight_kg / (height_m * height_m), 1));
+}

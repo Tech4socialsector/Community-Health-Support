@@ -333,8 +333,9 @@
   },
   {
    "fieldname": "bmi_calculation",
-   "fieldtype": "Int",
-   "label": "BMI Calculation "
+   "fieldtype": "Float",
+   "label": "BMI Calculation ",
+   "precision": "1"
   },
   {
    "fieldname": "section_break_dyhz",

@@ -12,6 +12,7 @@ class PregnancyRegistration(Document):
 		if self.lmp_date:
 			self.estimated_date_of_delivery = add_days(self.lmp_date, 281)
 		self.calculate_pog()
+		self.calculate_bmi()
 
 	def calculate_pog(self):
 		if not self.lmp_date:
@@ -21,3 +22,17 @@ class PregnancyRegistration(Document):
 		days_pregnant = (getdate(today()) - getdate(self.lmp_date)).days
 		weeks, days = divmod(days_pregnant, 7)
 		self.pog = f"{weeks} weeks {days} days"
+
+	def calculate_bmi(self):
+		if not self.height or not self.weight:
+			self.bmi_calculation = None
+			return
+
+		try:
+			weight_kg = float(self.weight)
+		except ValueError:
+			self.bmi_calculation = None
+			return
+
+		height_m = self.height / 100
+		self.bmi_calculation = round(weight_kg / (height_m**2), 1)
