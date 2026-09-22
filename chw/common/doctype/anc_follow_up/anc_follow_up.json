@@ -20,7 +20,9 @@
   "next_anc_visit_date",
   "next_anc_visit_date_auto",
   "section_break_vzey",
-  "anc_followup"
+  "anc_followup",
+  "anc_followup_for_nurse",
+  "anc_followup_for_docter"
  ],
  "fields": [
   {
@@ -116,7 +118,7 @@
   {
    "fieldname": "anc_followup",
    "fieldtype": "Table",
-   "label": "ANC Followup",
+   "label": "ANC Followup for Volunteer",
    "options": "ANC Followup Child"
   },
   {
@@ -131,12 +133,24 @@
    "hidden": 1,
    "label": "Next ANC Visit Date (auto-calculated, internal)",
    "read_only": 1
+  },
+  {
+   "fieldname": "anc_followup_for_nurse",
+   "fieldtype": "Table",
+   "label": "ANC Followup for Nurse",
+   "options": "ANC Followup Nurse"
+  },
+  {
+   "fieldname": "anc_followup_for_docter",
+   "fieldtype": "Table",
+   "label": "ANC Followup for Docter",
+   "options": "ANC Followup Docter"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-09 14:30:34.010028",
+ "modified": "2026-09-22 17:12:43.199504",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

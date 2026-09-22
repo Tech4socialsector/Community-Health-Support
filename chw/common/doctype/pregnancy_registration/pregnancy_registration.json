@@ -17,14 +17,18 @@
   "place_of_health_checkup",
   "lmp_date",
   "estimated_date_of_delivery",
+  "pog",
   "edd_ultrasonography",
   "blood_group",
+  "height",
+  "weight",
+  "bmi_calculation",
   "trimester",
   "hb_level",
+  "column_break_tczd",
   "tsh_value",
   "tt_status",
   "number_of_living_children",
-  "column_break_tczd",
   "number_of_children_died",
   "number_of_abortion",
   "any_stillbirth",
@@ -40,7 +44,58 @@
   "usg_1",
   "usg_2",
   "usg_3",
-  "delivery_status"
+  "delivery_status",
+  "section_break_dyhz",
+  "labs_and_tests_column",
+  "h5td_scanh",
+  "td",
+  "us_dating_result",
+  "date_of_scan",
+  "ga_at_scan",
+  "edd_by_us",
+  "h5nt_scanh",
+  "d_o_s",
+  "ga",
+  "normal_or_abnormal",
+  "if_abnormal",
+  "h5anatomy_scanh",
+  "date_of_scan_copy",
+  "ga_copy",
+  "normal_or_abnormal_copy",
+  "if_abnormal_copy",
+  "h5growth_scanh",
+  "date_of_scan_copy_copy",
+  "ga_copy_copy",
+  "position",
+  "cephalic",
+  "growth",
+  "if_abnormal_copy_copy",
+  "column_break_sdxf",
+  "h5initial_labsh",
+  "hepb",
+  "hepc",
+  "hiv",
+  "rpr",
+  "blood_type",
+  "urinalysis_culture",
+  "h5hbh",
+  "h5hb_1h",
+  "date_t",
+  "ga_t",
+  "result_1",
+  "abnormal_t",
+  "h5hb_2h",
+  "date_copy",
+  "result_2",
+  "result_3",
+  "abnormal_tr",
+  "h5hb_3h",
+  "date_tri",
+  "ga_trim",
+  "result_trime",
+  "abnormal_trimes",
+  "past_delivery_history_section",
+  "past_delivery_history"
  ],
  "fields": [
   {
@@ -93,16 +148,14 @@
   },
   {
    "fieldname": "gravida",
-   "fieldtype": "Select",
-   "label": "Gravida",
-   "options": "\n1\n2\n3\n4 and Above",
+   "fieldtype": "Data",
+   "label": "GBLAD",
    "reqd": 1
   },
   {
    "fieldname": "place_of_health_checkup",
-   "fieldtype": "Select",
-   "label": "Place of ANC Checkup",
-   "options": "\nPHC\nPHC and Tribal hospital\nPHC and outside hospital"
+   "fieldtype": "Data",
+   "label": "Place of ANC Checkup"
   },
   {
    "fieldname": "lmp_date",
@@ -264,6 +317,299 @@
    "in_standard_filter": 1,
    "label": "Village",
    "options": "Village"
+  },
+  {
+   "fieldname": "pog",
+   "fieldtype": "Data",
+   "label": "POG"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Int",
+   "label": "Height"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Data",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "bmi_calculation",
+   "fieldtype": "Int",
+   "label": "BMI Calculation "
+  },
+  {
+   "fieldname": "section_break_dyhz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "labs_and_tests_column",
+   "fieldtype": "Column Break",
+   "label": "Labs and Tests"
+  },
+  {
+   "fieldname": "h5td_scanh",
+   "fieldtype": "Heading",
+   "label": "<h5>TD Scan</h5>"
+  },
+  {
+   "fieldname": "td",
+   "fieldtype": "Select",
+   "label": "TD",
+   "options": "\n1\n2\nBooster"
+  },
+  {
+   "fieldname": "us_dating_result",
+   "fieldtype": "Select",
+   "label": "US dating Result",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "date_of_scan",
+   "fieldtype": "Date",
+   "label": "Date of Scan"
+  },
+  {
+   "fieldname": "ga_at_scan",
+   "fieldtype": "Data",
+   "label": "GA at Scan"
+  },
+  {
+   "fieldname": "edd_by_us",
+   "fieldtype": "Data",
+   "label": "EDD by US"
+  },
+  {
+   "fieldname": "h5nt_scanh",
+   "fieldtype": "Heading",
+   "label": "<h5>NT Scan</h5>"
+  },
+  {
+   "fieldname": "d_o_s",
+   "fieldtype": "Date",
+   "label": "Date of Scan"
+  },
+  {
+   "fieldname": "ga",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "normal_or_abnormal",
+   "fieldtype": "Select",
+   "label": "Normal or Abnormal",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.normal_or_abnormal==\"Abnormal\"",
+   "fieldname": "if_abnormal",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "fieldname": "h5anatomy_scanh",
+   "fieldtype": "Heading",
+   "label": "<h5>Anatomy Scan</h5>"
+  },
+  {
+   "fieldname": "date_of_scan_copy",
+   "fieldtype": "Date",
+   "label": "Date of Scan Copy"
+  },
+  {
+   "fieldname": "ga_copy",
+   "fieldtype": "Data",
+   "label": "GA Copy"
+  },
+  {
+   "fieldname": "normal_or_abnormal_copy",
+   "fieldtype": "Select",
+   "label": "Normal or Abnormal ",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.normal_or_abnormal_copy==\"Abnormal\"",
+   "fieldname": "if_abnormal_copy",
+   "fieldtype": "Data",
+   "label": "If Abnormal Copy"
+  },
+  {
+   "fieldname": "h5growth_scanh",
+   "fieldtype": "Heading",
+   "label": "<h5>Growth Scan</h5>"
+  },
+  {
+   "fieldname": "date_of_scan_copy_copy",
+   "fieldtype": "Date",
+   "label": "Date of Growth Scan"
+  },
+  {
+   "fieldname": "ga_copy_copy",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "position",
+   "fieldtype": "Data",
+   "label": "Position"
+  },
+  {
+   "fieldname": "cephalic",
+   "fieldtype": "Select",
+   "label": "Cephalic",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "growth",
+   "fieldtype": "Select",
+   "label": "Growth",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.growth==\"Abnormal\"",
+   "fieldname": "if_abnormal_copy_copy",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "fieldname": "column_break_sdxf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "h5initial_labsh",
+   "fieldtype": "Heading",
+   "label": "<h5>Initial Labs</h5>"
+  },
+  {
+   "fieldname": "hepb",
+   "fieldtype": "Select",
+   "label": "HepB",
+   "options": "\nNon Reactive\nReactive"
+  },
+  {
+   "fieldname": "hepc",
+   "fieldtype": "Select",
+   "label": "HepC",
+   "options": "\nNon Reactive\nReactive"
+  },
+  {
+   "fieldname": "hiv",
+   "fieldtype": "Select",
+   "label": "HIV",
+   "options": "\nNon Reactive\nReactive"
+  },
+  {
+   "fieldname": "rpr",
+   "fieldtype": "Select",
+   "label": "RPR",
+   "options": "\nNon Reactive\nReactive"
+  },
+  {
+   "fieldname": "blood_type",
+   "fieldtype": "Data",
+   "label": "Blood type"
+  },
+  {
+   "fieldname": "h5hbh",
+   "fieldtype": "Heading",
+   "label": "<h5>Trimester</h5>"
+  },
+  {
+   "fieldname": "result_1",
+   "fieldtype": "Select",
+   "label": "Result",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "fieldname": "result_2",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "date_copy",
+   "fieldtype": "Data",
+   "label": "Date"
+  },
+  {
+   "fieldname": "result_3",
+   "fieldtype": "Select",
+   "label": "Result ",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "fieldname": "urinalysis_culture",
+   "fieldtype": "Data",
+   "label": "Urinalysis/ Culture"
+  },
+  {
+   "fieldname": "h5hb_1h",
+   "fieldtype": "Heading",
+   "label": "<h5>HB 1</h5>"
+  },
+  {
+   "fieldname": "date_t",
+   "fieldtype": "Data",
+   "label": "Date"
+  },
+  {
+   "fieldname": "ga_t",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "depends_on": "eval:doc.result_1==\"Abnormal\"",
+   "fieldname": "abnormal_t",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "fieldname": "h5hb_2h",
+   "fieldtype": "Heading",
+   "label": "<h5>HB 2</h5>"
+  },
+  {
+   "depends_on": "eval:doc.result_3==\"Abnormal\"",
+   "fieldname": "abnormal_tr",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "fieldname": "h5hb_3h",
+   "fieldtype": "Heading",
+   "label": "<h5>HB 3</h5>"
+  },
+  {
+   "fieldname": "date_tri",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "ga_trim",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "result_trime",
+   "fieldtype": "Select",
+   "label": "Result",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.result_trime==\"Abnormal\"",
+   "fieldname": "abnormal_trimes",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "fieldname": "past_delivery_history_section",
+   "fieldtype": "Section Break",
+   "label": "Past Delivery History"
+  },
+  {
+   "fieldname": "past_delivery_history",
+   "fieldtype": "Table",
+   "label": "Past Delivery History",
+   "options": "Pregancy"
   }
  ],
  "grid_page_length": 50,
@@ -272,13 +618,9 @@
   {
    "link_doctype": "ANC Follow-up",
    "link_fieldname": "pregnant_id"
-  },
-  {
-   "link_doctype": "Birth Registration",
-   "link_fieldname": "prid"
   }
  ],
- "modified": "2026-09-10 17:00:11.818653",
+ "modified": "2026-09-22 16:33:58.969410",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",
