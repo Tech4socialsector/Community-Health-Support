@@ -1407,3 +1407,455 @@ def chw_drilldown_excel(report_type, target_date=None, from_date=None, to_date=N
     frappe.response['filename'] = f"{report_type}.xlsx"
     frappe.response['filecontent'] = xlsx_file.getvalue()
     frappe.response['type'] = 'binary'
+
+
+# ---- chw-dashboard (coordinator-only program overview) ----
+# Separate from chw_visit_summary/chw_visit_drilldown above, which power
+# each CHW's own pending/backlog worklist on the chw-visit-dashboard page
+# and the mobile app. This section counts and lists raw records
+# (Household/Family/Pregnancy/Birth/PNC/ANC/Palliative) for coordinators,
+# filtered by village/health worker/date range wherever the underlying
+# doctype carries that field. The two Palliative doctypes have neither a
+# village nor a health_worker_name field, so those filters are skipped for
+# them (has_village/has_health_worker below).
+
+CHW_DASHBOARD_CARDS = [
+    {
+        'key': 'household',
+        'label': 'Household Details',
+        'doctype': 'Household profile',
+        'display_field': 'household_head_name',
+        'icon': 'home',
+        'color': 'gray',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'family',
+        'label': 'Family Members',
+        'doctype': 'Family members',
+        'display_field': 'family_member',
+        'icon': 'users',
+        'color': 'purple',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'pregnancy',
+        'label': 'Pregnancy Registration',
+        'doctype': 'Pregnancy Registration',
+        'display_field': 'first_name',
+        'icon': 'user-plus',
+        'color': 'blue',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'birth',
+        'label': 'Birth Registration',
+        'doctype': 'Birth Registration',
+        'display_field': 'first_name',
+        'icon': 'smile',
+        'color': 'green',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'pnc',
+        'label': 'PNC Followup',
+        'doctype': 'PNC',
+        'display_field': 'first_name',
+        'icon': 'clock',
+        'color': 'orange',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'anc',
+        'label': 'ANC Follow-up',
+        'doctype': 'ANC Follow-up',
+        'display_field': 'first_name',
+        'icon': 'calendar',
+        'color': 'blue',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'palliative_initial',
+        'label': 'Palliative Care Initial Assessment',
+        'doctype': 'Palliative Care Initial Assessment Form',
+        'display_field': 'name1',
+        'icon': 'heart',
+        'color': 'red',
+        'has_village': False,
+        'has_health_worker': False,
+    },
+    {
+        'key': 'palliative_followup',
+        'label': 'Palliative Care followup',
+        'doctype': 'Palliative care followup',
+        'display_field': 'name1',
+        'icon': 'activity',
+        'color': 'red',
+        'has_village': False,
+        'has_health_worker': False,
+    },
+]
+
+
+def _dashboard_card_by_key(key):
+    for card in CHW_DASHBOARD_CARDS:
+        if card['key'] == key:
+            return card
+    return None
+
+
+def _dashboard_date_bounds(date_range):
+    """Return (from_date, to_date) for a chw-dashboard date_range preset, or
+    (None, None) for 'all' / anything unrecognised."""
+    today = getdate(frappe.utils.nowdate())
+    if date_range == 'today':
+        return today, today
+    if date_range == 'week':
+        return get_week_bounds(today)
+    if date_range == 'month':
+        return today.replace(day=1), today
+    return None, None
+
+
+def _dashboard_filters(card, village, health_worker, date_range):
+    filters = {}
+    from_date, to_date = _dashboard_date_bounds(date_range)
+    if from_date and to_date:
+        # Full end-of-day bound - `creation` is a Datetime field, so an
+        # end date alone would clip out everything after its midnight.
+        filters['creation'] = ['between', [f'{from_date} 00:00:00', f'{to_date} 23:59:59']]
+    if card['has_village']:
+        filters = apply_village_filter(filters, village)
+    if card['has_health_worker'] and health_worker and health_worker != 'All Health Workers':
+        filters['health_worker_name'] = health_worker
+    return filters
+
+
+@frappe.whitelist()
+def get_health_workers():
+    """Return all Health Worker names for the chw-dashboard's Health Worker filter."""
+    if not is_privileged_user():
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+    return frappe.get_all('Health Worker', pluck='name', order_by='name asc')
+
+
+@frappe.whitelist()
+def get_chw_dashboard_cards(village=None, health_worker=None, date_range=None):
+    """Program-wide record counts for the chw-dashboard page, one per
+    CHW_DASHBOARD_CARDS entry, filtered by village/health worker/date range
+    wherever the underlying doctype supports that field."""
+    if not is_privileged_user():
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    cards = []
+    for card in CHW_DASHBOARD_CARDS:
+        filters = _dashboard_filters(card, village, health_worker, date_range)
+        try:
+            count = frappe.db.count(card['doctype'], filters)
+        except Exception:
+            frappe.log_error(f"Error counting {card['doctype']} for chw-dashboard")
+            count = 0
+        cards.append({
+            'key': card['key'],
+            'label': card['label'],
+            'doctype': card['doctype'],
+            'icon': card['icon'],
+            'color': card['color'],
+            'count': count,
+            'has_village': card['has_village'],
+            'has_health_worker': card['has_health_worker'],
+        })
+    return cards
+
+
+@frappe.whitelist()
+def chw_dashboard_drilldown(card_key, village=None, health_worker=None, date_range=None):
+    """Underlying records for one chw-dashboard card, most recent first."""
+    if not is_privileged_user():
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    card = _dashboard_card_by_key(card_key)
+    if not card:
+        return {'records': []}
+
+    filters = _dashboard_filters(card, village, health_worker, date_range)
+    fields = ['name', f"{card['display_field']} as patient", 'creation']
+    if card['has_village']:
+        fields.append('village')
+
+    records = frappe.get_list(
+        card['doctype'],
+        filters=filters,
+        fields=fields,
+        order_by='creation desc',
+        limit_page_length=100,
+    )
+    return {'records': records}
+
+
+@frappe.whitelist()
+def chw_dashboard_drilldown_excel(card_key, village=None, health_worker=None, date_range=None):
+    """Same records as chw_dashboard_drilldown, as a downloadable Excel file."""
+    from frappe.utils.xlsxutils import make_xlsx
+
+    data = chw_dashboard_drilldown(card_key, village, health_worker, date_range)
+    records = data.get('records', [])
+
+    columns = ["Name", "Patient", "Village", "Date"]
+    rows = [columns]
+    for r in records:
+        rows.append([
+            r.get('name', ''),
+            r.get('patient', ''),
+            r.get('village', ''),
+            str(r.get('creation', '') or '')
+        ])
+
+    xlsx_file = make_xlsx(rows, "CHW Dashboard")
+
+    frappe.response['filename'] = f"{card_key}.xlsx"
+    frappe.response['filecontent'] = xlsx_file.getvalue()
+    frappe.response['type'] = 'binary'
+
+
+# ---- chw-work-order-list (new, separate page - does not read from or
+# modify WORKLIST_PROGRAMS / chw_worklist_summary above, which belong to
+# chw-visit-dashboard's own "My Worklist" section) ----
+# The 5 programs actually used day to day: ANC, PNC, Palliative Care,
+# Postpartum (1-6 weeks), Child (6 wk-1 year). NCD, Child Growth Monitoring
+# and Mental Health are intentionally excluded - present in the app but not
+# part of this program. Palliative Care followup has no "next visit" date
+# field on the doctype, so it's marked has_date=False and simply never
+# queried for a due date, rather than queried and having the missing-field
+# error caught and swallowed.
+
+CHW_WORK_ORDER_TYPES = [
+    {
+        'key': 'anc',
+        'label': 'ANC',
+        'doctype': 'ANC Follow-up',
+        'date_field': 'next_anc_visit_date',
+        'patient_field': 'first_name',
+        'patient_fallback_field': 'pregnant_id',
+        'has_date': True,
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'pnc',
+        'label': 'PNC',
+        'doctype': 'PNC',
+        'date_field': 'next_pnc_visit_date',
+        'patient_field': 'first_name',
+        'patient_fallback_field': None,
+        'has_date': True,
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'palliative',
+        'label': 'Palliative Care',
+        'doctype': 'Palliative care followup',
+        'date_field': None,
+        'patient_field': 'name1',
+        'patient_fallback_field': None,
+        'has_date': False,
+        'has_village': False,
+        'has_health_worker': False,
+    },
+    {
+        'key': 'postpartum',
+        'label': 'Postpartum (1-6 weeks)',
+        'doctype': 'Postpartum Reg and Followup',
+        'date_field': 'next_visit_date',
+        'patient_field': 'patient_name',
+        'patient_fallback_field': None,
+        'has_date': True,
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'child_6w_1y',
+        'label': 'Child (6 wk-1 year)',
+        'doctype': 'Child 6w to 1 Year Reg and Followup',
+        'date_field': 'next_visit_date',
+        'patient_field': 'patient_name',
+        'patient_fallback_field': None,
+        'has_date': True,
+        'has_village': True,
+        'has_health_worker': True,
+    },
+]
+
+
+def _work_order_scope(village, health_worker):
+    """Privileged users get whatever village/health_worker they passed (or
+    none, for everyone). Non-privileged callers are always forced to their
+    own linked Health Worker, regardless of what they pass, and never see
+    another worker's records."""
+    if is_privileged_user():
+        return village, health_worker
+    return village, get_current_health_worker()
+
+
+def _work_order_base_filters(wtype, village, health_worker):
+    filters = []
+    if wtype['has_village'] and village and village != 'All Villages':
+        filters.append(['village', '=', village])
+    if wtype['has_health_worker'] and health_worker and health_worker != 'All Health Workers':
+        filters.append(['health_worker_name', '=', health_worker])
+    return filters
+
+
+def _work_order_patient_name(rec, wtype):
+    name = rec.get(wtype['patient_field'])
+    if not name and wtype['patient_fallback_field']:
+        name = rec.get(wtype['patient_fallback_field'])
+    return name or rec.get('name')
+
+
+@frappe.whitelist()
+def get_chw_work_order_summary(village=None, health_worker=None, visit_type=None):
+    """Today / Upcoming (rest of this week) / Overdue counts, plus a
+    per-type breakdown, across the 5 CHW_WORK_ORDER_TYPES - always relative
+    to the real current date, not a navigable date range."""
+    if frappe.session.user == 'Guest':
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    village, health_worker = _work_order_scope(village, health_worker)
+    if not is_privileged_user() and not health_worker:
+        return {'health_worker_linked': False, 'today': 0, 'upcoming': 0, 'overdue': 0, 'by_type': []}
+
+    today = getdate(frappe.utils.nowdate())
+    week_end = get_week_bounds(today)[1]
+    types = [t for t in CHW_WORK_ORDER_TYPES if not visit_type or visit_type == t['label']]
+
+    by_type = []
+    total_today = 0
+    total_upcoming = 0
+    total_overdue = 0
+
+    for wtype in types:
+        if not wtype['has_date']:
+            by_type.append({'key': wtype['key'], 'label': wtype['label'], 'today': 0, 'upcoming': 0, 'overdue': 0})
+            continue
+
+        base = _work_order_base_filters(wtype, village, health_worker)
+        try:
+            today_n = frappe.db.count(wtype['doctype'], base + [[wtype['date_field'], '=', today]])
+            upcoming = frappe.db.count(
+                wtype['doctype'], base + [[wtype['date_field'], '>', today], [wtype['date_field'], '<=', week_end]]
+            )
+            overdue = frappe.db.count(
+                wtype['doctype'], base + [[wtype['date_field'], 'is', 'set'], [wtype['date_field'], '<', today]]
+            )
+        except Exception:
+            frappe.log_error(f"Error counting {wtype['doctype']} for chw-work-order-list")
+            today_n, upcoming, overdue = 0, 0, 0
+
+        by_type.append({'key': wtype['key'], 'label': wtype['label'], 'today': today_n, 'upcoming': upcoming, 'overdue': overdue})
+        total_today += today_n
+        total_upcoming += upcoming
+        total_overdue += overdue
+
+    return {
+        'health_worker_linked': True,
+        'today': total_today,
+        'upcoming': total_upcoming,
+        'overdue': total_overdue,
+        'by_type': by_type,
+    }
+
+
+@frappe.whitelist()
+def chw_work_order_drilldown(status='all', village=None, health_worker=None, visit_type=None):
+    """Underlying records behind get_chw_work_order_summary's counts.
+    status is one of 'today', 'upcoming', 'overdue', 'all'."""
+    if frappe.session.user == 'Guest':
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    village, health_worker = _work_order_scope(village, health_worker)
+    if not is_privileged_user() and not health_worker:
+        return {'records': []}
+
+    today = getdate(frappe.utils.nowdate())
+    week_end = get_week_bounds(today)[1]
+    types = [
+        t for t in CHW_WORK_ORDER_TYPES
+        if (not visit_type or visit_type == t['label']) and t['has_date']
+    ]
+
+    buckets = [
+        ('today', [['=', today]], 'Today'),
+        ('upcoming', [['>', today], ['<=', week_end]], 'Upcoming'),
+        ('overdue', [['is', 'set'], ['<', today]], 'Overdue'),
+    ]
+
+    records = []
+    for wtype in types:
+        base = _work_order_base_filters(wtype, village, health_worker)
+        fields = ['name', wtype['patient_field'], wtype['date_field']]
+        if wtype['patient_fallback_field']:
+            fields.append(wtype['patient_fallback_field'])
+        if wtype['has_village']:
+            fields.append('village')
+
+        try:
+            for bucket_key, conditions, status_label in buckets:
+                if status not in (bucket_key, 'all'):
+                    continue
+                date_conditions = [[wtype['date_field'], op, val] for op, val in conditions]
+                rows = frappe.get_list(
+                    wtype['doctype'],
+                    filters=base + date_conditions,
+                    fields=fields,
+                    limit_page_length=200,
+                )
+                for r in rows:
+                    records.append({
+                        'doctype': wtype['doctype'],
+                        'name': r.name,
+                        'visit_type': wtype['label'],
+                        'patient': _work_order_patient_name(r, wtype),
+                        'village': r.get('village'),
+                        'due_date': str(r.get(wtype['date_field']) or ''),
+                        'status': status_label,
+                    })
+        except Exception:
+            frappe.log_error(f"Error fetching {wtype['doctype']} for chw-work-order-list")
+            continue
+
+    records.sort(key=lambda r: r['due_date'])
+    return {'records': records}
+
+
+@frappe.whitelist()
+def chw_work_order_drilldown_excel(status='all', village=None, health_worker=None, visit_type=None):
+    """Same records as chw_work_order_drilldown, as a downloadable Excel file."""
+    from frappe.utils.xlsxutils import make_xlsx
+
+    data = chw_work_order_drilldown(status, village, health_worker, visit_type)
+    records = data.get('records', [])
+
+    columns = ["Visit Type", "Patient", "Village", "Due Date", "Status"]
+    rows = [columns]
+    for r in records:
+        rows.append([
+            r.get('visit_type', ''),
+            r.get('patient', ''),
+            r.get('village', ''),
+            r.get('due_date', ''),
+            r.get('status', ''),
+        ])
+
+    xlsx_file = make_xlsx(rows, "CHW Work Order List")
+
+    frappe.response['filename'] = "work-order-list.xlsx"
+    frappe.response['filecontent'] = xlsx_file.getvalue()
+    frappe.response['type'] = 'binary'
