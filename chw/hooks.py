@@ -21,6 +21,9 @@ fixtures = [
 					"ANC Follow-up",
 					"Palliative Care Initial Assessment Form-1",
 					"Palliative Care followup-1",
+					"Preconception (Yesterday)",
+					"Postpartum (Yesterday)",
+					"Child 6w-1y (Yesterday)",
 				],
 			]
 		],

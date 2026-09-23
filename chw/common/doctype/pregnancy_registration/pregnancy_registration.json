@@ -125,8 +125,6 @@
    "label": "Name"
   },
   {
-   "fetch_from": "familymember_id.father_husband_name",
-   "fetch_if_empty": 1,
    "fieldname": "father_husband_name",
    "fieldtype": "Data",
    "label": "Husband's Name"

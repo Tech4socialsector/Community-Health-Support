@@ -122,7 +122,7 @@
    "options": "ANC Followup Child"
   },
   {
-   "description": "Auto-calculated from the last follow-up date and the ANC Visit Interval Master. Enter a date here to override it, or clear it to let it auto-calculate again.",
+   "description": "Set automatically from the latest followup row's \"Date of Next Visit\" - edit it by hand only to override that.",
    "fieldname": "next_anc_visit_date",
    "fieldtype": "Date",
    "label": "Next ANC Visit Date"

@@ -8,6 +8,7 @@
  "field_order": [
   "date_section",
   "visit_date",
+  "next_visit_date",
   "vitals_section",
   "blood_pressure",
   "pulse",
@@ -46,6 +47,12 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Visit Date"
+  },
+  {
+   "fieldname": "next_visit_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date of Next Visit"
   },
   {
    "fieldname": "blood_pressure",

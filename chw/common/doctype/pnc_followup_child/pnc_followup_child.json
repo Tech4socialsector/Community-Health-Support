@@ -15,7 +15,8 @@
   "wound_infection",
   "breast",
   "teaching",
-  "any_other_complaintremark"
+  "any_other_complaintremark",
+  "date_of_next_visit"
  ],
  "fields": [
   {
@@ -83,6 +84,12 @@
    "fieldname": "any_other_complaintremark",
    "fieldtype": "Small Text",
    "label": "Any other complaint/remark"
+  },
+  {
+   "fieldname": "date_of_next_visit",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date of Next Visit"
   }
  ],
  "grid_page_length": 50,

@@ -18,6 +18,8 @@
   "date_of_visit",
   "time_from",
   "time_to",
+  "next_visit_date",
+  "next_visit_date_auto",
   "husbands_name",
   "husbands_occupation",
   "husbands_phone_number",
@@ -137,6 +139,21 @@
    "fieldname": "time_to",
    "fieldtype": "Time",
    "label": "Time To"
+  },
+  {
+   "description": "Set automatically from the latest followup row's \"Date of Next Visit\" - edit it by hand only to override that.",
+   "fieldname": "next_visit_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Next Visit Date"
+  },
+  {
+   "fieldname": "next_visit_date_auto",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Next Visit Date (auto)",
+   "read_only": 1
   },
   {
    "fieldname": "husbands_name",

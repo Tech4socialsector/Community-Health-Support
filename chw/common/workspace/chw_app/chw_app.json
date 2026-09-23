@@ -1,8 +1,8 @@
 {
  "app": "chw",
  "charts": [],
- "content": "[{\"id\":\"MfIUhWNivo\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Household Details\",\"col\":4}},{\"id\":\"cxs9pjDOiG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Family Members\",\"col\":4}},{\"id\":\"n14mU_LhS-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pregnancy Registration\",\"col\":4}},{\"id\":\"ancFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ANC Follow-up\",\"col\":4}},{\"id\":\"lgNLFGGKLJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Birth Registration\",\"col\":4}},{\"id\":\"zfNmA54s-M\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PNC Followup\",\"col\":4}},{\"id\":\"kfVraXbodY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care Initial Assessment Form\",\"col\":4}},{\"id\":\"g2JEHutcmC\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care followup\",\"col\":4}}]",
- "creation": "2026-09-21 15:02:48.609331",
+ "content": "[{\"id\":\"MfIUhWNivo\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Household Details\",\"col\":4}},{\"id\":\"cxs9pjDOiG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Family Members\",\"col\":4}},{\"id\":\"n14mU_LhS-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pregnancy Registration\",\"col\":4}},{\"id\":\"ancFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ANC Follow-up\",\"col\":4}},{\"id\":\"lgNLFGGKLJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Birth Registration\",\"col\":4}},{\"id\":\"zfNmA54s-M\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PNC Followup\",\"col\":4}},{\"id\":\"kfVraXbodY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care Initial Assessment Form\",\"col\":4}},{\"id\":\"g2JEHutcmC\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care followup\",\"col\":4}},{\"id\":\"preconYest01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Preconception (Yesterday)\",\"col\":4}},{\"id\":\"postpartYest01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Postpartum (Yesterday)\",\"col\":4}},{\"id\":\"child6wYest01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Child 6w-1y (Yesterday)\",\"col\":4}}]",
+ "creation": "2026-09-23 10:29:40.101175",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -14,7 +14,7 @@
  "label": "CHW App",
  "link_type": "DocType",
  "links": [],
- "modified": "2026-09-22 17:36:06.041943",
+ "modified": "2026-09-23 10:30:00",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "CHW App",
@@ -50,6 +50,18 @@
   {
    "label": "ANC Follow-up",
    "number_card_name": "ANC Follow-up"
+  },
+  {
+   "label": "Preconception (Yesterday)",
+   "number_card_name": "Preconception (Yesterday)"
+  },
+  {
+   "label": "Postpartum (Yesterday)",
+   "number_card_name": "Postpartum (Yesterday)"
+  },
+  {
+   "label": "Child 6w-1y (Yesterday)",
+   "number_card_name": "Child 6w-1y (Yesterday)"
   }
  ],
  "owner": "Administrator",

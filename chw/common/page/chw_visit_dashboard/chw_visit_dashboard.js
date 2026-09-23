@@ -53,25 +53,26 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
             label: 'Pregnancy',
             visitTypes: [
                 { label: 'ANC Follow-up', value: 'ANC Follow-up' },
-                { label: 'PNC', value: 'PNC' }
+                { label: 'PNC', value: 'PNC' },
+                { label: 'Preconception', value: 'Preconception' }
             ]
         },
         {
             label: 'Child',
             visitTypes: [
-                { label: 'Growth Monitoring', value: 'Child Growth Monitoring' }
+                { label: 'Child 6w-1y', value: 'Child 6w-1y' }
             ]
         },
         {
-            label: 'NCD',
+            label: 'Postpartum',
             visitTypes: [
-                { label: 'NCD', value: 'NCD' }
+                { label: 'Postpartum', value: 'Postpartum' }
             ]
         },
         {
-            label: 'Mental Health',
+            label: 'Palliative Care',
             visitTypes: [
-                { label: 'Mental Health', value: 'Mental Health' }
+                { label: 'Palliative Care', value: 'Palliative Care' }
             ]
         }
     ];
@@ -80,6 +81,194 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
         if (!visitTypeValue) return null;
         let program = PROGRAMS.find(p => p.visitTypes.some(vt => vt.value === visitTypeValue));
         return program ? program.label : null;
+    }
+
+    // One color per My Worklist program - same palette used in the design
+    // preview. Only these 6 - ANC, PNC, Preconception, Postpartum,
+    // Child 6w-1y, Palliative Care - chw_worklist_summary never returns
+    // anything else, so no fallback/default color is needed here.
+    const WORKLIST_PROGRAM_COLORS = {
+        'ANC Follow-up': '#2a78d6',
+        'PNC': '#eb6834',
+        'Preconception': '#4a3aa7',
+        'Postpartum': '#007a5e',
+        'Child 6w-1y': '#8a5a00',
+        'Palliative Care': '#c2568a'
+    };
+
+    const WORKLIST_TABS = ['overdue', 'today', 'upcoming', 'all'];
+    const WORKLIST_TAB_LABELS = { overdue: 'Overdue', today: 'Today', upcoming: 'Upcoming', all: 'All' };
+    const WORKLIST_TAB_COLORS = { overdue: '#c62828', today: '#b8790a', upcoming: '#607d8b', all: '#222' };
+    let worklistData = { overdue: [], today: [], upcoming: [] };
+    let worklistActiveTab = 'overdue';
+
+    function worklistChipHtml(tab, value) {
+        let color = WORKLIST_TAB_COLORS[tab];
+        let active = worklistActiveTab === tab;
+        return `
+            <div class="worklist-chip" data-tab="${tab}" style="
+                flex:1; min-width:100px; background:${active ? color + '18' : 'white'};
+                border:2px solid ${color}; border-radius:10px; padding:14px; text-align:center; cursor:pointer;">
+                <div style="font-size:26px; font-weight:800; color:${color};">${value}</div>
+                <div style="font-size:11px; font-weight:700; letter-spacing:0.03em; color:${color}; margin-top:2px;">${WORKLIST_TAB_LABELS[tab].toUpperCase()}</div>
+            </div>`;
+    }
+
+    function worklistTabBarHtml() {
+        return `
+            <div style="display:flex; gap:4px; background:var(--control-bg,#f5f7fa); border-radius:8px; padding:4px; margin:14px 0;">
+                ${WORKLIST_TABS.map(tab => `
+                    <div class="worklist-tab" data-tab="${tab}" style="
+                        flex:1; text-align:center; padding:7px 4px; border-radius:6px; cursor:pointer;
+                        font-size:12.5px; font-weight:600;
+                        background:${worklistActiveTab === tab ? '#222' : 'transparent'};
+                        color:${worklistActiveTab === tab ? 'white' : '#555'};">
+                        ${WORKLIST_TAB_LABELS[tab]}
+                    </div>`).join('')}
+            </div>`;
+    }
+
+    function worklistCardHtml(visit) {
+        let color = WORKLIST_PROGRAM_COLORS[visit.visit_type] || '#607d8b';
+        let dateStr = visit.visit_date ? formatDMY(visit.visit_date) : '';
+        let today = frappe.datetime.get_today();
+        let tagColor = visit.visit_date < today ? '#c62828' : (visit.visit_date === today ? '#b8790a' : '#607d8b');
+        let tagText = visit.visit_date < today
+            ? `Overdue (${dateStr})`
+            : (visit.visit_date === today ? 'Due today' : `Due ${dateStr}`);
+        return `
+            <div class="worklist-card" style="
+                display:flex; align-items:center; gap:12px; background:white; border:1px solid var(--border-color,#d1d8dd);
+                border-radius:10px; padding:12px 14px; margin-bottom:8px; box-shadow:0 1px 2px rgba(0,0,0,.04); cursor:pointer;"
+                data-doctype="${visit.doctype}" data-name="${visit.name}">
+                <div style="flex:1; min-width:0;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:3px; flex-wrap:wrap;">
+                        <span style="font-weight:700; font-size:14px;">${frappe.utils.escape_html(visit.patient_name || '-')}</span>
+                        <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; border:1.3px solid ${color}; color:${color}; white-space:nowrap;">${frappe.utils.escape_html(visit.visit_type)}</span>
+                    </div>
+                    ${visit.village ? `<div style="font-size:12px; color:#777;">${frappe.utils.escape_html(visit.village)}</div>` : ''}
+                </div>
+                <div style="font-size:12px; font-weight:700; color:${tagColor}; white-space:nowrap;">${tagText}</div>
+            </div>`;
+    }
+
+    let worklistFilters = { village: 'All Villages', visit_type: '' };
+
+    function worklistFilterChipsHtml() {
+        let villageOpts = villageOptions.length ? villageOptions : ['All Villages'];
+        let programOpts = Object.keys(WORKLIST_PROGRAM_COLORS);
+        return `
+            <div style="display:flex; gap:8px; margin:12px 0 14px; flex-wrap:wrap;">
+                <select class="worklist-village-filter" style="
+                    border:1px solid var(--border-color,#d1d8dd); border-radius:100px; padding:5px 12px;
+                    font-size:12.5px; background:white; cursor:pointer;">
+                    ${villageOpts.map(v => `<option value="${v}" ${worklistFilters.village === v ? 'selected' : ''}>📍 ${v}</option>`).join('')}
+                </select>
+                <select class="worklist-program-filter" style="
+                    border:1px solid var(--border-color,#d1d8dd); border-radius:100px; padding:5px 12px;
+                    font-size:12.5px; background:white; cursor:pointer;">
+                    <option value="" ${!worklistFilters.visit_type ? 'selected' : ''}>All programs</option>
+                    ${programOpts.map(p => `<option value="${p}" ${worklistFilters.visit_type === p ? 'selected' : ''}>${p}</option>`).join('')}
+                </select>
+            </div>`;
+    }
+
+    function worklistSectionHtml(subtitle) {
+        let overdueCount = worklistData.overdue.length;
+        let todayCount = worklistData.today.length;
+        let upcomingCount = worklistData.upcoming.length;
+        return `
+            <div style="margin-bottom:2px;">
+                <div style="font-size:20px; font-weight:800;">My Worklist</div>
+                <div style="color:#888; font-size:12.5px; margin-top:2px;">${subtitle}</div>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                ${worklistChipHtml('overdue', overdueCount)}
+                ${worklistChipHtml('today', todayCount)}
+                ${worklistChipHtml('upcoming', upcomingCount)}
+            </div>
+            ${worklistTabBarHtml()}
+            ${worklistFilterChipsHtml()}
+            <div id="worklist-list-container"></div>
+        `;
+    }
+
+    function renderWorklistList() {
+        let $container = page.main.find('#worklist-list-container');
+        if (!$container.length) return;
+        let visits = worklistActiveTab === 'all'
+            ? [...worklistData.overdue, ...worklistData.today, ...worklistData.upcoming]
+            : worklistData[worklistActiveTab] || [];
+
+        if (!visits.length) {
+            $container.html(`<div style="text-align:center; color:#999; padding:30px; border:1px dashed var(--border-color,#ddd); border-radius:8px;">Nothing here.</div>`);
+            return;
+        }
+        $container.html(`<div style="max-height:420px; overflow-y:auto;">${visits.map(worklistCardHtml).join('')}</div>`);
+        $container.find('.worklist-card').on('click', function() {
+            frappe.set_route('Form', $(this).data('doctype'), $(this).data('name'));
+        });
+    }
+
+    function rerenderWorklistChipsAndTabs() {
+        page.main.find('.worklist-chip').each(function() {
+            let tab = $(this).data('tab');
+            let active = worklistActiveTab === tab;
+            let color = WORKLIST_TAB_COLORS[tab];
+            $(this).css({ background: active ? color + '18' : 'white' });
+        });
+        page.main.find('.worklist-tab').each(function() {
+            let tab = $(this).data('tab');
+            let active = worklistActiveTab === tab;
+            $(this).css({ background: active ? '#222' : 'transparent', color: active ? 'white' : '#555' });
+        });
+    }
+
+    function worklistVillageSummary(visits) {
+        let villages = [...new Set(visits.map(v => v.village).filter(Boolean))];
+        if (!villages.length) return 'All villages';
+        if (villages.length === 1) return villages[0];
+        return `${villages[0]} & ${villages.length - 1} more village${villages.length - 1 > 1 ? 's' : ''}`;
+    }
+
+    function loadWorklistData() {
+        let $wrap = page.main.find('#my-worklist-wrapper');
+        if (!$wrap.length) return;
+        frappe.call({
+            method: 'chw.api.chw_worklist_summary',
+            args: {
+                village: worklistFilters.village !== 'All Villages' ? worklistFilters.village : null,
+                visit_type: worklistFilters.visit_type || null
+            },
+            callback: function(r) {
+                let data = r.message || {};
+                if (data.health_worker_linked === false) {
+                    $wrap.html(`<div style="background:#fff3cd; border:1px solid #ffe69c; color:#664d03; padding:12px 16px; border-radius:6px;">
+                        No Health Worker record is linked to your login, so your worklist can't be shown here.
+                    </div>`);
+                    return;
+                }
+                worklistData = { overdue: data.overdue || [], today: data.today || [], upcoming: data.upcoming || [] };
+                let allVisits = [...worklistData.overdue, ...worklistData.today, ...worklistData.upcoming];
+                let subtitle = `${data.health_worker_name || 'You'} · ${worklistVillageSummary(allVisits)}`;
+
+                $wrap.html(worklistSectionHtml(subtitle));
+                renderWorklistList();
+                $wrap.find('.worklist-chip, .worklist-tab').on('click', function() {
+                    worklistActiveTab = $(this).data('tab');
+                    rerenderWorklistChipsAndTabs();
+                    renderWorklistList();
+                });
+                $wrap.find('.worklist-village-filter').on('change', function() {
+                    worklistFilters.village = $(this).val();
+                    loadWorklistData();
+                });
+                $wrap.find('.worklist-program-filter').on('change', function() {
+                    worklistFilters.visit_type = $(this).val();
+                    loadWorklistData();
+                });
+            }
+        });
     }
 
     let villageOptions = [
@@ -148,27 +337,6 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
         `;
     }
 
-    function bigVisitCard(id, value, label, color) {
-        return `
-            <div id="${id}" style="background: ${color}; color: white; padding: 30px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.3)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
-                <div style="font-size: 48px; font-weight: bold;">${value}</div>
-                <div>${label}</div>
-            </div>
-        `;
-    }
-
-    function visitDetailsHtml(scheduled, backlog, viewMode) {
-        // Always a single combined Pending/Missed pair for the selected day or week -
-        // narrowed to whichever Program/Visit Type is selected in FILTER, or the total when none is.
-        let pendingLabel = viewMode === 'day' ? 'Pending Today' : 'Pending This Week';
-        return `
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                ${bigVisitCard('scheduled-card', scheduled, pendingLabel, '#2e7d32')}
-                ${bigVisitCard('backlog-card', backlog, 'Missed / Due List', '#c62828')}
-            </div>
-        `;
-    }
-
     function updateSelectedDateFromFilters() {
         selectedDate = selectedFilters.period_date || frappe.datetime.get_today();
     }
@@ -194,15 +362,8 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
 
     function render() {
         // Get data
-        let scheduled = dashboardData.scheduled_count || 0;
-        let backlog = dashboardData.backlog_count || 0;
         let recentReg = dashboardData.recent_registrations || 0;
-        let recentEnroll = dashboardData.recent_enrollments || 0;
-        let recentVisits = dashboardData.recent_visits || 0;
         let totalReg = dashboardData.total_registrations || 0;
-        let normalChildren = dashboardData.normal_children || 0;
-        let mamChildren = dashboardData.mam_children || 0;
-        let samChildren = dashboardData.sam_children || 0;
         let exitWomenAnc = dashboardData.exit_women_anc || 0;
         let exitWomenPnc = dashboardData.exit_women_pnc || 0;
 
@@ -294,37 +455,16 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
                     </div>
                 </div>` : ''}
 
-                ${selectedFilters.program === 'Child' ? `
-                <div style="margin-bottom: 30px;">
-                    <h5 style="font-size: 13px; font-weight: 700; letter-spacing:0.5px; color: #333; margin-bottom: 12px;">CHILD GROWTH MONITORING</h5>
-                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                        ${statCard(normalChildren, 'Normal', '#66bb6a', 'normal_children')}
-                        ${statCard(mamChildren, 'MAM (Moderate)', '#ffa726', 'mam_children')}
-                        ${statCard(samChildren, 'SAM (Severe)', '#ef5350', 'sam_children')}
-                    </div>
-                </div>` : ''}
-
-                <div style="margin-bottom: 30px;">
-                    <h5 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">Visit Details</h5>
-                    ${visitDetailsHtml(scheduled, backlog, viewMode)}
+                <div style="margin-bottom: 30px; max-width: 620px;">
+                    <div id="my-worklist-wrapper"><div style="text-align:center; color:#999; padding:20px;">Loading...</div></div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
                     <div>
-                        <h5 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">Recent Statistics</h5>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                            <div id="recent-registrations-card" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
-                                <div style="font-size: 32px; font-weight: bold;">${recentReg}</div>
-                                <div style="font-size: 12px; color: #666;">Recent registrations</div>
-                            </div>
-                            <div id="recent-enrollments-card" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
-                                <div style="font-size: 32px; font-weight: bold;">${recentEnroll}</div>
-                                <div style="font-size: 12px; color: #666;">Recent enrollments</div>
-                            </div>
-                            <div id="total-visits-card" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center; grid-column: 1 / -1; cursor: pointer; transition: all 0.2s ease;">
-                                <div style="font-size: 32px; font-weight: bold;">${recentVisits}</div>
-                                <div style="font-size: 12px; color: #666;">Total pending visits ${viewMode === 'day' ? 'today' : 'this week'}</div>
-                            </div>
+                        <h5 style="font-size: 16px; font-weight: 600; margin-bottom: 15px;">Recent Registrations</h5>
+                        <div id="recent-registrations-card" style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+                            <div style="font-size: 32px; font-weight: bold;">${recentReg}</div>
+                            <div style="font-size: 12px; color: #666;">Pregnancy Registrations, last 30 days</div>
                         </div>
                     </div>
 
@@ -340,6 +480,8 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
         `;
 
         page.main.html(html);
+
+        loadWorklistData();
 
         page.main.find('#dashboard-apply-filters').on('click', function() {
             selectedFilters.village = page.main.find('#filter-village').val();
@@ -398,22 +540,8 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
         page.main.find('#recent-registrations-card').on('click', function() {
             showRecentRegistrationsDialog();
         });
-        page.main.find('#recent-enrollments-card').on('click', function() {
-            showRecentEnrollmentsDialog();
-        });
-        page.main.find('#total-visits-card').on('click', function() {
-            showTotalVisitsDialog();
-        });
         page.main.find('#total-registrations-card').on('click', function() {
             showTotalRegistrationsDialog();
-        });
-        page.main.find('#backlog-card').on('click', function() {
-            showBacklogDialog();
-        });
-
-        // Attach event to scheduled (pending this week) visits card
-        page.main.find('#scheduled-card').on('click', function() {
-            showPendingDialog();
         });
 
         // Attach events to the new stat cards (Household & Family / NCD sections)
@@ -604,127 +732,6 @@ frappe.pages['chw-visit-dashboard'].on_page_load = function(wrapper) {
                 let records = (r.message && r.message.records) || [];
                 let d = new frappe.ui.Dialog({
                     title: 'Recent Registrations',
-                    fields: [
-                        { fieldtype: 'HTML', fieldname: 'content' }
-                    ]
-                });
-                d.fields_dict.content.$wrapper.html(renderRecordList(records));
-                d.show();
-                d.$wrapper.find('tbody tr').on('click', function() {
-                    let doctype = $(this).data('doctype');
-                    let name = $(this).data('name');
-                    if (doctype && name) {
-                        frappe.set_route('Form', doctype, name);
-                        d.hide();
-                    }
-                });
-            }
-        });
-    }
-
-    function showRecentEnrollmentsDialog() {
-        frappe.call({
-            method: 'chw.api.chw_visit_drilldown',
-            args: {
-                report_type: 'recent_enrollments'
-            },
-            callback: function(r) {
-                let records = (r.message && r.message.records) || [];
-                let d = new frappe.ui.Dialog({
-                    title: 'Recent Enrollments',
-                    fields: [
-                        { fieldtype: 'HTML', fieldname: 'content' }
-                    ]
-                });
-                if (records.length) {
-                    d.fields_dict.content.$wrapper.html(renderRecordList(records));
-                    d.show();
-                    d.$wrapper.find('tbody tr').on('click', function() {
-                        let doctype = $(this).data('doctype');
-                        let name = $(this).data('name');
-                        if (doctype && name) {
-                            frappe.set_route('Form', doctype, name);
-                            d.hide();
-                        }
-                    });
-                } else {
-                    d.fields_dict.content.$wrapper.html('<div style="padding: 10px; color: #666;">No enrollment records available.</div>');
-                    d.show();
-                }
-            }
-        });
-    }
-
-    function showTotalVisitsDialog() {
-        let viewMode = selectedFilters.view_mode;
-        let periodRange = getPeriodBounds(selectedDate, viewMode);
-        let periodStr = viewMode === 'day' ? periodRange.start : `${periodRange.start} to ${periodRange.end}`;
-        let d = new frappe.ui.Dialog({
-            title: `Total Pending Visits ${viewMode === 'day' ? 'Today' : 'This Week'}`,
-            fields: [
-                { fieldtype: 'HTML', fieldname: 'content' }
-            ]
-        });
-        d.fields_dict.content.$wrapper.html(`
-            <div style="padding: 10px;">
-                <p>${viewMode === 'day' ? 'Day' : 'Week'}: <strong>${periodStr}</strong>: <strong>${dashboardData.recent_visits || 0}</strong> pending visits.</p>
-                <p>This is your own pending count for the selected visit type and ${viewMode === 'day' ? 'day' : 'week'}.</p>
-            </div>
-        `);
-        d.show();
-    }
-
-    function showPendingDialog(visitTypeOverride) {
-        let vt = visitTypeOverride !== undefined ? visitTypeOverride : selectedFilters.visit_type;
-        let viewMode = selectedFilters.view_mode;
-        let periodLabel = viewMode === 'day' ? 'Pending Today' : 'Pending This Week';
-        frappe.call({
-            method: 'chw.api.chw_visit_drilldown',
-            args: {
-                report_type: 'pending_visits',
-                visit_type: vt,
-                week_start: getPeriodBounds(selectedDate, viewMode).start,
-                village: villageArg(),
-                view_mode: viewMode
-            },
-            callback: function(r) {
-                let records = (r.message && r.message.records) || [];
-                let d = new frappe.ui.Dialog({
-                    title: vt ? `${periodLabel} — ${vt}` : periodLabel,
-                    fields: [
-                        { fieldtype: 'HTML', fieldname: 'content' }
-                    ]
-                });
-                d.fields_dict.content.$wrapper.html(renderRecordList(records));
-                d.show();
-                d.$wrapper.find('tbody tr').on('click', function() {
-                    let doctype = $(this).data('doctype');
-                    let name = $(this).data('name');
-                    if (doctype && name) {
-                        frappe.set_route('Form', doctype, name);
-                        d.hide();
-                    }
-                });
-            }
-        });
-    }
-
-    function showBacklogDialog(visitTypeOverride) {
-        let vt = visitTypeOverride !== undefined ? visitTypeOverride : selectedFilters.visit_type;
-        let viewMode = selectedFilters.view_mode;
-        frappe.call({
-            method: 'chw.api.chw_visit_drilldown',
-            args: {
-                report_type: 'backlog_visits',
-                visit_type: vt,
-                week_start: getPeriodBounds(selectedDate, viewMode).start,
-                village: villageArg(),
-                view_mode: viewMode
-            },
-            callback: function(r) {
-                let records = (r.message && r.message.records) || [];
-                let d = new frappe.ui.Dialog({
-                    title: vt ? `Missed / Due List — ${vt}` : 'Missed / Due List',
                     fields: [
                         { fieldtype: 'HTML', fieldname: 'content' }
                     ]

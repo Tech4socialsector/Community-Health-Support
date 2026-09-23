@@ -15,6 +15,9 @@
   "date_of_birth",
   "age",
   "phone_number",
+  "health_worker_name",
+  "next_visit_date",
+  "next_visit_date_auto",
   "therapist_followup",
   "medical_followup_form",
   "are_pressure_sores_present",
@@ -71,6 +74,27 @@
    "fieldname": "phone_number",
    "fieldtype": "Data",
    "label": "Phone Number"
+  },
+  {
+   "fieldname": "health_worker_name",
+   "fieldtype": "Link",
+   "label": "Volunteer / Data Collector",
+   "options": "Health Worker"
+  },
+  {
+   "description": "Set automatically from the latest Medical Followup Form row's \"Date of Next Visit\" - edit it by hand only to override that.",
+   "fieldname": "next_visit_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Next Visit Date"
+  },
+  {
+   "fieldname": "next_visit_date_auto",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Next Visit Date (auto)",
+   "read_only": 1
   },
   {
    "fieldname": "therapist_followup",

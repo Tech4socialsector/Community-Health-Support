@@ -127,7 +127,7 @@
    "options": "Baby PNC Followup Child"
   },
   {
-   "description": "Auto-calculated from the last PNC follow-up date and the PNC Visit Interval Master. Enter a date here to override it, or clear it to let it auto-calculate again.",
+   "description": "Set automatically from the latest mother followup row's \"Date of Next Visit\" - edit it by hand only to override that.",
    "fieldname": "next_pnc_visit_date",
    "fieldtype": "Date",
    "label": "Next PNC Visit date"

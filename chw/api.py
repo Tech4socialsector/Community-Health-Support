@@ -388,7 +388,7 @@ def sync_next_visit_todo(doc, date_field, description):
             'description': description,
         })
     else:
-        from frappe.desk.form.assign_to import _add as assign_to_add
+        from frappe.desk.form.assign_to import add as assign_to_add
 
         assign_to_add({
             'doctype': doc.doctype,
@@ -603,6 +603,91 @@ def chw_visit_summary(target_date=None, visit_type=None, village=None, view_mode
             frappe.log_error(f"Error fetching Mental Health records: {str(e)}")
             per_type_scheduled['Mental Health'] = 0
 
+        # Query Preconception records due this week
+        try:
+            precon_records = frappe.get_list(
+                'Preconception Reg and Followup',
+                filters=hw_filters({'next_visit_date': ['between', [week_start, week_end]]}),
+                fields=['name', 'patient_name', 'village', 'next_visit_date as visit_date'],
+                limit_page_length=500
+            )
+            for rec in precon_records:
+                visits.append({
+                    'visit_type': 'Preconception',
+                    'patient_name': rec.patient_name or '-',
+                    'visit_date': rec.visit_date,
+                    'status': 'Pending'
+                })
+            per_type_scheduled['Preconception'] = len(precon_records)
+        except Exception as e:
+            frappe.log_error(f"Error fetching Preconception records: {str(e)}")
+            per_type_scheduled['Preconception'] = 0
+
+        # Query Postpartum records due this week
+        try:
+            postpartum_records = frappe.get_list(
+                'Postpartum Reg and Followup',
+                filters=hw_filters({'next_visit_date': ['between', [week_start, week_end]]}),
+                fields=['name', 'patient_name', 'village', 'next_visit_date as visit_date'],
+                limit_page_length=500
+            )
+            for rec in postpartum_records:
+                visits.append({
+                    'visit_type': 'Postpartum',
+                    'patient_name': rec.patient_name or '-',
+                    'visit_date': rec.visit_date,
+                    'status': 'Pending'
+                })
+            per_type_scheduled['Postpartum'] = len(postpartum_records)
+        except Exception as e:
+            frappe.log_error(f"Error fetching Postpartum records: {str(e)}")
+            per_type_scheduled['Postpartum'] = 0
+
+        # Query Child 6w-1y records due this week
+        try:
+            child_6w_1y_records = frappe.get_list(
+                'Child 6w to 1 Year Reg and Followup',
+                filters=hw_filters({'next_visit_date': ['between', [week_start, week_end]]}),
+                fields=['name', 'patient_name', 'village', 'next_visit_date as visit_date'],
+                limit_page_length=500
+            )
+            for rec in child_6w_1y_records:
+                visits.append({
+                    'visit_type': 'Child 6w-1y',
+                    'patient_name': rec.patient_name or '-',
+                    'visit_date': rec.visit_date,
+                    'status': 'Pending'
+                })
+            per_type_scheduled['Child 6w-1y'] = len(child_6w_1y_records)
+        except Exception as e:
+            frappe.log_error(f"Error fetching Child 6w-1y records: {str(e)}")
+            per_type_scheduled['Child 6w-1y'] = 0
+
+        # Query Palliative Care records due this week - no village field on this
+        # doctype (see apply_village_filter's own docstring reasoning for Mental
+        # Health), so village filtering doesn't apply here, health worker still does.
+        try:
+            palliative_filters = {'next_visit_date': ['between', [week_start, week_end]]}
+            if health_worker:
+                palliative_filters['health_worker_name'] = health_worker
+            palliative_records = frappe.get_list(
+                'Palliative care followup',
+                filters=palliative_filters,
+                fields=['name', 'name1', 'next_visit_date as visit_date'],
+                limit_page_length=500
+            )
+            for rec in palliative_records:
+                visits.append({
+                    'visit_type': 'Palliative Care',
+                    'patient_name': rec.name1 or '-',
+                    'visit_date': rec.visit_date,
+                    'status': 'Pending'
+                })
+            per_type_scheduled['Palliative Care'] = len(palliative_records)
+        except Exception as e:
+            frappe.log_error(f"Error fetching Palliative Care records: {str(e)}")
+            per_type_scheduled['Palliative Care'] = 0
+
     total_count = len(visits)
 
     # Get registration statistics
@@ -686,6 +771,42 @@ def chw_visit_summary(target_date=None, visit_type=None, village=None, view_mode
         except Exception as e:
             frappe.log_error(f"Error calculating Mental Health backlog count: {str(e)}")
             per_type_backlog['Mental Health'] = 0
+
+        try:
+            per_type_backlog['Preconception'] = frappe.db.count(
+                'Preconception Reg and Followup',
+                hw_filters({'next_visit_date': ['<', week_start]})
+            )
+        except Exception as e:
+            frappe.log_error(f"Error calculating Preconception backlog count: {str(e)}")
+            per_type_backlog['Preconception'] = 0
+
+        try:
+            per_type_backlog['Postpartum'] = frappe.db.count(
+                'Postpartum Reg and Followup',
+                hw_filters({'next_visit_date': ['<', week_start]})
+            )
+        except Exception as e:
+            frappe.log_error(f"Error calculating Postpartum backlog count: {str(e)}")
+            per_type_backlog['Postpartum'] = 0
+
+        try:
+            per_type_backlog['Child 6w-1y'] = frappe.db.count(
+                'Child 6w to 1 Year Reg and Followup',
+                hw_filters({'next_visit_date': ['<', week_start]})
+            )
+        except Exception as e:
+            frappe.log_error(f"Error calculating Child 6w-1y backlog count: {str(e)}")
+            per_type_backlog['Child 6w-1y'] = 0
+
+        try:
+            palliative_backlog_filters = {'next_visit_date': ['<', week_start]}
+            if health_worker:
+                palliative_backlog_filters['health_worker_name'] = health_worker
+            per_type_backlog['Palliative Care'] = frappe.db.count('Palliative care followup', palliative_backlog_filters)
+        except Exception as e:
+            frappe.log_error(f"Error calculating Palliative Care backlog count: {str(e)}")
+            per_type_backlog['Palliative Care'] = 0
 
     if visit_type:
         scheduled_count = per_type_scheduled.get(visit_type, 0)
@@ -952,6 +1073,93 @@ def _chw_visit_drilldown(report_type, target_date=None, from_date=None, to_date=
             except Exception as e:
                 frappe.log_error(f"Error fetching Mental Health backlog/pending: {str(e)}")
 
+        if not visit_type or visit_type == 'Preconception':
+            try:
+                records += [
+                    {
+                        'doctype': 'Preconception Reg and Followup',
+                        'name': rec.name,
+                        'patient': rec.patient_name or '-',
+                        'village': rec.village,
+                        'creation': rec.next_visit_date
+                    }
+                    for rec in frappe.get_all(
+                        'Preconception Reg and Followup',
+                        fields=['name', 'patient_name', 'village', 'next_visit_date'],
+                        filters=date_window_filters('next_visit_date')
+                    )
+                ]
+            except Exception as e:
+                frappe.log_error(f"Error fetching Preconception backlog/pending: {str(e)}")
+
+        if not visit_type or visit_type == 'Postpartum':
+            try:
+                records += [
+                    {
+                        'doctype': 'Postpartum Reg and Followup',
+                        'name': rec.name,
+                        'patient': rec.patient_name or '-',
+                        'village': rec.village,
+                        'creation': rec.next_visit_date
+                    }
+                    for rec in frappe.get_all(
+                        'Postpartum Reg and Followup',
+                        fields=['name', 'patient_name', 'village', 'next_visit_date'],
+                        filters=date_window_filters('next_visit_date')
+                    )
+                ]
+            except Exception as e:
+                frappe.log_error(f"Error fetching Postpartum backlog/pending: {str(e)}")
+
+        if not visit_type or visit_type == 'Child 6w-1y':
+            try:
+                records += [
+                    {
+                        'doctype': 'Child 6w to 1 Year Reg and Followup',
+                        'name': rec.name,
+                        'patient': rec.patient_name or '-',
+                        'village': rec.village,
+                        'creation': rec.next_visit_date
+                    }
+                    for rec in frappe.get_all(
+                        'Child 6w to 1 Year Reg and Followup',
+                        fields=['name', 'patient_name', 'village', 'next_visit_date'],
+                        filters=date_window_filters('next_visit_date')
+                    )
+                ]
+            except Exception as e:
+                frappe.log_error(f"Error fetching Child 6w-1y backlog/pending: {str(e)}")
+
+        if not visit_type or visit_type == 'Palliative Care':
+            try:
+                # No village field on this doctype, so date_window_filters isn't
+                # reused here (it bakes in a village condition) - built by hand
+                # with just the date/health-worker parts that do apply.
+                if date_op == '<':
+                    palliative_filters = [['next_visit_date', 'is', 'set'], ['next_visit_date', '<', date_value]]
+                    if health_worker:
+                        palliative_filters.append(['health_worker_name', '=', health_worker])
+                else:
+                    palliative_filters = {'next_visit_date': [date_op, date_value]}
+                    if health_worker:
+                        palliative_filters['health_worker_name'] = health_worker
+                records += [
+                    {
+                        'doctype': 'Palliative care followup',
+                        'name': rec.name,
+                        'patient': rec.name1 or '-',
+                        'village': None,
+                        'creation': rec.next_visit_date
+                    }
+                    for rec in frappe.get_all(
+                        'Palliative care followup',
+                        fields=['name', 'name1', 'next_visit_date'],
+                        filters=palliative_filters
+                    )
+                ]
+            except Exception as e:
+                frappe.log_error(f"Error fetching Palliative Care backlog/pending: {str(e)}")
+
         return {
             'records': sorted(
                 records,
@@ -1082,6 +1290,95 @@ def _chw_visit_drilldown(report_type, target_date=None, from_date=None, to_date=
         ]}
 
     return {'records': []}
+
+
+# The 6 programs that make up this team's actual maternal/child-health
+# continuum - NCD, Child Growth Monitoring and Mental Health are deliberately
+# left out of this worklist (they stay on the existing Scheduled/Backlog
+# view above, untouched). Each tuple is
+# (doctype, short label shown on the badge, the "next visit" date field,
+# the patient-name field, the village field or None if the doctype doesn't
+# carry one - see Palliative care followup, which has none).
+WORKLIST_PROGRAMS = [
+    ('ANC Follow-up', 'ANC Follow-up', 'next_anc_visit_date', 'first_name', 'village'),
+    ('PNC', 'PNC', 'next_pnc_visit_date', 'first_name', 'village'),
+    ('Preconception Reg and Followup', 'Preconception', 'next_visit_date', 'patient_name', 'village'),
+    ('Postpartum Reg and Followup', 'Postpartum', 'next_visit_date', 'patient_name', 'village'),
+    ('Child 6w to 1 Year Reg and Followup', 'Child 6w-1y', 'next_visit_date', 'patient_name', 'village'),
+    ('Palliative care followup', 'Palliative Care', 'next_visit_date', 'name1', None),
+]
+
+
+@frappe.whitelist()
+def chw_worklist_summary(village=None, visit_type=None):
+    """Overdue / Due Today / This Week buckets across the 6-program MCH
+    continuum, for the My Worklist view - a fixed real-time split (always
+    against today), independent of the broader Visit Dashboard's own
+    arbitrary week/day navigation above."""
+    health_worker = get_current_health_worker()
+    privileged = is_privileged_user()
+    if not health_worker and not privileged:
+        return {'health_worker_linked': False, 'overdue': [], 'today': [], 'upcoming': []}
+
+    today = getdate(frappe.utils.nowdate())
+    week_end = getdate(get_period_bounds('week', today)[1])
+
+    overdue, today_list, upcoming = [], [], []
+
+    for doctype, label, date_field, patient_field, village_field in WORKLIST_PROGRAMS:
+        if visit_type and visit_type != label:
+            continue
+
+        filters = {date_field: ['is', 'set']}
+        if health_worker:
+            filters['health_worker_name'] = health_worker
+        if village_field and village and village != 'All Villages':
+            filters[village_field] = village
+        elif not village_field and village and village != 'All Villages':
+            # This program has no village field to filter on at all (see
+            # Palliative Care) - rather than silently ignoring the filter,
+            # skip the program entirely so a village-scoped view never
+            # leaks records that can't actually be confirmed to belong to it.
+            continue
+
+        fields = ['name', patient_field, date_field]
+        if village_field:
+            fields.append(village_field)
+
+        try:
+            records = frappe.get_all(doctype, filters=filters, fields=fields, limit_page_length=500)
+        except Exception as e:
+            frappe.log_error(f"Error fetching {doctype} for worklist: {str(e)}")
+            continue
+
+        for rec in records:
+            date_val = rec.get(date_field)
+            if not date_val:
+                continue
+            date_val = getdate(date_val)
+            entry = {
+                'doctype': doctype,
+                'name': rec.name,
+                'visit_type': label,
+                'patient_name': rec.get(patient_field) or '-',
+                'village': rec.get(village_field) if village_field else None,
+                'visit_date': str(date_val),
+            }
+            if date_val < today:
+                overdue.append(entry)
+            elif date_val == today:
+                today_list.append(entry)
+            elif date_val <= week_end:
+                upcoming.append(entry)
+
+    sort_key = lambda e: e['visit_date']
+    return {
+        'health_worker_linked': bool(health_worker) or privileged,
+        'health_worker_name': health_worker,
+        'overdue': sorted(overdue, key=sort_key),
+        'today': sorted(today_list, key=sort_key),
+        'upcoming': sorted(upcoming, key=sort_key),
+    }
 
 
 @frappe.whitelist()
