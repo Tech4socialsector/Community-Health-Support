@@ -20,19 +20,36 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 	let isPrivileged = false;
 	let villageOptions = ['All Villages'];
 	let healthWorkerOptions = ['All Health Workers'];
-	let summary = { today: 0, upcoming: 0, overdue: 0, by_type: [], health_worker_linked: true };
+	let summary = { this_week: 0, today: 0, upcoming: 0, overdue: 0, completed: 0, high_risk: 0, by_type: [], health_worker_linked: true };
 	let allRecords = [];
 
 	let selectedFilters = {
 		status: 'all',
 		visit_type: '',
+		risk: '',
 	};
 
 	const VISIT_TYPES = ['ANC', 'PNC', 'Palliative Care', 'Postpartum (1-6 weeks)', 'Child (6 wk-1 year)'];
+	// This Week is the working list for the week (any day Mon-Sun); Today is
+	// just that same list filtered down to date == today, not a separate
+	// count - see byTypeCountFor()/the backend's own get_chw_work_order_summary.
+	// Upcoming is a rolling 30-days-from-today view, not "later this week"
+	// and not "rest of this calendar month" (that gap - a visit due just
+	// after month-end - used to fall through the cracks). Completed is
+	// followups actually logged this week, kept separate from the other 4
+	// (which are all "still pending") so it never gets mixed into "All".
+	// High Risk is a risk-status view, not a due-date bucket - every
+	// currently High Risk patient, regardless of when her next visit lands.
+	// Not a subset of the other 5 and not part of "All" for the same reason
+	// Completed isn't - mixing it in would double-count patients who are
+	// both High Risk and, say, due This Week.
 	const STATUS_CARDS = [
+		{ key: 'this_week', label: 'This Week', color: '#7C3AED' },
 		{ key: 'today', label: 'Today', color: '#2563EB' },
-		{ key: 'upcoming', label: 'Upcoming', color: '#C2540A' },
+		{ key: 'upcoming', label: 'Upcoming (30 days)', color: '#C2540A' },
 		{ key: 'overdue', label: 'Overdue / Missed', color: '#B91C1C' },
+		{ key: 'completed', label: 'Completed (this week)', color: '#15803D' },
+		{ key: 'high_risk', label: 'High Risk', color: '#9F1239' },
 	];
 
 	function loadOptionsThenRender() {
@@ -104,7 +121,11 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 	}
 
 	function byTypeCountFor(t) {
-		if (selectedFilters.status === 'all') return t.today + t.upcoming + t.overdue;
+		// "All" (the default) means "everything still pending" - This Week
+		// already includes Today as a subset, so it isn't added a second
+		// time here; Completed is a different kind of thing (already-done
+		// work) and is deliberately left out of "All" too.
+		if (selectedFilters.status === 'all') return t.this_week + t.overdue;
 		return t[selectedFilters.status] || 0;
 	}
 
@@ -112,11 +133,14 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 		let filterRow = `
 			<div style="display: flex; flex-direction: column; gap: 4px;">
 				<label style="font-size: 11px; font-weight: 600; color: #B91C1C; text-transform: uppercase; letter-spacing: 0.04em;">Status</label>
-				<select id="wol-status" class="form-control" style="height: 34px; width: 150px;">
-					<option value="all" ${selectedFilters.status === 'all' ? 'selected' : ''}>All</option>
+				<select id="wol-status" class="form-control" style="height: 34px; width: 170px;">
+					<option value="all" ${selectedFilters.status === 'all' ? 'selected' : ''}>All (pending)</option>
+					<option value="this_week" ${selectedFilters.status === 'this_week' ? 'selected' : ''}>This Week</option>
 					<option value="today" ${selectedFilters.status === 'today' ? 'selected' : ''}>Today</option>
-					<option value="upcoming" ${selectedFilters.status === 'upcoming' ? 'selected' : ''}>Upcoming</option>
+					<option value="upcoming" ${selectedFilters.status === 'upcoming' ? 'selected' : ''}>Upcoming (30 days)</option>
 					<option value="overdue" ${selectedFilters.status === 'overdue' ? 'selected' : ''}>Overdue</option>
+					<option value="completed" ${selectedFilters.status === 'completed' ? 'selected' : ''}>Completed (week)</option>
+					<option value="high_risk" ${selectedFilters.status === 'high_risk' ? 'selected' : ''}>High Risk</option>
 				</select>
 			</div>
 			<div style="display: flex; flex-direction: column; gap: 4px;">
@@ -124,6 +148,14 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 				<select id="wol-visit-type" class="form-control" style="height: 34px; width: 190px;">
 					<option value="">All Visit Types</option>
 					${VISIT_TYPES.map((v) => `<option value="${v}" ${selectedFilters.visit_type === v ? 'selected' : ''}>${v}</option>`).join('')}
+				</select>
+			</div>
+			<div style="display: flex; flex-direction: column; gap: 4px;">
+				<label style="font-size: 11px; font-weight: 600; color: #B91C1C; text-transform: uppercase; letter-spacing: 0.04em;">Risk</label>
+				<select id="wol-risk" class="form-control" style="height: 34px; width: 150px;">
+					<option value="" ${selectedFilters.risk === '' ? 'selected' : ''}>All</option>
+					<option value="high_risk" ${selectedFilters.risk === 'high_risk' ? 'selected' : ''}>High Risk</option>
+					<option value="normal" ${selectedFilters.risk === 'normal' ? 'selected' : ''}>Normal</option>
 				</select>
 			</div>
 		`;
@@ -151,20 +183,53 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 
 		let byTypeChips = (summary.by_type || []).map((t) => chipHtml(t.label, byTypeCountFor(t))).join('');
 
-		let rows = allRecords
+		let visibleRecords = allRecords.filter((r) => {
+			if (selectedFilters.risk === 'high_risk') return r.high_risk === 'Yes';
+			if (selectedFilters.risk === 'normal') return r.high_risk !== 'Yes';
+			return true;
+		});
+
+		let rows = visibleRecords
 			.map((r) => {
 				let statusColor =
 					r.status === 'Overdue'
 						? 'background:#FEE2E2;color:#B91C1C;'
+						: r.status === 'Completed'
+						? 'background:#DCFCE7;color:#15803D;'
 						: r.status === 'Upcoming'
 						? 'background:#FFEDD5;color:#C2540A;'
+						: r.status === 'This Week'
+						? 'background:#F3E8FF;color:#7C3AED;'
+						: r.status === 'High Risk'
+						? 'background:#FCE7F3;color:#9F1239;'
 						: 'background:#DBEAFE;color:#1D4ED8;';
+
+				let isHighRisk = r.high_risk === 'Yes';
+				let highRiskBadge = isHighRisk
+					? `<span style="font-size: 10px; font-weight: 700; color: #B91C1C; background: #FEE2E2; border: 1px solid #FCA5A5; border-radius: 999px; padding: 2px 8px; margin-left: 8px;">HIGH RISK</span>`
+					: '';
+
+				// Always show a full range - if no window start was stored
+				// (older records saved before this field existed, or the
+				// manual phase's own typed date), fall back to 30 days
+				// before the due date so the list always reads as a range.
+				let windowRange = '-';
+				if (r.due_date) {
+					let fromDate = r.from_date || frappe.datetime.add_days(r.due_date, -30);
+					windowRange = `${frappe.datetime.str_to_user(fromDate)} &ndash; ${frappe.datetime.str_to_user(r.due_date)}`;
+				}
+
+				let alertCell = r.alert_date
+					? `<span style="font-size: 11px; font-weight: 700; color: #B91C1C;">Visit by ${frappe.datetime.str_to_user(r.alert_date)}</span>`
+					: '-';
+
 				return `
-				<tr data-doctype="${r.doctype}" data-name="${frappe.utils.escape_html(r.name)}" style="cursor: pointer;">
-					<td style="padding: 11px 8px; font-size: 13px; font-weight: 600; color: #1F2937;">${frappe.utils.escape_html(r.patient || r.name)}</td>
+				<tr data-doctype="${r.doctype}" data-name="${frappe.utils.escape_html(r.name)}" style="cursor: pointer; ${isHighRisk ? 'background:#FFFBFB;' : ''}">
+					<td style="padding: 11px 8px; font-size: 13px; font-weight: 600; color: #1F2937; white-space: nowrap;">${frappe.utils.escape_html(r.patient || r.name)}${highRiskBadge}</td>
 					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280;">${frappe.utils.escape_html(r.visit_type)}</td>
 					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280;">${frappe.utils.escape_html(r.village || '-')}</td>
-					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280;">${r.due_date ? frappe.datetime.str_to_user(r.due_date) : '-'}</td>
+					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280; white-space: nowrap;">${windowRange}</td>
+					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280; white-space: nowrap;">${alertCell}</td>
 					<td style="padding: 11px 8px;"><span style="font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; ${statusColor}">${r.status}</span></td>
 				</tr>
 			`;
@@ -193,7 +258,7 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 
 				${noHealthWorker}
 
-				<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 18px;">
+				<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px;">
 					${STATUS_CARDS.map(statusCardHtml).join('')}
 				</div>
 
@@ -213,12 +278,13 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 							<th>Patient</th>
 							<th>Visit Type</th>
 							<th>Village</th>
-							<th>Due Date</th>
+							<th>Visit Window (From &ndash; To)</th>
+							<th>Priority Alert</th>
 							<th>Status</th>
 						</tr>
 					</thead>
 					<tbody>
-						${rows || '<tr><td colspan="5" style="color:#9CA3AF;padding:20px;text-align:center;">No records for this selection.</td></tr>'}
+						${rows || '<tr><td colspan="6" style="color:#9CA3AF;padding:20px;text-align:center;">No records for this selection.</td></tr>'}
 					</tbody>
 				</table>
 			</div>
@@ -238,6 +304,10 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 		page.main.find('#wol-visit-type').on('change', function () {
 			selectedFilters.visit_type = $(this).val();
 			loadAndRender();
+		});
+		page.main.find('#wol-risk').on('change', function () {
+			selectedFilters.risk = $(this).val();
+			render();
 		});
 		page.main.find('#wol-village').on('change', function () {
 			selectedFilters.village = $(this).val();

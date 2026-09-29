@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
+  "lmp_date",
+  "pog_weeks",
   "status",
   "month",
   "bp",
@@ -85,7 +87,8 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date"
+   "label": "Date",
+   "reqd": 1
   },
   {
    "default": "Pending",
@@ -500,13 +503,29 @@
    "fieldname": "date_reffe",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "fieldname": "lmp_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "LMP Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pog_weeks",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "POG Weeks",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-22 17:10:09.711111",
+ "modified": "2026-09-25 11:42:31.002278",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Nurse",

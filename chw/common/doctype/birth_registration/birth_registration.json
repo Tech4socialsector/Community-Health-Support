@@ -110,7 +110,8 @@
   {
    "fieldname": "date_of_delivery",
    "fieldtype": "Date",
-   "label": "Date of Delivery"
+   "label": "Date of Delivery",
+   "reqd": 1
   },
   {
    "fieldname": "place_of_birth",
@@ -270,7 +271,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-09-22 11:51:34.763420",
+ "modified": "2026-09-28 16:23:45.112930",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",

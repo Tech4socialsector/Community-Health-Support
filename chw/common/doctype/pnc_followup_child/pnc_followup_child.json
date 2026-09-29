@@ -16,7 +16,10 @@
   "breast",
   "teaching",
   "any_other_complaintremark",
-  "date_of_next_visit"
+  "date_of_next_visit",
+  "next_visit_window",
+  "patient_condition",
+  "urgent_followup"
  ],
  "fields": [
   {
@@ -86,10 +89,35 @@
    "label": "Any other complaint/remark"
   },
   {
+   "description": "Auto-filled with the same date driving Next PNC Visit date - type over it here to override.",
    "fieldname": "date_of_next_visit",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Date of Next Visit"
+  },
+  {
+   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
+   "fieldname": "next_visit_window",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Next Visit Window (From - To)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Patient Condition",
+   "options": "\nNormal\nRisk"
+  },
+  {
+   "default": "0",
+   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
+   "fieldname": "urgent_followup",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Urgent Follow-up",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,

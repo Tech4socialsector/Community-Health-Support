@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
  "autoname": "prompt",
  "creation": "2026-08-10 13:06:55.675647",
@@ -8,22 +7,50 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "interval_days"
+  "interval_days",
+  "automatic_window_count",
+  "column_break_zojt",
+  "risk_alert_within_days",
+  "visits_required_per_window"
  ],
  "fields": [
   {
-   "description": "Days after the last ANC follow-up date to schedule the next visit. Record name must match the Pregnancy Registration 'High Risk' value exactly (Yes / No).",
    "fieldname": "interval_days",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Interval (Days)",
+   "label": "Interval Day Count",
    "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "visits_required_per_window",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Risk Visits Required Per Row"
+  },
+  {
+   "default": "7",
+   "fieldname": "risk_alert_within_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Risk Alert Days"
+  },
+  {
+   "default": "6",
+   "fieldname": "automatic_window_count",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Automatic Month  Count Per Row"
+  },
+  {
+   "fieldname": "column_break_zojt",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-10 13:06:55.675647",
+ "modified": "2026-09-28 10:04:31.684127",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "ANC Visit Interval Master",

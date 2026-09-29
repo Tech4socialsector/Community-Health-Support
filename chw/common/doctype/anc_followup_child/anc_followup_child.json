@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
+  "lmp_date",
+  "pog_weeks",
   "status",
   "month",
   "bp",
@@ -45,6 +47,7 @@
   "reduced_fetal_movement",
   "itching_of_palms_or_soles_of_feet_especially_at_night",
   "palpitations",
+  "patient_condition",
   "column_break_icvq",
   "mch_nurse_notified_of_danger_signs",
   "problems_identified",
@@ -68,7 +71,8 @@
   "care_plan_created",
   "reports_or_info_sent_to_mch_nurse",
   "column_break_tzcp",
-  "date_of_next_visit",
+  "next_visit_window",
+  "urgent_followup",
   "place",
   "signature_of_mch_nurse",
   "date_reffe"
@@ -79,7 +83,8 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date"
+   "label": "Date",
+   "reqd": 1
   },
   {
    "default": "Pending",
@@ -447,9 +452,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "date_of_next_visit",
-   "fieldtype": "Date",
-   "label": "Date of Next Visit"
+   "fieldname": "next_visit_window",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Next Visit Date",
+   "read_only": 1
   },
   {
    "fieldname": "place",
@@ -465,13 +472,45 @@
    "fieldname": "date_reffe",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "description": "Set automatically from the pregnancy's LMP Date - not editable by hand.",
+   "fieldname": "lmp_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "LMP Date",
+   "read_only": 1
+  },
+  {
+   "description": "Gestational age (weeks + days) as of this visit's Date - calculated automatically from LMP Date.",
+   "fieldname": "pog_weeks",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "POG",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_condition",
+   "fieldtype": "Select",
+   "label": "Patient Condition",
+   "options": "\nNormal\nRisk"
+  },
+  {
+   "default": "0",
+   "fieldname": "urgent_followup",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Urgent Follow-up (auto)",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-22 17:06:36.472287",
+ "modified": "2026-09-28 15:21:40.802953",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Child",

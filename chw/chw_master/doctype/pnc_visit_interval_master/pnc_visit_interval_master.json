@@ -1,30 +1,26 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
- "allow_rename": 1,
  "creation": "2026-08-10 14:43:42.684976",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "interval_days"
+  "visit_schedule"
  ],
  "fields": [
   {
-   "default": "30",
-   "description": "Days after the last PNC follow-up date to schedule the next visit (30 = monthly).",
-   "fieldname": "interval_days",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Interval (Days)",
-   "reqd": 1
+   "description": "One row per visit, in order - however many rows exist, that's how many visits there are. Each row is fully independent, so any protocol shape (a gap in between, back-to-back weeks, irregular spacing) is just data - no code change needed.",
+   "fieldname": "visit_schedule",
+   "fieldtype": "Table",
+   "label": "Visit Schedule",
+   "options": "PNC Visit Schedule Row"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-08-10 14:43:42.684976",
+ "modified": "2026-09-29 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "PNC Visit Interval Master",

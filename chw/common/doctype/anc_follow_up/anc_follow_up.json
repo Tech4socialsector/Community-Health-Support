@@ -18,7 +18,13 @@
   "gravida",
   "status",
   "next_anc_visit_date",
+  "next_anc_visit_risk_alert",
   "next_anc_visit_date_auto",
+  "section_break_lxnr",
+  "current_status_column",
+  "delivery_status",
+  "aboration_status",
+  "iud_stauts",
   "section_break_vzey",
   "anc_followup",
   "anc_followup_for_nurse",
@@ -102,7 +108,6 @@
    "label": "Gravida"
   },
   {
-   "description": "Automatically set to Closed when this mother's Birth Registration is recorded (she has delivered) - her remaining ANC visits are no longer due.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -122,10 +127,16 @@
    "options": "ANC Followup Child"
   },
   {
-   "description": "Set automatically from the latest followup row's \"Date of Next Visit\" - edit it by hand only to override that.",
    "fieldname": "next_anc_visit_date",
    "fieldtype": "Date",
    "label": "Next ANC Visit Date"
+  },
+  {
+   "bold": 1,
+   "fieldname": "next_anc_visit_risk_alert",
+   "fieldtype": "Data",
+   "label": "Risk Visit Date ",
+   "read_only": 1
   },
   {
    "fieldname": "next_anc_visit_date_auto",
@@ -145,12 +156,42 @@
    "fieldtype": "Table",
    "label": "ANC Followup for Docter",
    "options": "ANC Followup Docter"
+  },
+  {
+   "fieldname": "section_break_lxnr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "current_status_column",
+   "fieldtype": "Column Break",
+   "label": "Current Status"
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "label": "Delivery Status",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "aboration_status",
+   "fieldtype": "Select",
+   "label": "Aboration Status",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "iud_stauts",
+   "fieldtype": "Select",
+   "label": "IUD Stauts",
+   "options": "\nYes\nNo",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-22 17:12:43.199504",
+ "modified": "2026-09-28 15:27:47.022668",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

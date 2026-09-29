@@ -1641,55 +1641,98 @@ CHW_WORK_ORDER_TYPES = [
         'label': 'ANC',
         'doctype': 'ANC Follow-up',
         'date_field': 'next_anc_visit_date',
+        # From-date, High Risk and Alert-date aren't stored fields for ANC -
+        # they're computed live, on read, straight from LMP + the Master +
+        # the followup rows (see _enrich_anc_records_live). live_risk_enrich
+        # marks this type for that treatment; every other type still reads
+        # plain stored fields (None below, same as before).
+        'from_date_field': None,
+        'high_risk_field': None,
+        'alert_field': None,
+        'live_risk_enrich': True,
         'patient_field': 'first_name',
         'patient_fallback_field': 'pregnant_id',
         'has_date': True,
         'has_village': True,
         'has_health_worker': True,
+        'followup_doctype': 'ANC Followup Child',
+        'followup_table_field': 'anc_followup',
+        'followup_date_field': 'date',
     },
     {
         'key': 'pnc',
         'label': 'PNC',
         'doctype': 'PNC',
         'date_field': 'next_pnc_visit_date',
+        # Both are real stored fields on PNC (unlike ANC's live-computed
+        # equivalents) - high_risk is set directly or from a followup row's
+        # Patient Condition, pnc_visit_risk_alert is computed alongside
+        # next_pnc_visit_date every save. from_date_field stays None - PNC
+        # doesn't store its window's start date anywhere, only the end
+        # (next_pnc_visit_date); the list view's own from_date - 30 days
+        # fallback covers the display in the meantime.
+        'from_date_field': None,
+        'high_risk_field': 'high_risk',
+        'alert_field': 'pnc_visit_risk_alert',
         'patient_field': 'first_name',
         'patient_fallback_field': None,
         'has_date': True,
         'has_village': True,
         'has_health_worker': True,
+        'followup_doctype': 'PNC Followup Child',
+        'followup_table_field': 'mother',
+        'followup_date_field': 'date',
     },
     {
         'key': 'palliative',
         'label': 'Palliative Care',
         'doctype': 'Palliative care followup',
         'date_field': None,
+        'from_date_field': None,
+        'high_risk_field': None,
+        'alert_field': None,
         'patient_field': 'name1',
         'patient_fallback_field': None,
         'has_date': False,
         'has_village': False,
         'has_health_worker': False,
+        'followup_doctype': None,
+        'followup_table_field': None,
+        'followup_date_field': None,
     },
     {
         'key': 'postpartum',
         'label': 'Postpartum (1-6 weeks)',
         'doctype': 'Postpartum Reg and Followup',
         'date_field': 'next_visit_date',
+        'from_date_field': None,
+        'high_risk_field': None,
+        'alert_field': None,
         'patient_field': 'patient_name',
         'patient_fallback_field': None,
         'has_date': True,
         'has_village': True,
         'has_health_worker': True,
+        'followup_doctype': 'Postpartum Followup',
+        'followup_table_field': 'followup_visits',
+        'followup_date_field': 'date_of_visit',
     },
     {
         'key': 'child_6w_1y',
         'label': 'Child (6 wk-1 year)',
         'doctype': 'Child 6w to 1 Year Reg and Followup',
         'date_field': 'next_visit_date',
+        'from_date_field': None,
+        'high_risk_field': None,
+        'alert_field': None,
         'patient_field': 'patient_name',
         'patient_fallback_field': None,
         'has_date': True,
         'has_village': True,
         'has_health_worker': True,
+        'followup_doctype': 'Child 6w to 1 Year Followup',
+        'followup_table_field': 'followup_visits',
+        'followup_date_field': 'date_of_visit',
     },
 ]
 
@@ -1720,63 +1763,388 @@ def _work_order_patient_name(rec, wtype):
     return name or rec.get('name')
 
 
+def _work_order_matching_parent_names(wtype, village, health_worker):
+    """Names of this type's parent records matching village/health_worker, or
+    None if there's no filter active at all (meaning "don't restrict by
+    parent" - the caller then skips the parent join entirely)."""
+    base = _work_order_base_filters(wtype, village, health_worker)
+    if not base:
+        return None
+    return frappe.get_all(wtype['doctype'], filters=base, pluck='name')
+
+
+def _high_risk_pregnant_ids():
+    return frappe.get_all('Pregnancy Registration', filters={'high_risk': 'Yes'}, pluck='name')
+
+
+def _enrich_pnc_records_live(records):
+    """From-date for PNC records, computed live from the PNC Visit Interval
+    Master's Visit Schedule + the record's own Mother child rows - reusing
+    the same lookup PNC's own form runs (chw.common.doctype.pnc.pnc.PNC),
+    instead of the list view's generic due_date-minus-30 fallback, which
+    has no relationship to the org's actual configured window length.
+    Unlike ANC, PNC's high_risk and alert_date are real stored fields
+    already read correctly by the generic path - only from_date needs this.
+    Mutates and returns the same list; non-PNC records pass through
+    untouched."""
+    pnc_records = [r for r in records if r.get('doctype') == 'PNC']
+    if not pnc_records:
+        return records
+
+    from chw.common.doctype.pnc.pnc import PNC
+
+    pnc_names = [r['name'] for r in pnc_records]
+    deliveries = frappe.get_all(
+        'PNC', filters=[['name', 'in', pnc_names]], fields=['name', 'date_of_delivery']
+    )
+    delivery_by_name = {d.name: d.date_of_delivery for d in deliveries}
+
+    followup_rows = frappe.get_all(
+        'PNC Followup Child',
+        filters=[['parent', 'in', pnc_names]],
+        fields=['parent', 'status', 'urgent_followup', 'date', 'idx'],
+        order_by='parent asc, idx asc',
+    ) if pnc_names else []
+    rows_by_parent = {}
+    for row in followup_rows:
+        rows_by_parent.setdefault(row.parent, []).append(row)
+
+    for r in pnc_records:
+        delivery_date = delivery_by_name.get(r['name'])
+        if not delivery_date:
+            r['from_date'] = None
+            continue
+
+        rows = rows_by_parent.get(r['name'], [])
+
+        # An open Urgent row always wins first, exactly like the form.
+        urgent_rows = [(i, row) for i, row in enumerate(rows) if row.urgent_followup and row.status != 'Completed']
+        if urgent_rows:
+            i, earliest = min(urgent_rows, key=lambda pair: getdate(pair[1].date))
+            trigger_row = rows[i - 1] if i > 0 else None
+            trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
+            r['from_date'] = str(trigger_date)
+            continue
+
+        completed_count = len([row for row in rows if row.status == 'Completed'])
+        window = PNC.get_visit_window(completed_count + 1)
+        r['from_date'] = str(add_days(getdate(delivery_date), window.start_offset)) if window else None
+
+    return records
+
+
+def _enrich_anc_records_live(records):
+    """From-date / Alert-date / High-Risk for ANC records, computed live from
+    LMP date + the ANC Visit Interval Master + the followup child rows -
+    reusing the exact same calculation the ANC Follow-up form itself runs
+    (chw.common.doctype.anc_follow_up.anc_follow_up.ANCFollowup), instead of
+    reading fields that were pre-calculated and stored on save. Batches its
+    reads into 2 queries total, regardless of how many records are passed in,
+    rather than querying per patient. Mutates and returns the same list;
+    non-ANC records pass through untouched."""
+    anc_records = [r for r in records if r.get('doctype') == 'ANC Follow-up']
+    if not anc_records:
+        return records
+
+    from chw.common.doctype.anc_follow_up.anc_follow_up import ANCFollowup
+
+    pregnant_ids = list({r.get('pregnant_id') for r in anc_records if r.get('pregnant_id')})
+    pregnancies = frappe.get_all(
+        'Pregnancy Registration',
+        filters=[['name', 'in', pregnant_ids]],
+        fields=['name', 'lmp_date', 'high_risk'],
+    ) if pregnant_ids else []
+    pregnancy_by_id = {p.name: p for p in pregnancies}
+
+    anc_names = [r['name'] for r in anc_records]
+    followup_rows = frappe.get_all(
+        'ANC Followup Child',
+        filters=[['parent', 'in', anc_names]],
+        fields=['parent', 'status', 'urgent_followup', 'date', 'idx'],
+        order_by='parent asc, idx asc',
+    ) if anc_names else []
+    rows_by_parent = {}
+    for row in followup_rows:
+        rows_by_parent.setdefault(row.parent, []).append(row)
+
+    for r in anc_records:
+        pregnancy = pregnancy_by_id.get(r.get('pregnant_id'))
+        if not pregnancy or not pregnancy.lmp_date:
+            r['from_date'] = None
+            r['alert_date'] = None
+            r['high_risk'] = None
+            continue
+
+        high_risk = pregnancy.high_risk or 'No'
+        r['high_risk'] = high_risk
+        rows = rows_by_parent.get(r['name'], [])
+
+        # An open Urgent row always wins first, exactly like the form.
+        urgent_rows = [(i, row) for i, row in enumerate(rows) if row.urgent_followup and row.status != 'Completed']
+        if urgent_rows:
+            i, earliest = min(urgent_rows, key=lambda pair: getdate(pair[1].date))
+            trigger_row = rows[i - 1] if i > 0 else None
+            trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
+            r['from_date'] = str(trigger_date)
+            r['alert_date'] = None
+            continue
+
+        window_days, visits_per_window, alert_within_days, _ = ANCFollowup.get_window_policy(high_risk)
+        completed_count = len([row for row in rows if row.status == 'Completed'])
+        starting_window = ANCFollowup.get_window_index(r.get('creation') or getdate(), pregnancy.lmp_date, window_days)
+        current_window = ANCFollowup.get_current_window(starting_window, completed_count, visits_per_window)
+        window_start = add_days(getdate(pregnancy.lmp_date), (current_window - 1) * window_days)
+        r['from_date'] = str(window_start)
+        r['alert_date'] = str(add_days(window_start, alert_within_days)) if high_risk == 'Yes' else None
+
+    return records
+
+
+def _work_order_completed_count(wtype, village, health_worker, from_date, to_date):
+    """How many followup visits (child-table rows, across all this type's
+    parent records) were actually logged in [from_date, to_date] - i.e. work
+    the CHW has already done, not what's still due. Palliative Care has no
+    followup table wired up for this (has_date=False), so it's never called
+    for that type."""
+    if not wtype['followup_doctype']:
+        return 0
+
+    parent_names = _work_order_matching_parent_names(wtype, village, health_worker)
+    if parent_names is not None and not parent_names:
+        return 0
+
+    filters = [[wtype['followup_date_field'], 'between', [from_date, to_date]]]
+    if parent_names is not None:
+        filters.append(['parent', 'in', parent_names])
+
+    try:
+        return frappe.db.count(wtype['followup_doctype'], filters)
+    except Exception:
+        frappe.log_error(f"Error counting completed {wtype['followup_doctype']} for chw-work-order-list")
+        return 0
+
+
+def _work_order_high_risk_records(wtype, village, health_worker):
+    """Every currently High Risk patient of this type, regardless of when her
+    next visit is due - types with neither high_risk_field nor
+    live_risk_enrich (most of them, today only ANC has either) never
+    contribute any rows here."""
+    if not wtype['high_risk_field'] and not wtype.get('live_risk_enrich'):
+        return []
+
+    base = _work_order_base_filters(wtype, village, health_worker)
+    fields = ['name', wtype['patient_field']]
+    if wtype['patient_fallback_field']:
+        fields.append(wtype['patient_fallback_field'])
+    if wtype['has_village']:
+        fields.append('village')
+    if wtype['has_date']:
+        fields.append(wtype['date_field'])
+    if wtype['from_date_field']:
+        fields.append(wtype['from_date_field'])
+    if wtype['high_risk_field']:
+        fields.append(wtype['high_risk_field'])
+    if wtype['alert_field']:
+        fields.append(wtype['alert_field'])
+
+    if wtype.get('live_risk_enrich'):
+        fields.append('creation')
+        # No high_risk field to filter by directly - find the High Risk
+        # pregnancies first, then match ANC records to them by pregnant_id.
+        high_risk_ids = _high_risk_pregnant_ids()
+        if not high_risk_ids:
+            return []
+        risk_filter = [['pregnant_id', 'in', high_risk_ids]]
+    else:
+        risk_filter = [[wtype['high_risk_field'], '=', 'Yes']]
+
+    try:
+        rows = frappe.get_list(
+            wtype['doctype'],
+            filters=base + risk_filter,
+            fields=fields,
+            limit_page_length=200,
+        )
+    except Exception:
+        frappe.log_error(f"Error fetching high risk {wtype['doctype']} for chw-work-order-list")
+        return []
+
+    records = []
+    for r in rows:
+        records.append({
+            'doctype': wtype['doctype'],
+            'name': r.name,
+            'pregnant_id': r.get('pregnant_id'),
+            'creation': r.get('creation'),
+            'visit_type': wtype['label'],
+            'patient': _work_order_patient_name(r, wtype),
+            'village': r.get('village') if wtype['has_village'] else None,
+            'due_date': str(r.get(wtype['date_field']) or '') if wtype['has_date'] else '',
+            'from_date': str(r.get(wtype['from_date_field']) or '') if wtype['from_date_field'] else None,
+            'high_risk': r.get(wtype['high_risk_field']) if wtype['high_risk_field'] else None,
+            'alert_date': str(r.get(wtype['alert_field']) or '') if wtype['alert_field'] else None,
+            'status': 'High Risk',
+        })
+
+    if wtype.get('live_risk_enrich'):
+        records = _enrich_anc_records_live(records)
+    if wtype['key'] == 'pnc':
+        records = _enrich_pnc_records_live(records)
+    return records
+
+
+def _work_order_completed_records(wtype, village, health_worker, from_date, to_date):
+    if not wtype['followup_doctype']:
+        return []
+
+    parent_names = _work_order_matching_parent_names(wtype, village, health_worker)
+    if parent_names is not None and not parent_names:
+        return []
+
+    filters = [[wtype['followup_date_field'], 'between', [from_date, to_date]]]
+    if parent_names is not None:
+        filters.append(['parent', 'in', parent_names])
+
+    try:
+        rows = frappe.get_all(
+            wtype['followup_doctype'],
+            filters=filters,
+            fields=['parent', wtype['followup_date_field']],
+            limit_page_length=200,
+        )
+    except Exception:
+        frappe.log_error(f"Error fetching completed {wtype['followup_doctype']} for chw-work-order-list")
+        return []
+    if not rows:
+        return []
+
+    parents = frappe.get_all(
+        wtype['doctype'],
+        filters=[['name', 'in', list({r.parent for r in rows})]],
+        fields=['name', wtype['patient_field']] + (
+            [wtype['patient_fallback_field']] if wtype['patient_fallback_field'] else []
+        ) + (['village'] if wtype['has_village'] else []) + (
+            [wtype['high_risk_field']] if wtype['high_risk_field'] else []
+        ),
+    )
+    parents_by_name = {p.name: p for p in parents}
+
+    # A completed visit has no window to show (no from_date/alert_date), but
+    # High Risk is still live-looked-up so the badge stays correct here too.
+    high_risk_by_pregnant_id = {}
+    if wtype.get('live_risk_enrich'):
+        pregnant_ids = list({p.get('pregnant_id') for p in parents if p.get('pregnant_id')})
+        if pregnant_ids:
+            high_risk_by_pregnant_id = {
+                p.name: p.high_risk
+                for p in frappe.get_all(
+                    'Pregnancy Registration', filters=[['name', 'in', pregnant_ids]], fields=['name', 'high_risk']
+                )
+            }
+
+    records = []
+    for r in rows:
+        parent = parents_by_name.get(r.parent)
+        if not parent:
+            continue
+        high_risk = (
+            high_risk_by_pregnant_id.get(parent.get('pregnant_id'))
+            if wtype.get('live_risk_enrich')
+            else (parent.get(wtype['high_risk_field']) if wtype['high_risk_field'] else None)
+        )
+        records.append({
+            'doctype': wtype['doctype'],
+            'name': parent.name,
+            'visit_type': wtype['label'],
+            'patient': _work_order_patient_name(parent, wtype),
+            'village': parent.get('village') if wtype['has_village'] else None,
+            'due_date': str(r.get(wtype['followup_date_field']) or ''),
+            'from_date': None,
+            'high_risk': high_risk,
+            'alert_date': None,
+            'status': 'Completed',
+        })
+    return records
+
+
 @frappe.whitelist()
 def get_chw_work_order_summary(village=None, health_worker=None, visit_type=None):
-    """Today / Upcoming (rest of this week) / Overdue counts, plus a
+    """This Week / Today (subset of This Week) / Upcoming (this month) /
+    Overdue / Completed (followups actually logged this week) counts, plus a
     per-type breakdown, across the 5 CHW_WORK_ORDER_TYPES - always relative
     to the real current date, not a navigable date range."""
     if frappe.session.user == 'Guest':
         frappe.throw(_('Not permitted'), frappe.PermissionError)
 
     village, health_worker = _work_order_scope(village, health_worker)
+    empty = {'health_worker_linked': False, 'this_week': 0, 'today': 0, 'upcoming': 0, 'overdue': 0, 'completed': 0, 'high_risk': 0, 'by_type': []}
     if not is_privileged_user() and not health_worker:
-        return {'health_worker_linked': False, 'today': 0, 'upcoming': 0, 'overdue': 0, 'by_type': []}
+        return empty
 
     today = getdate(frappe.utils.nowdate())
-    week_end = get_week_bounds(today)[1]
+    week_start, week_end = get_week_bounds(today)
+    # Rolling 30 days from today, not "rest of this calendar month" - a visit
+    # due just after month-end (e.g. 2 days into next month) is still only a
+    # couple of days away and belongs in Upcoming, not stuck in a gap between
+    # this month's Upcoming and next week's This Week.
+    month_start, month_end = today, add_days(today, 30)
     types = [t for t in CHW_WORK_ORDER_TYPES if not visit_type or visit_type == t['label']]
 
     by_type = []
-    total_today = 0
-    total_upcoming = 0
-    total_overdue = 0
+    totals = {'this_week': 0, 'today': 0, 'upcoming': 0, 'overdue': 0, 'completed': 0, 'high_risk': 0}
 
     for wtype in types:
-        if not wtype['has_date']:
-            by_type.append({'key': wtype['key'], 'label': wtype['label'], 'today': 0, 'upcoming': 0, 'overdue': 0})
-            continue
-
+        row = {'key': wtype['key'], 'label': wtype['label'], 'this_week': 0, 'today': 0, 'upcoming': 0, 'overdue': 0, 'completed': 0, 'high_risk': 0}
         base = _work_order_base_filters(wtype, village, health_worker)
-        try:
-            today_n = frappe.db.count(wtype['doctype'], base + [[wtype['date_field'], '=', today]])
-            upcoming = frappe.db.count(
-                wtype['doctype'], base + [[wtype['date_field'], '>', today], [wtype['date_field'], '<=', week_end]]
-            )
-            overdue = frappe.db.count(
-                wtype['doctype'], base + [[wtype['date_field'], 'is', 'set'], [wtype['date_field'], '<', today]]
-            )
-        except Exception:
-            frappe.log_error(f"Error counting {wtype['doctype']} for chw-work-order-list")
-            today_n, upcoming, overdue = 0, 0, 0
 
-        by_type.append({'key': wtype['key'], 'label': wtype['label'], 'today': today_n, 'upcoming': upcoming, 'overdue': overdue})
-        total_today += today_n
-        total_upcoming += upcoming
-        total_overdue += overdue
+        if wtype['has_date']:
+            try:
+                row['this_week'] = frappe.db.count(wtype['doctype'], base + [[wtype['date_field'], 'between', [week_start, week_end]]])
+                row['today'] = frappe.db.count(wtype['doctype'], base + [[wtype['date_field'], '=', today]])
+                row['upcoming'] = frappe.db.count(wtype['doctype'], base + [[wtype['date_field'], 'between', [month_start, month_end]]])
+                row['overdue'] = frappe.db.count(
+                    wtype['doctype'], base + [[wtype['date_field'], 'is', 'set'], [wtype['date_field'], '<', today]]
+                )
+            except Exception:
+                frappe.log_error(f"Error counting {wtype['doctype']} for chw-work-order-list")
 
-    return {
-        'health_worker_linked': True,
-        'today': total_today,
-        'upcoming': total_upcoming,
-        'overdue': total_overdue,
-        'by_type': by_type,
-    }
+        row['completed'] = _work_order_completed_count(wtype, village, health_worker, week_start, week_end)
+
+        # Every currently High Risk patient, regardless of when her next
+        # visit is due - a separate view from the date-based buckets above,
+        # not a subset of any of them.
+        if wtype['high_risk_field']:
+            try:
+                row['high_risk'] = frappe.db.count(wtype['doctype'], base + [[wtype['high_risk_field'], '=', 'Yes']])
+            except Exception:
+                frappe.log_error(f"Error counting high risk {wtype['doctype']} for chw-work-order-list")
+        elif wtype.get('live_risk_enrich'):
+            # No stored high_risk field - count via the linked Pregnancy
+            # Registration's own High Risk value instead.
+            high_risk_ids = _high_risk_pregnant_ids()
+            if high_risk_ids:
+                try:
+                    row['high_risk'] = frappe.db.count(
+                        wtype['doctype'], base + [['pregnant_id', 'in', high_risk_ids]]
+                    )
+                except Exception:
+                    frappe.log_error(f"Error counting high risk {wtype['doctype']} for chw-work-order-list")
+
+        by_type.append(row)
+        for k in totals:
+            totals[k] += row[k]
+
+    return {'health_worker_linked': True, **totals, 'by_type': by_type}
 
 
 @frappe.whitelist()
 def chw_work_order_drilldown(status='all', village=None, health_worker=None, visit_type=None):
     """Underlying records behind get_chw_work_order_summary's counts.
-    status is one of 'today', 'upcoming', 'overdue', 'all'."""
+    status is one of 'this_week', 'today', 'upcoming', 'overdue',
+    'completed', 'high_risk', 'all' ('all' excludes 'completed' and
+    'high_risk' - both are a different kind of view (already-done work, and
+    a risk-status view unrelated to due dates) and would double up with the
+    others when mixed into one undifferentiated list)."""
     if frappe.session.user == 'Guest':
         frappe.throw(_('Not permitted'), frappe.PermissionError)
 
@@ -1785,30 +2153,61 @@ def chw_work_order_drilldown(status='all', village=None, health_worker=None, vis
         return {'records': []}
 
     today = getdate(frappe.utils.nowdate())
-    week_end = get_week_bounds(today)[1]
-    types = [
-        t for t in CHW_WORK_ORDER_TYPES
-        if (not visit_type or visit_type == t['label']) and t['has_date']
-    ]
+    week_start, week_end = get_week_bounds(today)
+    # Rolling 30 days from today - see get_chw_work_order_summary for why.
+    month_start, month_end = today, add_days(today, 30)
+    types = [t for t in CHW_WORK_ORDER_TYPES if not visit_type or visit_type == t['label']]
 
     buckets = [
+        ('this_week', [['between', [week_start, week_end]]], 'This Week'),
         ('today', [['=', today]], 'Today'),
-        ('upcoming', [['>', today], ['<=', week_end]], 'Upcoming'),
+        ('upcoming', [['between', [month_start, month_end]]], 'Upcoming'),
         ('overdue', [['is', 'set'], ['<', today]], 'Overdue'),
     ]
-
+    # 'all' = everything still pending, with no duplicate rows. This Week
+    # already contains Today (a subset) and overlaps Upcoming (a superset of
+    # This Week), so 'all' only ever pulls This Week + Overdue - the same
+    # two buckets the summary's own 'all' total is built from - rather than
+    # looping every bucket and showing the same patient two or three times.
+    # A record due earlier this week but still not done satisfies BOTH of
+    # those two buckets at once (e.g. due Monday, today is Wednesday) - kept
+    # in a dict keyed by (doctype, name) for the 'all' case specifically, so
+    # the second match (Overdue, processed after This Week below) overwrites
+    # the first rather than appending a second row for the same patient.
+    all_bucket_keys = {'this_week', 'overdue'}
+    records_by_key = {}
     records = []
     for wtype in types:
+        if status == 'completed':
+            records.extend(_work_order_completed_records(wtype, village, health_worker, week_start, week_end))
+            continue
+        if status == 'high_risk':
+            records.extend(_work_order_high_risk_records(wtype, village, health_worker))
+            continue
+        if not wtype['has_date']:
+            continue
+
         base = _work_order_base_filters(wtype, village, health_worker)
         fields = ['name', wtype['patient_field'], wtype['date_field']]
         if wtype['patient_fallback_field']:
             fields.append(wtype['patient_fallback_field'])
         if wtype['has_village']:
             fields.append('village')
+        if wtype['from_date_field']:
+            fields.append(wtype['from_date_field'])
+        if wtype['high_risk_field']:
+            fields.append(wtype['high_risk_field'])
+        if wtype['alert_field']:
+            fields.append(wtype['alert_field'])
+        if wtype.get('live_risk_enrich'):
+            fields.append('creation')
 
         try:
             for bucket_key, conditions, status_label in buckets:
-                if status not in (bucket_key, 'all'):
+                if status == 'all':
+                    if bucket_key not in all_bucket_keys:
+                        continue
+                elif status != bucket_key:
                     continue
                 date_conditions = [[wtype['date_field'], op, val] for op, val in conditions]
                 rows = frappe.get_list(
@@ -1818,19 +2217,33 @@ def chw_work_order_drilldown(status='all', village=None, health_worker=None, vis
                     limit_page_length=200,
                 )
                 for r in rows:
-                    records.append({
+                    entry = {
                         'doctype': wtype['doctype'],
                         'name': r.name,
+                        'pregnant_id': r.get('pregnant_id'),
+                        'creation': r.get('creation'),
                         'visit_type': wtype['label'],
                         'patient': _work_order_patient_name(r, wtype),
                         'village': r.get('village'),
                         'due_date': str(r.get(wtype['date_field']) or ''),
+                        'from_date': str(r.get(wtype['from_date_field']) or '') if wtype['from_date_field'] else None,
+                        'high_risk': r.get(wtype['high_risk_field']) if wtype['high_risk_field'] else None,
+                        'alert_date': str(r.get(wtype['alert_field']) or '') if wtype['alert_field'] else None,
                         'status': status_label,
-                    })
+                    }
+                    if status == 'all':
+                        records_by_key[(wtype['doctype'], r.name)] = entry
+                    else:
+                        records.append(entry)
         except Exception:
             frappe.log_error(f"Error fetching {wtype['doctype']} for chw-work-order-list")
             continue
 
+    if status == 'all':
+        records = list(records_by_key.values())
+
+    records = _enrich_anc_records_live(records)
+    records = _enrich_pnc_records_live(records)
     records.sort(key=lambda r: r['due_date'])
     return {'records': records}
 
@@ -1843,14 +2256,17 @@ def chw_work_order_drilldown_excel(status='all', village=None, health_worker=Non
     data = chw_work_order_drilldown(status, village, health_worker, visit_type)
     records = data.get('records', [])
 
-    columns = ["Visit Type", "Patient", "Village", "Due Date", "Status"]
+    columns = ["Visit Type", "Patient", "High Risk", "Village", "From Date", "Due Date", "Alert By", "Status"]
     rows = [columns]
     for r in records:
         rows.append([
             r.get('visit_type', ''),
             r.get('patient', ''),
+            r.get('high_risk') or '',
             r.get('village', ''),
+            r.get('from_date') or '',
             r.get('due_date', ''),
+            r.get('alert_date') or '',
             r.get('status', ''),
         ])
 

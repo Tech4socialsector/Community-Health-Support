@@ -17,7 +17,9 @@
   "phone_number",
   "health_worker_name",
   "next_pnc_visit_date",
+  "pnc_visit_risk_alert",
   "next_pnc_visit_date_auto",
+  "high_risk",
   "section_break_dmfm",
   "mother",
   "section_break_baby",
@@ -127,16 +129,34 @@
    "options": "Baby PNC Followup Child"
   },
   {
-   "description": "Set automatically from the latest mother followup row's \"Date of Next Visit\" - edit it by hand only to override that.",
+   "description": "Calculated automatically from the delivery date and the PNC Visit Interval Master's visit schedule. Not editable by hand.",
    "fieldname": "next_pnc_visit_date",
    "fieldtype": "Date",
-   "label": "Next PNC Visit date"
+   "label": "Next PNC Visit date",
+   "read_only": 1
   },
   {
    "fieldname": "next_pnc_visit_date_auto",
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Next PNC Visit Date (auto-calculated, internal)",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "description": "High Risk only: visit her early, within this window. Blank for Normal patients.",
+   "fieldname": "pnc_visit_risk_alert",
+   "fieldtype": "Data",
+   "label": "Risk Alert",
+   "read_only": 1
+  },
+  {
+   "description": "Set automatically from a Mother followup row's Patient Condition = Risk. Not manually editable - internal, drives the Risk Alert, the urgent follow-up chain, and the Work Order List's High Risk view.",
+   "fieldname": "high_risk",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Has the mother been identified as high risk?",
+   "options": "\nYes\nNo",
    "read_only": 1
   }
  ],
