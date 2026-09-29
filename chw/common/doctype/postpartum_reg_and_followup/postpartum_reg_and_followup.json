@@ -144,6 +144,7 @@
    "description": "Set automatically from the latest followup row's \"Date of Next Visit\" - edit it by hand only to override that.",
    "fieldname": "next_visit_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Next Visit Date"
@@ -390,7 +391,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-22 16:34:25.787043",
+ "modified": "2026-09-29 15:19:24.543603",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",

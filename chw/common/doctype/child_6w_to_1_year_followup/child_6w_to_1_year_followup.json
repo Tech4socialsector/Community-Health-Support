@@ -8,8 +8,8 @@
   "date_of_visit",
   "health_worker_name",
   "patient_symptoms_concerns",
-  "baby_age",
   "column_break_v1",
+  "baby_age",
   "baby_current_weight",
   "baby_length",
   "condition_section",
@@ -17,12 +17,11 @@
   "condition_active",
   "condition_distressed",
   "condition_lethargic",
-  "column_break_c1",
   "feeding_type",
   "feeding_mixed_specify",
   "feeding_problems",
+  "column_break_c1",
   "complementary_feeding_6_months",
-  "column_break_c2",
   "color",
   "hr",
   "rr",
@@ -32,10 +31,10 @@
   "danger_convulsions",
   "danger_breathing_difficulty",
   "danger_jaundice",
-  "column_break_d1",
   "danger_blue_mouth",
   "danger_lethargic",
   "danger_cold",
+  "column_break_d1",
   "danger_irritable",
   "nurse_notified_danger_signs",
   "problems_identified",
@@ -50,13 +49,13 @@
   "edu_postpartum_depression",
   "edu_child_immunization_schedule",
   "edu_child_weight_gain_chart",
+  "date_of_next_visit",
   "referrals_section",
   "referral_needed",
   "referral_made_to",
   "care_plan_created",
   "reports_sent_to_mch_nurse",
   "column_break_ref1",
-  "date_of_next_visit",
   "next_visit_place",
   "mch_nurse_name",
   "signature_date"
@@ -161,10 +160,6 @@
    "options": "\nYes\nNo"
   },
   {
-   "fieldname": "column_break_c2",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "color",
    "fieldtype": "Data",
    "label": "Color"
@@ -182,7 +177,7 @@
    "label": "RR"
   },
   {
-   "description": "38° C +",
+   "description": "38\u00b0 C +",
    "fieldname": "temp",
    "fieldtype": "Data",
    "label": "Temp"
@@ -377,7 +372,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-23 00:00:00.000000",
+ "modified": "2026-09-29 15:20:41.897988",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Followup",
