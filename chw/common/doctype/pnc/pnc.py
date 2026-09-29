@@ -45,6 +45,7 @@ class PNC(Document):
 		self.validate_gender()
 		self.sync_patient_condition_to_high_risk()
 		self.insert_urgent_followups_for_risk_rows()
+		self.insert_urgent_followups_for_baby_risk_rows()
 		self.set_next_pnc_visit_date()
 
 	def on_update(self):
@@ -67,61 +68,75 @@ class PNC(Document):
 
 	def sync_patient_condition_to_high_risk(self):
 		# The only way high_risk ever gets set - there's no manual entry
-		# point on the main form. If the CHW records the mother as at-risk
-		# during any followup, that becomes her current risk status, feeding
-		# the risk alert and the urgent follow-up chain below. A later
-		# "Normal" reading never downgrades it back on its own.
-		rows_with_condition = [row for row in self.mother if row.patient_condition]
-		if not rows_with_condition:
-			return
-
-		if rows_with_condition[-1].patient_condition == "Risk":
+		# point on the main form. Either the mother's own Patient Condition
+		# OR the baby's own Baby Condition can independently push this to
+		# Yes - a household visit can find either one at risk. A later
+		# "Normal" reading on either table never downgrades it back on its
+		# own.
+		mother_risk = self._latest_condition(self.mother, "patient_condition") == "Risk"
+		baby_risk = self._latest_condition(self.baby, "baby_condition") == "Risk"
+		if mother_risk or baby_risk:
 			self.high_risk = "Yes"
 
+	@staticmethod
+	def _latest_condition(table, fieldname):
+		rows_with_condition = [row for row in table if row.get(fieldname)]
+		if not rows_with_condition:
+			return None
+		return rows_with_condition[-1].get(fieldname)
+
 	def insert_urgent_followups_for_risk_rows(self):
-		# Whenever a visit is Completed with Patient Condition = Risk, she
-		# needs an earlier follow-up than the normal schedule - insert it
+		self._insert_urgent_followups("mother", "patient_condition")
+
+	def insert_urgent_followups_for_baby_risk_rows(self):
+		self._insert_urgent_followups("baby", "baby_condition")
+
+	def _insert_urgent_followups(self, table_field, condition_field):
+		# Whenever a visit is Completed with its condition field = Risk, an
+		# earlier follow-up than the normal schedule is needed - insert it
 		# right after that row (not appended at the end), dated from that
 		# visit's own actual date + *that visit's own* Urgent Visit Within
 		# Days (not a fixed number, not a chain - each schedule row sets its
 		# own duration, found by counting how many visits are completed up
 		# to and including this one). Skipped if the next row already
 		# sitting there is close enough that a separate visit wouldn't add
-		# anything, and never inserted twice for the same trigger.
+		# anything, and never inserted twice for the same trigger. Mother
+		# and baby run through this independently - a risk finding on one
+		# table only ever inserts into that same table.
+		table = self.get(table_field)
 		i = 0
-		while i < len(self.mother):
-			row = self.mother[i]
-			if row.status == "Completed" and row.patient_condition == "Risk":
-				next_row = self.mother[i + 1] if i + 1 < len(self.mother) else None
+		while i < len(table):
+			row = table[i]
+			if row.status == "Completed" and row.get(condition_field) == "Risk":
+				next_row = table[i + 1] if i + 1 < len(table) else None
 				already_inserted = next_row and next_row.urgent_followup
 				if not already_inserted:
-					effective_visit_number = len(
-						[r for r in self.mother[: i + 1] if r.status == "Completed"]
-					)
+					effective_visit_number = len([r for r in table[: i + 1] if r.status == "Completed"])
 					urgent_within_days = self.get_urgent_visit_within_days(effective_visit_number)
 					urgent_date = add_days(getdate(row.date), urgent_within_days)
 					next_row_too_soon = next_row and getdate(next_row.date) <= urgent_date
 					if not next_row_too_soon:
-						new_row = self.append("mother", {})
+						new_row = self.append(table_field, {})
 						new_row.date = urgent_date
 						new_row.status = "Pending"
 						new_row.urgent_followup = 1
-						self.mother.remove(new_row)
-						self.mother.insert(i + 1, new_row)
-						for idx, r in enumerate(self.mother):
+						table.remove(new_row)
+						table.insert(i + 1, new_row)
+						for idx, r in enumerate(table):
 							r.idx = idx + 1
 			i += 1
 
-	def get_pending_urgent_followup(self):
+	@staticmethod
+	def _pending_urgent_in(table):
 		urgent_rows = [
-			(i, row) for i, row in enumerate(self.mother)
+			(i, row) for i, row in enumerate(table)
 			if row.urgent_followup and row.status != "Completed"
 		]
 		if not urgent_rows:
 			return None
 
 		i, earliest = min(urgent_rows, key=lambda pair: getdate(pair[1].date))
-		trigger_row = self.mother[i - 1] if i > 0 else None
+		trigger_row = table[i - 1] if i > 0 else None
 		trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
 		return frappe._dict(date=getdate(earliest.date), trigger_date=trigger_date)
 
@@ -139,69 +154,85 @@ class PNC(Document):
 		return rows[index].urgent_visit_within_days or DEFAULT_RISK_ALERT_DAYS
 
 	def set_next_pnc_visit_date(self):
-		# Each visit's window is a direct row lookup from the PNC Visit
-		# Interval Master's Visit Schedule table - however many rows are
-		# configured there, that's how many visits this protocol has. Any
-		# days not covered by a row (a gap between two windows) simply have
-		# nothing due - that's not a special case, the code never looks at
-		# those days at all.
+		# Mother and baby are tracked independently - each gets its own
+		# effective next-visit date (an open urgent row if either table has
+		# one, otherwise the normal schedule lookup) - but they share the
+		# exact same Visit Schedule master, since both are checked on the
+		# same household visit. The single shared "Next PNC Visit Date"
+		# field always shows whichever of the two tracks is due sooner.
 		if not self.date_of_delivery:
 			return
 
-		# An open Urgent-tagged row always wins first - it never gets masked
-		# by the normal schedule lookup. "From" is the visit that triggered
-		# it, "To" is the urgent row's own date.
-		urgent = self.get_pending_urgent_followup()
-		if urgent:
-			self.next_pnc_visit_date = urgent.date
-			self.next_pnc_visit_date_auto = urgent.date
-			# The urgent date itself already IS the early-visit signal - no
-			# separate alert needed on top of it.
-			self.pnc_visit_risk_alert = ""
-			self.sync_mother_row_fields(urgent.trigger_date, urgent.date)
-			return
+		delivery_date = getdate(self.date_of_delivery)
+		mother_track = self._compute_track(self.mother, delivery_date)
+		baby_track = self._compute_track(self.baby, delivery_date)
 
-		visit_number = len([row for row in self.mother if row.status == "Completed"]) + 1
-		window = self.get_visit_window(visit_number)
-		if window is None:
-			# every scheduled visit has been completed
+		self.sync_mother_row_fields(mother_track.window_start, mother_track.window_end)
+		self.sync_baby_row_fields(baby_track.window_start, baby_track.window_end)
+
+		candidates = [t for t in (mother_track, baby_track) if t.next_date]
+		if not candidates:
+			# every scheduled visit, for both mother and baby, is complete
 			self.next_pnc_visit_date = None
 			self.next_pnc_visit_date_auto = None
 			self.pnc_visit_risk_alert = ""
-			self.sync_mother_row_fields(None, None)
 			return
 
-		delivery_date = getdate(self.date_of_delivery)
+		winner = min(candidates, key=lambda t: t.next_date)
+		self.next_pnc_visit_date = winner.next_date
+		self.next_pnc_visit_date_auto = winner.next_date
+		self.pnc_visit_risk_alert = winner.risk_alert
+
+	def _compute_track(self, table, delivery_date):
+		# An open Urgent-tagged row on this table always wins first - it
+		# never gets masked by the normal schedule lookup. The urgent date
+		# itself already IS the early-visit signal, so no separate alert on
+		# top of it.
+		urgent = self._pending_urgent_in(table)
+		if urgent:
+			return frappe._dict(
+				next_date=urgent.date, window_start=urgent.trigger_date, window_end=urgent.date, risk_alert=""
+			)
+
+		visit_number = len([row for row in table if row.status == "Completed"]) + 1
+		window = self.get_visit_window(visit_number)
+		if window is None:
+			# every visit on this table has been completed
+			return frappe._dict(next_date=None, window_start=None, window_end=None, risk_alert="")
+
 		window_start = add_days(delivery_date, window.start_offset)
 		window_end = add_days(delivery_date, window.end_offset)
 
-		self.next_pnc_visit_date = window_end
-		self.next_pnc_visit_date_auto = window_end
-
 		# High Risk only, shown in red - a nudge to visit early within the
 		# window (from window_start, not window_end - the point is to go
-		# sooner, not to wait until the window is about to close). Blank for
-		# Normal mothers; the window/due date above are unaffected either way.
+		# sooner, not to wait until the window is about to close). Blank
+		# otherwise; the window/due date above are unaffected either way.
 		high_risk = self.high_risk or "No"
-		self.pnc_visit_risk_alert = (
+		risk_alert = (
 			"Visit by {0}".format(frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days)))
 			if high_risk == "Yes"
 			else ""
 		)
-
-		self.sync_mother_row_fields(window_start, window_end)
+		return frappe._dict(next_date=window_end, window_start=window_start, window_end=window_end, risk_alert=risk_alert)
 
 	def sync_mother_row_fields(self, window_start, window_end):
+		self._sync_row_fields(self.mother, window_start, window_end)
+
+	def sync_baby_row_fields(self, window_start, window_end):
+		self._sync_row_fields(self.baby, window_start, window_end)
+
+	@staticmethod
+	def _sync_row_fields(table, window_start, window_end):
 		# "Date of Next Visit" is auto-filled on the latest row only.
 		# "Next Visit Window" is a plain read-only range shown on every row.
 		if window_start and window_end:
 			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
-			if self.mother:
-				self.mother[-1].date_of_next_visit = window_end
+			if table:
+				table[-1].date_of_next_visit = window_end
 		else:
 			display = ""
 
-		for row in self.mother:
+		for row in table:
 			row.next_visit_window = display
 
 	@staticmethod

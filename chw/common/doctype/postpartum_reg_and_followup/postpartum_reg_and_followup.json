@@ -19,6 +19,7 @@
   "time_from",
   "time_to",
   "next_visit_date",
+  "postpartum_risk_alert",
   "next_visit_date_auto",
   "husbands_name",
   "husbands_occupation",
@@ -141,13 +142,21 @@
    "label": "Time To"
   },
   {
-   "description": "Set automatically from the latest followup row's \"Date of Next Visit\" - edit it by hand only to override that.",
+   "description": "Calculated automatically from the delivery date and the Postpartum Visit Interval Master's visit schedule. Not editable by hand.",
    "fieldname": "next_visit_date",
    "fieldtype": "Date",
-   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Next Visit Date"
+   "label": "Next Visit Date",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "description": "High Risk only: visit her early, within this window. Blank for Normal patients. Reflects the most recently completed visit's Mother's/Baby's Condition - not a sticky flag, so it clears once a later visit comes back Normal.",
+   "fieldname": "postpartum_risk_alert",
+   "fieldtype": "Data",
+   "label": "Risk Alert",
+   "read_only": 1
   },
   {
    "fieldname": "next_visit_date_auto",

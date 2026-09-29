@@ -6,6 +6,7 @@
  "field_order": [
   "vitals_section",
   "date_of_visit",
+  "status",
   "health_worker_name",
   "patient_symptoms_concerns",
   "column_break_v1",
@@ -39,6 +40,7 @@
   "nurse_notified_danger_signs",
   "problems_identified",
   "notes_support_care_provided",
+  "baby_condition",
   "education_section",
   "edu_postpartum_self_care",
   "edu_iron_calcium",
@@ -50,6 +52,8 @@
   "edu_child_immunization_schedule",
   "edu_child_weight_gain_chart",
   "date_of_next_visit",
+  "next_visit_window",
+  "urgent_followup",
   "referrals_section",
   "referral_needed",
   "referral_made_to",
@@ -71,6 +75,14 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Date of Visit"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nCompleted"
   },
   {
    "fieldname": "health_worker_name",
@@ -257,6 +269,14 @@
    "label": "Notes and Support / Care Provided"
   },
   {
+   "description": "Set this to Risk if the baby needs urgent attention - triggers an extra early follow-up.",
+   "fieldname": "baby_condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Baby Condition",
+   "options": "\nNormal\nRisk"
+  },
+  {
    "fieldname": "education_section",
    "fieldtype": "Section Break",
    "label": "Education Provided to Mother or Family"
@@ -347,10 +367,29 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Auto-filled with the same date driving Next Visit Date - not editable by hand.",
    "fieldname": "date_of_next_visit",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date of Next Visit"
+   "label": "Date of Next Visit",
+   "read_only": 1
+  },
+  {
+   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
+   "fieldname": "next_visit_window",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Next Visit Window (From - To)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
+   "fieldname": "urgent_followup",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Urgent Follow-up (auto)",
+   "read_only": 1
   },
   {
    "fieldname": "next_visit_place",

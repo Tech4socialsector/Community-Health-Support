@@ -40,6 +40,9 @@ frappe.ui.form.on("PNC", {
 	mother_remove(frm) {
 		calculate_next_pnc_visit_date(frm);
 	},
+	baby_remove(frm) {
+		calculate_next_pnc_visit_date(frm);
+	},
 });
 
 frappe.ui.form.on("PNC Followup Child", {
@@ -54,24 +57,23 @@ frappe.ui.form.on("PNC Followup Child", {
 		calculate_next_pnc_visit_date(frm);
 	},
 	mother_add(frm, cdt, cdn) {
-		// A row added by hand (rather than by the bulk schedule generator
-		// below) still gets its target date filled in from the delivery
-		// date - the CHW should never see a blank calendar with no
-		// suggested date. A row beyond however many visits are configured
-		// simply gets no schedule to fill in from.
+		fill_new_row_date(frm, cdt, cdn, "mother");
+	},
+});
+
+frappe.ui.form.on("Baby PNC Followup Child", {
+	status(frm) {
+		calculate_next_pnc_visit_date(frm);
+	},
+	baby_condition(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
-		if (row.date || !frm.doc.date_of_delivery) {
-			calculate_next_pnc_visit_date(frm);
-			return;
+		if (row.baby_condition === "Risk") {
+			frm.set_value("high_risk", "Yes");
 		}
-		const visit_number = (frm.doc.mother || []).indexOf(row) + 1;
-		get_full_schedule().then((schedule_rows) => {
-			const window = get_visit_window(visit_number, schedule_rows);
-			if (!window) return;
-			const window_end = frappe.datetime.add_days(frm.doc.date_of_delivery, window.end_offset);
-			frappe.model.set_value(cdt, cdn, "date", window_end);
-			calculate_next_pnc_visit_date(frm);
-		});
+		calculate_next_pnc_visit_date(frm);
+	},
+	baby_add(frm, cdt, cdn) {
+		fill_new_row_date(frm, cdt, cdn, "baby");
 	},
 });
 
@@ -117,13 +119,36 @@ function get_visit_window(visit_number, schedule_rows) {
 	};
 }
 
+function fill_new_row_date(frm, cdt, cdn, table_field) {
+	// A row added by hand (rather than by the bulk schedule generator
+	// below) still gets its target date filled in from the delivery date -
+	// the CHW should never see a blank calendar with no suggested date. A
+	// row beyond however many visits are configured simply gets no
+	// schedule to fill in from.
+	const row = locals[cdt][cdn];
+	if (row.date || !frm.doc.date_of_delivery) {
+		calculate_next_pnc_visit_date(frm);
+		return;
+	}
+	const visit_number = (frm.doc[table_field] || []).indexOf(row) + 1;
+	get_full_schedule().then((schedule_rows) => {
+		const window = get_visit_window(visit_number, schedule_rows);
+		if (!window) return;
+		const window_end = frappe.datetime.add_days(frm.doc.date_of_delivery, window.end_offset);
+		frappe.model.set_value(cdt, cdn, "date", window_end);
+		calculate_next_pnc_visit_date(frm);
+	});
+}
+
 function generate_visit_schedule(frm) {
 	// The whole schedule is known as soon as the delivery date is known -
 	// so, unlike ANC's open-ended pregnancy horizon, it can be laid out at
-	// once, one row per configured visit. Only runs once - if rows already
-	// exist (auto-generated earlier, or added by hand), leave them alone
-	// and just recalculate the summary fields.
-	if (!frm.doc.date_of_delivery || (frm.doc.mother || []).length) {
+	// once, one row per configured visit - on BOTH the mother and baby
+	// tables at once, same dates, since they're checked on the same
+	// household visit. Only runs once - if either table already has rows
+	// (auto-generated earlier, or added by hand), leave both alone and
+	// just recalculate the summary fields.
+	if (!frm.doc.date_of_delivery || (frm.doc.mother || []).length || (frm.doc.baby || []).length) {
 		calculate_next_pnc_visit_date(frm);
 		return;
 	}
@@ -131,12 +156,11 @@ function generate_visit_schedule(frm) {
 	get_full_schedule().then((schedule_rows) => {
 		schedule_rows.forEach((row) => {
 			const window_end = frappe.datetime.add_days(frm.doc.date_of_delivery, row.window_closes_day);
-			frm.add_child("mother", {
-				date: window_end,
-				status: "Pending",
-			});
+			frm.add_child("mother", { date: window_end, status: "Pending" });
+			frm.add_child("baby", { date: window_end, status: "Pending" });
 		});
 		frm.refresh_field("mother");
+		frm.refresh_field("baby");
 		calculate_next_pnc_visit_date(frm);
 	});
 }
@@ -161,7 +185,7 @@ function set_risk_alert(frm, text) {
 // Only the currently open (Pending) urgent follow-up row gets the tint -
 // not the row where Risk was originally found (already Completed, nothing
 // more to do there), and not an urgent row that's itself been completed.
-// Same rule as ANC's row highlight, applied to the "mother" table.
+// Applies to both the "mother" and "baby" tables independently.
 const RISK_ROW_CLASS = "pnc-risk-row";
 
 function ensure_risk_row_style() {
@@ -182,21 +206,22 @@ function ensure_risk_row_style() {
 
 function highlight_risk_rows(frm) {
 	ensure_risk_row_style();
-	const grid = frm.fields_dict.mother && frm.fields_dict.mother.grid;
-	if (!grid || !grid.grid_rows) return;
-
-	grid.grid_rows.forEach((grid_row) => {
-		const is_risk = !!grid_row.doc.urgent_followup && grid_row.doc.status !== "Completed";
-		if (grid_row.wrapper) {
-			grid_row.wrapper.toggleClass(RISK_ROW_CLASS, is_risk);
-		}
+	["mother", "baby"].forEach((table_field) => {
+		const grid = frm.fields_dict[table_field] && frm.fields_dict[table_field].grid;
+		if (!grid || !grid.grid_rows) return;
+		grid.grid_rows.forEach((grid_row) => {
+			const is_risk = !!grid_row.doc.urgent_followup && grid_row.doc.status !== "Completed";
+			if (grid_row.wrapper) {
+				grid_row.wrapper.toggleClass(RISK_ROW_CLASS, is_risk);
+			}
+		});
 	});
 }
 
-function sync_mother_row_fields(frm, window_start, window_end) {
-	// "Date of Next Visit" is auto-filled on the latest row only. "Next Visit
-	// Window" is a plain read-only range shown on every row.
-	const rows = frm.doc.mother || [];
+function sync_row_fields(frm, table_field, window_start, window_end) {
+	// "Date of Next Visit" is auto-filled on the latest row only. "Next
+	// Visit Window" is a plain read-only range shown on every row.
+	const rows = frm.doc[table_field] || [];
 	let display = "";
 	if (window_start && window_end) {
 		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(window_end)}`;
@@ -208,64 +233,75 @@ function sync_mother_row_fields(frm, window_start, window_end) {
 	rows.forEach((row) => {
 		row.next_visit_window = display;
 	});
-	frm.refresh_field("mother");
+	frm.refresh_field(table_field);
 }
 
-function calculate_next_pnc_visit_date(frm) {
-	if (!frm.doc.date_of_delivery) return;
-
-	// An open Urgent-tagged row always wins first - the actual insertion of
-	// this row only happens server-side (on save), but once one exists,
-	// the preview needs to respect it too instead of recomputing over it.
-	const rows = frm.doc.mother || [];
+function compute_track(frm, rows, schedule_rows) {
+	// An open Urgent-tagged row on this table always wins first - the
+	// actual insertion of this row only happens server-side (on save), but
+	// once one exists, the preview needs to respect it too instead of
+	// recomputing over it.
 	const pending_urgent = rows
 		.filter((row) => row.urgent_followup && row.status !== "Completed")
 		.sort((a, b) => (a.date > b.date ? 1 : -1))[0];
 	if (pending_urgent) {
 		const trigger_row_index = rows.indexOf(pending_urgent) - 1;
 		const trigger_date = trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
-		frm.set_value("next_pnc_visit_date", pending_urgent.date);
-		frm.set_value("next_pnc_visit_date_auto", pending_urgent.date);
-		// The urgent date itself already IS the early-visit signal - no
-		// separate alert needed on top of it.
-		set_risk_alert(frm, "");
-		sync_mother_row_fields(frm, trigger_date, pending_urgent.date);
-		highlight_risk_rows(frm);
-		return;
+		return { next_date: pending_urgent.date, window_start: trigger_date, window_end: pending_urgent.date, risk_alert: "" };
 	}
 
 	// Each visit's window is a direct row lookup from the master's Visit
 	// Schedule table - not a repeating interval from the last visit.
 	const completed_count = rows.filter((row) => row.status === "Completed").length;
-	const visit_number = completed_count + 1;
+	const window = get_visit_window(completed_count + 1, schedule_rows);
+	if (!window) {
+		// every visit on this table has been completed
+		return { next_date: null, window_start: null, window_end: null, risk_alert: "" };
+	}
+
+	const window_start = frappe.datetime.add_days(frm.doc.date_of_delivery, window.start_offset);
+	const window_end = frappe.datetime.add_days(frm.doc.date_of_delivery, window.end_offset);
+
+	// High Risk only, shown in red - a nudge to visit early within the
+	// window (from window_start, not window_end). Blank otherwise; the
+	// window/due date above are unaffected either way.
+	const risk_alert =
+		frm.doc.high_risk === "Yes"
+			? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, window.risk_alert_within_days))}`
+			: "";
+	return { next_date: window_end, window_start, window_end, risk_alert };
+}
+
+function calculate_next_pnc_visit_date(frm) {
+	if (!frm.doc.date_of_delivery) return;
 
 	get_full_schedule().then((schedule_rows) => {
-		const window = get_visit_window(visit_number, schedule_rows);
-		if (!window) {
-			// every scheduled visit has been completed
+		// Mother and baby are tracked independently - each gets its own
+		// effective next-visit date (an open urgent row if either table has
+		// one, otherwise the normal schedule lookup) - but they share the
+		// exact same Visit Schedule master, since both are checked on the
+		// same household visit. The single shared "Next PNC Visit Date"
+		// field always shows whichever of the two tracks is due sooner.
+		const mother_track = compute_track(frm, frm.doc.mother || [], schedule_rows);
+		const baby_track = compute_track(frm, frm.doc.baby || [], schedule_rows);
+
+		sync_row_fields(frm, "mother", mother_track.window_start, mother_track.window_end);
+		sync_row_fields(frm, "baby", baby_track.window_start, baby_track.window_end);
+
+		const candidates = [mother_track, baby_track].filter((t) => t.next_date);
+		if (!candidates.length) {
+			// every scheduled visit, for both mother and baby, is complete
 			frm.set_value("next_pnc_visit_date", null);
 			frm.set_value("next_pnc_visit_date_auto", null);
 			set_risk_alert(frm, "");
-			sync_mother_row_fields(frm, null, null);
 			highlight_risk_rows(frm);
 			return;
 		}
 
-		const window_start = frappe.datetime.add_days(frm.doc.date_of_delivery, window.start_offset);
-		const window_end = frappe.datetime.add_days(frm.doc.date_of_delivery, window.end_offset);
-
-		frm.set_value("next_pnc_visit_date", window_end);
-		frm.set_value("next_pnc_visit_date_auto", window_end);
-
-		// High Risk only, shown in red - a nudge to visit early within the
-		// window (from window_start, not window_end). Blank for Normal
-		// mothers; the window/due date above are unaffected either way.
-		const risk_alert =
-			frm.doc.high_risk === "Yes"
-				? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, window.risk_alert_within_days))}`
-				: "";
-		set_risk_alert(frm, risk_alert);
-		sync_mother_row_fields(frm, window_start, window_end);
+		const winner = candidates.sort((a, b) => (a.next_date > b.next_date ? 1 : -1))[0];
+		frm.set_value("next_pnc_visit_date", winner.next_date);
+		frm.set_value("next_pnc_visit_date_auto", winner.next_date);
+		set_risk_alert(frm, winner.risk_alert);
 		highlight_risk_rows(frm);
 	});
 }

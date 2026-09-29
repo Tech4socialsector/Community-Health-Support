@@ -6,6 +6,7 @@
  "field_order": [
   "vitals_section",
   "date_of_visit",
+  "status",
   "health_worker_name",
   "patient_symptoms_concerns",
   "general_condition",
@@ -27,6 +28,7 @@
   "mother_cesarean_scar_normal",
   "phq2_score",
   "mother_notes",
+  "mother_condition",
   "danger_signs_mother_section",
   "danger_fever",
   "danger_heavy_bleeding",
@@ -50,6 +52,7 @@
   "feeding_mixed_specify",
   "feeding_problems",
   "baby_notes",
+  "baby_condition",
   "danger_signs_baby_section",
   "baby_danger_fever",
   "baby_danger_convulsions",
@@ -79,6 +82,8 @@
   "reports_sent_to_mch_nurse",
   "column_break_ref1",
   "date_of_next_visit",
+  "next_visit_window",
+  "urgent_followup",
   "next_visit_place",
   "mch_nurse_name",
   "signature_date"
@@ -94,6 +99,14 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Date of Visit"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nCompleted"
   },
   {
    "fieldname": "health_worker_name",
@@ -124,7 +137,7 @@
    "label": "BP"
   },
   {
-   "description": "38° C +",
+   "description": "38\u00b0 C +",
    "fieldname": "temp",
    "fieldtype": "Data",
    "label": "Temp"
@@ -210,6 +223,14 @@
    "fieldname": "mother_notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "description": "Set this to Risk if the mother needs urgent attention - triggers an extra early follow-up.",
+   "fieldname": "mother_condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Mother's Condition",
+   "options": "\nNormal\nRisk"
   },
   {
    "description": "Highlighted on the paper form - flag immediately if any apply.",
@@ -335,6 +356,14 @@
    "fieldname": "baby_notes",
    "fieldtype": "Small Text",
    "label": "Notes"
+  },
+  {
+   "description": "Set this to Risk if the baby needs urgent attention - triggers an extra early follow-up.",
+   "fieldname": "baby_condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Baby's Condition",
+   "options": "\nNormal\nRisk"
   },
   {
    "description": "Highlighted on the paper form - flag immediately if any apply.",
@@ -496,10 +525,30 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Auto-filled with the same date driving Next Visit Date - not editable by hand.",
    "fieldname": "date_of_next_visit",
    "fieldtype": "Date",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "Date of Next Visit"
+   "label": "Date of Next Visit",
+   "read_only": 1
+  },
+  {
+   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
+   "fieldname": "next_visit_window",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Date of Next Visit",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
+   "fieldname": "urgent_followup",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Urgent Follow-up (auto)",
+   "read_only": 1
   },
   {
    "fieldname": "next_visit_place",
@@ -521,7 +570,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-23 00:00:00.000000",
+ "modified": "2026-09-29 22:36:30.796136",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Followup",

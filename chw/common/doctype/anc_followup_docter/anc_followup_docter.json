@@ -47,6 +47,7 @@
   "reduced_fetal_movement",
   "itching_of_palms_or_soles_of_feet_especially_at_night",
   "palpitations",
+  "patient_condition",
   "column_break_icvq",
   "mch_nurse_notified_of_danger_signs",
   "problems_identified",
@@ -77,6 +78,8 @@
   "reports_or_info_sent_to_mch_nurse",
   "column_break_tzcp",
   "date_of_next_visit",
+  "next_visit_window",
+  "urgent_followup",
   "place",
   "signature_of_mch_nurse",
   "date_reffe"
@@ -456,9 +459,27 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Auto-filled with the same date driving Next ANC Visit Date - type over it here to override.",
    "fieldname": "date_of_next_visit",
    "fieldtype": "Date",
    "label": "Date of Next Visit"
+  },
+  {
+   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
+   "fieldname": "next_visit_window",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Next Visit Window (From - To)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
+   "fieldname": "urgent_followup",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Urgent Follow-up (auto)",
+   "read_only": 1
   },
   {
    "fieldname": "place",
@@ -505,20 +526,28 @@
    "label": "Plan"
   },
   {
+   "description": "Set automatically from the pregnancy's LMP Date - not editable by hand.",
    "fieldname": "lmp_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "LMP Date",
-   "reqd": 1
+   "read_only": 1
   },
   {
+   "description": "Gestational age (weeks + days) as of this visit's Date - calculated automatically from LMP Date.",
    "fieldname": "pog_weeks",
-   "fieldtype": "Date",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "POG Weeks",
-   "reqd": 1
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_condition",
+   "fieldtype": "Select",
+   "label": "Patient Condition",
+   "options": "\nNormal\nRisk"
   }
  ],
  "grid_page_length": 50,

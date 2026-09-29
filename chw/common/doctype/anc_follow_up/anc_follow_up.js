@@ -1,6 +1,13 @@
 // Copyright (c) 2026, tech4socialsector@azimpremjifoundation.org and contributors
 // For license information, please see license.txt
 
+// The three follow-up tables all describe the same patient, just recorded
+// by a different staff type. Some organizations only use one or two of
+// these (e.g. Nurse + Doctor, no Volunteer) - every function below loops
+// over whichever tables exist; an empty or hidden one simply contributes
+// nothing.
+const FOLLOWUP_TABLE_FIELDS = ["anc_followup", "anc_followup_for_nurse", "anc_followup_for_docter"];
+
 frappe.ui.form.on("ANC Follow-up", {
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
@@ -30,35 +37,51 @@ frappe.ui.form.on("ANC Follow-up", {
 	pregnant_id(frm) {
 		generate_visit_schedule(frm);
 	},
-});
-
-frappe.ui.form.on("ANC Followup Child", {
-	date(frm, cdt, cdn) {
-		sync_row_pog(frm, cdt, cdn);
-	},
-	status(frm) {
-		calculate_next_anc_visit_date(frm);
-	},
-	patient_condition(frm) {
-		highlight_risk_rows(frm);
-	},
-});
-
-frappe.ui.form.on("ANC Follow-up", {
 	anc_followup_remove(frm) {
 		calculate_next_anc_visit_date(frm);
 	},
 	anc_followup_add(frm) {
 		highlight_risk_rows(frm);
 	},
+	anc_followup_for_nurse_remove(frm) {
+		calculate_next_anc_visit_date(frm);
+	},
+	anc_followup_for_nurse_add(frm) {
+		highlight_risk_rows(frm);
+	},
+	anc_followup_for_docter_remove(frm) {
+		calculate_next_anc_visit_date(frm);
+	},
+	anc_followup_for_docter_add(frm) {
+		highlight_risk_rows(frm);
+	},
 });
+
+function register_followup_table_events(child_doctype) {
+	frappe.ui.form.on(child_doctype, {
+		date(frm, cdt, cdn) {
+			sync_row_pog(frm, cdt, cdn);
+		},
+		status(frm) {
+			calculate_next_anc_visit_date(frm);
+		},
+		patient_condition(frm) {
+			highlight_risk_rows(frm);
+		},
+	});
+}
+
+register_followup_table_events("ANC Followup Child");
+register_followup_table_events("ANC Followup Nurse");
+register_followup_table_events("ANC Followup Docter");
 
 // Only the currently open (Pending) urgent follow-up row gets the tint -
 // not the row where Risk was originally found (already Completed, nothing
 // more to do there), and not an urgent row that's itself been completed. If
 // that completed urgent row also found Risk again, a new urgent row chains
 // off it and the highlight moves there - never two rows lit up at once.
-// Applies uniformly across the whole table, automatic phase or manual.
+// Applies uniformly across every follow-up table in use, automatic phase or
+// manual.
 const RISK_ROW_CLASS = "anc-risk-row";
 
 function ensure_risk_row_style() {
@@ -85,14 +108,15 @@ function ensure_risk_row_style() {
 
 function highlight_risk_rows(frm) {
 	ensure_risk_row_style();
-	const grid = frm.fields_dict.anc_followup && frm.fields_dict.anc_followup.grid;
-	if (!grid || !grid.grid_rows) return;
-
-	grid.grid_rows.forEach((grid_row) => {
-		const is_risk = !!grid_row.doc.urgent_followup && grid_row.doc.status !== "Completed";
-		if (grid_row.wrapper) {
-			grid_row.wrapper.toggleClass(RISK_ROW_CLASS, is_risk);
-		}
+	FOLLOWUP_TABLE_FIELDS.forEach((table_field) => {
+		const grid = frm.fields_dict[table_field] && frm.fields_dict[table_field].grid;
+		if (!grid || !grid.grid_rows) return;
+		grid.grid_rows.forEach((grid_row) => {
+			const is_risk = !!grid_row.doc.urgent_followup && grid_row.doc.status !== "Completed";
+			if (grid_row.wrapper) {
+				grid_row.wrapper.toggleClass(RISK_ROW_CLASS, is_risk);
+			}
+		});
 	});
 }
 
@@ -156,8 +180,21 @@ function sync_row_pog(frm, cdt, cdn) {
 	calculate_next_anc_visit_date(frm);
 }
 
+function get_active_table_fields(frm) {
+	// Only the tables this organization actually has visible get bulk
+	// pre-filled - a hidden one (e.g. Volunteer, for an org that only uses
+	// Nurse + Doctor) is left alone rather than quietly gaining rows no one
+	// will ever see.
+	return FOLLOWUP_TABLE_FIELDS.filter((f) => {
+		const field = frm.fields_dict[f];
+		return field && !field.df.hidden;
+	});
+}
+
 function generate_visit_schedule(frm) {
-	if (!frm.doc.pregnant_id || (frm.doc.anc_followup || []).length) {
+	const active_fields = get_active_table_fields(frm);
+	const already_has_rows = active_fields.some((f) => (frm.doc[f] || []).length);
+	if (!frm.doc.pregnant_id || already_has_rows) {
 		calculate_next_anc_visit_date(frm);
 		return;
 	}
@@ -176,14 +213,16 @@ function generate_visit_schedule(frm) {
 			for (let idx = starting_window; idx <= automatic_window_count; idx++) {
 				const window_start = frappe.datetime.add_days(info.lmp_date, (idx - 1) * window_days);
 				const window_end = frappe.datetime.add_days(window_start, window_days);
-				frm.add_child("anc_followup", {
-					date: window_end,
-					status: "Pending",
-					lmp_date: info.lmp_date,
-					pog_weeks: calculate_pog(info.lmp_date, window_end),
+				active_fields.forEach((table_field) => {
+					frm.add_child(table_field, {
+						date: window_end,
+						status: "Pending",
+						lmp_date: info.lmp_date,
+						pog_weeks: calculate_pog(info.lmp_date, window_end),
+					});
 				});
 			}
-			frm.refresh_field("anc_followup");
+			active_fields.forEach((table_field) => frm.refresh_field(table_field));
 			calculate_next_anc_visit_date(frm);
 		});
 	});
@@ -207,23 +246,48 @@ function set_risk_alert(frm, text) {
 }
 
 function sync_child_row_fields(frm, window_start, window_end) {
-	// "Date of Next Visit" is auto-filled on the latest row only - a genuine
-	// manual entry on an earlier row, or a fresh row she adds herself later,
-	// is never overwritten by this. "Next Visit Window" is a plain read-only
-	// range shown on every row.
-	const rows = frm.doc.anc_followup || [];
+	// "Date of Next Visit" is auto-filled on the latest row of EVERY
+	// follow-up table in use - a genuine manual entry on an earlier row, or
+	// a fresh row added later, is never overwritten by this. "Next Visit
+	// Window" is a plain read-only range shown on every row, on every
+	// table, so opening any of them shows the same clear From-To picture.
 	let display = "";
 	if (window_start && window_end) {
 		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(window_end)}`;
-		if (rows.length) {
+	}
+
+	FOLLOWUP_TABLE_FIELDS.forEach((table_field) => {
+		const rows = frm.doc[table_field] || [];
+		if (window_start && window_end && rows.length) {
 			const last_row = rows[rows.length - 1];
 			frappe.model.set_value(last_row.doctype, last_row.name, "date_of_next_visit", window_end);
 		}
-	}
-	rows.forEach((row) => {
-		row.next_visit_window = display;
+		rows.forEach((row) => {
+			row.next_visit_window = display;
+		});
+		frm.refresh_field(table_field);
 	});
-	frm.refresh_field("anc_followup");
+}
+
+function get_all_pending_urgent(frm) {
+	// An open Urgent-tagged row always wins first - the actual insertion of
+	// this row only happens server-side (on save), but once one exists, the
+	// preview needs to respect it too instead of recomputing over it.
+	// Checked across every follow-up table; whichever is earliest wins.
+	const candidates = [];
+	FOLLOWUP_TABLE_FIELDS.forEach((table_field) => {
+		const rows = frm.doc[table_field] || [];
+		const pending_urgent = rows
+			.filter((row) => row.urgent_followup && row.status !== "Completed")
+			.sort((a, b) => (a.date > b.date ? 1 : -1))[0];
+		if (pending_urgent) {
+			const trigger_row_index = rows.indexOf(pending_urgent) - 1;
+			const trigger_date = trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
+			candidates.push({ date: pending_urgent.date, trigger_date });
+		}
+	});
+	if (!candidates.length) return null;
+	return candidates.sort((a, b) => (a.date > b.date ? 1 : -1))[0];
 }
 
 function calculate_next_anc_visit_date(frm) {
@@ -237,22 +301,14 @@ function calculate_next_anc_visit_date(frm) {
 	}
 	if (!frm.doc.pregnant_id) return;
 
-	// An open Urgent-tagged row always wins first - the actual insertion of
-	// this row only happens server-side (on save), but once one exists,
-	// the preview needs to respect it too instead of recomputing over it.
-	const rows = frm.doc.anc_followup || [];
-	const pending_urgent = rows
-		.filter((row) => row.urgent_followup && row.status !== "Completed")
-		.sort((a, b) => (a.date > b.date ? 1 : -1))[0];
+	const pending_urgent = get_all_pending_urgent(frm);
 	if (pending_urgent) {
-		const trigger_row_index = rows.indexOf(pending_urgent) - 1;
-		const trigger_date = trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
 		frm.set_value("next_anc_visit_date", pending_urgent.date);
 		frm.set_value("next_anc_visit_date_auto", pending_urgent.date);
 		// The urgent date itself already IS the early-visit signal - no
 		// separate alert needed on top of it.
 		set_risk_alert(frm, "");
-		sync_child_row_fields(frm, trigger_date, pending_urgent.date);
+		sync_child_row_fields(frm, pending_urgent.trigger_date, pending_urgent.date);
 		return;
 	}
 
@@ -260,7 +316,10 @@ function calculate_next_anc_visit_date(frm) {
 		if (!info.lmp_date) return;
 
 		get_window_policy(info.high_risk).then(({ window_days, visits_per_window, alert_within_days, automatic_window_count }) => {
-			const completed_count = (frm.doc.anc_followup || []).filter((row) => row.status === "Completed").length;
+			const completed_count = FOLLOWUP_TABLE_FIELDS.reduce(
+				(sum, table_field) => sum + (frm.doc[table_field] || []).filter((row) => row.status === "Completed").length,
+				0
+			);
 			const starting_window = get_window_index(
 				frm.doc.creation || frappe.datetime.get_today(),
 				info.lmp_date,
@@ -286,10 +345,11 @@ function calculate_next_anc_visit_date(frm) {
 				return;
 			}
 
-			// Manual phase - the CHW's own "Date of Next Visit" on the latest
-			// dated row wins, same as the original design. Until she's
-			// actually recorded one, never leave this blank - show her
-			// current month's window (from POG) as a starting suggestion.
+			// Manual phase - whichever row, on whichever table, has the most
+			// recently visited date's "Date of Next Visit" wins, same as
+			// the original design. Until anyone has actually recorded one,
+			// never leave this blank - show her current month's window
+			// (from POG) as a starting suggestion.
 			const current = frm.doc.next_anc_visit_date;
 			const last_auto = frm.doc.next_anc_visit_date_auto;
 			if (current && last_auto && current !== last_auto) {
@@ -301,7 +361,9 @@ function calculate_next_anc_visit_date(frm) {
 				return;
 			}
 
-			const manual_rows = (frm.doc.anc_followup || []).filter((row) => row.date_of_next_visit);
+			const manual_rows = FOLLOWUP_TABLE_FIELDS.flatMap((table_field) =>
+				(frm.doc[table_field] || []).filter((row) => row.date_of_next_visit)
+			);
 			if (!manual_rows.length) {
 				frm.set_value("next_anc_visit_date", window_end);
 				frm.set_value("next_anc_visit_date_auto", window_end);
@@ -310,10 +372,10 @@ function calculate_next_anc_visit_date(frm) {
 				return;
 			}
 
-			const calculated_date = manual_rows[manual_rows.length - 1].date_of_next_visit;
-			frm.set_value("next_anc_visit_date", calculated_date);
-			frm.set_value("next_anc_visit_date_auto", calculated_date);
-			// The CHW's own manually typed date isn't a calculated window either.
+			const latest_row = manual_rows.sort((a, b) => (a.date > b.date ? 1 : -1))[manual_rows.length - 1];
+			frm.set_value("next_anc_visit_date", latest_row.date_of_next_visit);
+			frm.set_value("next_anc_visit_date_auto", latest_row.date_of_next_visit);
+			// A staff member's own manually typed date isn't a calculated window either.
 			set_risk_alert(frm, "");
 			sync_child_row_fields(frm, null, null);
 		});

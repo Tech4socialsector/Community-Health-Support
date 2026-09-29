@@ -30,6 +30,7 @@
  ],
  "fields": [
   {
+   "default": "Today",
    "fieldname": "date_of_visit",
    "fieldtype": "Date",
    "in_list_view": 1,
