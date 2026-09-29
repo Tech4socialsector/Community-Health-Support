@@ -1,9 +1,7 @@
-import frappe
-
-
 def execute():
-	"""PNC follow-up visits changed from weekly (6 weeks) to monthly (6 months) -
-	update the stored PNC Visit Interval Master value to match, since a Single
-	doctype's value doesn't pick up a new JSON default once it already has one."""
-	frappe.reload_doc("chw_master", "doctype", "pnc_visit_interval_master")
-	frappe.db.set_single_value("PNC Visit Interval Master", "interval_days", 30)
+	"""No-op - superseded by the later row-based Visit Schedule redesign
+	(see seed_pnc_visit_interval_rows.py), which replaced the single
+	`interval_days` field this patch used to write to. Kept as a no-op
+	rather than removed from patches.txt, since it already ran and is
+	logged on existing sites; a fresh site just skips straight past it."""
+	pass
