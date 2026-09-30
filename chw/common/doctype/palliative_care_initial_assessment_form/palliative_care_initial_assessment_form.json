@@ -35,6 +35,10 @@
   "relevant_investigations_with_date",
   "relevant_investigations_description",
   "present_medications",
+  "concerns_section",
+  "primary_concerns",
+  "concerns_column_break",
+  "family_primary_concern",
   "vitals_section",
   "pulse",
   "blood_pressure",
@@ -112,7 +116,17 @@
   "job_title",
   "signature",
   "date",
-  "other_staff_present"
+  "other_staff_present",
+  "consent_section",
+  "consent_text",
+  "consent_given_by_name",
+  "consent_signature",
+  "consent_column_break",
+  "witness_name",
+  "witness_signature",
+  "consent_staff_name",
+  "consent_staff_signature",
+  "consent_date"
  ],
  "fields": [
   {
@@ -124,12 +138,16 @@
    "fetch_from": "fmid.family_member",
    "fieldname": "name1",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Name"
   },
   {
    "fetch_from": "fmid.gender",
    "fieldname": "gender",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Gender"
   },
   {
@@ -231,6 +249,25 @@
    "fieldname": "present_medications",
    "fieldtype": "Data",
    "label": "Present medications"
+  },
+  {
+   "fieldname": "concerns_section",
+   "fieldtype": "Section Break",
+   "label": "Concerns"
+  },
+  {
+   "fieldname": "primary_concerns",
+   "fieldtype": "Small Text",
+   "label": "Patient's Primary Concerns"
+  },
+  {
+   "fieldname": "concerns_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "family_primary_concern",
+   "fieldtype": "Small Text",
+   "label": "Family's Primary Concern"
   },
   {
    "fieldname": "vitals_section",
@@ -659,6 +696,8 @@
   {
    "fieldname": "fmid",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "FMID",
    "options": "Family members"
   },
@@ -677,6 +716,57 @@
   {
    "fieldname": "column_break_kmur",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consent_section",
+   "fieldtype": "Section Break",
+   "label": "Consent"
+  },
+  {
+   "fieldname": "consent_text",
+   "fieldtype": "HTML",
+   "options": "<div style=\"line-height:1.5;\"><p><strong>I give consent</strong> for Palliative Care Landour Community Hospital (LCH), Mussoorie, to provide medical, therapeutic and psychosocial support services to my relative / myself from this day forward. I understand that if I have any questions regarding services, LCH or my relative that I am allowed and encouraged to ask them. I understand that I am able to withdraw consent at any time without any penalties.</p><p>I agree to have my image taken by the photographer/videographer who represents Palliative Care LCH. I understand that Palliative Care LCH might use my image in electronic or print format to help the project in different ways including: to promote organization activities; to illustrate reports about the training I am participating in; to publicise future training programmes (on printed materials like books, reports and leaflets, and videos or internet).</p><hr><p lang=\"hi\">\u092e\u0948\u0902 \u0907\u0938 \u0926\u093f\u0928 \u0938\u0947 \u0905\u092a\u0928\u0947 \u0930\u093f\u0936\u094d\u0924\u0947\u0926\u093e\u0930/\u0938\u094d\u0935\u092f\u0902 \u0915\u094b \u091a\u093f\u0915\u093f\u0924\u094d\u0938\u093e, \u0909\u092a\u091a\u093e\u0930\u093e\u0924\u094d\u092e\u0915 \u0914\u0930 \u092e\u0928\u094b\u0935\u0948\u091c\u094d\u091e\u093e\u0928\u093f\u0915 \u0938\u0939\u093e\u092f\u0924\u093e \u0938\u0947\u0935\u093e\u090f\u0902 \u092a\u094d\u0930\u0926\u093e\u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u092a\u0948\u0932\u093f\u090f\u091f\u093f\u0935 \u0915\u0947\u092f\u0930 \u0932\u0902\u0922\u094c\u0930 \u0938\u093e\u092e\u0941\u0926\u093e\u092f\u093f\u0915 \u0905\u0938\u094d\u092a\u0924\u093e\u0932 (LCH), \u092e\u0938\u0942\u0930\u0940 \u0915\u094b \u0938\u0939\u092e\u0924\u093f \u0926\u0947\u0924\u093e \u0939\u0942\u0902\u0964 \u092e\u0948\u0902 \u0938\u092e\u091d\u0924\u093e \u0939\u0942\u0902 \u0915\u093f \u092f\u0926\u093f \u092e\u0947\u0930\u0947 \u092a\u093e\u0938 \u0938\u0947\u0935\u093e\u0913\u0902, LCH \u092f\u093e \u092e\u0947\u0930\u0947 \u0930\u093f\u0936\u094d\u0924\u0947\u0926\u093e\u0930 \u0915\u0947 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u0915\u094b\u0908 \u092a\u094d\u0930\u0936\u094d\u0928 \u0939\u0948 \u0924\u094b \u092e\u0941\u091d\u0947 \u0909\u0928\u0938\u0947 \u092a\u0942\u091b\u0928\u0947 \u0915\u0940 \u0905\u0928\u0941\u092e\u0924\u093f \u0939\u0948 \u0914\u0930 \u092a\u094d\u0930\u094b\u0924\u094d\u0938\u093e\u0939\u093f\u0924 \u0915\u093f\u092f\u093e \u091c\u093e\u0924\u093e \u0939\u0948\u0964 \u092e\u0948\u0902 \u0938\u092e\u091d\u0924\u093e \u0939\u0942\u0902 \u0915\u093f \u092e\u0948\u0902 \u092c\u093f\u0928\u093e \u0915\u093f\u0938\u0940 \u0926\u0902\u0921 \u0915\u0947 \u0915\u093f\u0938\u0940 \u092d\u0940 \u0938\u092e\u092f \u0938\u0939\u092e\u0924\u093f \u0935\u093e\u092a\u0938 \u0932\u0947\u0928\u0947 \u092e\u0947\u0902 \u0938\u0915\u094d\u0937\u092e \u0939\u0942\u0902\u0964</p><p lang=\"hi\">\u092e\u0948\u0902 \u0905\u092a\u0928\u0940 \u091b\u0935\u093f \u0915\u094b \u092b\u094b\u091f\u094b\u0917\u094d\u0930\u093e\u092b\u0930/\u0935\u0940\u0921\u093f\u092f\u094b\u0917\u094d\u0930\u093e\u092b\u0930 \u0926\u094d\u0935\u093e\u0930\u093e \u0932\u0947\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0938\u0939\u092e\u0924 \u0939\u0942\u0902 \u091c\u094b \u092a\u0948\u0932\u093f\u090f\u091f\u093f\u0935 \u0915\u0947\u092f\u0930 LCH \u0915\u093e \u092a\u094d\u0930\u0924\u093f\u0928\u093f\u0927\u093f\u0924\u094d\u0935 \u0915\u0930\u0924\u093e \u0939\u0948\u0964 \u092e\u0948\u0902 \u0938\u092e\u091d\u0924\u093e \u0939\u0942\u0902 \u0915\u093f \u092a\u0948\u0932\u093f\u090f\u091f\u093f\u0935 \u0915\u0947\u092f\u0930 LCH \u092a\u0930\u093f\u092f\u094b\u091c\u0928\u093e \u092e\u0947\u0902 \u0935\u093f\u092d\u093f\u0928\u094d\u0928 \u0924\u0930\u0940\u0915\u094b\u0902 \u0938\u0947 \u092e\u0926\u0926 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0907\u0932\u0947\u0915\u094d\u091f\u094d\u0930\u0949\u0928\u093f\u0915 \u092f\u093e \u092a\u094d\u0930\u093f\u0902\u091f \u092a\u094d\u0930\u093e\u0930\u0942\u092a \u092e\u0947\u0902 \u092e\u0947\u0930\u0940 \u091b\u0935\u093f \u0915\u093e \u0909\u092a\u092f\u094b\u0917 \u0915\u0930 \u0938\u0915\u0924\u093e \u0939\u0948, \u091c\u093f\u0938\u092e\u0947\u0902 \u0936\u093e\u092e\u093f\u0932 \u0939\u0948: \u0938\u0902\u0917\u0920\u0928 \u0915\u0940 \u0917\u0924\u093f\u0935\u093f\u0927\u093f\u092f\u094b\u0902 \u0915\u094b \u092c\u0922\u093c\u093e\u0935\u093e \u0926\u0947\u0928\u093e; \u091c\u093f\u0938 \u092a\u094d\u0930\u0936\u093f\u0915\u094d\u0937\u0923 \u092e\u0947\u0902 \u092e\u0948\u0902 \u092d\u093e\u0917 \u0932\u0947 \u0930\u0939\u093e \u0939\u0942\u0902 \u0909\u0938\u0915\u0947 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0915\u094b \u091a\u093f\u0924\u094d\u0930\u093f\u0924 \u0915\u0930\u0928\u093e; \u092d\u0935\u093f\u0937\u094d\u092f \u0915\u0947 \u092a\u094d\u0930\u0936\u093f\u0915\u094d\u0937\u0923 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e\u094b\u0902 (\u0915\u093f\u0924\u093e\u092c\u094b\u0902, \u0930\u093f\u092a\u094b\u0930\u094d\u091f\u094b\u0902 \u0914\u0930 \u092a\u0924\u094d\u0930\u0915, \u0914\u0930 \u0935\u0940\u0921\u093f\u092f\u094b \u092f\u093e \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u091c\u0948\u0938\u0940 \u092e\u0941\u0926\u094d\u0930\u093f\u0924 \u0938\u093e\u092e\u0917\u094d\u0930\u0940 \u092a\u0930) \u0915\u093e \u092a\u094d\u0930\u091a\u093e\u0930 \u0915\u0930\u0928\u093e\u0964</p></div>"
+  },
+  {
+   "description": "Name of the person consenting - the patient themselves, or a relative on their behalf.",
+   "fieldname": "consent_given_by_name",
+   "fieldtype": "Data",
+   "label": "Name"
+  },
+  {
+   "fieldname": "consent_signature",
+   "fieldtype": "Signature",
+   "label": "Signature"
+  },
+  {
+   "fieldname": "consent_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "witness_name",
+   "fieldtype": "Data",
+   "label": "Witness Name"
+  },
+  {
+   "fieldname": "witness_signature",
+   "fieldtype": "Signature",
+   "label": "Witness Signature"
+  },
+  {
+   "fieldname": "consent_staff_name",
+   "fieldtype": "Data",
+   "label": "Staff Name"
+  },
+  {
+   "fieldname": "consent_staff_signature",
+   "fieldtype": "Signature",
+   "label": "Staff Signature"
+  },
+  {
+   "default": "Today",
+   "fieldname": "consent_date",
+   "fieldtype": "Date",
+   "label": "Date"
   }
  ],
  "grid_page_length": 50,
@@ -687,7 +777,7 @@
    "link_fieldname": "pcid"
   }
  ],
- "modified": "2026-09-22 11:54:33.723446",
+ "modified": "2026-09-30 11:42:09.597507",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",

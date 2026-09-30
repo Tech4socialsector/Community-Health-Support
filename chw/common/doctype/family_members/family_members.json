@@ -27,6 +27,7 @@
   "education",
   "date",
   "health_worker_name",
+  "suggested_charity_percentage",
   "status",
   "hmis_patient_registration",
   "section_break_kdnz",
@@ -201,6 +202,15 @@
    "fieldtype": "Link",
    "label": "Data Collector",
    "options": "Health Worker",
+   "read_only": 1
+  },
+  {
+   "description": "Carried over from this family's Household profile - LCH Palliative Care Charity Criteria score. Only set once that household's assessment has all 5 questions answered.",
+   "fetch_from": "hhid.charity_percentage_band",
+   "fetch_if_empty": 1,
+   "fieldname": "suggested_charity_percentage",
+   "fieldtype": "Data",
+   "label": "Suggested Charity %",
    "read_only": 1
   },
   {

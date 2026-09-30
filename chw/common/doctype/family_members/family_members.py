@@ -14,12 +14,25 @@ class Familymembers(Document):
 	def validate(self):
 		validate_phone_number(self.phone_number)
 		self.calculate_age()
+		self.sync_suggested_charity_percentage()
 
 	def on_update(self):
 		refresh_member_counts(self.hhid)
 
 	def after_delete(self):
 		refresh_member_counts(self.hhid)
+
+	def sync_suggested_charity_percentage(self):
+		# fetch_from only pulls once, when hhid is first set on this row - if
+		# the household's Charity Assessment gets filled in (or redone) later,
+		# an existing family member would otherwise be stuck showing a blank
+		# or stale value. Re-pull on every save instead, so it always matches
+		# the household's current assessment.
+		if not self.hhid:
+			return
+		self.suggested_charity_percentage = frappe.db.get_value(
+			"Household profile", self.hhid, "charity_percentage_band"
+		)
 
 	def calculate_age(self):
 		if not self.date_of_birth:

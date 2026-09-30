@@ -168,7 +168,7 @@
   {
    "fieldname": "husbands_name",
    "fieldtype": "Data",
-   "label": "Husband's Name"
+   "label": "Husband'sName"
   },
   {
    "fieldname": "husbands_occupation",
@@ -184,7 +184,7 @@
   {
    "fieldname": "history_section",
    "fieldtype": "Section Break",
-   "label": "History (preconception, pregnancy and postnatal)"
+   "label": "Mother History (preconception, pregnancy and postnatal)"
   },
   {
    "fieldname": "pmh_diabetes",
@@ -246,7 +246,7 @@
   {
    "fieldname": "personal_history_section",
    "fieldtype": "Section Break",
-   "label": "Personal History"
+   "label": "Mother Personal History"
   },
   {
    "fieldname": "personal_history_smoking",
@@ -400,7 +400,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-29 15:19:24.543603",
+ "modified": "2026-09-29 17:21:40.487619",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",
