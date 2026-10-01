@@ -8,33 +8,26 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_rmhx",
+  "survay_date",
   "village",
   "gram_panchayat",
   "subcenter",
   "household_head_name",
   "total_family_members",
-  "members_added",
-  "pending_members",
+  "phone_no",
   "status",
   "caste",
   "others_caste",
   "house",
   "type_of_housing",
+  "column_break_kkvt",
   "electricity",
-  "phone_no",
-  "survay_date",
   "farming",
   "drinkingwater",
   "hereditarydisease",
   "toilet",
   "cattles",
-  "column_break_kkvt",
-  "village_short_code",
   "address",
-  "geo_location",
-  "latitude",
-  "longitude",
-  "household_id",
   "health_worker_name",
   "charity_section",
   "charity_breadwinner_occupation",
@@ -57,8 +50,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Head of the Family ",
-   "reqd": 1
+   "label": "Head of the Family "
   },
   {
    "fieldname": "total_family_members",
@@ -66,20 +58,6 @@
    "in_list_view": 1,
    "label": "Total Family Members in the Family",
    "non_negative": 1
-  },
-  {
-   "fieldname": "members_added",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Family Members Added",
-   "read_only": 1
-  },
-  {
-   "fieldname": "pending_members",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Pending Family Members",
-   "read_only": 1
   },
   {
    "fieldname": "caste",
@@ -99,8 +77,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Village",
-   "options": "Village",
-   "reqd": 1
+   "options": "Village"
   },
   {
    "fieldname": "gram_panchayat",
@@ -182,38 +159,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "village.village_code",
-   "fetch_if_empty": 1,
-   "fieldname": "village_short_code",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Village Code"
-  },
-  {
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address"
-  },
-  {
-   "description": "Tap the locate icon on the map to capture this household's GPS coordinates.",
-   "fieldname": "geo_location",
-   "fieldtype": "Geolocation",
-   "label": "Geo Location"
-  },
-  {
-   "fieldname": "latitude",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Latitude",
-   "read_only": 1
-  },
-  {
-   "fieldname": "longitude",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Longitude",
-   "read_only": 1
   },
   {
    "fieldname": "health_worker_name",
@@ -222,14 +170,6 @@
    "in_standard_filter": 1,
    "label": "Data Collector",
    "options": "Health Worker",
-   "read_only": 1
-  },
-  {
-   "fieldname": "household_id",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Household ID",
    "read_only": 1
   },
   {
@@ -300,7 +240,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-09-10 16:49:55.482413",
+ "modified": "2026-09-30 11:50:46.247139",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",
