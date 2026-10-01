@@ -49,6 +49,7 @@ class Child6wto1YearRegandFollowup(Document):
 					next_row_too_soon = next_row and getdate(next_row.date_of_visit) <= urgent_date
 					if not next_row_too_soon:
 						new_row = self.append("followup_visits", {})
+						new_row.window_start_date = row.date_of_visit
 						new_row.date_of_visit = urgent_date
 						new_row.status = "Pending"
 						new_row.urgent_followup = 1

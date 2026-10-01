@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "vitals_section",
+  "window_start_date",
   "date_of_visit",
   "status",
   "health_worker_name",
@@ -95,10 +96,18 @@
    "label": "Vital Signs (Postpartum)"
   },
   {
+   "description": "The start of this visit's scheduled window - filled in automatically when the row is generated. Purely informational, alongside Visit Ending Date (the window's end / due date).",
+   "fieldname": "window_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Visit Starting Date",
+   "read_only": 1
+  },
+  {
    "fieldname": "date_of_visit",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date of Visit"
+   "label": "Visit Ending Date"
   },
   {
    "default": "Pending",

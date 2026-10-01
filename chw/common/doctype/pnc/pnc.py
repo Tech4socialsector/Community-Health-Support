@@ -117,6 +117,7 @@ class PNC(Document):
 					next_row_too_soon = next_row and getdate(next_row.date) <= urgent_date
 					if not next_row_too_soon:
 						new_row = self.append(table_field, {})
+						new_row.window_start_date = row.date
 						new_row.date = urgent_date
 						new_row.status = "Pending"
 						new_row.urgent_followup = 1

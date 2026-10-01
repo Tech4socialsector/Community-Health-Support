@@ -96,6 +96,7 @@ function generate_visit_schedule(frm) {
 			const window_start = frappe.datetime.add_days(frm.doc.date_of_visit, (idx - 1) * window_days);
 			const window_end = frappe.datetime.add_days(window_start, window_days);
 			frm.add_child("followup_visits", {
+				window_start_date: window_start,
 				date_of_visit: window_end,
 				status: "Pending",
 			});

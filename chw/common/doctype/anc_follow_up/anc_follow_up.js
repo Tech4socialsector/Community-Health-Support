@@ -247,6 +247,7 @@ function generate_visit_schedule(frm) {
 				const window_start = frappe.datetime.add_days(info.lmp_date, (idx - 1) * window_days);
 				const window_end = frappe.datetime.add_days(window_start, window_days);
 				frm.add_child(NURSE_TABLE_FIELD, {
+					window_start_date: window_start,
 					date: window_end,
 					status: "Pending",
 					lmp_date: info.lmp_date,

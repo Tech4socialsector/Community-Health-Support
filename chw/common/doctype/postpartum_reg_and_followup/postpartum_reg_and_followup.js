@@ -101,8 +101,9 @@ function generate_visit_schedule(frm) {
 
 	get_full_schedule().then((schedule_rows) => {
 		schedule_rows.forEach((row) => {
+			const window_start = frappe.datetime.add_days(frm.doc.delivery_date, row.window_opens_day);
 			const window_end = frappe.datetime.add_days(frm.doc.delivery_date, row.window_closes_day);
-			frm.add_child("followup_visits", { date_of_visit: window_end, status: "Pending" });
+			frm.add_child("followup_visits", { window_start_date: window_start, date_of_visit: window_end, status: "Pending" });
 		});
 		frm.refresh_field("followup_visits");
 		calculate_next_visit_date(frm);

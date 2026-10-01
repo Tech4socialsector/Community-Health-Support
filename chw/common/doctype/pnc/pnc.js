@@ -155,9 +155,10 @@ function generate_visit_schedule(frm) {
 
 	get_full_schedule().then((schedule_rows) => {
 		schedule_rows.forEach((row) => {
+			const window_start = frappe.datetime.add_days(frm.doc.date_of_delivery, row.window_opens_day);
 			const window_end = frappe.datetime.add_days(frm.doc.date_of_delivery, row.window_closes_day);
-			frm.add_child("mother", { date: window_end, status: "Pending" });
-			frm.add_child("baby", { date: window_end, status: "Pending" });
+			frm.add_child("mother", { window_start_date: window_start, date: window_end, status: "Pending" });
+			frm.add_child("baby", { window_start_date: window_start, date: window_end, status: "Pending" });
 		});
 		frm.refresh_field("mother");
 		frm.refresh_field("baby");
