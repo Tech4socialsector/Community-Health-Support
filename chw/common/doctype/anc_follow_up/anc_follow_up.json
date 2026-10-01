@@ -129,7 +129,7 @@
   {
    "fieldname": "next_anc_visit_date",
    "fieldtype": "Date",
-   "label": "Next ANC Visit Date"
+   "label": "Visit Due data"
   },
   {
    "bold": 1,
@@ -191,7 +191,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-30 22:55:59.959163",
+ "modified": "2026-10-01 15:44:06.495394",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

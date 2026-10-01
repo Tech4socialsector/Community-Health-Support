@@ -132,7 +132,7 @@
    "description": "Calculated automatically from the delivery date and the PNC Visit Interval Master's visit schedule. Not editable by hand.",
    "fieldname": "next_pnc_visit_date",
    "fieldtype": "Date",
-   "label": "Next PNC Visit date",
+   "label": "Visit due Date",
    "read_only": 1
   },
   {
@@ -164,7 +164,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-01 11:55:56.248165",
+ "modified": "2026-10-01 15:44:57.965277",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",
