@@ -1643,9 +1643,12 @@ CHW_WORK_ORDER_TYPES = [
         'date_field': 'next_anc_visit_date',
         # From-date, High Risk and Alert-date aren't stored fields for ANC -
         # they're computed live, on read, straight from LMP + the Master +
-        # the followup rows (see _enrich_anc_records_live). live_risk_enrich
+        # the Nurse followup rows (see _enrich_anc_records_live). live_risk_enrich
         # marks this type for that treatment; every other type still reads
-        # plain stored fields (None below, same as before).
+        # plain stored fields (None below, same as before). Only the Nurse
+        # follow-up table connects to the Work Order List at all - Volunteer
+        # and Doctor are open-ended manual logs with no schedule, so they
+        # never feed due dates, High Risk, or completed-visit counts here.
         'from_date_field': None,
         'high_risk_field': None,
         'alert_field': None,
@@ -1655,8 +1658,8 @@ CHW_WORK_ORDER_TYPES = [
         'has_date': True,
         'has_village': True,
         'has_health_worker': True,
-        'followup_doctype': 'ANC Followup Child',
-        'followup_table_field': 'anc_followup',
+        'followup_doctype': 'ANC Followup Nurse',
+        'followup_table_field': 'anc_followup_for_nurse',
         'followup_date_field': 'date',
     },
     {
@@ -1816,32 +1819,25 @@ def _work_order_matching_parent_names(wtype, village, health_worker):
 
 
 def _anc_currently_risk_names(anc_names):
-    """ANC Follow-up names whose most recently COMPLETED followup row -
-    across all three tables (Volunteer/Nurse/Doctor combined, whichever
-    the org actually uses) - has Patient Condition = Risk. This is what
-    "currently High Risk" means for the Work Order List: always the latest
-    visit, never a stored flag that can go stale once that visit's risk is
-    later resolved. Separate from Pregnancy Registration's own High Risk
-    field, which stays a one-time registration record and drives the
-    window/quota policy and on-form Risk Alert, not this."""
+    """ANC Follow-up names whose most recently COMPLETED Nurse followup row
+    has Patient Condition = Risk. This is what "currently High Risk" means
+    for the Work Order List: always the latest Nurse visit, never a stored
+    flag that can go stale once that visit's risk is later resolved.
+    Volunteer and Doctor are open-ended manual logs with no Work Order List
+    connection, so their rows are never consulted here - only Nurse drives
+    this. Separate from Pregnancy Registration's own High Risk field, which
+    stays a one-time registration record and drives the window/quota policy
+    and on-form Risk Alert, not this."""
     if not anc_names:
         return []
-    from chw.common.doctype.anc_follow_up.anc_follow_up import FOLLOWUP_TABLE_FIELDS
-
-    table_field_to_doctype = {
-        'anc_followup': 'ANC Followup Child',
-        'anc_followup_for_nurse': 'ANC Followup Nurse',
-        'anc_followup_for_docter': 'ANC Followup Docter',
-    }
+    rows = frappe.get_all(
+        'ANC Followup Nurse',
+        filters=[['parent', 'in', anc_names], ['status', '=', 'Completed']],
+        fields=['parent', 'date', 'patient_condition'],
+    )
     entries_by_parent = {}
-    for table_field in FOLLOWUP_TABLE_FIELDS:
-        rows = frappe.get_all(
-            table_field_to_doctype[table_field],
-            filters=[['parent', 'in', anc_names], ['status', '=', 'Completed']],
-            fields=['parent', 'date', 'patient_condition'],
-        )
-        for row in rows:
-            entries_by_parent.setdefault(row.parent, []).append((row.date, row.patient_condition))
+    for row in rows:
+        entries_by_parent.setdefault(row.parent, []).append((row.date, row.patient_condition))
 
     return [
         name for name, entries in entries_by_parent.items()
@@ -1937,8 +1933,8 @@ LIVE_HIGH_RISK_RESOLVERS = {
 def _pnc_track_from_date(rows, delivery_date):
     """Mirrors PNC._compute_track's from-date half exactly - an open Urgent
     row on this table wins first, otherwise the normal schedule lookup for
-    however many visits are completed. Returns (window_start, next_date) or
-    (None, None) if this table has nothing due."""
+    however many visits are completed. Returns (window_start, next_date,
+    is_urgent) or (None, None, False) if this table has nothing due."""
     from chw.common.doctype.pnc.pnc import PNC
 
     urgent_rows = [(i, row) for i, row in enumerate(rows) if row.urgent_followup and row.status != 'Completed']
@@ -1946,15 +1942,15 @@ def _pnc_track_from_date(rows, delivery_date):
         i, earliest = min(urgent_rows, key=lambda pair: getdate(pair[1].date))
         trigger_row = rows[i - 1] if i > 0 else None
         trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
-        return trigger_date, getdate(earliest.date)
+        return trigger_date, getdate(earliest.date), True
 
     completed_count = len([row for row in rows if row.status == 'Completed'])
     window = PNC.get_visit_window(completed_count + 1)
     if not window:
-        return None, None
+        return None, None, False
     window_start = add_days(getdate(delivery_date), window.start_offset)
     window_end = add_days(getdate(delivery_date), window.end_offset)
-    return window_start, window_end
+    return window_start, window_end, False
 
 
 def _enrich_pnc_records_live(records):
@@ -2019,16 +2015,19 @@ def _enrich_pnc_records_live(records):
             r['from_date'] = None
             continue
 
-        mother_start, mother_end = _pnc_track_from_date(mother_by_parent.get(r['name'], []), delivery_date)
-        baby_start, baby_end = _pnc_track_from_date(baby_by_parent.get(r['name'], []), delivery_date)
+        mother_track = _pnc_track_from_date(mother_by_parent.get(r['name'], []), delivery_date)
+        baby_track = _pnc_track_from_date(baby_by_parent.get(r['name'], []), delivery_date)
 
-        candidates = [(mother_start, mother_end), (baby_start, baby_end)]
-        candidates = [c for c in candidates if c[1]]
+        candidates = [c for c in (mother_track, baby_track) if c[1]]
         if not candidates:
             r['from_date'] = None
             continue
 
-        winner_start, _ = min(candidates, key=lambda pair: pair[1])
+        # An open urgent row on either track always outranks an ordinary due
+        # date on the other - see PNC.set_next_pnc_visit_date for the same
+        # rule on the form itself.
+        urgent_candidates = [c for c in candidates if c[2]]
+        winner_start, _, _ = min(urgent_candidates or candidates, key=lambda c: c[1])
         r['from_date'] = str(winner_start)
 
     return records
@@ -2036,20 +2035,20 @@ def _enrich_pnc_records_live(records):
 
 def _enrich_anc_records_live(records):
     """From-date / Alert-date / High-Risk for ANC records, computed live from
-    LMP date + the ANC Visit Interval Master + the followup rows across all
-    three follow-up tables (Volunteer, Nurse, Doctor - some orgs only use
-    one or two of them) - reusing the exact same calculation the ANC
-    Follow-up form itself runs
+    LMP date + the ANC Visit Interval Master + the Nurse follow-up rows only
+    - reusing the exact same calculation the ANC Follow-up form itself runs
     (chw.common.doctype.anc_follow_up.anc_follow_up.ANCFollowup), instead of
-    reading fields that were pre-calculated and stored on save. Batches its
-    reads into a fixed number of queries regardless of how many records are
-    passed in, rather than querying per patient. Mutates and returns the
-    same list; non-ANC records pass through untouched."""
+    reading fields that were pre-calculated and stored on save. Volunteer and
+    Doctor are open-ended manual logs with no schedule and no Work Order
+    List connection, so their rows never factor in here. Batches its reads
+    into a fixed number of queries regardless of how many records are passed
+    in, rather than querying per patient. Mutates and returns the same list;
+    non-ANC records pass through untouched."""
     anc_records = [r for r in records if r.get('doctype') == 'ANC Follow-up']
     if not anc_records:
         return records
 
-    from chw.common.doctype.anc_follow_up.anc_follow_up import ANCFollowup, FOLLOWUP_TABLE_FIELDS
+    from chw.common.doctype.anc_follow_up.anc_follow_up import ANCFollowup
 
     pregnant_ids = list({r.get('pregnant_id') for r in anc_records if r.get('pregnant_id')})
     pregnancies = frappe.get_all(
@@ -2060,22 +2059,15 @@ def _enrich_anc_records_live(records):
     pregnancy_by_id = {p.name: p for p in pregnancies}
 
     anc_names = [r['name'] for r in anc_records]
-    # (child doctype, table fieldname) - mirrors ANCFollowup.FOLLOWUP_TABLE_FIELDS.
-    table_field_to_doctype = {
-        'anc_followup': 'ANC Followup Child',
-        'anc_followup_for_nurse': 'ANC Followup Nurse',
-        'anc_followup_for_docter': 'ANC Followup Docter',
-    }
+    followup_rows = frappe.get_all(
+        'ANC Followup Nurse',
+        filters=[['parent', 'in', anc_names]],
+        fields=['parent', 'status', 'urgent_followup', 'date', 'idx', 'patient_condition'],
+        order_by='parent asc, idx asc',
+    ) if anc_names else []
     rows_by_parent = {}
-    for table_field in FOLLOWUP_TABLE_FIELDS:
-        followup_rows = frappe.get_all(
-            table_field_to_doctype[table_field],
-            filters=[['parent', 'in', anc_names]],
-            fields=['parent', 'status', 'urgent_followup', 'date', 'idx', 'patient_condition'],
-            order_by='parent asc, idx asc',
-        ) if anc_names else []
-        for row in followup_rows:
-            rows_by_parent.setdefault(row.parent, {}).setdefault(table_field, []).append(row)
+    for row in followup_rows:
+        rows_by_parent.setdefault(row.parent, []).append(row)
 
     for r in anc_records:
         pregnancy = pregnancy_by_id.get(r.get('pregnant_id'))
@@ -2088,44 +2080,30 @@ def _enrich_anc_records_live(records):
         # high_risk (from Pregnancy Registration, sticky) still drives the
         # window/quota policy and the on-form Risk Alert below - unchanged.
         # The badge shown in the Work Order List is a separate, live signal:
-        # the most recently COMPLETED followup row's own condition, across
-        # every table in use - never a stored flag that can go stale once
-        # that visit's risk is resolved.
+        # the most recently COMPLETED Nurse followup row's own condition -
+        # never a stored flag that can go stale once that visit's risk is
+        # resolved.
         high_risk = pregnancy.high_risk or 'No'
-        completed_rows = [
-            row for table_field in FOLLOWUP_TABLE_FIELDS
-            for row in rows_by_parent.get(r['name'], {}).get(table_field, [])
-            if row.status == 'Completed'
-        ]
+        rows = rows_by_parent.get(r['name'], [])
+        completed_rows = [row for row in rows if row.status == 'Completed']
         if completed_rows:
             latest_completed = max(completed_rows, key=lambda row: getdate(row.date))
             r['high_risk'] = 'Yes' if latest_completed.patient_condition == 'Risk' else 'No'
         else:
             r['high_risk'] = 'No'
-        tables = rows_by_parent.get(r['name'], {})
 
-        # An open Urgent row always wins first, exactly like the form -
-        # checked across every follow-up table, whichever is earliest wins.
-        urgent_candidates = []
-        for table_field in FOLLOWUP_TABLE_FIELDS:
-            rows = tables.get(table_field, [])
-            urgent_rows = [(i, row) for i, row in enumerate(rows) if row.urgent_followup and row.status != 'Completed']
-            if urgent_rows:
-                i, earliest = min(urgent_rows, key=lambda pair: getdate(pair[1].date))
-                trigger_row = rows[i - 1] if i > 0 else None
-                trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
-                urgent_candidates.append((trigger_date, getdate(earliest.date)))
-        if urgent_candidates:
-            winner_trigger_date, _ = min(urgent_candidates, key=lambda pair: pair[1])
-            r['from_date'] = str(winner_trigger_date)
+        # An open Urgent row always wins first, exactly like the form.
+        urgent_rows = [(i, row) for i, row in enumerate(rows) if row.urgent_followup and row.status != 'Completed']
+        if urgent_rows:
+            i, earliest = min(urgent_rows, key=lambda pair: getdate(pair[1].date))
+            trigger_row = rows[i - 1] if i > 0 else None
+            trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
+            r['from_date'] = str(trigger_date)
             r['alert_date'] = None
             continue
 
-        window_days, visits_per_window, alert_within_days, _ = ANCFollowup.get_window_policy(high_risk)
-        completed_count = sum(
-            len([row for row in tables.get(table_field, []) if row.status == 'Completed'])
-            for table_field in FOLLOWUP_TABLE_FIELDS
-        )
+        window_days, visits_per_window, alert_within_days, _ = ANCFollowup.get_window_policy()
+        completed_count = len(completed_rows)
         starting_window = ANCFollowup.get_window_index(r.get('creation') or getdate(), pregnancy.lmp_date, window_days)
         current_window = ANCFollowup.get_current_window(starting_window, completed_count, visits_per_window)
         window_start = add_days(getdate(pregnancy.lmp_date), (current_window - 1) * window_days)

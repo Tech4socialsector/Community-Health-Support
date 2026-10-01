@@ -79,6 +79,8 @@
  ],
  "fields": [
   {
+   "default": "Today",
+   "description": "Open-ended - not part of a calculated schedule. Defaults to today when you click Add Row.",
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,

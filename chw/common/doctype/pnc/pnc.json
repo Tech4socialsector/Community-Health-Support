@@ -147,6 +147,7 @@
    "description": "High Risk only: visit her early, within this window. Blank for Normal patients.",
    "fieldname": "pnc_visit_risk_alert",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Risk Alert",
    "read_only": 1
   },
@@ -163,7 +164,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-09 12:27:09.256732",
+ "modified": "2026-10-01 11:55:56.248165",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",

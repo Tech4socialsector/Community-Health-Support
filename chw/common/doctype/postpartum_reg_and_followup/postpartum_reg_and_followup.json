@@ -293,7 +293,8 @@
   {
    "fieldname": "delivery_date",
    "fieldtype": "Date",
-   "label": "Delivery Date"
+   "label": "Delivery Date",
+   "reqd": 1
   },
   {
    "fieldname": "mode_of_delivery",
@@ -400,7 +401,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-29 17:21:40.487619",
+ "modified": "2026-10-01 11:24:58.692526",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",

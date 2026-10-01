@@ -247,7 +247,13 @@ function compute_track(frm, rows, schedule_rows) {
 	if (pending_urgent) {
 		const trigger_row_index = rows.indexOf(pending_urgent) - 1;
 		const trigger_date = trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
-		return { next_date: pending_urgent.date, window_start: trigger_date, window_end: pending_urgent.date, risk_alert: "" };
+		return {
+			next_date: pending_urgent.date,
+			window_start: trigger_date,
+			window_end: pending_urgent.date,
+			risk_alert: "",
+			is_urgent: true,
+		};
 	}
 
 	// Each visit's window is a direct row lookup from the master's Visit
@@ -256,7 +262,7 @@ function compute_track(frm, rows, schedule_rows) {
 	const window = get_visit_window(completed_count + 1, schedule_rows);
 	if (!window) {
 		// every visit on this table has been completed
-		return { next_date: null, window_start: null, window_end: null, risk_alert: "" };
+		return { next_date: null, window_start: null, window_end: null, risk_alert: "", is_urgent: false };
 	}
 
 	const window_start = frappe.datetime.add_days(frm.doc.date_of_delivery, window.start_offset);
@@ -269,7 +275,7 @@ function compute_track(frm, rows, schedule_rows) {
 		frm.doc.high_risk === "Yes"
 			? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, window.risk_alert_within_days))}`
 			: "";
-	return { next_date: window_end, window_start, window_end, risk_alert };
+	return { next_date: window_end, window_start, window_end, risk_alert, is_urgent: false };
 }
 
 function calculate_next_pnc_visit_date(frm) {
@@ -298,7 +304,12 @@ function calculate_next_pnc_visit_date(frm) {
 			return;
 		}
 
-		const winner = candidates.sort((a, b) => (a.next_date > b.next_date ? 1 : -1))[0];
+		// An open urgent row on EITHER track always outranks an ordinary due
+		// date on the other, even if that ordinary date is sooner - only
+		// once neither track has an open urgent row does "whichever is due
+		// sooner" decide it.
+		const urgent_candidates = candidates.filter((t) => t.is_urgent);
+		const winner = (urgent_candidates.length ? urgent_candidates : candidates).sort((a, b) => (a.next_date > b.next_date ? 1 : -1))[0];
 		frm.set_value("next_pnc_visit_date", winner.next_date);
 		frm.set_value("next_pnc_visit_date_auto", winner.next_date);
 		set_risk_alert(frm, winner.risk_alert);

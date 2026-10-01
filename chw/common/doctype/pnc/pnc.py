@@ -178,7 +178,13 @@ class PNC(Document):
 			self.pnc_visit_risk_alert = ""
 			return
 
-		winner = min(candidates, key=lambda t: t.next_date)
+		# An open urgent row on EITHER track always outranks an ordinary due
+		# date on the other, even if that ordinary date is sooner - a freshly
+		# flagged risk should never get buried behind a merely overdue
+		# routine visit. Only once neither track has an open urgent row does
+		# "whichever is due sooner" decide it.
+		urgent_candidates = [t for t in candidates if t.is_urgent]
+		winner = min(urgent_candidates or candidates, key=lambda t: t.next_date)
 		self.next_pnc_visit_date = winner.next_date
 		self.next_pnc_visit_date_auto = winner.next_date
 		self.pnc_visit_risk_alert = winner.risk_alert
@@ -191,14 +197,15 @@ class PNC(Document):
 		urgent = self._pending_urgent_in(table)
 		if urgent:
 			return frappe._dict(
-				next_date=urgent.date, window_start=urgent.trigger_date, window_end=urgent.date, risk_alert=""
+				next_date=urgent.date, window_start=urgent.trigger_date, window_end=urgent.date, risk_alert="",
+				is_urgent=True,
 			)
 
 		visit_number = len([row for row in table if row.status == "Completed"]) + 1
 		window = self.get_visit_window(visit_number)
 		if window is None:
 			# every visit on this table has been completed
-			return frappe._dict(next_date=None, window_start=None, window_end=None, risk_alert="")
+			return frappe._dict(next_date=None, window_start=None, window_end=None, risk_alert="", is_urgent=False)
 
 		window_start = add_days(delivery_date, window.start_offset)
 		window_end = add_days(delivery_date, window.end_offset)
@@ -213,7 +220,10 @@ class PNC(Document):
 			if high_risk == "Yes"
 			else ""
 		)
-		return frappe._dict(next_date=window_end, window_start=window_start, window_end=window_end, risk_alert=risk_alert)
+		return frappe._dict(
+			next_date=window_end, window_start=window_start, window_end=window_end, risk_alert=risk_alert,
+			is_urgent=False,
+		)
 
 	def sync_mother_row_fields(self, window_start, window_end):
 		self._sync_row_fields(self.mother, window_start, window_end)

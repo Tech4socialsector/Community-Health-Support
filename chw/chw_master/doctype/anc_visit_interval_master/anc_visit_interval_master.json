@@ -1,10 +1,7 @@
 {
  "actions": [],
- "allow_rename": 1,
- "autoname": "prompt",
  "creation": "2026-08-10 13:06:55.675647",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "interval_days",
@@ -15,6 +12,8 @@
  ],
  "fields": [
   {
+   "default": "30",
+   "description": "Length of each repeating window, in days (e.g. 30 = monthly). Drives the Nurse follow-up schedule only - applies to every patient, regardless of High Risk status.",
    "fieldname": "interval_days",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -22,49 +21,50 @@
    "reqd": 1
   },
   {
-   "default": "1",
-   "fieldname": "visits_required_per_window",
+   "default": "6",
+   "description": "How many windows are automatically calculated before switching to manual entry.",
+   "fieldname": "automatic_window_count",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Risk Visits Required Per Row"
+   "label": "Automatic Window Count"
+  },
+  {
+   "fieldname": "column_break_zojt",
+   "fieldtype": "Column Break"
   },
   {
    "default": "7",
+   "description": "How many days into each window the Nurse should be nudged to visit early - shown only for patients currently flagged High Risk on Pregnancy Registration. Also used for the urgent follow-up chain's timing after a Risk-completed Nurse visit.",
    "fieldname": "risk_alert_within_days",
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Risk Alert Days"
   },
   {
-   "default": "6",
-   "fieldname": "automatic_window_count",
+   "default": "1",
+   "description": "How many completed Nurse visits close out one window before moving to the next.",
+   "fieldname": "visits_required_per_window",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Automatic Month  Count Per Row"
-  },
-  {
-   "fieldname": "column_break_zojt",
-   "fieldtype": "Column Break"
+   "label": "Visits Required Per Window"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
+ "issingle": 1,
  "links": [],
- "modified": "2026-09-28 10:04:31.684127",
+ "modified": "2026-09-30 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "ANC Visit Interval Master",
- "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
    "delete": 1,
    "email": 1,
-   "export": 1,
    "print": 1,
    "read": 1,
-   "report": 1,
    "role": "System Manager",
    "share": 1,
    "write": 1
@@ -73,10 +73,8 @@
    "create": 1,
    "delete": 1,
    "email": 1,
-   "export": 1,
    "print": 1,
    "read": 1,
-   "report": 1,
    "role": "Program Coordinator",
    "share": 1,
    "write": 1
@@ -85,10 +83,8 @@
    "create": 1,
    "delete": 1,
    "email": 1,
-   "export": 1,
    "print": 1,
    "read": 1,
-   "report": 1,
    "role": "CHW Health Worker",
    "share": 1,
    "write": 1

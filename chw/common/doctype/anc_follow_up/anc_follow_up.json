@@ -123,7 +123,6 @@
   {
    "fieldname": "anc_followup",
    "fieldtype": "Table",
-   "hidden": 1,
    "label": "ANC Followup for Volunteer",
    "options": "ANC Followup Child"
   },
@@ -192,7 +191,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-29 20:31:39.871649",
+ "modified": "2026-09-30 22:55:59.959163",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",
