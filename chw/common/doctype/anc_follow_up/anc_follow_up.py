@@ -27,6 +27,7 @@ class ANCFollowup(Document):
 	def validate(self):
 		validate_phone_number(self.phone_number)
 		self.sync_followup_rows_with_pregnancy()
+		self.close_on_delivery_or_abortion()
 		if self.status == "Closed":
 			# She's delivered - no more ANC visits are due, regardless of what's
 			# still sitting on the last row's Date of Next Visit.
@@ -42,6 +43,18 @@ class ANCFollowup(Document):
 			"next_anc_visit_date",
 			f"ANC follow-up visit due for {self.first_name or self.pregnant_id}",
 		)
+
+	def close_on_delivery_or_abortion(self):
+		# Two independent signals can close this record, whichever arrives
+		# first - Birth Registration (handled separately, in chw.api's
+		# create_pnc_from_birth_registration) is the guaranteed eventual
+		# backstop, but it's a different document that may not get created
+		# until well after the delivery itself. Delivery Status / Aboration
+		# Status set directly here close it immediately instead of waiting.
+		# One-way only - never reopens a closed record if these are later
+		# edited back to "No" by mistake.
+		if self.delivery_status == "Yes" or self.aboration_status == "Yes":
+			self.status = "Closed"
 
 	def sync_followup_rows_with_pregnancy(self):
 		# LMP Date and POG (how far along she was at that specific visit) are

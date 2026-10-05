@@ -390,13 +390,21 @@ def sync_next_visit_todo(doc, date_field, description):
     else:
         from frappe.desk.form.assign_to import add as assign_to_add
 
-        assign_to_add({
+        assign_to_args = {
             'doctype': doc.doctype,
             'name': doc.name,
             'assign_to': [user],
             'date': next_date,
             'description': description,
-        }, ignore_permissions=True)
+        }
+        try:
+            assign_to_add(assign_to_args, ignore_permissions=True)
+        except TypeError:
+            # Older Frappe versions' assign_to.add() doesn't accept
+            # ignore_permissions at all (added in a later core version) -
+            # fall back to calling it the old way instead of crashing, same
+            # as every other site/version this app also needs to run on.
+            assign_to_add(assign_to_args)
 
 
 def find_matching_anc_followup(family_member_id, date_of_delivery):
@@ -1653,6 +1661,13 @@ CHW_WORK_ORDER_TYPES = [
         'high_risk_field': None,
         'alert_field': None,
         'live_risk_enrich': True,
+        # Only ANC has a Closed/Active lifecycle on the parent record itself
+        # (set when she delivers or the pregnancy ends) - a Closed record is
+        # no longer an active pregnancy at all, so it's excluded from every
+        # count here, including High Risk, which otherwise has no date field
+        # to naturally fall out of on its own. PNC/Postpartum/Child 6w-1y/
+        # Preconception have no equivalent parent-level status field.
+        'active_only_filter': ['status', '!=', 'Closed'],
         'patient_field': 'first_name',
         'patient_fallback_field': 'pregnant_id',
         'has_date': True,
@@ -2287,6 +2302,8 @@ def _work_order_high_risk_records(wtype, village, health_worker):
         return []
 
     base = _work_order_base_filters(wtype, village, health_worker)
+    if wtype.get('active_only_filter'):
+        base = base + [wtype['active_only_filter']]
     fields = ['name', wtype['patient_field']]
     if wtype['patient_fallback_field']:
         fields.append(wtype['patient_fallback_field'])
@@ -2483,7 +2500,8 @@ def get_chw_work_order_summary(village=None, health_worker=None, visit_type=None
             resolver = LIVE_HIGH_RISK_RESOLVERS.get(wtype['key'])
             if resolver:
                 try:
-                    all_names = frappe.get_all(wtype['doctype'], filters=base, pluck='name')
+                    high_risk_base = base + [wtype['active_only_filter']] if wtype.get('active_only_filter') else base
+                    all_names = frappe.get_all(wtype['doctype'], filters=high_risk_base, pluck='name')
                     row['high_risk'] = len(resolver(all_names))
                 except Exception:
                     frappe.log_error(f"Error counting high risk {wtype['doctype']} for chw-work-order-list")

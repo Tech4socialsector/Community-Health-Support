@@ -10,9 +10,9 @@
   "hh_id",
   "village",
   "first_name",
+  "father_husband_name",
   "age",
   "phone_number",
-  "father_husband_name",
   "gravida",
   "place_of_health_checkup",
   "lmp_date",
@@ -44,6 +44,7 @@
   "usg_1",
   "usg_2",
   "usg_3",
+  "delivery_status",
   "section_break_dyhz",
   "labs_and_tests_column",
   "h5td_scanh",
@@ -146,7 +147,8 @@
   {
    "fieldname": "gravida",
    "fieldtype": "Data",
-   "label": "GPLAD"
+   "label": "GBLAD",
+   "reqd": 1
   },
   {
    "fieldname": "place_of_health_checkup",
@@ -156,7 +158,8 @@
   {
    "fieldname": "lmp_date",
    "fieldtype": "Date",
-   "label": "LMP Date"
+   "label": "LMP Date",
+   "reqd": 1
   },
   {
    "fieldname": "estimated_date_of_delivery",
@@ -178,7 +181,8 @@
    "fieldname": "trimester",
    "fieldtype": "Select",
    "label": "Trimester at Registration",
-   "options": "\nFirst trimester\nSecond trimester\nThird trimester"
+   "options": "\nFirst trimester\nSecond trimester\nThird trimester",
+   "reqd": 1
   },
   {
    "fieldname": "hb_level",
@@ -231,7 +235,8 @@
    "fieldname": "availability_of_mcp_card",
    "fieldtype": "Select",
    "label": "Is MCP Card Available?",
-   "options": "\nYes\nNo"
+   "options": "\nYes\nNo",
+   "reqd": 1
   },
   {
    "fieldname": "previous_delivery_mode",
@@ -243,7 +248,8 @@
    "fieldname": "high_risk",
    "fieldtype": "Select",
    "label": "Has the pregnant woman been identified as high risk?",
-   "options": "\nYes\nNo"
+   "options": "\nYes\nNo",
+   "reqd": 1
   },
   {
    "depends_on": "eval:doc.high_risk==\"Yes\"",
@@ -595,6 +601,12 @@
    "fieldtype": "Table",
    "label": "Past Delivery History",
    "options": "Pregancy"
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "label": "Delivery Status",
+   "options": "\nDelivered\nNot Delivered"
   }
  ],
  "grid_page_length": 50,
@@ -603,9 +615,13 @@
   {
    "link_doctype": "ANC Follow-up",
    "link_fieldname": "pregnant_id"
+  },
+  {
+   "link_doctype": "Birth Registration",
+   "link_fieldname": "prid"
   }
  ],
- "modified": "2026-09-30 12:01:07.116786",
+ "modified": "2026-10-05 17:35:05.062144",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

@@ -6,11 +6,11 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "family_member_id",
+  "prid",
+  "fmid",
   "hh_id",
   "first_name",
   "village",
-  "specify_complication",
   "husbands_name",
   "age",
   "phone_number",
@@ -44,17 +44,7 @@
  ],
  "fields": [
   {
-   "fetch_if_empty": 1,
-   "fieldname": "family_member_id",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "FMID",
-   "options": "Family members"
-  },
-  {
-   "fetch_from": "family_member_id.family_member",
-   "fetch_if_empty": 1,
+   "fetch_from": "prid.first_name",
    "fieldname": "first_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -62,8 +52,7 @@
    "label": "Name"
   },
   {
-   "fetch_from": "family_member_id.hhid",
-   "fetch_if_empty": 1,
+   "fetch_from": "prid.hh_id",
    "fieldname": "hh_id",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -71,8 +60,7 @@
    "label": "HH ID"
   },
   {
-   "fetch_from": "family_member_id.village",
-   "fetch_if_empty": 1,
+   "fetch_from": "prid.village",
    "fieldname": "village",
    "fieldtype": "Link",
    "label": "Village",
@@ -80,20 +68,21 @@
    "read_only": 1
   },
   {
+   "fetch_from": "prid.father_husband_name",
    "fetch_if_empty": 1,
    "fieldname": "husbands_name",
    "fieldtype": "Data",
    "label": "Husband's Name"
   },
   {
-   "fetch_from": "family_member_id.age",
+   "fetch_from": "prid.age",
    "fetch_if_empty": 1,
    "fieldname": "age",
    "fieldtype": "Data",
    "label": "Age"
   },
   {
-   "fetch_from": "family_member_id.phone_number",
+   "fetch_from": "prid.phone_number",
    "fetch_if_empty": 1,
    "fieldname": "phone_number",
    "fieldtype": "Data",
@@ -139,12 +128,6 @@
    "fieldtype": "Select",
    "label": "Did the mother have any complications during/since delivery?",
    "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval: doc.complication_identified == \"Yes\"",
-   "fieldname": "specify_complication",
-   "fieldtype": "Data",
-   "label": "If Yes, specify the complication"
   },
   {
    "fieldname": "family_planning",
@@ -261,6 +244,22 @@
    "fieldtype": "Select",
    "label": " Which child is it?",
    "options": "\n1\n2\n3\n4\n5\n6\n7 and Above"
+  },
+  {
+   "fetch_from": "prid.familymember_id",
+   "fieldname": "fmid",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "FMID"
+  },
+  {
+   "fieldname": "prid",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "PRID",
+   "options": "Pregnancy Registration"
   }
  ],
  "grid_page_length": 50,
@@ -271,7 +270,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-09-28 16:23:45.112930",
+ "modified": "2026-10-05 17:39:12.427052",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",

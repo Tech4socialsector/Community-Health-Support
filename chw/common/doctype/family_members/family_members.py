@@ -36,7 +36,14 @@ class Familymembers(Document):
 
 	def calculate_age(self):
 		if not self.date_of_birth:
-			self.age = ""
+			# No DOB on record - if the exact birth date isn't known, a staff
+			# member can still type Age in directly by hand, and every other
+			# doctype that shows this person's age (Pregnancy Registration,
+			# Birth Registration, NCD, ANC, Palliative Care, Preconception,
+			# Postpartum, Child 6w-1y) fetches it straight from this same
+			# field - so it must be left exactly as entered, not wiped.
+			# Age in Months/Days can't be derived without a real DOB though,
+			# so those always reset regardless.
 			self.age_in_months = 0
 			self.age_in_days = 0
 			return

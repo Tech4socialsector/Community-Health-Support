@@ -348,7 +348,7 @@
   },
   {
    "link_doctype": "Birth Registration",
-   "link_fieldname": "family_member_id"
+   "link_fieldname": "prid"
   },
   {
    "link_doctype": "Palliative Care Initial Assessment Form",
@@ -367,7 +367,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-09-22 12:06:44.005420",
+ "modified": "2026-10-05 17:35:37.484035",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

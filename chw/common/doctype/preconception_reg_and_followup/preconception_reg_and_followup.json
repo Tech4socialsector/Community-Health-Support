@@ -163,9 +163,11 @@
    "fieldtype": "Section Break"
   },
   {
+   "fetch_from": "husband_name.father_husband_name",
    "fieldname": "husbands_name",
-   "fieldtype": "Data",
-   "label": "Husband's Name"
+   "fieldtype": "Date",
+   "label": "Husband's Name",
+   "options": "Pregnancy Registration"
   },
   {
    "fieldname": "husbands_occupation",
@@ -350,7 +352,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-22 16:22:18.450453",
+ "modified": "2026-10-05 16:33:46.703627",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Preconception Reg and Followup",

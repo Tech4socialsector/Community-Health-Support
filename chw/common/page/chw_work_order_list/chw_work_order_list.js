@@ -23,8 +23,12 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 	let summary = { this_week: 0, today: 0, upcoming: 0, overdue: 0, completed: 0, high_risk: 0, by_type: [], health_worker_linked: true };
 	let allRecords = [];
 
+	// status starts unselected ('') - the landing view shows only the
+	// summary cards, nothing drilled into yet. Clicking a card (or picking
+	// one from the Status dropdown) is what first populates the table, the
+	// by-visit-type chips, and the search/export row below it.
 	let selectedFilters = {
-		status: 'all',
+		status: '',
 		visit_type: '',
 		risk: '',
 	};
@@ -85,6 +89,13 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 	}
 
 	function loadRecordsThenRender() {
+		// Nothing selected yet (landing view) - don't bother fetching records
+		// at all, the table stays hidden until a card/status is picked.
+		if (!selectedFilters.status) {
+			allRecords = [];
+			render();
+			return;
+		}
 		frappe.call({
 			method: 'chw.api.chw_work_order_drilldown',
 			args: {
@@ -134,6 +145,7 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 			<div style="display: flex; flex-direction: column; gap: 4px;">
 				<label style="font-size: 11px; font-weight: 600; color: #B91C1C; text-transform: uppercase; letter-spacing: 0.04em;">Status</label>
 				<select id="wol-status" class="form-control" style="height: 34px; width: 170px;">
+					<option value="" ${!selectedFilters.status ? 'selected' : ''}>Select...</option>
 					<option value="all" ${selectedFilters.status === 'all' ? 'selected' : ''}>All (pending)</option>
 					<option value="this_week" ${selectedFilters.status === 'this_week' ? 'selected' : ''}>This Week</option>
 					<option value="today" ${selectedFilters.status === 'today' ? 'selected' : ''}>Today</option>
@@ -181,6 +193,7 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 			? `<div style="background:#FFF3CD; border:1px solid #FFE69C; color:#664D03; padding:12px 16px; border-radius:8px; margin-bottom:18px;">No Health Worker record is linked to your login. Ask your coordinator to set the <strong>User</strong> field on your Health Worker record so your work order list can show here.</div>`
 			: '';
 
+		let hasSelection = !!selectedFilters.status;
 		let byTypeChips = (summary.by_type || []).map((t) => chipHtml(t.label, byTypeCountFor(t))).join('');
 
 		let visibleRecords = allRecords.filter((r) => {
@@ -219,17 +232,12 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 					windowRange = `${frappe.datetime.str_to_user(fromDate)} &ndash; ${frappe.datetime.str_to_user(r.due_date)}`;
 				}
 
-				let alertCell = r.alert_date
-					? `<span style="font-size: 11px; font-weight: 700; color: #B91C1C;">Visit by ${frappe.datetime.str_to_user(r.alert_date)}</span>`
-					: '-';
-
 				return `
 				<tr data-doctype="${r.doctype}" data-name="${frappe.utils.escape_html(r.name)}" style="cursor: pointer; ${isHighRisk ? 'background:#FFFBFB;' : ''}">
 					<td style="padding: 11px 8px; font-size: 13px; font-weight: 600; color: #1F2937; white-space: nowrap;">${frappe.utils.escape_html(r.patient || r.name)}${highRiskBadge}</td>
 					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280;">${frappe.utils.escape_html(r.visit_type)}</td>
 					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280;">${frappe.utils.escape_html(r.village || '-')}</td>
 					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280; white-space: nowrap;">${windowRange}</td>
-					<td style="padding: 11px 8px; font-size: 13px; color: #6B7280; white-space: nowrap;">${alertCell}</td>
 					<td style="padding: 11px 8px;"><span style="font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; ${statusColor}">${r.status}</span></td>
 				</tr>
 			`;
@@ -258,10 +266,13 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 
 				${noHealthWorker}
 
-				<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px;">
+				<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px;">
 					${STATUS_CARDS.map(statusCardHtml).join('')}
 				</div>
 
+				${
+					hasSelection
+						? `
 				<div style="margin-bottom: 18px;">
 					<span style="font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #9CA3AF;">By visit type</span>
 					<div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">${byTypeChips}</div>
@@ -279,14 +290,16 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 							<th>Visit Type</th>
 							<th>Village</th>
 							<th>Visit Window (From &ndash; To)</th>
-							<th>Priority Alert</th>
 							<th>Status</th>
 						</tr>
 					</thead>
 					<tbody>
-						${rows || '<tr><td colspan="6" style="color:#9CA3AF;padding:20px;text-align:center;">No records for this selection.</td></tr>'}
+						${rows || '<tr><td colspan="5" style="color:#9CA3AF;padding:20px;text-align:center;">No records for this selection.</td></tr>'}
 					</tbody>
 				</table>
+				`
+						: ''
+				}
 			</div>
 		`;
 
@@ -294,7 +307,7 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 
 		page.main.find('.wol-status-card').on('click', function () {
 			let key = $(this).data('key');
-			selectedFilters.status = selectedFilters.status === key ? 'all' : key;
+			selectedFilters.status = selectedFilters.status === key ? '' : key;
 			loadRecordsThenRender();
 		});
 		page.main.find('#wol-status').on('change', function () {
