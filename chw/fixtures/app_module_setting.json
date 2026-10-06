@@ -1,0 +1,83 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "App Module Setting",
+  "doctypes": [
+   {
+    "doctype_name": "Household profile",
+    "icon": null,
+    "label": "Household profile",
+    "route": null
+   },
+   {
+    "doctype_name": "Family members",
+    "icon": null,
+    "label": "Family members",
+    "route": null
+   },
+   {
+    "doctype_name": "Pregnancy Registration",
+    "icon": null,
+    "label": "Pregnancy Registration",
+    "route": null
+   },
+   {
+    "doctype_name": "ANC Follow-up",
+    "icon": null,
+    "label": "ANC Follow-up",
+    "route": null
+   },
+   {
+    "doctype_name": "Birth Registration",
+    "icon": null,
+    "label": "Birth Registration",
+    "route": null
+   },
+   {
+    "doctype_name": "PNC",
+    "icon": null,
+    "label": "PNC",
+    "route": null
+   },
+   {
+    "doctype_name": "Palliative Care Initial Assessment Form",
+    "icon": null,
+    "label": "Palliative Care Initial Assessment Form",
+    "route": null
+   },
+   {
+    "doctype_name": "Palliative care followup",
+    "icon": null,
+    "label": "Palliative care followup",
+    "route": null
+   },
+   {
+    "doctype_name": "Postpartum Reg and Followup",
+    "icon": null,
+    "label": "Postpartum Reg and Followup",
+    "route": null
+   },
+   {
+    "doctype_name": "Preconception Reg and Followup",
+    "icon": null,
+    "label": "Preconception Reg and Followup",
+    "route": null
+   },
+   {
+    "doctype_name": "Child 6w to 1 Year Reg and Followup",
+    "icon": null,
+    "label": "Child 6w to 1 Year Reg and Followup",
+    "route": null
+   }
+  ],
+  "enabled": 1,
+  "icon": "box",
+  "label": "CHW",
+  "modified": "2026-10-06 12:08:04.063849",
+  "module_name": "CHW",
+  "name": "CHW",
+  "restrict_by_role": 0,
+  "roles": [],
+  "sort_order": 1
+ }
+]

@@ -57,6 +57,7 @@ import { brandingResource } from '@/data/branding'
 import { activeModule } from '@/data/activeModule'
 import { notificationsResource, unreadCount, toggleNotifications } from '@/data/notifications'
 import { showSettingsDialog, openSettingsDialog } from '@/data/settingsDialog'
+import { userContextResource } from '@/data/userContext'
 
 const props = defineProps({
   // Forced open (never icon-collapsed) when rendered inside the mobile
@@ -138,6 +139,26 @@ const sections = computed(() => {
           to: { name: 'Worklist' },
           isActive: route.name === 'Worklist',
         },
+        {
+          label: 'Work Orders',
+          icon: moduleIcon('clipboard-list'),
+          to: { name: 'WorkOrders' },
+          isActive: route.name === 'WorkOrders',
+        },
+        // Overview mirrors the Desk chw-dashboard page, which is
+        // privileged-only (Administrator/System Manager/Program
+        // Coordinator) on the backend - hidden here rather than shown and
+        // then throwing a Permission Error once opened.
+        ...(userContextResource.data?.is_privileged
+          ? [
+              {
+                label: 'Overview',
+                icon: moduleIcon('bar-chart-2'),
+                to: { name: 'Overview' },
+                isActive: route.name === 'Overview',
+              },
+            ]
+          : []),
       ],
     },
   ]

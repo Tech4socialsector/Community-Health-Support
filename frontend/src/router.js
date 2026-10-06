@@ -29,6 +29,16 @@ const routes = [
     component: () => import('@/pages/Worklist.vue'),
   },
   {
+    path: '/work-orders',
+    name: 'WorkOrders',
+    component: () => import('@/pages/WorkOrders.vue'),
+  },
+  {
+    path: '/overview',
+    name: 'Overview',
+    component: () => import('@/pages/Overview.vue'),
+  },
+  {
     path: '/email-accounts',
     name: 'EmailAccountList',
     component: () => import('@/pages/EmailAccountList.vue'),

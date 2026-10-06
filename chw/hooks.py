@@ -41,6 +41,11 @@ fixtures = [
 	# though the Number Card/Workspace fixtures above are working correctly.
 	{"dt": "Desktop Icon", "filters": [["name", "=", "CHW App"]]},
 	{"dt": "Workspace Sidebar", "filters": [["name", "=", "CHW App"]]},
+	# Drives the Vue frontend's sidebar/module list (chw.api.get_app_modules) -
+	# without this, a fresh install or a teammate's pull only ever shows the
+	# Vue app's own empty-sidebar default, same blank-list problem the
+	# Number Card fixture above was added to fix for the Desk dashboard.
+	{"dt": "App Module Setting", "filters": [["name", "=", "CHW"]]},
 ]
 
 app_name = "chw"
