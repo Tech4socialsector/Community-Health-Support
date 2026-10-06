@@ -205,7 +205,6 @@
    "read_only": 1
   },
   {
-   "description": "Carried over from this family's Household profile - LCH Palliative Care Charity Criteria score. Only set once that household's assessment has all 5 questions answered.",
    "fetch_from": "hhid.charity_percentage_band",
    "fetch_if_empty": 1,
    "fieldname": "suggested_charity_percentage",
@@ -244,6 +243,7 @@
    "label": "Referal for the disability"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "does_the_person_needs_an_preconception",
    "fieldtype": "Select",
    "label": "Does the person needs an Preconception",
@@ -367,7 +367,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-10-05 17:35:37.484035",
+ "modified": "2026-10-06 18:39:56.364136",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

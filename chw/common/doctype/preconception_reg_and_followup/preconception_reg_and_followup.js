@@ -13,3 +13,28 @@ frappe.ui.form.on("Preconception Reg and Followup", {
 		}
 	},
 });
+
+// Height (cm) and Weight (kg), live as the CHW types either one into a
+// followup row - the server's own validate() recalculates the same way as a
+// backstop (Data Import/API rows), so this is purely for instant feedback
+// before save.
+function calculate_preconception_followup_bmi(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	let bmi = "";
+	if (row.height && row.weight) {
+		const height_m = flt(row.height) / 100;
+		if (height_m) {
+			bmi = (flt(row.weight) / (height_m * height_m)).toFixed(1);
+		}
+	}
+	frappe.model.set_value(cdt, cdn, "bmi", bmi);
+}
+
+frappe.ui.form.on("Preconception Followup", {
+	height(frm, cdt, cdn) {
+		calculate_preconception_followup_bmi(frm, cdt, cdn);
+	},
+	weight(frm, cdt, cdn) {
+		calculate_preconception_followup_bmi(frm, cdt, cdn);
+	},
+});

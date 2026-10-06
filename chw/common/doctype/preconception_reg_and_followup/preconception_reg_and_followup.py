@@ -4,15 +4,33 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import flt, getdate
 
 from chw.api import sync_next_visit_todo
 
 
 class PreconceptionRegandFollowup(Document):
 	def validate(self):
+		self.calculate_followup_bmi()
 		self.validate_followup_dates()
 		self.set_next_visit_date()
+
+	def calculate_followup_bmi(self):
+		# Height is entered in cm, weight in kg - BMI = kg / (height in m)^2,
+		# rounded to 1 decimal. A backstop recalculation on every save (the
+		# row's own .js trigger already does this live as the CHW types) -
+		# this is the one that also covers Data Import/API-created rows.
+		# Left blank, not guessed at, whenever either reading is missing.
+		for row in self.followup_visits:
+			if row.height and row.weight:
+				try:
+					height_m = flt(row.height) / 100
+					weight_kg = flt(row.weight)
+					row.bmi = str(round(weight_kg / (height_m ** 2), 1)) if height_m else ""
+				except (ValueError, ZeroDivisionError):
+					row.bmi = ""
+			else:
+				row.bmi = ""
 
 	def validate_followup_dates(self):
 		# A visit being logged after the fact (backdated) or a next-visit

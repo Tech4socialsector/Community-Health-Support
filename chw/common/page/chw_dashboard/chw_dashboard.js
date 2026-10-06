@@ -83,14 +83,54 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 	function cardHtml(card) {
 		let color = COLORS[card.color] || COLORS.gray;
 		return `
-			<div class="chw-dashboard-card" data-key="${card.key}" style="cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 8px; background: #FFFFFF; border: 1px solid #E5E7EB; border-top: 3px solid ${color.fg}; border-radius: 10px; padding: 20px;">
-				<span style="font-size: 28px; font-weight: 800; color: #111827; line-height: 1;">${card.count}</span>
-				<span style="font-size: 13px; font-weight: 600; color: #6B7280;">${frappe.utils.escape_html(card.label)}</span>
+			<div class="chw-dashboard-card" data-key="${card.key}" style="cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px; background: #FFFFFF; border: 1px solid #E5E7EB; border-top: 3px solid ${color.fg}; border-radius: 10px; padding: 20px 32px; width: 100%; min-width: 0; box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
+				<span style="font-size: 26px; font-weight: 800; color: #111827; line-height: 1;">${card.count}</span>
+				<span style="font-size: 12.5px; font-weight: 500; color: #6B7280; line-height: 1.3;">${frappe.utils.escape_html(card.label)}</span>
+			</div>
+		`;
+	}
+
+	// 4 per row on desktop, but on a narrow PWA/mobile screen 4 fixed
+	// columns squeeze each card down to ~80px and wrap every label onto 3
+	// lines - these breakpoints drop to 2, then 1, column(s) instead so each
+	// card stays a readable width. Injected once, guarded against duplicate
+	// <style> tags across re-renders.
+	function ensureOverviewGridStyle() {
+		if (document.getElementById('chw-dashboard-overview-grid-style')) return;
+		let style = document.createElement('style');
+		style.id = 'chw-dashboard-overview-grid-style';
+		style.innerHTML = `
+			.chw-dashboard-overview-grid {
+				display: grid;
+				grid-template-columns: repeat(4, minmax(0, 1fr));
+				column-gap: 10px;
+				row-gap: 10px;
+			}
+			@media (max-width: 700px) {
+				.chw-dashboard-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+			}
+			@media (max-width: 420px) {
+				.chw-dashboard-overview-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+			}
+		`;
+		document.head.appendChild(style);
+	}
+
+	// Small-caps label + a thin divider line filling the rest of the row -
+	// matches the "OVERVIEW" / "CONTRIBUTION SUMMARY" section headers used
+	// elsewhere in the HMIS suite, so this page's card section reads the
+	// same way.
+	function sectionHeaderHtml(label) {
+		return `
+			<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+				<span style="font-size: 11px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;">${label}</span>
+				<span style="flex: 1; height: 1px; background: #E5E7EB;"></span>
 			</div>
 		`;
 	}
 
 	function render() {
+		ensureOverviewGridStyle();
 		let html = `
 			<div style="padding: 8px 4px 28px 4px;">
 				<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; padding: 14px 20px; margin-bottom: 22px;">
@@ -133,7 +173,8 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 					</div>
 					<button class="btn btn-default" id="chw-dashboard-refresh" style="height: 34px;">Refresh</button>
 				</div>
-				<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 16px; row-gap: 28px;">
+				${sectionHeaderHtml('Overview')}
+				<div class="chw-dashboard-overview-grid">
 					${cardsData.map(cardHtml).join('')}
 				</div>
 				<p style="font-size: 12px; color: #9CA3AF; margin-top: 18px;">Click a card to see the records behind it.</p>

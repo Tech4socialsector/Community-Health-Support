@@ -25,12 +25,13 @@
   "grbs",
   "tt",
   "hemoglobin_level",
-  "teaching",
   "monthly_checkup",
   "ironcal",
+  "vitamins",
   "any_other_complaitsremark",
   "pregnancy_assessment_section",
   "h5pregnancy_assessmenth",
+  "anemia__11gm",
   "feeling_well",
   "good_energy",
   "pink_tongue",
@@ -80,7 +81,6 @@
  "fields": [
   {
    "default": "Today",
-   "description": "Open-ended - not part of a calculated schedule. Defaults to today when you click Add Row.",
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -100,6 +100,7 @@
   {
    "fieldname": "month",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Month"
@@ -122,6 +123,7 @@
   {
    "fieldname": "anemia",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Anemia",
@@ -143,6 +145,7 @@
   {
    "fieldname": "tt",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "TT",
    "options": "\nYes\nNo"
@@ -151,13 +154,6 @@
    "fieldname": "hemoglobin_level",
    "fieldtype": "Data",
    "label": "Hb"
-  },
-  {
-   "fieldname": "teaching",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Teaching"
   },
   {
    "fieldname": "monthly_checkup",
@@ -208,6 +204,7 @@
   {
    "fieldname": "bmi",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "BMI"
   },
   {
@@ -506,13 +503,25 @@
    "hidden": 1,
    "label": "Urgent Follow-up (auto)",
    "read_only": 1
+  },
+  {
+   "fieldname": "vitamins",
+   "fieldtype": "Select",
+   "label": "Vitamins",
+   "options": "\nFolic Acid\nIron\nCalcium daily\nIron twice daily\nCalcium daily"
+  },
+  {
+   "default": "0",
+   "fieldname": "anemia__11gm",
+   "fieldtype": "Check",
+   "label": "Anemia < 11gm"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-28 15:21:40.802953",
+ "modified": "2026-10-06 17:17:19.035886",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Child",

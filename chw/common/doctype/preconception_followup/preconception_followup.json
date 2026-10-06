@@ -91,7 +91,8 @@
   {
    "fieldname": "bmi",
    "fieldtype": "Data",
-   "label": "BMI"
+   "label": "BMI",
+   "read_only": 1
   },
   {
    "fieldname": "nurse_notified_abnormal_vitals",

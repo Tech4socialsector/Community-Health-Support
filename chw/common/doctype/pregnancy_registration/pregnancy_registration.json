@@ -8,6 +8,7 @@
  "field_order": [
   "familymember_id",
   "hh_id",
+  "hope_id",
   "village",
   "first_name",
   "father_husband_name",
@@ -24,19 +25,22 @@
   "weight",
   "bmi_calculation",
   "trimester",
-  "hb_level",
   "column_break_tczd",
-  "tsh_value",
   "tt_status",
   "number_of_living_children",
   "number_of_children_died",
   "number_of_abortion",
+  "number_of_abortions_before_20weeks",
+  "number_of_pregnancies",
+  "number_of_pregnancies_beyond_20_weeks",
   "any_stillbirth",
   "any_pre_existing_diseases",
+  "ifyes",
   "availability_of_mcp_card",
   "previous_delivery_mode",
   "high_risk",
   "name_of_highrisk_factor",
+  "if_other_high_risk",
   "pih",
   "gdm",
   "health_worker_name",
@@ -58,6 +62,10 @@
   "ga",
   "normal_or_abnormal",
   "if_abnormal",
+  "h5tsh_scanh5",
+  "date",
+  "ga12",
+  "result",
   "h5anatomy_scanh",
   "date_of_scan_copy",
   "ga_copy",
@@ -94,6 +102,11 @@
   "ga_trim",
   "result_trime",
   "abnormal_trimes",
+  "h5_blood_sugarh",
+  "date_blood",
+  "ga_blood",
+  "select_type",
+  "result_blood",
   "past_delivery_history_section",
   "past_delivery_history"
  ],
@@ -147,7 +160,7 @@
   {
    "fieldname": "gravida",
    "fieldtype": "Data",
-   "label": "GBLAD",
+   "label": "GPLAD",
    "reqd": 1
   },
   {
@@ -187,20 +200,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "hb_level",
-   "fieldtype": "Data",
-   "label": "HB Level"
-  },
-  {
-   "fieldname": "tsh_value",
-   "fieldtype": "Data",
-   "label": "TSH Value"
-  },
-  {
    "fieldname": "tt_status",
    "fieldtype": "Select",
    "label": "TT Status",
-   "options": "\nOne dose taken\nTwo dose taken\nThree dose taken"
+   "options": "\nOne\nTwo\nBooster"
   },
   {
    "fieldname": "number_of_living_children",
@@ -229,9 +232,8 @@
   },
   {
    "fieldname": "any_pre_existing_diseases",
-   "fieldtype": "Select",
-   "label": "Any Pre-existing Health Problem",
-   "options": "\nYes\nNo"
+   "fieldtype": "Data",
+   "label": "Any Pre-existing Health Problem"
   },
   {
    "fieldname": "availability_of_mcp_card",
@@ -243,6 +245,7 @@
   {
    "fieldname": "previous_delivery_mode",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Previous Delivery Mode",
    "options": "\nNormal\nC-section"
   },
@@ -258,7 +261,7 @@
    "fieldname": "name_of_highrisk_factor",
    "fieldtype": "Select",
    "label": "If Yes, specify the risk factor",
-   "options": "\n1. Age below 18 years (as of LMP date)\n2. Any history of abortion or miscarriage\n3. Gravida more than 3\n4. Any stillbirth\n5. Previous delivery mode \u2013 LSCS (C-section)\n6. Any pre-existing physical health problem\n7. Do you have anemia?\n8. Do you have heart disease?\n9. Do you have sickle cell disease or thalassemia?\n10. Previous delivery \u2013 PIH\n11. Previous delivery \u2013 GDM"
+   "options": "Anemia < 11gm\nprevious C/S\nHigh Blood Pressure\nGestational Diabetes\nRH negative\nHistory of 2 first trimester miscarriages\nHistory of 1 or more second trimester miscarriage\nHistory of 3 or more deliveries\nOthers"
   },
   {
    "fieldname": "pih",
@@ -343,17 +346,18 @@
   {
    "fieldname": "h5td_scanh",
    "fieldtype": "Heading",
-   "label": "<h5>TD Scan</h5>"
+   "label": "<h5>Other US</h5>"
   },
   {
    "fieldname": "td",
    "fieldtype": "Select",
-   "label": "TD",
+   "label": "US",
    "options": "\n1\n2\nBooster"
   },
   {
    "fieldname": "us_dating_result",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "US dating Result",
    "options": "\nYes\nNo"
   },
@@ -365,11 +369,12 @@
   {
    "fieldname": "ga_at_scan",
    "fieldtype": "Data",
-   "label": "GA at Scan"
+   "label": "Result"
   },
   {
    "fieldname": "edd_by_us",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "EDD by US"
   },
   {
@@ -407,12 +412,12 @@
   {
    "fieldname": "date_of_scan_copy",
    "fieldtype": "Date",
-   "label": "Date of Scan Copy"
+   "label": "Date of Scan"
   },
   {
    "fieldname": "ga_copy",
    "fieldtype": "Data",
-   "label": "GA Copy"
+   "label": "GA"
   },
   {
    "fieldname": "normal_or_abnormal_copy",
@@ -609,6 +614,85 @@
    "fieldtype": "Select",
    "label": "Delivery Status",
    "options": "\nDelivered\nNot Delivered"
+  },
+  {
+   "fieldname": "number_of_abortions_before_20weeks",
+   "fieldtype": "Data",
+   "label": "Number of Abortions Before 20weeks"
+  },
+  {
+   "fieldname": "number_of_pregnancies",
+   "fieldtype": "Data",
+   "label": "Number of Pregnancies "
+  },
+  {
+   "fieldname": "number_of_pregnancies_beyond_20_weeks",
+   "fieldtype": "Data",
+   "label": "Number of Pregnancies beyond 20 weeks"
+  },
+  {
+   "fieldname": "h5tsh_scanh5",
+   "fieldtype": "Heading",
+   "label": "<h5>TSH Scan</h5>"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "ga12",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "fieldname": "h5_blood_sugarh",
+   "fieldtype": "Heading",
+   "label": "<h5> Blood Sugar</h5>"
+  },
+  {
+   "fieldname": "date_blood",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "ga_blood",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "select_type",
+   "fieldtype": "Select",
+   "label": "Select Type",
+   "options": "\nRBS\nFBS\n1hr GTT\n2hr GTT"
+  },
+  {
+   "fieldname": "result_blood",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "depends_on": "eval:doc.any_pre_existing_diseases==\"Yes\"",
+   "fieldname": "ifyes",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "If Any Pre-existing Health Problem Yes"
+  },
+  {
+   "fieldname": "hope_id",
+   "fieldtype": "Data",
+   "label": "HOPE ID"
+  },
+  {
+   "depends_on": "eval:doc.name_of_highrisk_factor==\"Others\"",
+   "fieldname": "if_other_high_risk",
+   "fieldtype": "Data",
+   "label": "If Other High Risk"
   }
  ],
  "grid_page_length": 50,
@@ -623,7 +707,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-06 10:27:04.319103",
+ "modified": "2026-10-06 18:51:15.548645",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

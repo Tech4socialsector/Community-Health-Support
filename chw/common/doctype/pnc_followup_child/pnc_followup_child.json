@@ -1,30 +1,75 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
  "creation": "2026-07-24 09:09:35.146622",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "vital_signs_postpartum_section",
   "window_start_date",
   "date",
   "status",
+  "postpartum_depression_screen_phq_2_score",
+  "h5patients_general_conditionh",
+  "responds_appropriately",
+  "appears_comfortable",
+  "not_responding_appropriately",
+  "appears_to_be_in_pain_or_distress",
   "bp",
-  "edema",
-  "anemia",
+  "column_break_wvbk",
+  "rr",
+  "hr",
+  "temperature",
+  "height",
+  "weight",
+  "bmi",
+  "mch_nurse_notified_of_abnormal_vital_signs",
+  "weeks_postpartum",
+  "section_break_zkpv",
+  "wound",
+  "wound_if_yes",
   "wound_infection",
+  "if_wound_infection_yes",
+  "h5hbh",
+  "date_hb",
+  "result",
+  "h5bsh",
+  "bs_date",
+  "type",
+  "result_bs",
+  "anemia",
+  "edema",
   "breast",
+  "bleeding",
+  "color",
+  "amount",
+  "column_break_nhnx",
+  "bowel",
+  "data_jfuj",
+  "bladder",
+  "bladder_if_abnormal",
+  "if_bladder_others",
+  "if_abnormal",
   "teaching",
   "any_other_complaintremark",
   "date_of_next_visit",
   "next_visit_window",
+  "urgent_followup",
   "patient_condition",
-  "urgent_followup"
+  "danger_signs_mother_section",
+  "fever",
+  "heavy_bleeding_bright_red",
+  "sever_headache_blurred_vision",
+  "thoughts_of_harming_self_or_baby",
+  "cesarean_section_scar_with_redness",
+  "swelling_or_discharge",
+  "phq_2_score_3_or_more",
+  "other",
+  "if_others"
  ],
  "fields": [
   {
-   "description": "The start of this visit's scheduled window - filled in automatically when the row is generated. Purely informational, alongside Visit Ending Date (the window's end / due date).",
    "fieldname": "window_start_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -47,6 +92,7 @@
    "options": "Pending\nCompleted"
   },
   {
+   "description": "(< 95/60 or 140/90 +)",
    "fieldname": "bp",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -74,16 +120,16 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Wound Infection",
-   "options": "\nYes\nNo"
+   "label": "Wound Assessment",
+   "options": "\nNormal\nSigns of infection"
   },
   {
    "fieldname": "breast",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Breast",
-   "options": "\nYes\nNo"
+   "label": "Breast normal or abnormal ",
+   "options": "\nNormal\nAbnormal"
   },
   {
    "fieldname": "teaching",
@@ -101,11 +147,11 @@
    "description": "Auto-filled with the same date driving Next PNC Visit date - type over it here to override.",
    "fieldname": "date_of_next_visit",
    "fieldtype": "Date",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Date of Next Visit"
   },
   {
-   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
    "fieldname": "next_visit_window",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -121,19 +167,282 @@
   },
   {
    "default": "0",
-   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
    "fieldname": "urgent_followup",
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Urgent Follow-up",
    "read_only": 1
+  },
+  {
+   "description": "(< 60 or 110 +)",
+   "fieldname": "hr",
+   "fieldtype": "Int",
+   "label": "HR"
+  },
+  {
+   "description": "(< 12 or 24 +)",
+   "fieldname": "rr",
+   "fieldtype": "Int",
+   "label": "RR"
+  },
+  {
+   "description": "(38* C + )",
+   "fieldname": "temperature",
+   "fieldtype": "Int",
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Int",
+   "label": "Height"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Int",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "bmi",
+   "fieldtype": "Int",
+   "label": "BMI"
+  },
+  {
+   "fieldname": "column_break_nhnx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mch_nurse_notified_of_abnormal_vital_signs",
+   "fieldtype": "Select",
+   "label": "MCH nurse notified of abnormal vital signs",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.wound_infection==\"Signs of infection\"",
+   "fieldname": "if_wound_infection_yes",
+   "fieldtype": "Select",
+   "label": "If Wound Infection Yes",
+   "options": "\nSwelling\nRedness\nEdema"
+  },
+  {
+   "fieldname": "h5hbh",
+   "fieldtype": "Heading",
+   "label": "<h5>HB</h5>"
+  },
+  {
+   "fieldname": "date_hb",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "fieldname": "h5bsh",
+   "fieldtype": "Heading",
+   "label": "<h5>BS</h5>"
+  },
+  {
+   "fieldname": "bs_date",
+   "fieldtype": "Date",
+   "label": "BS Date"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "result_bs",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "fieldname": "postpartum_depression_screen_phq_2_score",
+   "fieldtype": "Data",
+   "label": "Postpartum Depression Screen (PHQ 2) score"
+  },
+  {
+   "fieldname": "vital_signs_postpartum_section",
+   "fieldtype": "Section Break",
+   "label": "Vital Signs (Postpartum)"
+  },
+  {
+   "fieldname": "h5patients_general_conditionh",
+   "fieldtype": "Heading",
+   "label": "<h5>Patient's General Condition</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "responds_appropriately",
+   "fieldtype": "Check",
+   "label": " responds appropriately"
+  },
+  {
+   "default": "0",
+   "fieldname": "appears_comfortable",
+   "fieldtype": "Check",
+   "label": "appears comfortable"
+  },
+  {
+   "default": "0",
+   "fieldname": "not_responding_appropriately",
+   "fieldtype": "Check",
+   "label": "not responding appropriately"
+  },
+  {
+   "default": "0",
+   "fieldname": "appears_to_be_in_pain_or_distress",
+   "fieldtype": "Check",
+   "label": "appears to be in pain or distress"
+  },
+  {
+   "fieldname": "column_break_wvbk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zkpv",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.breast==\"Abnormal\"",
+   "fieldname": "if_abnormal",
+   "fieldtype": "Data",
+   "label": "if abnormal"
+  },
+  {
+   "fieldname": "weeks_postpartum",
+   "fieldtype": "Data",
+   "label": "Weeks postpartum"
+  },
+  {
+   "fieldname": "wound",
+   "fieldtype": "Select",
+   "label": "Wound",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "wound_if_yes",
+   "fieldtype": "Select",
+   "label": "Wound if Yes",
+   "options": "\nC/S\nVaginal Repair"
+  },
+  {
+   "fieldname": "bleeding",
+   "fieldtype": "Select",
+   "label": "Bleeding",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.bleeding==\"Yes\"",
+   "fieldname": "color",
+   "fieldtype": "Select",
+   "label": "Color",
+   "options": "\nBright red\nDark red"
+  },
+  {
+   "depends_on": "eval:doc.bleeding==\"Yes\"",
+   "fieldname": "amount",
+   "fieldtype": "Select",
+   "label": "Amount",
+   "options": "\nNone\nMinimal\nLess than 1-2 pads per hour\nMore than one to two pads per hour"
+  },
+  {
+   "fieldname": "bowel",
+   "fieldtype": "Select",
+   "label": "Bowel",
+   "options": "\nNormal\nAbnormal constipation\nDiarrhea\nUnable to control bowel function\nOthers"
+  },
+  {
+   "depends_on": "eval:doc.bowel==\"Others\"",
+   "fieldname": "data_jfuj",
+   "fieldtype": "Data",
+   "label": "Bowel if Others"
+  },
+  {
+   "fieldname": "bladder",
+   "fieldtype": "Select",
+   "label": "Bladder",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.bladder==\"Abnormal\"",
+   "fieldname": "bladder_if_abnormal",
+   "fieldtype": "Select",
+   "label": "Bladder if Abnormal",
+   "options": "\nUnable to void,\nFrequency\nVoiding with Coughing\nBurning with urination\nOthers"
+  },
+  {
+   "depends_on": "eval:doc.bladder_if_abnormal==\"Others\"",
+   "fieldname": "if_bladder_others",
+   "fieldtype": "Data",
+   "label": "If Bladder Others"
+  },
+  {
+   "fieldname": "danger_signs_mother_section",
+   "fieldtype": "Section Break",
+   "label": "Danger Signs Mother"
+  },
+  {
+   "default": "0",
+   "fieldname": "fever",
+   "fieldtype": "Check",
+   "label": "Fever"
+  },
+  {
+   "default": "0",
+   "fieldname": "heavy_bleeding_bright_red",
+   "fieldtype": "Check",
+   "label": "Heavy bleeding/ bright red"
+  },
+  {
+   "default": "0",
+   "fieldname": "sever_headache_blurred_vision",
+   "fieldtype": "Check",
+   "label": "Sever Headache/ Blurred Vision"
+  },
+  {
+   "default": "0",
+   "fieldname": "thoughts_of_harming_self_or_baby",
+   "fieldtype": "Check",
+   "label": "Thoughts of harming self or baby"
+  },
+  {
+   "default": "0",
+   "fieldname": "cesarean_section_scar_with_redness",
+   "fieldtype": "Check",
+   "label": "Cesarean section scar with redness"
+  },
+  {
+   "default": "0",
+   "fieldname": "swelling_or_discharge",
+   "fieldtype": "Check",
+   "label": "swelling or discharge"
+  },
+  {
+   "default": "0",
+   "fieldname": "phq_2_score_3_or_more",
+   "fieldtype": "Check",
+   "label": "PHQ 2 score 3 or more."
+  },
+  {
+   "default": "0",
+   "fieldname": "other",
+   "fieldtype": "Check",
+   "label": "Other"
+  },
+  {
+   "fieldname": "if_others",
+   "fieldtype": "Data",
+   "label": "If Others"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-08-11 11:18:52.190872",
+ "modified": "2026-10-06 18:28:57.561911",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC Followup Child",
