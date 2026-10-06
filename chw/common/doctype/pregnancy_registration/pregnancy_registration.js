@@ -26,6 +26,14 @@ frappe.ui.form.on("Pregnancy Registration", {
 			const weeks = Math.floor(days_pregnant / 7);
 			const days = days_pregnant % 7;
 			frm.set_value("pog", `${weeks} weeks ${days} days`);
+
+			// Automatic only, no manual selection - same weeks-based ranges
+			// the server recalculates on save.
+			let trimester;
+			if (weeks <= 13) trimester = "First trimester";
+			else if (weeks <= 27) trimester = "Second trimester";
+			else trimester = "Third trimester";
+			frm.set_value("trimester", trimester);
 		}
 	},
 	phone_number(frm) {

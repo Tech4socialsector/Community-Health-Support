@@ -12,6 +12,7 @@ class PregnancyRegistration(Document):
 		if self.lmp_date:
 			self.estimated_date_of_delivery = add_days(self.lmp_date, 281)
 		self.calculate_pog()
+		self.calculate_trimester()
 		self.calculate_bmi()
 
 	def calculate_pog(self):
@@ -22,6 +23,24 @@ class PregnancyRegistration(Document):
 		days_pregnant = (getdate(today()) - getdate(self.lmp_date)).days
 		weeks, days = divmod(days_pregnant, 7)
 		self.pog = f"{weeks} weeks {days} days"
+
+	def calculate_trimester(self):
+		# Automatic only - no manual selection. Refreshed here on every save
+		# of this record, and separately kept fresh roughly monthly by
+		# ANCFollowup.sync_patient_condition_to_pregnancy (the same place
+		# high_risk already gets written back), since Pregnancy Registration
+		# itself may otherwise sit untouched for most of the pregnancy.
+		if not self.lmp_date:
+			self.trimester = ""
+			return
+
+		weeks = (getdate(today()) - getdate(self.lmp_date)).days // 7
+		if weeks <= 13:
+			self.trimester = "First trimester"
+		elif weeks <= 27:
+			self.trimester = "Second trimester"
+		else:
+			self.trimester = "Third trimester"
 
 	def calculate_bmi(self):
 		if not self.height or not self.weight:

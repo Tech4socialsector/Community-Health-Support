@@ -42,8 +42,9 @@
  ],
  "fields": [
   {
+   "default": "Today",
    "fieldname": "visit_date",
-   "fieldtype": "Data",
+   "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Visit Date"

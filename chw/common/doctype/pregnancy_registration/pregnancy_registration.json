@@ -178,11 +178,13 @@
    "label": "Blood Group"
   },
   {
+   "bold": 1,
    "fieldname": "trimester",
    "fieldtype": "Select",
-   "label": "Trimester at Registration",
+   "in_standard_filter": 1,
+   "label": "Trimester",
    "options": "\nFirst trimester\nSecond trimester\nThird trimester",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "hb_level",
@@ -621,7 +623,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-05 17:35:05.062144",
+ "modified": "2026-10-06 10:27:04.319103",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

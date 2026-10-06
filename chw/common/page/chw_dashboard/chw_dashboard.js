@@ -3,10 +3,16 @@
 
 // Coordinator-facing overview dashboard: program-wide record counts
 // (Household/Family/Pregnancy/Birth/PNC/ANC/Palliative) with Date range,
-// Village and Health Worker filters, and a drilldown into the underlying
-// records per card. Separate from chw-visit-dashboard (each CHW's own
-// pending/backlog worklist) - this page never touches that one's files or
-// its chw_visit_summary/chw_visit_drilldown backend.
+// Village and Health Worker filters, and a drilldown popup into the
+// underlying records per card. The popup itself mirrors whatever that
+// card's own doctype actually shows/filters by in its real list view
+// (chw.api.chw_dashboard_doctype_fields/_drilldown), not a fixed generic
+// set shared by every card - so it's a fully separate filter scope from
+// this page's own Date range/Village/Health Worker filters above, which
+// only ever control the card counts themselves. Separate from
+// chw-visit-dashboard (each CHW's own pending/backlog worklist) - this
+// page never touches that one's files or its chw_visit_summary/
+// chw_visit_drilldown backend.
 
 frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
@@ -25,6 +31,20 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 		health_worker: 'All Health Workers',
 	};
 
+	// Previous/Next paging, fixed 100 records per page - not the standard
+	// Frappe 20/100/500/2500 page-size selector.
+	const PAGE_SIZE = 100;
+	let pageOffset = 0;
+
+	let drilldownDialog = null;
+	let currentCard = null;
+	let listViewFields = [];
+	let standardFilterFields = [];
+	let linkFieldOptions = {}; // { fieldname: [options...] }, for Link-type filter fields
+	let popupFilters = {}; // { fieldname: value }, this popup's own filter state - independent of selectedFilters above
+	let drilldownRecords = [];
+	let drilldownTotalCount = 0;
+
 	const COLORS = {
 		gray: { bg: '#F3F4F6', border: '#E5E7EB', fg: '#374151' },
 		purple: { bg: '#F5F0FF', border: '#E9D8FD', fg: '#7C3AED' },
@@ -37,19 +57,11 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 	function loadFilterOptions() {
 		frappe.call({ method: 'chw.api.get_villages' }).then((r) => {
 			villageOptions = ['All Villages'].concat(r.message || []);
-			page.main.find('#chw-dashboard-village').html(
-				villageOptions
-					.map((v) => `<option value="${v}" ${selectedFilters.village === v ? 'selected' : ''}>${v}</option>`)
-					.join('')
-			);
+			render();
 		});
 		frappe.call({ method: 'chw.api.get_health_workers' }).then((r) => {
 			healthWorkerOptions = ['All Health Workers'].concat(r.message || []);
-			page.main.find('#chw-dashboard-health-worker').html(
-				healthWorkerOptions
-					.map((v) => `<option value="${v}" ${selectedFilters.health_worker === v ? 'selected' : ''}>${v}</option>`)
-					.join('')
-			);
+			render();
 		});
 	}
 
@@ -121,10 +133,10 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 					</div>
 					<button class="btn btn-default" id="chw-dashboard-refresh" style="height: 34px;">Refresh</button>
 				</div>
-				<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;">
+				<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 16px; row-gap: 28px;">
 					${cardsData.map(cardHtml).join('')}
 				</div>
-				<p style="font-size: 12px; color: #9CA3AF; margin-top: 18px;">Click a card to see the records behind it, filtered by the selection above.</p>
+				<p style="font-size: 12px; color: #9CA3AF; margin-top: 18px;">Click a card to see the records behind it.</p>
 			</div>
 		`;
 		page.main.html(html);
@@ -156,152 +168,301 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 		});
 	}
 
-	function drilldownStats(records, cardKey) {
-		let sevenDaysAgo = moment().subtract(7, 'days');
-		let thisWeek = records.filter((r) => r.creation && moment(r.creation).isAfter(sevenDaysAgo)).length;
-
-		let villageCounts = {};
-		records.forEach((r) => {
-			if (!r.village) return;
-			villageCounts[r.village] = (villageCounts[r.village] || 0) + 1;
-		});
-
-		let stats = [
-			{ label: 'Records', value: records.length },
-			{ label: 'This week', value: thisWeek },
-		];
-
-		if (cardKey === 'household' || cardKey === 'family') {
-			// Households/Family Members are one-per-village-slot - how many
-			// distinct villages have a record registered matters more here
-			// than which single village has the most.
-			let villageCount = Object.keys(villageCounts).length;
-			stats.push({ label: 'Total villages registered', value: villageCount });
-		} else {
-			let topVillage = Object.entries(villageCounts).sort((a, b) => b[1] - a[1])[0];
-			if (topVillage) {
-				stats.push({ label: 'Top village', value: `${topVillage[0]} (${topVillage[1]})` });
-			}
-		}
-		return stats;
+	function paginationControlsHtml() {
+		let hasPrevious = pageOffset > 0;
+		let hasNext = pageOffset + drilldownRecords.length < drilldownTotalCount;
+		return `
+			<button type="button" class="btn btn-xs chw-dashboard-prev" ${hasPrevious ? '' : 'disabled'}
+				style="border: 1.5px solid ${hasPrevious ? '#0D9488' : '#D1D5DB'}; background: ${hasPrevious ? '#0D9488' : '#F3F4F6'}; color: ${hasPrevious ? '#FFFFFF' : '#9CA3AF'}; font-weight: 700; font-size: 12.5px; padding: 5px 12px; border-radius: 6px;">
+				&lt; Previous
+			</button>
+			<button type="button" class="btn btn-xs chw-dashboard-next" ${hasNext ? '' : 'disabled'}
+				style="border: 1.5px solid ${hasNext ? '#0D9488' : '#D1D5DB'}; background: ${hasNext ? '#0D9488' : '#F3F4F6'}; color: ${hasNext ? '#FFFFFF' : '#9CA3AF'}; font-weight: 700; font-size: 12.5px; padding: 5px 12px; border-radius: 6px;">
+				Next &gt;
+			</button>
+		`;
 	}
 
-	function drilldownTabHtml(card, cardKey, records) {
-		let rows = records
-			.map(
-				(r) => `
-			<tr>
-				<td><a href="/app/${frappe.router.slug(card.doctype)}/${encodeURIComponent(r.name)}">${frappe.utils.escape_html(r.patient || r.name || '')}</a></td>
-				<td>${frappe.utils.escape_html(r.village || '-')}</td>
-				<td>${frappe.datetime.comment_when(r.creation)}</td>
-			</tr>
-		`
-			)
-			.join('');
-		let excelParams = new URLSearchParams({
-			card_key: cardKey,
-			village: selectedFilters.village,
-			health_worker: selectedFilters.health_worker,
-			date_range: selectedFilters.date_range,
-		});
-		let metaBits = [
-			selectedFilters.village !== 'All Villages' ? `Village = ${selectedFilters.village}` : null,
-			selectedFilters.health_worker !== 'All Health Workers' ? `Health Worker = ${selectedFilters.health_worker}` : null,
-			selectedFilters.date_range !== 'all' ? `Date range = ${selectedFilters.date_range}` : null,
-		].filter(Boolean);
-		let subtitle = metaBits.length ? `${metaBits.join(' · ')} (${records.length} records)` : `${records.length} records`;
+	// One filter control per standard_filter_fields entry, the right kind of
+	// control for that field's own fieldtype - a Select gets its own real
+	// options, a Link gets a dropdown of that doctype's names (already
+	// fetched into linkFieldOptions before this renders), a Date gets a
+	// date picker, anything else gets a plain text (partial match) input.
+	const FILTER_CONTROL_STYLE = 'height: 36px; width: 170px; font-size: 13px; font-weight: 600; color: #1F2937; border: 1.5px solid #A7D8D0; border-radius: 7px;';
 
-		let statsHtml = drilldownStats(records, cardKey)
-			.map(
-				(s) => `
-			<div>
-				<div class="stat-label">${frappe.utils.escape_html(s.label)}</div>
-				<div class="stat-value">${frappe.utils.escape_html(String(s.value))}</div>
-			</div>
-		`
-			)
+	function filterFieldHtml(field) {
+		let value = popupFilters[field.fieldname] || '';
+		if (field.fieldtype === 'Select') {
+			let options = (field.options || '').split('\n').map((o) => o.trim()).filter(Boolean);
+			return `
+				<select class="form-control chw-dashboard-popup-filter" data-fieldname="${field.fieldname}" style="${FILTER_CONTROL_STYLE}">
+					<option value="">All</option>
+					${options.map((o) => `<option value="${o}" ${value === o ? 'selected' : ''}>${o}</option>`).join('')}
+				</select>
+			`;
+		}
+		if (field.fieldtype === 'Link') {
+			let options = linkFieldOptions[field.fieldname] || [];
+			return `
+				<select class="form-control chw-dashboard-popup-filter" data-fieldname="${field.fieldname}" style="${FILTER_CONTROL_STYLE}">
+					<option value="">All</option>
+					${options.map((o) => `<option value="${o}" ${value === o ? 'selected' : ''}>${o}</option>`).join('')}
+				</select>
+			`;
+		}
+		if (field.fieldtype === 'Date') {
+			return `<input type="date" class="form-control chw-dashboard-popup-filter" data-fieldname="${field.fieldname}" value="${value}" style="${FILTER_CONTROL_STYLE}">`;
+		}
+		return `<input type="text" class="form-control chw-dashboard-popup-filter" data-fieldname="${field.fieldname}" value="${frappe.utils.escape_html(value)}" placeholder="Search ${frappe.utils.escape_html(field.label)}" style="${FILTER_CONTROL_STYLE}">`;
+	}
+
+	function formatCell(value, field) {
+		if (value === null || value === undefined || value === '') return '-';
+		if (field.fieldtype === 'Date') return frappe.datetime.str_to_user(value);
+		if (field.fieldtype === 'Datetime') return frappe.datetime.comment_when(value);
+		return frappe.utils.escape_html(String(value));
+	}
+
+	function ensureDashboardTableStyle() {
+		if (document.getElementById('chw-dashboard-table-style')) return;
+		let style = document.createElement('style');
+		style.id = 'chw-dashboard-table-style';
+		style.textContent = `
+			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody tr:nth-child(odd) td {
+				background: #FFFFFF;
+			}
+			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody tr:nth-child(even) td {
+				background: #F3FBF8;
+			}
+			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody tr:hover td {
+				background: #D7F5E9 !important;
+			}
+			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody td {
+				font-size: 14px;
+				font-weight: 500;
+			}
+			#chw-dashboard-table-wrapper table#chw-dashboard-table thead th {
+				position: sticky;
+				top: 0;
+				z-index: 1;
+				background: #0D9488;
+				color: #FFFFFF;
+				font-size: 12.5px;
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+				font-weight: 800;
+				border-bottom: 2px solid #0B7D72;
+				padding: 12px 10px;
+			}
+			.chw-dashboard-popup-filter:focus {
+				border-color: #0D9488 !important;
+				box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15) !important;
+				outline: none;
+			}
+			.chw-dashboard-export-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 7px;
+				height: 36px;
+				padding: 0 16px;
+				border: none;
+				border-radius: 8px;
+				background: #15803D;
+				color: #FFFFFF;
+				font-size: 13px;
+				font-weight: 700;
+				box-shadow: 0 1px 3px rgba(21, 128, 61, 0.35);
+				cursor: pointer;
+				transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+			}
+			.chw-dashboard-export-btn:hover {
+				background: #126C32;
+				box-shadow: 0 3px 8px rgba(21, 128, 61, 0.45);
+			}
+			.chw-dashboard-export-btn:active {
+				transform: translateY(1px);
+				box-shadow: 0 1px 2px rgba(21, 128, 61, 0.4);
+			}
+		`;
+		document.head.appendChild(style);
+	}
+
+	function drilldownBodyHtml() {
+		ensureDashboardTableStyle();
+
+		let rows = drilldownRecords
+			.map((r) => {
+				let cells = listViewFields
+					.filter((f) => f.fieldname !== 'name')
+					.map((f) => `<td style="padding: 12px 10px; color: #374151;">${formatCell(r[f.fieldname], f)}</td>`)
+					.join('');
+				return `
+				<tr data-name="${frappe.utils.escape_html(r.name)}" style="cursor: pointer;">
+					<td style="padding: 12px 10px; font-size: 14px; font-weight: 700; color: #0D9488;">${frappe.utils.escape_html(r.name)}</td>
+					${cells}
+				</tr>
+			`;
+			})
+			.join('');
+
+		let headers = listViewFields
+			.map((f) => `<th>${frappe.utils.escape_html(f.fieldname === 'name' ? 'ID' : f.label)}</th>`)
 			.join('');
 
 		return `
-			<!doctype html>
-			<html>
-			<head>
-				<meta charset="utf-8">
-				<title>${frappe.utils.escape_html(card.label)} — CHW Dashboard</title>
-				<style>
-					body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; margin: 0; padding: 0; color: #1F2937; background: #FFFFFF; }
-					header { display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid #EDEBE5; }
-					h1 { font-size: 18px; margin: 0 0 4px 0; }
-					p.meta { color: #6B7280; font-size: 13px; margin: 0; }
-					.export { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: 1px solid #0D9488; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0D9488; text-decoration: none; background: #FFFFFF; }
-					.stats-bar { display: flex; gap: 36px; flex-wrap: wrap; background: #F7F6F3; border-bottom: 1px solid #EDEBE5; padding: 16px 28px; }
-					.stat-label { font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
-					.stat-value { font-size: 16px; font-weight: 800; color: #111827; }
-					.content { padding: 20px 28px; }
-					input#search { width: 320px; height: 34px; border-radius: 8px; border: 1px solid #E4E1D8; padding: 0 10px; font-size: 13px; margin-bottom: 14px; box-sizing: border-box; }
-					table { border-collapse: collapse; width: 100%; }
-					th { text-align: left; font-size: 11px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.04em; padding: 8px; border-bottom: 1px solid #EDEBE5; }
-					td { padding: 10px 8px; font-size: 13px; border-bottom: 1px solid #F5F4EF; }
-					tr:nth-child(even) td { background: #FBF7F1; }
-					a { color: #1D4ED8; text-decoration: none; font-weight: 600; }
-					a:hover { text-decoration: underline; }
-				</style>
-			</head>
-			<body>
-				<header>
-					<div>
-						<h1>${frappe.utils.escape_html(card.label)}</h1>
-						<p class="meta">${frappe.utils.escape_html(subtitle)}</p>
+			<div style="display: flex; flex-direction: column; max-height: 68vh;">
+				<div style="flex-shrink: 0;">
+					<div style="display: flex; align-items: flex-end; justify-content: center; gap: 14px; flex-wrap: wrap; background: #ECFDF5; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 16px 18px; margin-bottom: 14px;">
+						${standardFilterFields.map((f) => `
+							<div style="display: flex; flex-direction: column; gap: 5px;">
+								<label style="font-size: 12px; font-weight: 800; color: #0D9488; text-transform: uppercase; letter-spacing: 0.05em;">${frappe.utils.escape_html(f.label)}</label>
+								${filterFieldHtml(f)}
+							</div>
+						`).join('')}
 					</div>
-					<a class="export" href="/api/method/chw.api.chw_dashboard_drilldown_excel?${excelParams.toString()}">&#8595; Download Excel</a>
-				</header>
-				<div class="stats-bar">${statsHtml}</div>
-				<div class="content">
-					<input id="search" type="text" placeholder="Search by name">
-					<table>
-						<thead><tr><th>Name</th><th>Village</th><th>Date</th></tr></thead>
-						<tbody>${rows || '<tr><td colspan="3" style="color:#9CA3AF;padding:20px;">No records for this selection.</td></tr>'}</tbody>
+
+					<div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 10px;">
+						<button class="chw-dashboard-export-btn" id="chw-dashboard-export">
+							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+								<polyline points="7 10 12 15 17 10"></polyline>
+								<line x1="12" y1="15" x2="12" y2="3"></line>
+							</svg>
+							Download Excel
+						</button>
+					</div>
+				</div>
+
+				<div id="chw-dashboard-table-wrapper" style="flex: 1; min-height: 0; overflow: auto; border: 1px solid #EDEBE5; border-radius: 10px;">
+					<table class="table table-bordered" id="chw-dashboard-table" style="width: 100%; margin-bottom: 0;">
+						<thead><tr>${headers}</tr></thead>
+						<tbody>
+							${rows || `<tr><td colspan="${listViewFields.length}" style="color:#9CA3AF;padding:20px;text-align:center;">No records for this selection.</td></tr>`}
+						</tbody>
 					</table>
 				</div>
-				<script>
-					document.getElementById('search').addEventListener('input', function (e) {
-						var q = e.target.value.toLowerCase();
-						document.querySelectorAll('tbody tr').forEach(function (tr) {
-							tr.style.display = tr.textContent.toLowerCase().indexOf(q) !== -1 ? '' : 'none';
-						});
-					});
-				</script>
-			</body>
-			</html>
+
+				<div style="display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; flex-shrink: 0;">
+					<div style="display: flex; gap: 6px;">${paginationControlsHtml()}</div>
+					<span style="font-size: 13px; font-weight: 700; color: #374151;">Showing ${drilldownRecords.length ? pageOffset + 1 : 0}-${pageOffset + drilldownRecords.length} of ${drilldownTotalCount}</span>
+				</div>
+			</div>
 		`;
+	}
+
+	function fetchDrilldownRecordsThenRender() {
+		frappe.call({
+			method: 'chw.api.chw_dashboard_drilldown',
+			args: {
+				card_key: currentCard.key,
+				filters: JSON.stringify(popupFilters),
+				page_length: PAGE_SIZE,
+				start: pageOffset,
+			},
+			callback: function (r) {
+				drilldownRecords = (r.message && r.message.records) || [];
+				drilldownTotalCount = (r.message && r.message.total_count) || 0;
+				renderDrilldownDialog();
+			},
+		});
+	}
+
+	function renderDrilldownDialog() {
+		if (!drilldownDialog) {
+			drilldownDialog = new frappe.ui.Dialog({
+				size: 'extra-large',
+				fields: [{ fieldtype: 'HTML', fieldname: 'drilldown_body' }],
+			});
+			// extra-large (Bootstrap's modal-xl) is the biggest size Frappe's
+			// Dialog supports natively - going any bigger needs a direct
+			// width override on the modal itself.
+			drilldownDialog.$wrapper.find('.modal-dialog').css({ 'max-width': '1400px', width: '92vw' });
+		}
+
+		drilldownDialog.set_title(currentCard.label);
+		drilldownDialog.fields_dict.drilldown_body.$wrapper.html(drilldownBodyHtml());
+		drilldownDialog.show();
+		wireDrilldownEvents();
+	}
+
+	function wireDrilldownEvents() {
+		let $body = drilldownDialog.fields_dict.drilldown_body.$wrapper;
+
+		$body.find('.chw-dashboard-popup-filter').on('change input', function () {
+			let fieldname = $(this).data('fieldname');
+			let value = $(this).val();
+			if (value) popupFilters[fieldname] = value;
+			else delete popupFilters[fieldname];
+		});
+		// Text inputs re-fetch on Enter (avoids a server round-trip per
+		// keystroke); Select/Link/Date re-fetch immediately on change.
+		$body.find('select.chw-dashboard-popup-filter, input[type="date"].chw-dashboard-popup-filter').on('change', function () {
+			pageOffset = 0;
+			fetchDrilldownRecordsThenRender();
+		});
+		$body.find('input[type="text"].chw-dashboard-popup-filter').on('keydown', function (e) {
+			if (e.key === 'Enter') {
+				pageOffset = 0;
+				fetchDrilldownRecordsThenRender();
+			}
+		});
+		$body.find('.chw-dashboard-prev').on('click', function () {
+			pageOffset = Math.max(0, pageOffset - PAGE_SIZE);
+			fetchDrilldownRecordsThenRender();
+		});
+		$body.find('.chw-dashboard-next').on('click', function () {
+			pageOffset = pageOffset + PAGE_SIZE;
+			fetchDrilldownRecordsThenRender();
+		});
+		$body.find('#chw-dashboard-export').on('click', function () {
+			let params = new URLSearchParams({
+				card_key: currentCard.key,
+				filters: JSON.stringify(popupFilters),
+				page_length: PAGE_SIZE,
+				start: pageOffset,
+			});
+			window.open(`/api/method/chw.api.chw_dashboard_drilldown_excel?${params.toString()}`, '_blank');
+		});
+		$body.find('#chw-dashboard-table tbody tr[data-name]').on('click', function () {
+			frappe.set_route('Form', currentCard.doctype, $(this).data('name'));
+		});
+	}
+
+	function loadLinkOptionsThenShow() {
+		let linkFields = standardFilterFields.filter((f) => f.fieldtype === 'Link');
+		if (!linkFields.length) {
+			fetchDrilldownRecordsThenRender();
+			return;
+		}
+		let remaining = linkFields.length;
+		linkFields.forEach((f) => {
+			frappe.call({
+				method: 'chw.api.chw_dashboard_link_options',
+				args: { link_doctype: f.options },
+				callback: function (r) {
+					linkFieldOptions[f.fieldname] = r.message || [];
+					remaining -= 1;
+					if (remaining === 0) fetchDrilldownRecordsThenRender();
+				},
+			});
+		});
 	}
 
 	function showDrilldown(cardKey) {
 		let card = cardsData.find((c) => c.key === cardKey);
 		if (!card) return;
-
-		let tab = window.open('', '_blank');
-		if (tab) {
-			tab.document.write('<p style="font-family: system-ui, sans-serif; padding: 24px; color: #6B7280;">Loading…</p>');
-		}
+		currentCard = card;
+		pageOffset = 0;
+		popupFilters = {};
+		linkFieldOptions = {};
 
 		frappe.call({
-			method: 'chw.api.chw_dashboard_drilldown',
-			args: {
-				card_key: cardKey,
-				village: selectedFilters.village,
-				health_worker: selectedFilters.health_worker,
-				date_range: selectedFilters.date_range,
-			},
+			method: 'chw.api.chw_dashboard_doctype_fields',
+			args: { card_key: cardKey },
 			callback: function (r) {
-				let records = (r.message && r.message.records) || [];
-				if (!tab || tab.closed) {
-					frappe.msgprint(__('Please allow pop-ups for this site to open the drilldown in a new tab.'));
-					return;
-				}
-				tab.document.open();
-				tab.document.write(drilldownTabHtml(card, cardKey, records));
-				tab.document.close();
+				listViewFields = (r.message && r.message.list_view_fields) || [];
+				standardFilterFields = (r.message && r.message.standard_filter_fields) || [];
+				loadLinkOptionsThenShow();
 			},
 		});
 	}

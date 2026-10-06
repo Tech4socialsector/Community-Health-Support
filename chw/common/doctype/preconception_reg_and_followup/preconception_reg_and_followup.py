@@ -1,6 +1,8 @@
 # Copyright (c) 2026, tfss and contributors
 # For license information, please see license.txt
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
@@ -9,7 +11,21 @@ from chw.api import sync_next_visit_todo
 
 class PreconceptionRegandFollowup(Document):
 	def validate(self):
+		self.validate_followup_dates()
 		self.set_next_visit_date()
+
+	def validate_followup_dates(self):
+		# A visit being logged after the fact (backdated) or a next-visit
+		# date that isn't genuinely in the future would make "which row is
+		# most recent" and "when is she next due" both unreliable - this
+		# program has no calculation engine to catch that, so the dates
+		# themselves have to be guaranteed sane going in.
+		today = getdate()
+		for row in self.followup_visits:
+			if row.date_of_visit and getdate(row.date_of_visit) < today:
+				frappe.throw(_("Row #{0}: Date of Visit cannot be in the past.").format(row.idx))
+			if row.date_of_next_visit and getdate(row.date_of_next_visit) <= today:
+				frappe.throw(_("Row #{0}: Date of Next Visit must be a future date, not today or earlier.").format(row.idx))
 
 	def on_update(self):
 		sync_next_visit_todo(

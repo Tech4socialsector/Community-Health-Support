@@ -4,7 +4,7 @@ from frappe.query_builder import Order
 from frappe.query_builder.functions import IfNull
 from pypika.analytics import RowNumber
 from pypika.terms import ExistsCriterion
-from frappe.utils import getdate, add_days, add_months
+from frappe.utils import getdate, add_days, add_months, cint
 
 
 PRIVILEGED_ROLES = {'Administrator', 'System Manager', 'Program Coordinator'}
@@ -1432,7 +1432,6 @@ CHW_DASHBOARD_CARDS = [
         'key': 'household',
         'label': 'Household Details',
         'doctype': 'Household profile',
-        'display_field': 'household_head_name',
         'icon': 'home',
         'color': 'gray',
         'has_village': True,
@@ -1442,7 +1441,6 @@ CHW_DASHBOARD_CARDS = [
         'key': 'family',
         'label': 'Family Members',
         'doctype': 'Family members',
-        'display_field': 'family_member',
         'icon': 'users',
         'color': 'purple',
         'has_village': True,
@@ -1452,8 +1450,16 @@ CHW_DASHBOARD_CARDS = [
         'key': 'pregnancy',
         'label': 'Pregnancy Registration',
         'doctype': 'Pregnancy Registration',
-        'display_field': 'first_name',
         'icon': 'user-plus',
+        'color': 'blue',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'anc',
+        'label': 'ANC Follow-up',
+        'doctype': 'ANC Follow-up',
+        'icon': 'calendar',
         'color': 'blue',
         'has_village': True,
         'has_health_worker': True,
@@ -1462,7 +1468,6 @@ CHW_DASHBOARD_CARDS = [
         'key': 'birth',
         'label': 'Birth Registration',
         'doctype': 'Birth Registration',
-        'display_field': 'first_name',
         'icon': 'smile',
         'color': 'green',
         'has_village': True,
@@ -1472,19 +1477,35 @@ CHW_DASHBOARD_CARDS = [
         'key': 'pnc',
         'label': 'PNC Followup',
         'doctype': 'PNC',
-        'display_field': 'first_name',
         'icon': 'clock',
         'color': 'orange',
         'has_village': True,
         'has_health_worker': True,
     },
     {
-        'key': 'anc',
-        'label': 'ANC Follow-up',
-        'doctype': 'ANC Follow-up',
-        'display_field': 'first_name',
-        'icon': 'calendar',
-        'color': 'blue',
+        'key': 'preconception',
+        'label': 'Preconception Reg and Followup',
+        'doctype': 'Preconception Reg and Followup',
+        'icon': 'target',
+        'color': 'green',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'postpartum',
+        'label': 'Postpartum Reg and Followup',
+        'doctype': 'Postpartum Reg and Followup',
+        'icon': 'refresh-cw',
+        'color': 'orange',
+        'has_village': True,
+        'has_health_worker': True,
+    },
+    {
+        'key': 'child_6w_1y',
+        'label': 'Child 6w to 1 Year Reg and Followup',
+        'doctype': 'Child 6w to 1 Year Reg and Followup',
+        'icon': 'trending-up',
+        'color': 'purple',
         'has_village': True,
         'has_health_worker': True,
     },
@@ -1492,7 +1513,6 @@ CHW_DASHBOARD_CARDS = [
         'key': 'palliative_initial',
         'label': 'Palliative Care Initial Assessment',
         'doctype': 'Palliative Care Initial Assessment Form',
-        'display_field': 'name1',
         'icon': 'heart',
         'color': 'red',
         'has_village': False,
@@ -1502,7 +1522,6 @@ CHW_DASHBOARD_CARDS = [
         'key': 'palliative_followup',
         'label': 'Palliative Care followup',
         'doctype': 'Palliative care followup',
-        'display_field': 'name1',
         'icon': 'activity',
         'color': 'red',
         'has_village': False,
@@ -1582,48 +1601,120 @@ def get_chw_dashboard_cards(village=None, health_worker=None, date_range=None):
     return cards
 
 
+TEXT_FIELDTYPES = {'Data', 'Small Text', 'Text', 'Long Text'}
+
+
+def _dashboard_list_view_fields(meta):
+    """This doctype's own in_list_view fields, in field_order - 'name'
+    always first (every doctype has it, not itself a DocField). Falls back
+    to just 'name' if the doctype has none marked in_list_view at all."""
+    fields = [df.fieldname for df in meta.fields if df.in_list_view]
+    return ['name'] + fields if fields else ['name']
+
+
 @frappe.whitelist()
-def chw_dashboard_drilldown(card_key, village=None, health_worker=None, date_range=None):
-    """Underlying records for one chw-dashboard card, most recent first."""
+def chw_dashboard_doctype_fields(card_key):
+    """The drilldown popup mirrors whatever this card's own doctype already
+    shows/filters by in its real list view - read live from the doctype's
+    own meta, instead of a fixed generic set shared by every card."""
     if not is_privileged_user():
         frappe.throw(_('Not permitted'), frappe.PermissionError)
 
     card = _dashboard_card_by_key(card_key)
     if not card:
-        return {'records': []}
+        return {'list_view_fields': [], 'standard_filter_fields': []}
 
-    filters = _dashboard_filters(card, village, health_worker, date_range)
-    fields = ['name', f"{card['display_field']} as patient", 'creation']
-    if card['has_village']:
-        fields.append('village')
+    meta = frappe.get_meta(card['doctype'])
 
-    records = frappe.get_list(
-        card['doctype'],
-        filters=filters,
-        fields=fields,
-        order_by='creation desc',
-        limit_page_length=100,
-    )
-    return {'records': records}
+    def field_dict(fieldname):
+        df = meta.get_field(fieldname)
+        return {
+            'fieldname': fieldname,
+            'label': (df.label if df else None) or frappe.unscrub(fieldname),
+            'fieldtype': df.fieldtype if df else 'Data',
+            'options': df.options if df else None,
+        }
+
+    list_view_fields = [field_dict(f) for f in _dashboard_list_view_fields(meta)]
+    standard_filter_fields = [field_dict(df.fieldname) for df in meta.fields if df.in_standard_filter]
+    return {'list_view_fields': list_view_fields, 'standard_filter_fields': standard_filter_fields}
 
 
 @frappe.whitelist()
-def chw_dashboard_drilldown_excel(card_key, village=None, health_worker=None, date_range=None):
-    """Same records as chw_dashboard_drilldown, as a downloadable Excel file."""
+def chw_dashboard_link_options(link_doctype):
+    """Dropdown options for a Link-type standard filter field in the
+    drilldown popup - e.g. Village, Health Worker, Village profile - the
+    same generic approach regardless of which doctype's field it's for."""
+    if not is_privileged_user():
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+    return frappe.get_all(link_doctype, pluck='name', order_by='name asc', limit_page_length=500)
+
+
+@frappe.whitelist()
+def chw_dashboard_drilldown(card_key, filters=None, page_length=None, start=0):
+    """Underlying records for one chw-dashboard card, most recent first -
+    fields shown and filters accepted both come from the doctype's own
+    in_list_view/in_standard_filter meta (see chw_dashboard_doctype_fields),
+    not a fixed generic set. filters is a JSON dict of {fieldname: value} -
+    only fieldnames actually marked in_standard_filter on this doctype are
+    ever honored, everything else is silently dropped rather than trusted
+    as a raw query filter. page_length caps how many are returned per page
+    (the drilldown popup's own fixed 100-per-page), start is the offset for
+    Previous/Next paging through the full matching set."""
+    if not is_privileged_user():
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    card = _dashboard_card_by_key(card_key)
+    if not card:
+        return {'records': [], 'total_count': 0, 'fields': []}
+
+    doctype = card['doctype']
+    meta = frappe.get_meta(doctype)
+    list_view_fields = _dashboard_list_view_fields(meta)
+
+    user_filters = frappe.parse_json(filters) if filters else {}
+    allowed_filter_fields = {df.fieldname: df for df in meta.fields if df.in_standard_filter}
+    db_filters = []
+    for fieldname, value in user_filters.items():
+        df = allowed_filter_fields.get(fieldname)
+        if not df or value in (None, ''):
+            continue
+        if df.fieldtype in TEXT_FIELDTYPES:
+            db_filters.append([fieldname, 'like', f'%{value}%'])
+        else:
+            db_filters.append([fieldname, '=', value])
+
+    total_count = frappe.db.count(doctype, db_filters)
+    records = frappe.get_list(
+        doctype,
+        filters=db_filters,
+        fields=list_view_fields,
+        order_by='creation desc',
+        start=cint(start),
+        limit_page_length=cint(page_length) if page_length else 100,
+    )
+    return {
+        'records': records,
+        'total_count': total_count,
+        'fields': [{'fieldname': f, 'label': meta.get_label(f) or frappe.unscrub(f)} for f in list_view_fields],
+    }
+
+
+@frappe.whitelist()
+def chw_dashboard_drilldown_excel(card_key, filters=None, page_length=None, start=0):
+    """Same records as chw_dashboard_drilldown, as a downloadable Excel file -
+    same dynamic doctype-driven columns, same page/offset so the export
+    matches what's on screen."""
     from frappe.utils.xlsxutils import make_xlsx
 
-    data = chw_dashboard_drilldown(card_key, village, health_worker, date_range)
+    data = chw_dashboard_drilldown(card_key, filters, page_length, start)
     records = data.get('records', [])
+    field_defs = data.get('fields', [])
 
-    columns = ["Name", "Patient", "Village", "Date"]
+    columns = [f['label'] for f in field_defs]
     rows = [columns]
     for r in records:
-        rows.append([
-            r.get('name', ''),
-            r.get('patient', ''),
-            r.get('village', ''),
-            str(r.get('creation', '') or '')
-        ])
+        rows.append([str(r.get(f['fieldname'], '') or '') for f in field_defs])
 
     xlsx_file = make_xlsx(rows, "CHW Dashboard")
 
@@ -2514,13 +2605,16 @@ def get_chw_work_order_summary(village=None, health_worker=None, visit_type=None
 
 
 @frappe.whitelist()
-def chw_work_order_drilldown(status='all', village=None, health_worker=None, visit_type=None):
+def chw_work_order_drilldown(status='all', village=None, health_worker=None, visit_type=None, page_length=None, start=0):
     """Underlying records behind get_chw_work_order_summary's counts.
     status is one of 'this_week', 'today', 'upcoming', 'overdue',
     'completed', 'high_risk', 'all' ('all' excludes 'completed' and
     'high_risk' - both are a different kind of view (already-done work, and
     a risk-status view unrelated to due dates) and would double up with the
-    others when mixed into one undifferentiated list)."""
+    others when mixed into one undifferentiated list). start/page_length are
+    the drilldown popup's own Next/Previous pagination - records (soonest-due
+    first) are sliced to [start : start + page_length], left uncapped (every
+    matching record) if page_length isn't passed."""
     if frappe.session.user == 'Guest':
         frappe.throw(_('Not permitted'), frappe.PermissionError)
 
@@ -2623,16 +2717,32 @@ def chw_work_order_drilldown(status='all', village=None, health_worker=None, vis
     records = _enrich_postpartum_records_live(records)
     records = _enrich_child_6w_1y_records_live(records)
     records.sort(key=lambda r: r['due_date'])
-    return {'records': records}
+
+    total_count = len(records)
+    start = cint(start)
+    if page_length:
+        records = records[start:start + cint(page_length)]
+    elif start:
+        records = records[start:]
+
+    return {'records': records, 'total_count': total_count}
 
 
 @frappe.whitelist()
-def chw_work_order_drilldown_excel(status='all', village=None, health_worker=None, visit_type=None):
-    """Same records as chw_work_order_drilldown, as a downloadable Excel file."""
+def chw_work_order_drilldown_excel(status='all', village=None, health_worker=None, visit_type=None, page_length=None, start=0, risk=None):
+    """Same records as chw_work_order_drilldown, as a downloadable Excel file -
+    capped to the same start/page_length (the drilldown popup's own
+    Next/Previous pagination) and narrowed by the same Risk filter, so the
+    export always matches exactly what's currently on screen - nothing more,
+    nothing less - at the moment the user clicks Download."""
     from frappe.utils.xlsxutils import make_xlsx
 
-    data = chw_work_order_drilldown(status, village, health_worker, visit_type)
+    data = chw_work_order_drilldown(status, village, health_worker, visit_type, page_length, start)
     records = data.get('records', [])
+    if risk == 'high_risk':
+        records = [r for r in records if r.get('high_risk') == 'Yes']
+    elif risk == 'normal':
+        records = [r for r in records if r.get('high_risk') != 'Yes']
 
     columns = ["Visit Type", "Patient", "High Risk", "Village", "From Date", "Due Date", "Alert By", "Status"]
     rows = [columns]

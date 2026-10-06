@@ -75,19 +75,26 @@ class ANCFollowup(Document):
 				row.pog_weeks = self.calculate_pog(lmp_date, row.date) if row.date else ""
 
 		self.sync_patient_condition_to_pregnancy()
+		self.refresh_pregnancy_pog_and_trimester(lmp_date)
 		self.insert_urgent_followups_for_risk_rows()
 
+	def refresh_pregnancy_pog_and_trimester(self, lmp_date):
+		today = getdate()
+		days_pregnant = (today - getdate(lmp_date)).days
+		weeks, days = divmod(days_pregnant, 7)
+		pog = f"{weeks} weeks {days} days"
+
+		if weeks <= 13:
+			trimester = "First trimester"
+		elif weeks <= 27:
+			trimester = "Second trimester"
+		else:
+			trimester = "Third trimester"
+
+		frappe.db.set_value("Pregnancy Registration", self.pregnant_id, {"pog": pog, "trimester": trimester})
+
 	def sync_patient_condition_to_pregnancy(self):
-		# If any staff member - Volunteer, Nurse, or Doctor - records this
-		# patient as at-risk on any visit, that becomes the pregnancy's
-		# current risk status - feeding straight into Nurse's own window
-		# quota, alert date and Work Order List highlight, all already
-		# driven by Pregnancy Registration's High Risk field. A "Normal"
-		# reading takes no action - it never downgrades an existing High
-		# Risk flag on its own; that's a separate, deliberate decision.
-		# Since Risk never downgrades, "was any row ever Risk" is
-		# equivalent to (and simpler than) tracking which table's row was
-		# most recent.
+		
 		any_risk = any(
 			row.patient_condition == "Risk"
 			for table_field in FOLLOWUP_TABLE_FIELDS
@@ -97,12 +104,6 @@ class ANCFollowup(Document):
 			frappe.db.set_value("Pregnancy Registration", self.pregnant_id, "high_risk", "Yes")
 
 	def insert_urgent_followups_for_risk_rows(self):
-		# Only the Nurse follow-up table runs the continuous schedule -
-		# Volunteer and Doctor are open-ended, manual logs (Add Row any
-		# time, no calculated cadence), so a Risk finding there only ever
-		# flips the shared Pregnancy Registration flag above, never inserts
-		# an extra row anywhere. A Risk finding on Nurse's own table still
-		# inserts an earlier Nurse follow-up, exactly as before.
 		_, _, alert_within_days, _ = self.get_window_policy()
 		self._insert_urgent_followups(NURSE_TABLE_FIELD, alert_within_days)
 
@@ -140,18 +141,7 @@ class ANCFollowup(Document):
 		return f"{weeks} weeks {days} days"
 
 	def set_next_anc_visit_date(self):
-		# The first N monthly windows (N = Automatic Window Count on the
-		# Master) are calculated automatically, anchored to LMP, and
-		# correctly account for late registration - a patient who registers
-		# already 2 months in starts at the window she's actually in, not
-		# window 1. Completed visits are counted on the Nurse table ONLY -
-		# Volunteer and Doctor visits are manual logs and never advance this
-		# schedule. The cadence itself is the same one-time-setup policy for
-		# every patient - High Risk status no longer selects a different
-		# schedule, it only controls whether the Risk Alert nudge is shown
-		# below. After the automatic phase, visit frequency depends on her
-		# condition, so whichever Nurse row was most recently typed takes
-		# over, exactly like before.
+		
 		if not self.pregnant_id:
 			return
 
@@ -160,18 +150,10 @@ class ANCFollowup(Document):
 		)
 		if not reg or not reg.lmp_date:
 			return
-
-		# An open Urgent-tagged row on the Nurse table always wins first, in
-		# every phase - it never gets masked by either the automatic window
-		# calculation or a manually typed date. "From" is the visit that
-		# triggered it, "To" is the urgent row's own date - shown as a
-		# range, same as any other window.
 		urgent = self.get_pending_urgent_followup()
 		if urgent:
 			self.next_anc_visit_date = urgent.date
 			self.next_anc_visit_date_auto = urgent.date
-			# The urgent date itself already IS the early-visit signal - no
-			# separate alert needed on top of it.
 			self.next_anc_visit_risk_alert = ""
 			self.sync_child_row_fields(urgent.trigger_date, urgent.date)
 			return

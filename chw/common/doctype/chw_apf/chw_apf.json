@@ -535,6 +535,7 @@
    "label": "Staff signature"
   },
   {
+   "default": "Today",
    "fieldname": "visit_date",
    "fieldtype": "Date",
    "in_list_view": 1,
