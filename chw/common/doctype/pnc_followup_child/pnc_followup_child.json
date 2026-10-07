@@ -16,8 +16,8 @@
   "appears_comfortable",
   "not_responding_appropriately",
   "appears_to_be_in_pain_or_distress",
-  "bp",
   "column_break_wvbk",
+  "bp",
   "rr",
   "hr",
   "temperature",
@@ -56,7 +56,6 @@
   "date_of_next_visit",
   "next_visit_window",
   "urgent_followup",
-  "patient_condition",
   "danger_signs_mother_section",
   "fever",
   "heavy_bleeding_bright_red",
@@ -66,7 +65,22 @@
   "swelling_or_discharge",
   "phq_2_score_3_or_more",
   "other",
-  "if_others"
+  "if_others",
+  "support_and_care_provided_section",
+  "h5education_providedh",
+  "postpartum_self_care_nutrition_sleep_counseling",
+  "iron_and_calcium_postnatal",
+  "breastfeeding",
+  "family_planning_teaching_and_handout",
+  "kegel_exercises_postnatal",
+  "postpartum_depression_handout",
+  "child_immunization_schedule_0_to_1_year",
+  "child_weight_gain_chart_0_to_1_year",
+  "column_break_qeho",
+  "h5referrals_and_action_planh",
+  "was_a_referral_needed",
+  "if_yes_where",
+  "patient_condition"
  ],
  "fields": [
   {
@@ -433,16 +447,96 @@
    "label": "Other"
   },
   {
+   "depends_on": "eval:doc.other == 1",
    "fieldname": "if_others",
    "fieldtype": "Data",
    "label": "If Others"
+  },
+  {
+   "fieldname": "support_and_care_provided_section",
+   "fieldtype": "Section Break",
+   "label": "Support and Care Provided"
+  },
+  {
+   "fieldname": "h5education_providedh",
+   "fieldtype": "Heading",
+   "label": "<h5>Education Provided</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "postpartum_self_care_nutrition_sleep_counseling",
+   "fieldtype": "Check",
+   "label": "Postpartum self care nutrition, sleep counseling "
+  },
+  {
+   "default": "0",
+   "fieldname": "iron_and_calcium_postnatal",
+   "fieldtype": "Check",
+   "label": "Iron and Calcium (postnatal)"
+  },
+  {
+   "default": "0",
+   "fieldname": "breastfeeding",
+   "fieldtype": "Check",
+   "label": "Exclusive breastfeeding 0 to 6 months and complementary feeding (handout)"
+  },
+  {
+   "default": "0",
+   "fieldname": "family_planning_teaching_and_handout",
+   "fieldtype": "Check",
+   "label": "Family planning teaching and handout"
+  },
+  {
+   "default": "0",
+   "fieldname": "kegel_exercises_postnatal",
+   "fieldtype": "Check",
+   "label": "Kegel exercises (postnatal)"
+  },
+  {
+   "default": "0",
+   "fieldname": "postpartum_depression_handout",
+   "fieldtype": "Check",
+   "label": "Postpartum Depression (handout)"
+  },
+  {
+   "default": "0",
+   "fieldname": "child_immunization_schedule_0_to_1_year",
+   "fieldtype": "Check",
+   "label": "Child Immunization Schedule (0 to 1 year)"
+  },
+  {
+   "default": "0",
+   "fieldname": "child_weight_gain_chart_0_to_1_year",
+   "fieldtype": "Check",
+   "label": "Child Weight Gain Chart (0 to 1 year)"
+  },
+  {
+   "fieldname": "column_break_qeho",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "h5referrals_and_action_planh",
+   "fieldtype": "Heading",
+   "label": "<h5>Referrals and Action Plan</h5>"
+  },
+  {
+   "fieldname": "was_a_referral_needed",
+   "fieldtype": "Select",
+   "label": "Was a referral needed",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.was_a_referral_neededwas_a_referral_needed==\"Yes\"",
+   "fieldname": "if_yes_where",
+   "fieldtype": "Data",
+   "label": "If Yes where"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-06 18:28:57.561911",
+ "modified": "2026-10-07 10:30:52.428048",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC Followup Child",

@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "column_break_njms",
   "window_start_date",
   "date",
   "lmp_date",
@@ -16,6 +17,8 @@
   "hr",
   "rr",
   "temp",
+  "fh",
+  "fhr",
   "height",
   "weight",
   "bmi",
@@ -75,6 +78,7 @@
   "action",
   "refferal_needed",
   "refferal_need",
+  "referral_clinic_type",
   "care_plan_created",
   "reports_or_info_sent_to_mch_nurse",
   "column_break_tzcp",
@@ -202,7 +206,7 @@
   {
    "fieldname": "hemoglobin_level",
    "fieldtype": "Data",
-   "label": "Hb"
+   "label": "HB"
   },
   {
    "fieldname": "teaching",
@@ -481,6 +485,12 @@
    "label": "where was the referral made"
   },
   {
+   "fieldname": "referral_clinic_type",
+   "fieldtype": "Select",
+   "label": "Referral Clinic Type",
+   "options": "\nDRC\nCHC\nOther\nNot Applicable"
+  },
+  {
    "fieldname": "care_plan_created",
    "fieldtype": "Select",
    "label": "Care plan Created",
@@ -557,13 +567,28 @@
    "fieldtype": "Select",
    "label": "Patient Condition",
    "options": "\nNormal\nRisk"
+  },
+  {
+   "fieldname": "fh",
+   "fieldtype": "Int",
+   "label": "FH"
+  },
+  {
+   "fieldname": "fhr",
+   "fieldtype": "Int",
+   "label": "FHR"
+  },
+  {
+   "fieldname": "column_break_njms",
+   "fieldtype": "Column Break",
+   "hidden": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-25 11:42:31.002278",
+ "modified": "2026-10-07 15:53:35.389739",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Nurse",

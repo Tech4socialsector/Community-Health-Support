@@ -24,6 +24,22 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 	let villageOptions = ['All Villages'];
 	let healthWorkerOptions = ['All Health Workers'];
 	let cardsData = [];
+	let newIndicatorsData = {};
+
+	// Don't fit chw.api.get_chw_dashboard_cards' generic one-doctype/one-field
+	// pattern (each needs cross-table or latest-row logic), so they're driven
+	// by their own chw.api.get_new_indicators_summary/new_indicator_drilldown
+	// pair instead - a donut + legend per card, segment breakdown and all
+	// labels/colors coming live from the backend, not hardcoded here.
+	let currentIndicatorKey = null;
+	let currentIndicatorSegmentKey = null; // null = the whole card, no one segment
+	let currentIndicatorTitle = '';
+	let currentIndicatorDoctype = null;
+	let currentIndicatorFields = [];
+	let indicatorDialog = null;
+	let indicatorPageOffset = 0;
+	let indicatorRecords = [];
+	let indicatorTotalCount = 0;
 
 	let selectedFilters = {
 		date_range: 'all',
@@ -78,6 +94,20 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 				render();
 			},
 		});
+		// New Indicators don't have a date_range argument server-side (none
+		// of the 5 are date-bounded the way the Overview cards can be) - only
+		// village/health worker apply.
+		frappe.call({
+			method: 'chw.api.get_new_indicators_summary',
+			args: {
+				village: selectedFilters.village,
+				health_worker: selectedFilters.health_worker,
+			},
+			callback: function (r) {
+				newIndicatorsData = r.message || {};
+				render();
+			},
+		});
 	}
 
 	function cardHtml(card) {
@@ -86,6 +116,74 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 			<div class="chw-dashboard-card" data-key="${card.key}" style="cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px; background: #FFFFFF; border: 1px solid #E5E7EB; border-top: 3px solid ${color.fg}; border-radius: 10px; padding: 20px 32px; width: 100%; min-width: 0; box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
 				<span style="font-size: 26px; font-weight: 800; color: #111827; line-height: 1;">${card.count}</span>
 				<span style="font-size: 12.5px; font-weight: 500; color: #6B7280; line-height: 1.3;">${frappe.utils.escape_html(card.label)}</span>
+			</div>
+		`;
+	}
+
+	const INDICATOR_DONUT_CIRCUMFERENCE = 2 * Math.PI * 52;
+
+	// A donut + legend per card, same pattern across all 5 - segments,
+	// colors and labels all come from the backend (chw.api.
+	// get_new_indicators_summary), nothing hardcoded client-side. A
+	// "no data" row (e.g. "No LMP recorded") shows in the legend when the
+	// backend sends one, but isn't clickable - there's no single coherent
+	// drilldown for "doesn't have this reading yet" the way there is for a
+	// real segment.
+	function indicatorCardHtml(key, data) {
+		let total = data.total || 0;
+		let cumulative = 0;
+		let slices = data.segments.map((seg) => {
+			let pct = total ? seg.count / total : 0;
+			let len = pct * INDICATOR_DONUT_CIRCUMFERENCE;
+			let offset = -cumulative;
+			cumulative += len;
+			return `
+				<circle class="chw-indicator-slice" data-key="${key}" data-segment="${seg.key}" cx="65" cy="65" r="52" fill="none"
+					stroke="${seg.color}" stroke-width="18" stroke-dasharray="${len.toFixed(2)} ${(INDICATOR_DONUT_CIRCUMFERENCE - len).toFixed(2)}"
+					stroke-dashoffset="${offset.toFixed(2)}" transform="rotate(-90 65 65)" style="cursor: pointer;"
+					tabindex="0" role="button" aria-label="${frappe.utils.escape_html(seg.label)}"></circle>
+			`;
+		}).join('');
+
+		let legendRows = data.segments.map((seg) => {
+			let pct = total ? Math.round((seg.count / total) * 100) : 0;
+			return `
+				<div class="chw-indicator-legend-row" data-key="${key}" data-segment="${seg.key}" tabindex="0" role="button"
+					style="display: flex; align-items: center; gap: 8px; cursor: pointer; border-radius: 6px; padding: 3px 6px; margin: 0 -6px;">
+					<span style="width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; background: ${seg.color};"></span>
+					<span style="font-size: 13px; color: #111827; flex: 1;">${frappe.utils.escape_html(seg.label)}</span>
+					<span style="font-size: 13px; font-weight: 700; color: #111827; width: 26px; text-align: right;">${seg.count}</span>
+					<span style="font-size: 12px; color: #6B7280; width: 36px; text-align: right;">${pct}%</span>
+				</div>
+			`;
+		}).join('');
+
+		let noDataRow = data.no_data ? `
+			<div style="display: flex; align-items: center; gap: 8px; padding: 3px 6px;">
+				<span style="width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; background: #E5E7EB;"></span>
+				<span style="font-size: 13px; color: #111827; flex: 1;">${frappe.utils.escape_html(data.no_data.label)}</span>
+				<span style="font-size: 13px; font-weight: 700; color: #111827; width: 26px; text-align: right;">${data.no_data.count}</span>
+				<span style="font-size: 12px; color: #6B7280; width: 36px; text-align: right;"></span>
+			</div>
+		` : '';
+
+		return `
+			<div class="chw-indicator-card" style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 18px 20px;">
+				<h3 style="margin: 0 0 2px; font-size: 14.5px; font-weight: 700; color: #111827;">${frappe.utils.escape_html(data.label)}</h3>
+				<div style="font-size: 12px; color: #6B7280; margin-bottom: 14px;">${frappe.utils.escape_html(data.subtitle || '')}</div>
+				<div style="display: flex; align-items: center; gap: 18px;">
+					<svg width="130" height="130" viewBox="0 0 130 130" style="flex-shrink: 0;">
+						<circle cx="65" cy="65" r="52" fill="none" stroke="#E5E7EB" stroke-width="18"></circle>
+						${slices}
+						<text x="65" y="62" text-anchor="middle" style="font-size: 20px; font-weight: 800; fill: #111827;">${total}</text>
+						<text x="65" y="78" text-anchor="middle" style="font-size: 9.5px; fill: #6B7280;">people</text>
+					</svg>
+					<div style="flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+						${legendRows}
+						${noDataRow}
+					</div>
+				</div>
+				<div style="font-size: 11px; color: #9CA3AF; margin-top: 12px;">Centre: people counted for this indicator.</div>
 			</div>
 		`;
 	}
@@ -112,6 +210,15 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 			@media (max-width: 420px) {
 				.chw-dashboard-overview-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
 			}
+			.chw-indicator-grid {
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 16px;
+			}
+			@media (max-width: 760px) {
+				.chw-indicator-grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+			}
+			.chw-indicator-legend-row:hover { background: #F3FBF8; }
 		`;
 		document.head.appendChild(style);
 	}
@@ -178,6 +285,12 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 					${cardsData.map(cardHtml).join('')}
 				</div>
 				<p style="font-size: 12px; color: #9CA3AF; margin-top: 18px;">Click a card to see the records behind it.</p>
+
+				${sectionHeaderHtml('New Indicators')}
+				<p style="font-size: 12.5px; color: #6B7280; margin: -6px 0 14px;">Worked out from the recorded followups using each programme's own criteria. Select a slice or a legend row to see the people in it.</p>
+				<div class="chw-indicator-grid">
+					${Object.keys(newIndicatorsData).map((key) => indicatorCardHtml(key, newIndicatorsData[key])).join('')}
+				</div>
 			</div>
 		`;
 		page.main.html(html);
@@ -206,6 +319,15 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 
 		page.main.find('.chw-dashboard-card').on('click', function () {
 			showDrilldown($(this).data('key'));
+		});
+		page.main.find('.chw-indicator-slice, .chw-indicator-legend-row').on('click', function () {
+			showIndicatorDrilldown($(this).data('key'), $(this).data('segment'));
+		});
+		page.main.find('.chw-indicator-slice, .chw-indicator-legend-row').on('keydown', function (e) {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				showIndicatorDrilldown($(this).data('key'), $(this).data('segment'));
+			}
 		});
 	}
 
@@ -269,20 +391,20 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 		let style = document.createElement('style');
 		style.id = 'chw-dashboard-table-style';
 		style.textContent = `
-			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody tr:nth-child(odd) td {
+			.chw-dashboard-styled-table-wrapper table.chw-dashboard-styled-table tbody tr:nth-child(odd) td {
 				background: #FFFFFF;
 			}
-			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody tr:nth-child(even) td {
+			.chw-dashboard-styled-table-wrapper table.chw-dashboard-styled-table tbody tr:nth-child(even) td {
 				background: #F3FBF8;
 			}
-			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody tr:hover td {
+			.chw-dashboard-styled-table-wrapper table.chw-dashboard-styled-table tbody tr:hover td {
 				background: #D7F5E9 !important;
 			}
-			#chw-dashboard-table-wrapper table#chw-dashboard-table tbody td {
+			.chw-dashboard-styled-table-wrapper table.chw-dashboard-styled-table tbody td {
 				font-size: 14px;
 				font-weight: 500;
 			}
-			#chw-dashboard-table-wrapper table#chw-dashboard-table thead th {
+			.chw-dashboard-styled-table-wrapper table.chw-dashboard-styled-table thead th {
 				position: sticky;
 				top: 0;
 				z-index: 1;
@@ -374,8 +496,8 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 					</div>
 				</div>
 
-				<div id="chw-dashboard-table-wrapper" style="flex: 1; min-height: 0; overflow: auto; border: 1px solid #EDEBE5; border-radius: 10px;">
-					<table class="table table-bordered" id="chw-dashboard-table" style="width: 100%; margin-bottom: 0;">
+				<div id="chw-dashboard-table-wrapper" class="chw-dashboard-styled-table-wrapper" style="flex: 1; min-height: 0; overflow: auto; border: 1px solid #EDEBE5; border-radius: 10px;">
+					<table class="table table-bordered chw-dashboard-styled-table" id="chw-dashboard-table" style="width: 100%; margin-bottom: 0;">
 						<thead><tr>${headers}</tr></thead>
 						<tbody>
 							${rows || `<tr><td colspan="${listViewFields.length}" style="color:#9CA3AF;padding:20px;text-align:center;">No records for this selection.</td></tr>`}
@@ -506,6 +628,151 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 				loadLinkOptionsThenShow();
 			},
 		});
+	}
+
+	// New Indicators drilldown - a separate, simpler dialog than the generic
+	// card one above: no per-popup filters (these 5 already respect the page's
+	// own Village/Health Worker filters), fixed columns from the backend's
+	// own `fields` list instead of doctype meta. Fully separate state/dialog
+	// from currentCard/drilldownDialog above, so nothing here risks the
+	// already-working generic card drilldown.
+	function indicatorPaginationControlsHtml() {
+		let hasPrevious = indicatorPageOffset > 0;
+		let hasNext = indicatorPageOffset + indicatorRecords.length < indicatorTotalCount;
+		return `
+			<button type="button" class="btn btn-xs chw-indicator-prev" ${hasPrevious ? '' : 'disabled'}
+				style="border: 1.5px solid ${hasPrevious ? '#0D9488' : '#D1D5DB'}; background: ${hasPrevious ? '#0D9488' : '#F3F4F6'}; color: ${hasPrevious ? '#FFFFFF' : '#9CA3AF'}; font-weight: 700; font-size: 12.5px; padding: 5px 12px; border-radius: 6px;">
+				&lt; Previous
+			</button>
+			<button type="button" class="btn btn-xs chw-indicator-next" ${hasNext ? '' : 'disabled'}
+				style="border: 1.5px solid ${hasNext ? '#0D9488' : '#D1D5DB'}; background: ${hasNext ? '#0D9488' : '#F3F4F6'}; color: ${hasNext ? '#FFFFFF' : '#9CA3AF'}; font-weight: 700; font-size: 12.5px; padding: 5px 12px; border-radius: 6px;">
+				Next &gt;
+			</button>
+		`;
+	}
+
+	function indicatorDrilldownBodyHtml() {
+		ensureDashboardTableStyle();
+
+		let rows = indicatorRecords
+			.map((r) => {
+				let cells = currentIndicatorFields
+					.map((f) => `<td style="padding: 12px 10px; color: #374151;">${frappe.utils.escape_html(r[f.fieldname] == null ? '-' : String(r[f.fieldname]))}</td>`)
+					.join('');
+				return `
+				<tr data-name="${frappe.utils.escape_html(r.name)}" style="cursor: pointer;">
+					<td style="padding: 12px 10px; font-size: 14px; font-weight: 700; color: #0D9488;">${frappe.utils.escape_html(r.name)}</td>
+					${cells}
+				</tr>
+			`;
+			})
+			.join('');
+
+		let headers = ['<th>ID</th>'].concat(currentIndicatorFields.map((f) => `<th>${frappe.utils.escape_html(f.label)}</th>`)).join('');
+		let colCount = currentIndicatorFields.length + 1;
+
+		return `
+			<div style="display: flex; flex-direction: column; max-height: 68vh;">
+				<div style="flex-shrink: 0; display: flex; align-items: center; justify-content: flex-end; margin-bottom: 10px;">
+					<button class="chw-dashboard-export-btn" id="chw-indicator-export">
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+							<polyline points="7 10 12 15 17 10"></polyline>
+							<line x1="12" y1="15" x2="12" y2="3"></line>
+						</svg>
+						Download Excel
+					</button>
+				</div>
+
+				<div id="chw-indicator-table-wrapper" class="chw-dashboard-styled-table-wrapper" style="flex: 1; min-height: 0; overflow: auto; border: 1px solid #EDEBE5; border-radius: 10px;">
+					<table class="table table-bordered chw-dashboard-styled-table" id="chw-indicator-table" style="width: 100%; margin-bottom: 0;">
+						<thead><tr>${headers}</tr></thead>
+						<tbody>
+							${rows || `<tr><td colspan="${colCount}" style="color:#9CA3AF;padding:20px;text-align:center;">No records for this selection.</td></tr>`}
+						</tbody>
+					</table>
+				</div>
+
+				<div style="display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; flex-shrink: 0;">
+					<div style="display: flex; gap: 6px;">${indicatorPaginationControlsHtml()}</div>
+					<span style="font-size: 13px; font-weight: 700; color: #374151;">Showing ${indicatorRecords.length ? indicatorPageOffset + 1 : 0}-${indicatorPageOffset + indicatorRecords.length} of ${indicatorTotalCount}</span>
+				</div>
+			</div>
+		`;
+	}
+
+	function fetchIndicatorRecordsThenRender() {
+		frappe.call({
+			method: 'chw.api.new_indicator_drilldown',
+			args: {
+				indicator_key: currentIndicatorKey,
+				segment_key: currentIndicatorSegmentKey || undefined,
+				village: selectedFilters.village,
+				health_worker: selectedFilters.health_worker,
+				page_length: PAGE_SIZE,
+				start: indicatorPageOffset,
+			},
+			callback: function (r) {
+				indicatorRecords = (r.message && r.message.records) || [];
+				indicatorTotalCount = (r.message && r.message.total_count) || 0;
+				currentIndicatorFields = (r.message && r.message.fields) || [];
+				currentIndicatorDoctype = r.message && r.message.doctype;
+				renderIndicatorDialog();
+			},
+		});
+	}
+
+	function renderIndicatorDialog() {
+		if (!indicatorDialog) {
+			indicatorDialog = new frappe.ui.Dialog({
+				size: 'extra-large',
+				fields: [{ fieldtype: 'HTML', fieldname: 'indicator_drilldown_body' }],
+			});
+			indicatorDialog.$wrapper.find('.modal-dialog').css({ 'max-width': '1400px', width: '92vw' });
+		}
+
+		indicatorDialog.set_title(currentIndicatorTitle);
+		indicatorDialog.fields_dict.indicator_drilldown_body.$wrapper.html(indicatorDrilldownBodyHtml());
+		indicatorDialog.show();
+		wireIndicatorDrilldownEvents();
+	}
+
+	function wireIndicatorDrilldownEvents() {
+		let $body = indicatorDialog.fields_dict.indicator_drilldown_body.$wrapper;
+
+		$body.find('.chw-indicator-prev').on('click', function () {
+			indicatorPageOffset = Math.max(0, indicatorPageOffset - PAGE_SIZE);
+			fetchIndicatorRecordsThenRender();
+		});
+		$body.find('.chw-indicator-next').on('click', function () {
+			indicatorPageOffset = indicatorPageOffset + PAGE_SIZE;
+			fetchIndicatorRecordsThenRender();
+		});
+		$body.find('#chw-indicator-export').on('click', function () {
+			let params = new URLSearchParams({
+				indicator_key: currentIndicatorKey,
+				segment_key: currentIndicatorSegmentKey || '',
+				village: selectedFilters.village || '',
+				health_worker: selectedFilters.health_worker || '',
+				page_length: PAGE_SIZE,
+				start: indicatorPageOffset,
+			});
+			window.open(`/api/method/chw.api.new_indicator_drilldown_excel?${params.toString()}`, '_blank');
+		});
+		$body.find('#chw-indicator-table tbody tr[data-name]').on('click', function () {
+			if (currentIndicatorDoctype) frappe.set_route('Form', currentIndicatorDoctype, $(this).data('name'));
+		});
+	}
+
+	function showIndicatorDrilldown(indicatorKey, segmentKey) {
+		let data = newIndicatorsData[indicatorKey];
+		if (!data) return;
+		let segment = (data.segments || []).find((s) => s.key === segmentKey);
+		currentIndicatorKey = indicatorKey;
+		currentIndicatorSegmentKey = segmentKey || null;
+		currentIndicatorTitle = segment ? `${data.label}: ${segment.label}` : data.label;
+		indicatorPageOffset = 0;
+		fetchIndicatorRecordsThenRender();
 	}
 
 	loadFilterOptions();

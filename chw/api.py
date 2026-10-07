@@ -1723,6 +1723,330 @@ def chw_dashboard_drilldown_excel(card_key, filters=None, page_length=None, star
     frappe.response['type'] = 'binary'
 
 
+# ---- chw-dashboard "New Indicators" - 5 cards that don't fit the generic
+# one-doctype/one-field CHW_DASHBOARD_CARDS pattern above (each needs its own
+# cross-table or latest-row logic), so they get their own small summary +
+# drilldown pair instead of being forced into that generic engine. ----
+
+# The 3 ANC Follow-up followup tables, by their parent fieldname (matches
+# chw.common.doctype.anc_follow_up.anc_follow_up.FOLLOWUP_TABLE_FIELDS).
+ANC_FOLLOWUP_CHILD_DOCTYPES = {
+    'anc_followup': 'ANC Followup Child',
+    'anc_followup_for_nurse': 'ANC Followup Nurse',
+    'anc_followup_for_docter': 'ANC Followup Docter',
+}
+
+
+def _new_indicator_anc_scope(village, health_worker):
+    """ANC Follow-up names matching the village/health worker filter - the
+    scope every ANC-based indicator (anc_4plus, high_risk_clinic) starts
+    from, since ANC Follow-up carries its own village/health_worker_name
+    (one record per pregnancy)."""
+    filters = apply_village_filter({}, village)
+    if health_worker and health_worker != 'All Health Workers':
+        filters['health_worker_name'] = health_worker
+    return frappe.get_all('ANC Follow-up', filters=filters, pluck='name')
+
+
+def _anc_completed_visit_counts():
+    """{anc_follow_up_name: total completed visits across all 3 tables}."""
+    union_sql = ' UNION ALL '.join(
+        f"SELECT parent FROM `tab{doctype}` WHERE status = 'Completed'"
+        for doctype in ANC_FOLLOWUP_CHILD_DOCTYPES.values()
+    )
+    rows = frappe.db.sql(f"""
+        SELECT parent, COUNT(*) AS completed_count
+        FROM ({union_sql}) AS completed_rows
+        GROUP BY parent
+    """, as_dict=True)
+    return {row.parent: row.completed_count for row in rows}
+
+
+def _anc_clinic_referral_names(clinic_types):
+    """ANC Follow-up names with at least one Completed row (any of the 3
+    tables) whose referral_clinic_type is in clinic_types."""
+    placeholders = ', '.join(['%s'] * len(clinic_types))
+    union_sql = ' UNION ALL '.join(
+        f"SELECT parent FROM `tab{doctype}` WHERE status = 'Completed' AND referral_clinic_type IN ({placeholders})"
+        for doctype in ANC_FOLLOWUP_CHILD_DOCTYPES.values()
+    )
+    rows = frappe.db.sql(f"SELECT DISTINCT parent FROM ({union_sql}) AS t", tuple(clinic_types) * len(ANC_FOLLOWUP_CHILD_DOCTYPES), as_dict=True)
+    return {row.parent for row in rows}
+
+
+def _trimester_segment_map(village, health_worker):
+    filters = apply_village_filter({}, village)
+    if health_worker and health_worker != 'All Health Workers':
+        filters['health_worker_name'] = health_worker
+    rows = frappe.get_all('Pregnancy Registration', filters=filters, fields=['name', 'trimester_at_registration'])
+    mapping = {}
+    for r in rows:
+        if r.trimester_at_registration == 'First trimester':
+            mapping[r.name] = 'first'
+        elif r.trimester_at_registration == 'Second trimester':
+            mapping[r.name] = 'second'
+        elif r.trimester_at_registration == 'Third trimester':
+            mapping[r.name] = 'third'
+        else:
+            mapping[r.name] = None
+    return mapping
+
+
+def _anc4_segment_map(village, health_worker):
+    scope = _new_indicator_anc_scope(village, health_worker)
+    counts = _anc_completed_visit_counts()
+    return {name: ('met' if counts.get(name, 0) >= 4 else 'short') for name in scope}
+
+
+def _clinic_segment_map(village, health_worker):
+    scope = set(_new_indicator_anc_scope(village, health_worker))
+    if not scope:
+        return {}
+    anc_rows = frappe.get_all('ANC Follow-up', filters={'name': ['in', list(scope)]}, fields=['name', 'pregnant_id'])
+    pregnant_ids = [r.pregnant_id for r in anc_rows if r.pregnant_id]
+    high_risk_ids = set(frappe.get_all(
+        'Pregnancy Registration', filters={'name': ['in', pregnant_ids], 'high_risk': 'Yes'}, pluck='name',
+    )) if pregnant_ids else set()
+    high_risk_anc_names = {r.name for r in anc_rows if r.pregnant_id in high_risk_ids}
+
+    drc_names = _anc_clinic_referral_names(['DRC'])
+    chc_names = _anc_clinic_referral_names(['CHC'])
+    other_names = _anc_clinic_referral_names(['Other'])
+
+    mapping = {}
+    for name in high_risk_anc_names:
+        # A record could in theory have Completed visits at more than one
+        # clinic type over time - DRC takes priority, then CHC, then Other,
+        # rather than double-counting it across slices.
+        if name in drc_names:
+            mapping[name] = 'drc'
+        elif name in chc_names:
+            mapping[name] = 'chc'
+        elif name in other_names:
+            mapping[name] = 'other'
+        else:
+            mapping[name] = None
+    return mapping
+
+
+def _feeding_segment_map(village, health_worker):
+    filters = apply_village_filter({}, village)
+    if health_worker and health_worker != 'All Health Workers':
+        filters['health_worker_name'] = health_worker
+    scope = frappe.get_all('Postpartum Reg and Followup', filters=filters, pluck='name')
+    educated_parents = set(frappe.get_all(
+        'Postpartum Followup', filters={'edu_exclusive_breastfeeding': 'Yes'}, pluck='parent',
+    ))
+    return {name: ('educated' if name in educated_parents else 'not_yet') for name in scope}
+
+
+def _child_segment_map(village, health_worker):
+    filters = apply_village_filter({}, village)
+    if health_worker and health_worker != 'All Health Workers':
+        filters['health_worker_name'] = health_worker
+    scope = frappe.get_all('Child 6w to 1 Year Reg and Followup', filters=filters, pluck='name')
+
+    # Only Completed visits - like ANC/PNC, this table pre-generates future
+    # "Pending" placeholder rows (higher idx, blank fields), so picking the
+    # highest idx without this filter would grab a not-yet-happened
+    # placeholder instead of the child's actual last completed visit.
+    rows = frappe.get_all(
+        'Child 6w to 1 Year Followup',
+        filters={'status': 'Completed'},
+        fields=['parent', 'immunisation_up_to_date', 'baby_current_weight'],
+        order_by='parent asc, idx desc',
+    )
+    latest_by_parent = {}
+    for row in rows:
+        if row.parent not in latest_by_parent:
+            latest_by_parent[row.parent] = row
+
+    mapping = {}
+    for name in scope:
+        latest = latest_by_parent.get(name)
+        if not latest:
+            mapping[name] = None
+            continue
+        immunised = latest.immunisation_up_to_date == 'Yes'
+        weighed = bool(latest.baby_current_weight)
+        if immunised and weighed:
+            mapping[name] = 'full'
+        elif weighed:
+            mapping[name] = 'partial'
+        else:
+            mapping[name] = 'behind'
+    return mapping
+
+
+# Each indicator card: an ordered list of mutually-exclusive segments (for
+# the donut slices/legend rows), a segment_map_fn returning {record_name:
+# segment_key_or_None}, a label for the "no data"/excluded bucket (shown in
+# the legend but not clickable - None if every record always falls into one
+# of the real segments), and the doctype its drilldown records come from.
+NEW_INDICATOR_DEFS = {
+    'trimester_first': {
+        'label': 'Started Care in 1st Trimester',
+        'subtitle': "Pregnancy Registration, trimester as of each woman's first visit",
+        'segments': [
+            {'key': 'first', 'label': 'First trimester (started care here)', 'color': '#0D9488'},
+            {'key': 'second', 'label': 'Second trimester', 'color': '#2563EB'},
+            {'key': 'third', 'label': 'Third trimester', 'color': '#C2540A'},
+        ],
+        'no_data_label': 'No LMP recorded',
+        'segment_map_fn': _trimester_segment_map,
+        'doctype': 'Pregnancy Registration',
+    },
+    'anc_4plus': {
+        'label': '4+ ANC Visits',
+        'subtitle': 'Completed ANC Follow-up visits across Volunteer, Nurse and Doctor',
+        'segments': [
+            {'key': 'met', 'label': '4 or more visits', 'color': '#15803D'},
+            {'key': 'short', 'label': 'Fewer than 4 visits', 'color': '#B45309'},
+        ],
+        'no_data_label': None,
+        'segment_map_fn': _anc4_segment_map,
+        'doctype': 'ANC Follow-up',
+    },
+    'high_risk_clinic': {
+        'label': 'High Risk Followed Up at DRC/CHC',
+        'subtitle': 'High Risk patients, latest ANC Follow-up visit location',
+        'segments': [
+            {'key': 'drc', 'label': 'DRC', 'color': '#7C3AED'},
+            {'key': 'chc', 'label': 'CHC', 'color': '#2563EB'},
+            {'key': 'other', 'label': 'Other facility', 'color': '#9CA3AF'},
+        ],
+        'no_data_label': 'Not yet referred',
+        'segment_map_fn': _clinic_segment_map,
+        'doctype': 'ANC Follow-up',
+    },
+    'lactating_educated': {
+        'label': 'Lactating Mothers Educated: EBF/Feeding',
+        'subtitle': 'Postpartum Followup, exclusive breastfeeding / complementary feeding counseling',
+        'segments': [
+            {'key': 'educated', 'label': 'Educated', 'color': '#15803D'},
+            {'key': 'not_yet', 'label': 'Not yet', 'color': '#B45309'},
+        ],
+        'no_data_label': None,
+        'segment_map_fn': _feeding_segment_map,
+        'doctype': 'Postpartum Reg and Followup',
+    },
+    'child_immunised_weighed': {
+        'label': 'Children 0-1 Fully Immunised & Weighed',
+        'subtitle': 'Child 6w-1y Followup, latest completed visit per child',
+        'segments': [
+            {'key': 'full', 'label': 'Fully immunised & weighed', 'color': '#15803D'},
+            {'key': 'partial', 'label': 'Weighed, immunisation pending', 'color': '#B45309'},
+            {'key': 'behind', 'label': 'Not up to date', 'color': '#B91C1C'},
+        ],
+        'no_data_label': 'No completed visit yet',
+        'segment_map_fn': _child_segment_map,
+        'doctype': 'Child 6w to 1 Year Reg and Followup',
+    },
+}
+
+# Per-doctype display columns for the drilldown table - 'name' is always
+# shown separately as the ID column, so it's never repeated in here.
+NEW_INDICATOR_DOCTYPE_COLUMNS = {
+    'Pregnancy Registration': [
+        ('first_name', 'Patient'), ('age', 'Age'), ('village', 'Village'),
+        ('health_worker_name', 'Health Worker'), ('lmp_date', 'LMP Date'), ('trimester_at_registration', 'Trimester'),
+    ],
+    'ANC Follow-up': [('first_name', 'Patient'), ('village', 'Village'), ('health_worker_name', 'Health Worker')],
+    'Postpartum Reg and Followup': [('patient_name', 'Patient'), ('village', 'Village'), ('health_worker_name', 'Health Worker')],
+    'Child 6w to 1 Year Reg and Followup': [('patient_name', 'Patient'), ('village', 'Village'), ('health_worker_name', 'Health Worker')],
+}
+
+
+@frappe.whitelist()
+def get_new_indicators_summary(village=None, health_worker=None):
+    """Segment breakdown (for the donut + legend) behind each of the 5
+    chw-dashboard 'New Indicators' cards."""
+    if not is_privileged_user():
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    result = {}
+    for key, cfg in NEW_INDICATOR_DEFS.items():
+        mapping = cfg['segment_map_fn'](village, health_worker)
+        counts = {seg['key']: 0 for seg in cfg['segments']}
+        no_data_count = 0
+        for seg_key in mapping.values():
+            if seg_key is None:
+                no_data_count += 1
+            elif seg_key in counts:
+                counts[seg_key] += 1
+        result[key] = {
+            'label': cfg['label'],
+            'subtitle': cfg['subtitle'],
+            'total': len(mapping),
+            'segments': [
+                {'key': seg['key'], 'label': seg['label'], 'color': seg['color'], 'count': counts[seg['key']]}
+                for seg in cfg['segments']
+            ],
+            'no_data': {'label': cfg['no_data_label'], 'count': no_data_count} if cfg['no_data_label'] else None,
+        }
+    return result
+
+
+@frappe.whitelist()
+def new_indicator_drilldown(indicator_key, segment_key=None, village=None, health_worker=None, page_length=None, start=0):
+    """Underlying records behind one segment of one New Indicators card -
+    every record in the card's total if segment_key isn't passed."""
+    if not is_privileged_user():
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    cfg = NEW_INDICATOR_DEFS.get(indicator_key)
+    if not cfg:
+        return {'records': [], 'total_count': 0, 'fields': [], 'doctype': None}
+
+    mapping = cfg['segment_map_fn'](village, health_worker)
+    if segment_key:
+        names = [name for name, seg in mapping.items() if seg == segment_key]
+    else:
+        names = list(mapping.keys())
+
+    doctype = cfg['doctype']
+    columns = NEW_INDICATOR_DOCTYPE_COLUMNS.get(doctype, [])
+    records = []
+    if names:
+        fields = ['name'] + [f for f, _label in columns]
+        records = frappe.get_all(doctype, filters={'name': ['in', names]}, fields=fields, order_by='name asc')
+
+    total_count = len(records)
+    start = cint(start)
+    if page_length:
+        records = records[start:start + cint(page_length)]
+    elif start:
+        records = records[start:]
+
+    return {
+        'records': records,
+        'total_count': total_count,
+        'fields': [{'fieldname': f, 'label': label} for f, label in columns],
+        'doctype': doctype,
+    }
+
+
+@frappe.whitelist()
+def new_indicator_drilldown_excel(indicator_key, segment_key=None, village=None, health_worker=None, page_length=None, start=0):
+    """Same records as new_indicator_drilldown, as a downloadable Excel file."""
+    from frappe.utils.xlsxutils import make_xlsx
+
+    data = new_indicator_drilldown(indicator_key, segment_key, village, health_worker, page_length, start)
+    records = data.get('records', [])
+    field_defs = data.get('fields', [])
+
+    columns = [f['label'] for f in field_defs]
+    rows = [columns]
+    for r in records:
+        rows.append([str(r.get(f['fieldname'], '') or '') for f in field_defs])
+
+    xlsx_file = make_xlsx(rows, "New Indicators")
+
+    frappe.response['filename'] = f"{indicator_key}.xlsx"
+    frappe.response['filecontent'] = xlsx_file.getvalue()
+    frappe.response['type'] = 'binary'
+
+
 # ---- chw-work-order-list (new, separate page - does not read from or
 # modify WORKLIST_PROGRAMS / chw_worklist_summary above, which belong to
 # chw-visit-dashboard's own "My Worklist" section) ----

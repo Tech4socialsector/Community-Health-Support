@@ -69,6 +69,7 @@
   "action",
   "refferal_needed",
   "refferal_need",
+  "referral_clinic_type",
   "care_plan_created",
   "reports_or_info_sent_to_mch_nurse",
   "column_break_tzcp",
@@ -433,6 +434,12 @@
    "fieldname": "refferal_need",
    "fieldtype": "Data",
    "label": "where was the referral made"
+  },
+  {
+   "fieldname": "referral_clinic_type",
+   "fieldtype": "Select",
+   "label": "Referral Clinic Type",
+   "options": "\nDRC\nCHC\nOther\nNot Applicable"
   },
   {
    "fieldname": "care_plan_created",

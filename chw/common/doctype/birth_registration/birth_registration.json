@@ -10,19 +10,25 @@
   "fmid",
   "hh_id",
   "first_name",
-  "village",
   "husbands_name",
+  "village",
   "age",
   "phone_number",
   "delivery_doneby",
   "type_of_delivery",
   "date_of_delivery",
-  "column_break_gjta",
   "place_of_birth",
+  "if_other_place_of_birth",
   "phc_address",
+  "column_break_gjta",
   "mother_weight",
   "complication_identified",
+  "if_yes_did_the_mother_have_any_complications",
+  "did_the_baby_have_any_complications",
+  "if_yes_did_the_baby_have_any_complications",
   "family_planning",
+  "was_the_baby_born_preterm__37_weeks",
+  "what_gestational_age_in_weeks_was_the_baby_born",
   "if_yes_specify_the_method",
   "delivery_outcome",
   "birth_status",
@@ -49,7 +55,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Name"
+   "label": "Mother's Name"
   },
   {
    "fetch_from": "prid.hh_id",
@@ -72,13 +78,14 @@
    "fetch_if_empty": 1,
    "fieldname": "husbands_name",
    "fieldtype": "Data",
-   "label": "Husband's Name"
+   "label": "Father's Name"
   },
   {
    "fetch_from": "prid.age",
    "fetch_if_empty": 1,
    "fieldname": "age",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Age"
   },
   {
@@ -106,7 +113,7 @@
    "fieldname": "place_of_birth",
    "fieldtype": "Select",
    "label": "Place of Birth",
-   "options": "\nHome\nPrivate Hospital\nPHC\nGovernment Hospital\nTribal Hospital"
+   "options": "\nHospital - LCH\nGovernment Hospital\nHome\nCHC\nOther"
   },
   {
    "fieldname": "phc_address",
@@ -172,12 +179,13 @@
   {
    "fieldname": "gender",
    "fieldtype": "Select",
-   "label": "Gender",
+   "label": "Gender of Child",
    "options": "\nMale\nFemale"
   },
   {
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Date of Birth"
   },
   {
@@ -260,6 +268,40 @@
    "in_standard_filter": 1,
    "label": "PRID",
    "options": "Pregnancy Registration"
+  },
+  {
+   "depends_on": "eval:doc.place_of_birth==\"Other\"",
+   "fieldname": "if_other_place_of_birth",
+   "fieldtype": "Data",
+   "label": "If Other Place of Birth"
+  },
+  {
+   "depends_on": "eval:doc.complication_identified==\"Yes\"",
+   "fieldname": "if_yes_did_the_mother_have_any_complications",
+   "fieldtype": "Data",
+   "label": "If Yes Did the mother have any complications"
+  },
+  {
+   "fieldname": "did_the_baby_have_any_complications",
+   "fieldtype": "Select",
+   "label": "Did the baby have any complications",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.did_the_baby_have_any_complications==\"Yes\"",
+   "fieldname": "if_yes_did_the_baby_have_any_complications",
+   "fieldtype": "Data",
+   "label": "If Yes Did the baby have any complications"
+  },
+  {
+   "fieldname": "was_the_baby_born_preterm__37_weeks",
+   "fieldtype": "Data",
+   "label": "Was the baby born preterm < 37 weeks ?"
+  },
+  {
+   "fieldname": "what_gestational_age_in_weeks_was_the_baby_born",
+   "fieldtype": "Data",
+   "label": "What gestational age in weeks was the baby born "
   }
  ],
  "grid_page_length": 50,
@@ -270,7 +312,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-10-05 17:39:12.427052",
+ "modified": "2026-10-07 10:45:31.920072",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",

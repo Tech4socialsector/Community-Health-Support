@@ -13,6 +13,7 @@ class PregnancyRegistration(Document):
 			self.estimated_date_of_delivery = add_days(self.lmp_date, 281)
 		self.calculate_pog()
 		self.calculate_trimester()
+		self.calculate_trimester_at_registration()
 		self.calculate_bmi()
 
 	def calculate_pog(self):
@@ -41,6 +42,23 @@ class PregnancyRegistration(Document):
 			self.trimester = "Second trimester"
 		else:
 			self.trimester = "Third trimester"
+
+	def calculate_trimester_at_registration(self):
+		# Same LMP -> weeks -> trimester math as calculate_trimester, but
+		# frozen at the moment she was first registered - set only on the
+		# very first save (is_new()), then never touched again, unlike
+		# Trimester above which keeps recalculating to "today" on every
+		# later save.
+		if not self.is_new() or not self.lmp_date:
+			return
+
+		weeks = (getdate(today()) - getdate(self.lmp_date)).days // 7
+		if weeks <= 13:
+			self.trimester_at_registration = "First trimester"
+		elif weeks <= 27:
+			self.trimester_at_registration = "Second trimester"
+		else:
+			self.trimester_at_registration = "Third trimester"
 
 	def calculate_bmi(self):
 		if not self.height or not self.weight:

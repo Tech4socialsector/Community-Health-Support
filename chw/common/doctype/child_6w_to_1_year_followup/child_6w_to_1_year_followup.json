@@ -11,9 +11,16 @@
   "health_worker_name",
   "patient_symptoms_concerns",
   "column_break_v1",
+  "date_of_birth",
   "baby_age",
   "baby_current_weight",
   "baby_length",
+  "vital_signs_child_section",
+  "hr",
+  "rr",
+  "temp",
+  "column_break_vmuz",
+  "notes_and_support_care_provided",
   "condition_section",
   "condition_content",
   "condition_active",
@@ -22,12 +29,14 @@
   "feeding_type",
   "feeding_mixed_specify",
   "feeding_problems",
+  "immunisation_up_to_date",
+  "if_no_which_ones_are_missing",
   "column_break_c1",
   "complementary_feeding_6_months",
   "color",
-  "hr",
-  "rr",
-  "temp",
+  "babys_general_condition",
+  "if_yes_babys_general_condition",
+  "if_other",
   "danger_signs_section",
   "danger_fever",
   "danger_convulsions",
@@ -72,7 +81,6 @@
    "label": "Baby / Child Details"
   },
   {
-   "description": "The start of this visit's scheduled window - filled in automatically when the row is generated. Purely informational, alongside Visit Ending Date (the window's end / due date).",
    "fieldname": "window_start_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -161,15 +169,16 @@
    "fieldname": "feeding_type",
    "fieldtype": "Select",
    "label": "Feeding",
-   "options": "\nExclusive Breastfeeding\nMixed"
+   "options": "\nExclusive Breastfeeding\nComplementary feeding (6mos +)\nOther\nFeeding Problems"
   },
   {
-   "depends_on": "eval:doc.feeding_type==\"Mixed\"",
+   "depends_on": "eval:doc.feeding_type==\"Other\"",
    "fieldname": "feeding_mixed_specify",
    "fieldtype": "Data",
-   "label": "Mixed - Please Specify"
+   "label": "If Other - Please Specify"
   },
   {
+   "depends_on": "eval:doc.feeding_type==\"Feeding Problems\"",
    "fieldname": "feeding_problems",
    "fieldtype": "Data",
    "label": "Feeding Problems"
@@ -414,13 +423,62 @@
    "fieldname": "signature_date",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fieldname": "babys_general_condition",
+   "fieldtype": "Select",
+   "label": "Baby's General Condition",
+   "options": "\nWell\nUnwell"
+  },
+  {
+   "fieldname": "if_yes_babys_general_condition",
+   "fieldtype": "Select",
+   "label": "If Yes Baby's General Condition",
+   "options": "\nFever\nConvulsions\nBreathing difficulty\nYellow skin (Jaundice)\nBlue Mouth\nlethargic\nCold\nIrritable\nOther"
+  },
+  {
+   "depends_on": "eval:doc.if_yes_babys_general_condition==\"Other\"",
+   "fieldname": "if_other",
+   "fieldtype": "Data",
+   "label": "If Other"
+  },
+  {
+   "fieldname": "immunisation_up_to_date",
+   "fieldtype": "Select",
+   "label": "Immunisation up to date",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.immunisation_up_to_date==\"No\"",
+   "fieldname": "if_no_which_ones_are_missing",
+   "fieldtype": "Data",
+   "label": "If no which ones are missing"
+  },
+  {
+   "fieldname": "vital_signs_child_section",
+   "fieldtype": "Section Break",
+   "label": "Vital Signs Child"
+  },
+  {
+   "fieldname": "column_break_vmuz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "notes_and_support_care_provided",
+   "fieldtype": "Small Text",
+   "label": "Notes and Support/ Care Provided"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-29 15:20:41.897988",
+ "modified": "2026-10-07 12:27:54.101963",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Followup",

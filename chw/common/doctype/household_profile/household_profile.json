@@ -34,6 +34,10 @@
   "charity_health_condition",
   "charity_living_conditions",
   "charity_disability_severity",
+  "unwanted_girl_child",
+  "hild_with_signs_of_malnutrition_neglect",
+  "girl_child",
+  "pregnancy_with_high_risk_factors",
   "charity_column_break",
   "charity_assessment_score",
   "charity_percentage_band"
@@ -202,9 +206,8 @@
   },
   {
    "fieldname": "charity_disability_severity",
-   "fieldtype": "Select",
-   "label": "Disability Severity",
-   "options": "\nNeeds to be carried around and requires assistance on a mobility device.\nRequires a wheelchair for mobility. Can propel wheelchair independently.\nCan walk with support /assistive device.\nCan move around independently."
+   "fieldtype": "Heading",
+   "label": "<h5>MCH Charity Assessment</h5>"
   },
   {
    "fieldname": "charity_column_break",
@@ -223,6 +226,30 @@
    "fieldtype": "Data",
    "label": "Suggested Charity %",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "unwanted_girl_child",
+   "fieldtype": "Check",
+   "label": "Unwanted girl child"
+  },
+  {
+   "default": "0",
+   "fieldname": "hild_with_signs_of_malnutrition_neglect",
+   "fieldtype": "Check",
+   "label": "hild with signs of malnutrition/ neglect"
+  },
+  {
+   "default": "0",
+   "fieldname": "girl_child",
+   "fieldtype": "Check",
+   "label": "Girl Child"
+  },
+  {
+   "default": "0",
+   "fieldname": "pregnancy_with_high_risk_factors",
+   "fieldtype": "Check",
+   "label": "Pregnancy with high risk factors"
   }
  ],
  "grid_page_length": 50,
@@ -233,7 +260,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-06 16:01:38.562484",
+ "modified": "2026-10-07 14:56:45.760127",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

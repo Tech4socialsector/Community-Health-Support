@@ -1,0 +1,112 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-10-07 12:37:04.416241",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "preconception_nurse_notes_section",
+  "bp",
+  "hr",
+  "rr",
+  "temp",
+  "height",
+  "weight",
+  "o2sat",
+  "column_break_qfdv",
+  "subjective",
+  "objective",
+  "assessment",
+  "plan"
+ ],
+ "fields": [
+  {
+   "fieldname": "subjective",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Subjective"
+  },
+  {
+   "fieldname": "objective",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Objective"
+  },
+  {
+   "fieldname": "column_break_qfdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assessment",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assessment"
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plan"
+  },
+  {
+   "fieldname": "preconception_nurse_notes_section",
+   "fieldtype": "Section Break",
+   "label": "Preconception Nurse Notes"
+  },
+  {
+   "fieldname": "bp",
+   "fieldtype": "Int",
+   "label": "BP"
+  },
+  {
+   "fieldname": "hr",
+   "fieldtype": "Int",
+   "label": "HR"
+  },
+  {
+   "fieldname": "rr",
+   "fieldtype": "Int",
+   "label": "RR"
+  },
+  {
+   "fieldname": "temp",
+   "fieldtype": "Int",
+   "label": "Temp"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Int",
+   "label": "Height"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Int",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "o2sat",
+   "fieldtype": "Int",
+   "label": "O2Sat"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-07 15:21:18.247133",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Preconception Nurse Notes",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

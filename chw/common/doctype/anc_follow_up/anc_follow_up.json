@@ -11,6 +11,7 @@
   "hh_id",
   "village",
   "age",
+  "gestational_age_by_ultrasound",
   "column_break_hbdc",
   "phone_number",
   "date",
@@ -186,12 +187,17 @@
    "label": "IUD Stauts",
    "options": "\nYes\nNo",
    "reqd": 1
+  },
+  {
+   "fieldname": "gestational_age_by_ultrasound",
+   "fieldtype": "Small Text",
+   "label": "Gestational Age by Ultrasound"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-01 15:44:06.495394",
+ "modified": "2026-10-07 12:34:47.813153",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

@@ -55,7 +55,9 @@
   "delivery_history_section",
   "delivery_history",
   "followup_section",
-  "followup_visits"
+  "followup_visits",
+  "followup_nurse_notes",
+  "followup_docter_notes"
  ],
  "fields": [
   {
@@ -329,11 +331,12 @@
    "collapsible": 1,
    "fieldname": "followup_section",
    "fieldtype": "Section Break",
-   "label": "Followup Visits (Vitals, Education, Referrals)"
+   "label": "Followup Visits"
   },
   {
    "fieldname": "followup_visits",
    "fieldtype": "Table",
+   "label": "Followup Visits for Volunteer",
    "options": "Preconception Followup"
   },
   {
@@ -347,12 +350,24 @@
    "fieldname": "if_yes_please_mention_other_surgeries",
    "fieldtype": "Data",
    "label": "If Yes, please mention Other Surgeries"
+  },
+  {
+   "fieldname": "followup_nurse_notes",
+   "fieldtype": "Table",
+   "label": "Followup Nurse Notes",
+   "options": "Preconception Nurse Notes"
+  },
+  {
+   "fieldname": "followup_docter_notes",
+   "fieldtype": "Table",
+   "label": "Followup Docter Notes",
+   "options": "Preconception Docter Notes"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-06 16:10:51.637267",
+ "modified": "2026-10-07 12:41:37.405746",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Preconception Reg and Followup",

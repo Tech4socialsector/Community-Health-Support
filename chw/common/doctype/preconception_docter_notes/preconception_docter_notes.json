@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-10-07 12:36:09.058854",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "subjective",
+  "objective",
+  "column_break_qfdv",
+  "assessment",
+  "plan"
+ ],
+ "fields": [
+  {
+   "fieldname": "subjective",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Subjective"
+  },
+  {
+   "fieldname": "objective",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Objective"
+  },
+  {
+   "fieldname": "column_break_qfdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assessment",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assessment"
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-07 12:38:20.627953",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "Preconception Docter Notes",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
