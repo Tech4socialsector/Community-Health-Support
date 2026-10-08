@@ -7,12 +7,42 @@ from frappe.utils import add_days, getdate
 
 from chw.api import sync_next_visit_todo
 
-# Last-resort fallback only, if the Master record is missing entirely - the
-# real numbers always come from Child 6w-1y Visit Interval Master's own
-# fields.
-DEFAULT_INTERVAL_DAYS = 30
+# Last-resort fallback only, used if Child 6w-1y Visit Interval Master hasn't
+# been configured yet - the real policy always comes from that master's
+# Visit Schedule rows. (window_opens_day, window_closes_day), counted from
+# the child's own date of birth (birth day itself = day 0).
+DEFAULT_VISIT_SCHEDULE = [
+	("6th Week", 35, 42),
+	("10th Week", 63, 70),
+	("12th Week", 77, 84),
+	("14th Week", 91, 98),
+	("6th Month", 150, 180),
+	("9th Month", 240, 270),
+	("12th Month", 330, 360),
+	("18th Month", 510, 540),
+]
 DEFAULT_RISK_ALERT_DAYS = 7
-DEFAULT_AUTOMATIC_WINDOW_COUNT = 10
+DEFAULT_URGENT_VISIT_WITHIN_DAYS = 7
+
+
+@frappe.whitelist()
+def get_visit_schedule():
+	"""The master's Visit Schedule rows, for this doctype's own .js live
+	preview. A child table (Child 6w-1y Visit Schedule Row) has no
+	permission rules of its own - only the parent Single does - so the
+	client can't reliably list it directly via frappe.db.get_list; fetching
+	through the parent doc here goes through normal, already-granted
+	permission checks instead."""
+	master = frappe.get_single("Child 6w-1y Visit Interval Master")
+	return [
+		{
+			"milestone_label": row.milestone_label,
+			"window_opens_day": row.window_opens_day,
+			"window_closes_day": row.window_closes_day,
+			"risk_alert_within_days": row.risk_alert_within_days,
+		}
+		for row in master.visit_schedule
+	]
 
 
 class Child6wto1YearRegandFollowup(Document):
@@ -29,14 +59,14 @@ class Child6wto1YearRegandFollowup(Document):
 
 	def insert_urgent_followups_for_risk_rows(self):
 		# Whenever a visit is Completed with Baby Condition = Risk, she
-		# needs an earlier follow-up than the normal monthly cadence -
-		# insert it right after that row (not appended at the end), dated
-		# from that visit's own actual date + the Master's Risk Alert Days.
+		# needs an earlier follow-up than the normal schedule - insert it
+		# right after that row (not appended at the end), dated from that
+		# visit's own actual date + *that visit's own* Urgent Visit Within
+		# Days (each schedule row sets its own duration, found by counting
+		# how many visits are completed up to and including this one).
 		# Skipped if the next row already sitting there is close enough
 		# that a separate visit wouldn't add anything, and never inserted
 		# twice for the same trigger.
-		alert_within_days = self.get_window_policy().risk_alert_within_days
-
 		table = self.followup_visits
 		i = 0
 		while i < len(table):
@@ -45,7 +75,9 @@ class Child6wto1YearRegandFollowup(Document):
 				next_row = table[i + 1] if i + 1 < len(table) else None
 				already_inserted = next_row and next_row.urgent_followup
 				if not already_inserted:
-					urgent_date = add_days(getdate(row.date_of_visit), alert_within_days)
+					effective_visit_number = len([r for r in table[: i + 1] if r.status == "Completed"])
+					urgent_within_days = self.get_urgent_visit_within_days(effective_visit_number)
+					urgent_date = add_days(getdate(row.date_of_visit), urgent_within_days)
 					next_row_too_soon = next_row and getdate(next_row.date_of_visit) <= urgent_date
 					if not next_row_too_soon:
 						new_row = self.append("followup_visits", {})
@@ -53,6 +85,7 @@ class Child6wto1YearRegandFollowup(Document):
 						new_row.date_of_visit = urgent_date
 						new_row.status = "Pending"
 						new_row.urgent_followup = 1
+						new_row.milestone_label = "Urgent Follow-up"
 						table.remove(new_row)
 						table.insert(i + 1, new_row)
 						for idx, r in enumerate(table):
@@ -73,6 +106,46 @@ class Child6wto1YearRegandFollowup(Document):
 		trigger_date = getdate(trigger_row.date_of_visit) if trigger_row else getdate(earliest.date_of_visit)
 		return frappe._dict(date=getdate(earliest.date_of_visit), trigger_date=trigger_date)
 
+	@staticmethod
+	def get_urgent_visit_within_days(visit_number):
+		"""The schedule row matching visit_number's own Urgent Visit Within
+		Days - clamped to the last configured row if visit_number runs past
+		however many rows exist."""
+		master = frappe.get_single("Child 6w-1y Visit Interval Master")
+		rows = master.visit_schedule
+		if not rows:
+			return DEFAULT_URGENT_VISIT_WITHIN_DAYS
+		index = max(min(visit_number, len(rows)) - 1, 0)
+		return rows[index].urgent_visit_within_days or DEFAULT_URGENT_VISIT_WITHIN_DAYS
+
+	@staticmethod
+	def get_visit_window(visit_number):
+		"""visit_number is 1-indexed, matching row position in the master's
+		Visit Schedule table - row 1 is visit 1, row 2 is visit 2, and so
+		on. Returns None once visit_number exceeds however many rows exist
+		- there's no fixed cap, the row count *is* the cap."""
+		master = frappe.get_single("Child 6w-1y Visit Interval Master")
+		rows = master.visit_schedule
+
+		if rows:
+			if visit_number < 1 or visit_number > len(rows):
+				return None
+			row = rows[visit_number - 1]
+			return frappe._dict(
+				milestone_label=row.milestone_label,
+				start_offset=row.window_opens_day,
+				end_offset=row.window_closes_day,
+				risk_alert_within_days=row.risk_alert_within_days or DEFAULT_RISK_ALERT_DAYS,
+			)
+
+		if visit_number < 1 or visit_number > len(DEFAULT_VISIT_SCHEDULE):
+			return None
+		label, start_offset, end_offset = DEFAULT_VISIT_SCHEDULE[visit_number - 1]
+		return frappe._dict(
+			milestone_label=label, start_offset=start_offset, end_offset=end_offset,
+			risk_alert_within_days=DEFAULT_RISK_ALERT_DAYS,
+		)
+
 	def currently_high_risk(self):
 		# Live, not sticky - reflects only the most recently COMPLETED
 		# visit's own Baby Condition. A later Normal visit clears this back
@@ -83,44 +156,21 @@ class Child6wto1YearRegandFollowup(Document):
 		latest = max(completed_rows, key=lambda row: getdate(row.date_of_visit))
 		return latest.baby_condition == "Risk"
 
-	@staticmethod
-	def get_window_policy():
-		master = frappe.get_single("Child 6w-1y Visit Interval Master")
-		return frappe._dict(
-			interval_days=master.interval_days or DEFAULT_INTERVAL_DAYS,
-			visits_per_window=master.visits_required_per_window or 1,
-			risk_alert_within_days=master.risk_alert_within_days or DEFAULT_RISK_ALERT_DAYS,
-			automatic_window_count=master.automatic_window_count or DEFAULT_AUTOMATIC_WINDOW_COUNT,
-		)
-
-	@staticmethod
-	def get_window_index(reference_date, anchor_date, window_days):
-		days_elapsed = (getdate(reference_date) - getdate(anchor_date)).days
-		if days_elapsed < 0:
-			return 1
-		return (days_elapsed // window_days) + 1
-
-	@staticmethod
-	def get_current_window(starting_window, completed_count, visits_per_window):
-		# A window only closes once its quota of completed visits is met.
-		window = starting_window
-		remaining = completed_count
-		while remaining >= visits_per_window:
-			remaining -= visits_per_window
-			window += 1
-		return window
+	def get_birth_date(self):
+		# Date of Birth (fetched from a linked Birth Registration) is the
+		# preferred source, but it's optional - Delivery Date, already a
+		# plain manual field on this form, works just as well as the
+		# schedule's anchor whenever no Birth Registration is linked.
+		return self.date_of_birth or self.delivery_date
 
 	def set_next_visit_date(self):
-		# Anchored on Date of Visit - the date this baby was registered
-		# into the 6w-1y program, not her raw birth date, since that's when
-		# this program's own monthly cadence actually starts counting from.
-		# Fully automatic throughout (like PNC/Postpartum) - once the
-		# configured number of windows is covered, this program is done for
-		# this child, no manual phase.
-		if not self.date_of_visit:
+		# Anchored on the child's actual birth date, not this doctype's own
+		# registration date, so "6th Week" genuinely means 6 weeks old.
+		birth_date = self.get_birth_date()
+		if not birth_date:
 			return
 
-		policy = self.get_window_policy()
+		birth_date = getdate(birth_date)
 
 		# An open Urgent-tagged row always wins first - it never gets
 		# masked by the normal schedule lookup. "From" is the visit that
@@ -129,18 +179,14 @@ class Child6wto1YearRegandFollowup(Document):
 		if urgent:
 			self.next_visit_date = urgent.date
 			self.next_visit_date_auto = urgent.date
-			# The urgent date itself already IS the early-visit signal - no
-			# separate alert needed on top of it.
 			self.child_risk_alert = ""
 			self.sync_row_fields(urgent.trigger_date, urgent.date)
 			return
 
-		completed_count = len([row for row in self.followup_visits if row.status == "Completed"])
-		starting_window = self.get_window_index(self.creation or getdate(), self.date_of_visit, policy.interval_days)
-		current_window = self.get_current_window(starting_window, completed_count, policy.visits_per_window)
-
-		if current_window > policy.automatic_window_count:
-			# Every configured window has been covered - this program is
+		visit_number = len([row for row in self.followup_visits if row.status == "Completed"]) + 1
+		window = self.get_visit_window(visit_number)
+		if window is None:
+			# Every configured visit has been completed - this program is
 			# done for this child.
 			self.next_visit_date = None
 			self.next_visit_date_auto = None
@@ -148,18 +194,17 @@ class Child6wto1YearRegandFollowup(Document):
 			self.sync_row_fields(None, None)
 			return
 
-		window_start = add_days(getdate(self.date_of_visit), (current_window - 1) * policy.interval_days)
-		window_end = add_days(window_start, policy.interval_days)
+		window_start = add_days(birth_date, window.start_offset)
+		window_end = add_days(birth_date, window.end_offset)
 
 		self.next_visit_date = window_end
 		self.next_visit_date_auto = window_end
 
 		# High Risk only, shown in red - a nudge to visit early within the
-		# window (from window_start, not window_end). Blank otherwise; the
-		# window/due date above are unaffected either way.
+		# window (from window_start, not window_end).
 		high_risk = self.currently_high_risk()
 		self.child_risk_alert = (
-			"Visit by {0}".format(frappe.utils.formatdate(add_days(window_start, policy.risk_alert_within_days)))
+			"Visit by {0}".format(frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days)))
 			if high_risk
 			else ""
 		)

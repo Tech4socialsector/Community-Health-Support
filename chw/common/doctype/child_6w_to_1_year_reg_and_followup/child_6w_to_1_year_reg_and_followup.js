@@ -3,31 +3,40 @@
 
 frappe.ui.form.on("Child 6w to 1 Year Reg and Followup", {
 	refresh(frm) {
-		// Date of Visit defaults to "Today" - a field default doesn't fire
-		// the date_of_visit change event below (Frappe only fires that for
-		// an actual edit), so a brand new record would otherwise never
-		// trigger the bulk schedule generation at all. generate_visit_schedule
-		// itself is a safe no-op once rows already exist, so calling it on
-		// every refresh is fine - it only ever does something the one time
-		// it's actually needed.
+		// date_of_birth is a fetch_from field - fetches don't fire their
+		// own change event (Frappe only fires that for an actual typed
+		// edit), so a brand new record would otherwise never trigger the
+		// bulk schedule generation at all. generate_visit_schedule itself
+		// is a safe no-op once rows already exist, so calling it on every
+		// refresh is fine - it only ever does something the one time it's
+		// actually needed.
 		generate_visit_schedule(frm);
 		// Small delay - the grid renders its rows just after refresh fires,
 		// so styling immediately would sometimes miss rows not yet drawn.
 		setTimeout(() => highlight_risk_rows(frm), 300);
 	},
-	date_of_visit(frm) {
+	birth_registration_id(frm) {
+		// date_of_birth is fetched from this field a moment later.
+		setTimeout(() => generate_visit_schedule(frm), 300);
+	},
+	date_of_birth(frm) {
+		generate_visit_schedule(frm);
+	},
+	delivery_date(frm) {
+		// The schedule's fallback anchor whenever no Birth Registration is
+		// linked - see get_birth_date() below.
 		generate_visit_schedule(frm);
 	},
 	followup_visits_remove(frm) {
 		calculate_next_visit_date(frm);
 	},
-	followup_visits_add(frm) {
-		// Extra rows added by hand beyond the auto-generated schedule don't
-		// have an unambiguous "next window" by table position alone (this
-		// program's window can start mid-way in for late registration), so
-		// - same as ANC - no per-row date guess here, just keep the
-		// highlighting current.
-		highlight_risk_rows(frm);
+	followup_visits_add(frm, cdt, cdn) {
+		// A row added by hand (rather than by the bulk schedule generator
+		// below) still gets its target date and milestone label filled in
+		// from the child's date of birth, matching whichever position it
+		// lands in - the CHW should never see a blank calendar with no
+		// suggested date.
+		fill_new_row_date(frm, cdt, cdn);
 	},
 });
 
@@ -43,64 +52,109 @@ frappe.ui.form.on("Child 6w to 1 Year Followup", {
 	},
 });
 
-function get_window_policy() {
-	return frappe.db
-		.get_value("Child 6w-1y Visit Interval Master", "Child 6w-1y Visit Interval Master", [
-			"interval_days",
-			"visits_required_per_window",
-			"risk_alert_within_days",
-			"automatic_window_count",
-		])
+// Last-resort fallback only, used if Child 6w-1y Visit Interval Master
+// hasn't been configured yet - the real policy always comes from that
+// master's Visit Schedule rows. (label, opens_day, closes_day), counted
+// from the child's own date of birth (birth day itself = 0).
+const DEFAULT_VISIT_SCHEDULE = [
+	["6th Week", 35, 42],
+	["10th Week", 63, 70],
+	["12th Week", 77, 84],
+	["14th Week", 91, 98],
+	["6th Month", 150, 180],
+	["9th Month", 240, 270],
+	["12th Month", 330, 360],
+	["18th Month", 510, 540],
+];
+const DEFAULT_RISK_ALERT_DAYS = 7;
+
+function get_full_schedule() {
+	// A child table (Child 6w-1y Visit Schedule Row) has no permission
+	// rules of its own, so it can't reliably be listed directly from the
+	// client - fetched through a whitelisted method on the parent doc here,
+	// which goes through the master's own, already-granted permissions.
+	return frappe
+		.call({
+			method:
+				"chw.common.doctype.child_6w_to_1_year_reg_and_followup.child_6w_to_1_year_reg_and_followup.get_visit_schedule",
+		})
 		.then((r) => {
-			const msg = (r && r.message) || {};
-			return {
-				window_days: msg.interval_days || 30,
-				visits_per_window: msg.visits_required_per_window || 1,
-				alert_within_days: msg.risk_alert_within_days || 7,
-				automatic_window_count: msg.automatic_window_count || 10,
-			};
+			const rows = r && r.message;
+			if (rows && rows.length) return rows;
+			return DEFAULT_VISIT_SCHEDULE.map(([label, opens, closes]) => ({
+				milestone_label: label,
+				window_opens_day: opens,
+				window_closes_day: closes,
+				risk_alert_within_days: DEFAULT_RISK_ALERT_DAYS,
+			}));
 		});
 }
 
-function get_window_index(reference_date, anchor_date, window_days) {
-	const days_elapsed = frappe.datetime.get_diff(reference_date, anchor_date);
-	if (days_elapsed < 0) return 1;
-	return Math.floor(days_elapsed / window_days) + 1;
+function get_visit_window(visit_number, schedule_rows) {
+	// visit_number is 1-indexed, matching row position - row 1 is visit 1,
+	// row 2 is visit 2, and so on. No fixed cap - however many rows exist
+	// is however many visits there are.
+	if (visit_number < 1 || visit_number > schedule_rows.length) return null;
+	const row = schedule_rows[visit_number - 1];
+	return {
+		milestone_label: row.milestone_label,
+		start_offset: row.window_opens_day,
+		end_offset: row.window_closes_day,
+		risk_alert_within_days: row.risk_alert_within_days || DEFAULT_RISK_ALERT_DAYS,
+	};
 }
 
-function get_current_window(starting_window, completed_count, visits_per_window) {
-	let window = starting_window;
-	let remaining = completed_count;
-	while (remaining >= visits_per_window) {
-		remaining -= visits_per_window;
-		window += 1;
+function get_birth_date(frm) {
+	// Date of Birth (fetched from a linked Birth Registration) is the
+	// preferred source, but it's optional - Delivery Date, already a plain
+	// manual field on this form, works just as well as the schedule's
+	// anchor whenever no Birth Registration is linked.
+	return frm.doc.date_of_birth || frm.doc.delivery_date;
+}
+
+function fill_new_row_date(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	const birth_date = get_birth_date(frm);
+	if (row.date_of_visit || !birth_date) {
+		calculate_next_visit_date(frm);
+		return;
 	}
-	return window;
+	const visit_number = (frm.doc.followup_visits || []).indexOf(row) + 1;
+	get_full_schedule().then((schedule_rows) => {
+		const window = get_visit_window(visit_number, schedule_rows);
+		if (!window) return;
+		const window_start = frappe.datetime.add_days(birth_date, window.start_offset);
+		const window_end = frappe.datetime.add_days(birth_date, window.end_offset);
+		frappe.model.set_value(cdt, cdn, "window_start_date", window_start);
+		frappe.model.set_value(cdt, cdn, "date_of_visit", window_end);
+		frappe.model.set_value(cdt, cdn, "milestone_label", window.milestone_label);
+		calculate_next_visit_date(frm);
+	});
 }
 
 function generate_visit_schedule(frm) {
-	if (!frm.doc.date_of_visit || (frm.doc.followup_visits || []).length) {
+	// The whole schedule is known as soon as the birth date is known - so,
+	// like PNC, it can be laid out at once, one row per configured visit.
+	// Only runs once - if the table already has rows (auto-generated
+	// earlier, or added by hand), leave it alone and just recalculate the
+	// summary fields.
+	const birth_date = get_birth_date(frm);
+	if (!birth_date || (frm.doc.followup_visits || []).length) {
 		calculate_next_visit_date(frm);
 		return;
 	}
 
-	get_window_policy().then(({ window_days, automatic_window_count }) => {
-		const today = frappe.datetime.get_today();
-		const starting_window = get_window_index(today, frm.doc.date_of_visit, window_days);
-
-		// Only the remaining automatic-phase windows are pre-filled - a
-		// child registered late (already past some windows) gets none of
-		// those already-passed ones; the schedule starts from whichever
-		// window she's actually in right now.
-		for (let idx = starting_window; idx <= automatic_window_count; idx++) {
-			const window_start = frappe.datetime.add_days(frm.doc.date_of_visit, (idx - 1) * window_days);
-			const window_end = frappe.datetime.add_days(window_start, window_days);
+	get_full_schedule().then((schedule_rows) => {
+		schedule_rows.forEach((row) => {
+			const window_start = frappe.datetime.add_days(birth_date, row.window_opens_day);
+			const window_end = frappe.datetime.add_days(birth_date, row.window_closes_day);
 			frm.add_child("followup_visits", {
+				milestone_label: row.milestone_label,
 				window_start_date: window_start,
 				date_of_visit: window_end,
 				status: "Pending",
 			});
-		}
+		});
 		frm.refresh_field("followup_visits");
 		calculate_next_visit_date(frm);
 	});
@@ -184,7 +238,8 @@ function currently_high_risk(rows) {
 }
 
 function calculate_next_visit_date(frm) {
-	if (!frm.doc.date_of_visit) return;
+	const birth_date = get_birth_date(frm);
+	if (!birth_date) return;
 
 	const rows = frm.doc.followup_visits || [];
 
@@ -208,17 +263,12 @@ function calculate_next_visit_date(frm) {
 		return;
 	}
 
-	get_window_policy().then(({ window_days, visits_per_window, alert_within_days, automatic_window_count }) => {
+	get_full_schedule().then((schedule_rows) => {
 		const completed_count = rows.filter((row) => row.status === "Completed").length;
-		const starting_window = get_window_index(
-			frm.doc.creation || frappe.datetime.get_today(),
-			frm.doc.date_of_visit,
-			window_days
-		);
-		const current_window = get_current_window(starting_window, completed_count, visits_per_window);
+		const window = get_visit_window(completed_count + 1, schedule_rows);
 
-		if (current_window > automatic_window_count) {
-			// Every configured window has been covered - done for this child.
+		if (!window) {
+			// Every configured visit has been completed - done for this child.
 			frm.set_value("next_visit_date", null);
 			frm.set_value("next_visit_date_auto", null);
 			set_risk_alert(frm, "");
@@ -227,8 +277,8 @@ function calculate_next_visit_date(frm) {
 			return;
 		}
 
-		const window_start = frappe.datetime.add_days(frm.doc.date_of_visit, (current_window - 1) * window_days);
-		const window_end = frappe.datetime.add_days(window_start, window_days);
+		const window_start = frappe.datetime.add_days(birth_date, window.start_offset);
+		const window_end = frappe.datetime.add_days(birth_date, window.end_offset);
 
 		frm.set_value("next_visit_date", window_end);
 		frm.set_value("next_visit_date_auto", window_end);
@@ -238,7 +288,7 @@ function calculate_next_visit_date(frm) {
 		// window/due date above are unaffected either way.
 		const high_risk = currently_high_risk(rows);
 		const risk_alert = high_risk
-			? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, alert_within_days))}`
+			? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, window.risk_alert_within_days))}`
 			: "";
 		set_risk_alert(frm, risk_alert);
 		sync_row_fields(frm, window_start, window_end);

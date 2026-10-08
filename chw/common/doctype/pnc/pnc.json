@@ -168,32 +168,32 @@
    "fieldname": "mother_folloup_nurse_notes",
    "fieldtype": "Table",
    "label": "Mother Folloup Nurse Notes",
-   "options": "PNC Followup Child Nurse"
+   "options": "PNC Followup Mother Nurse Notes"
   },
   {
    "fieldname": "baby_followup_nurse_notes",
    "fieldtype": "Table",
    "label": "Baby Followup Nurse Notes",
-   "options": "PNC Child Followup Nurse Nots"
+   "options": "PNC Child Followup Nurse Notes"
   },
   {
    "fieldname": "baby_followup_docter_notes",
    "fieldtype": "Table",
    "label": "Baby Followup Docter Notes",
-   "options": "PNC Child Followup Docter Nots"
+   "options": "PNC Child Followup Docter Notes"
   },
   {
    "fieldname": "mother_followup_docter_notes",
    "fieldtype": "Table",
    "label": "Mother Followup Docter Notes",
-   "options": "PNC Followup Child Docter Notes",
+   "options": "PNC Followup Mother Docter Notes",
    "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-07 10:32:19.085580",
+ "modified": "2026-10-07 16:52:38.590076",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",

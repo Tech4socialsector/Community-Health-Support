@@ -2,58 +2,25 @@
  "actions": [],
  "creation": "2026-09-29 00:00:00",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "interval_days",
-  "automatic_window_count",
-  "column_break_c6w1",
-  "risk_alert_within_days",
-  "visits_required_per_window"
+  "visit_schedule"
  ],
  "fields": [
   {
-   "default": "30",
-   "description": "Length of each repeating window, in days (e.g. 30 = monthly).",
-   "fieldname": "interval_days",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Interval Day Count",
-   "reqd": 1
-  },
-  {
-   "default": "10",
-   "description": "How many windows (e.g. 10 monthly windows, covering roughly 6 weeks to 1 year) are automatically calculated. Change this to match however many visits your organization actually uses.",
-   "fieldname": "automatic_window_count",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Automatic Window Count"
-  },
-  {
-   "fieldname": "column_break_c6w1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "7",
-   "description": "High Risk only: how many days into each window (from its start) the CHW should be nudged to visit early. Also used for the urgent follow-up chain's timing after a Risk-completed visit.",
-   "fieldname": "risk_alert_within_days",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Risk Alert Days"
-  },
-  {
-   "default": "1",
-   "description": "How many completed visits close out one window before moving to the next.",
-   "fieldname": "visits_required_per_window",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Visits Required Per Window"
+   "description": "One row per visit, in order - however many rows exist, that's how many visits there are. Each row is fully independent, so any protocol shape (a gap in between, back-to-back weeks, irregular spacing) is just data - no code change needed. Same pattern as PNC Visit Interval Master, just anchored on the child's own Date of Birth instead of the mother's delivery date.",
+   "fieldname": "visit_schedule",
+   "fieldtype": "Table",
+   "label": "Visit Schedule",
+   "options": "Child 6w-1y Visit Schedule Row"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-29 00:00:00",
+ "modified": "2026-10-08 00:00:00",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "Child 6w-1y Visit Interval Master",

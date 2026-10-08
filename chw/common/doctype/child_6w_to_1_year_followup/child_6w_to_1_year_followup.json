@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "vitals_section",
+  "milestone_label",
   "window_start_date",
   "date_of_visit",
   "status",
@@ -79,6 +80,14 @@
    "fieldname": "vitals_section",
    "fieldtype": "Section Break",
    "label": "Baby / Child Details"
+  },
+  {
+   "description": "Which scheduled checkup this row is, from Child 6w-1y Visit Interval Master (e.g. \"6th Week\", \"6th Month\") - filled in automatically when the row is generated, same as the dates either side of it.",
+   "fieldname": "milestone_label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Milestone",
+   "read_only": 1
   },
   {
    "fieldname": "window_start_date",

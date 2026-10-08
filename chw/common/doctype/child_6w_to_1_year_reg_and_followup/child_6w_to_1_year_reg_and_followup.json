@@ -43,6 +43,8 @@
   "personal_history_drug_use",
   "personal_history_other",
   "birth_details_section",
+  "birth_registration_id",
+  "date_of_birth",
   "edd",
   "pregnancy_risk_factors",
   "column_break_bd1",
@@ -64,7 +66,9 @@
   "comp_vacuum_assist_delivery",
   "comp_other",
   "followup_section",
-  "followup_visits"
+  "followup_visits",
+  "child_6w_to_1y_nurse_notes",
+  "child_6w_to_1y_docter_notes"
  ],
  "fields": [
   {
@@ -291,6 +295,20 @@
    "label": "Birth Details"
   },
   {
+   "description": "Optional - links to a Birth Registration record and auto-fills Date of Birth below. If left blank, the visit schedule uses Delivery Date (to the right) instead.",
+   "fieldname": "birth_registration_id",
+   "fieldtype": "Link",
+   "label": "Birth Registration ID",
+   "options": "Birth Registration"
+  },
+  {
+   "fetch_from": "birth_registration_id.date_of_birth",
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth",
+   "read_only": 1
+  },
+  {
    "fieldname": "edd",
    "fieldtype": "Date",
    "label": "EDD"
@@ -404,13 +422,27 @@
   {
    "fieldname": "followup_visits",
    "fieldtype": "Table",
+   "label": "Child 6w to 1y Volunteer Follwup",
    "options": "Child 6w to 1 Year Followup"
+  },
+  {
+   "fieldname": "child_6w_to_1y_nurse_notes",
+   "fieldtype": "Table",
+   "label": "Child 6w to 1y Nurse Notes",
+   "options": "Child 6w to 1y Nurse Followup"
+  },
+  {
+   "fieldname": "child_6w_to_1y_docter_notes",
+   "fieldtype": "Table",
+   "label": "Child 6w to 1y Docter Notes",
+   "options": "Child 6w to 1y Followup Docter",
+   "print_hide": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-09-22 16:53:12.201032",
+ "modified": "2026-10-08 10:59:20.663630",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Reg and Followup",

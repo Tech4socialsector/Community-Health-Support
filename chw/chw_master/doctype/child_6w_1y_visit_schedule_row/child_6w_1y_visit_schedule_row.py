@@ -1,9 +1,8 @@
 # Copyright (c) 2026, tech4socialsector@azimpremjifoundation.org and contributors
 # For license information, please see license.txt
 
-# import frappe
 from frappe.model.document import Document
 
 
-class PNCFollowupChildDocterNotes(Document):
+class Child6w1yVisitScheduleRow(Document):
 	pass

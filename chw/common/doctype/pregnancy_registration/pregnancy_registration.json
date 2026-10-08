@@ -108,7 +108,12 @@
   "date_blood",
   "ga_blood",
   "select_type",
+  "additional_blood_sugar_tests",
   "result_blood",
+  "other_lab_test_date",
+  "gaother",
+  "type_of_the_test",
+  "resultother",
   "past_delivery_history_section",
   "past_delivery_history",
   "number_of_anc_visits"
@@ -681,7 +686,7 @@
    "fieldname": "select_type",
    "fieldtype": "Select",
    "label": "Select Type",
-   "options": "\nRBS\nFBS\n1hr GTT\n2hr GTT"
+   "options": "\nRBS\nFBS\n1hr GTT\n2hr GTT\nAdditional Blood Sugar Tests"
   },
   {
    "fieldname": "result_blood",
@@ -716,6 +721,32 @@
    "fieldtype": "Table",
    "label": "Number of ANC Visits",
    "options": "Previous ANC Visits for Mother"
+  },
+  {
+   "fieldname": "other_lab_test_date",
+   "fieldtype": "Data",
+   "label": "Other Lab Test Date"
+  },
+  {
+   "fieldname": "gaother",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "type_of_the_test",
+   "fieldtype": "Data",
+   "label": "Type of the Test"
+  },
+  {
+   "fieldname": "resultother",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "depends_on": "eval:doc.select_type==\"Additional Blood Sugar Tests\"",
+   "fieldname": "additional_blood_sugar_tests",
+   "fieldtype": "Data",
+   "label": "Additional Blood Sugar Tests"
   }
  ],
  "grid_page_length": 50,
@@ -730,7 +761,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-07 12:33:46.051608",
+ "modified": "2026-10-07 17:37:23.359882",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

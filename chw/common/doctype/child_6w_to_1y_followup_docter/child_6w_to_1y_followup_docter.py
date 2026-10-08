@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PNCChildFollowupDocterNots(Document):
+class Child6wto1yFollowupDocter(Document):
 	pass

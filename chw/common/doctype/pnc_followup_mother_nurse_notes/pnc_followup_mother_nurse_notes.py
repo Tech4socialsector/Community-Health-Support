@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PNCFollowupChildNurse(Document):
+class PNCFollowupMotherNurseNotes(Document):
 	pass

@@ -1798,16 +1798,26 @@ def _anc4_segment_map(village, health_worker):
     return {name: ('met' if counts.get(name, 0) >= 4 else 'short') for name in scope}
 
 
+def _anc_high_risk_names():
+    """ANC Follow-up names with at least one row (any of the 3 tables, any
+    status) where patient_condition = 'Risk' - the direct per-visit
+    assessment a Nurse/Doctor/Volunteer actually makes, not Pregnancy
+    Registration's own high_risk flag (which is a separate, one-way-synced
+    field set FROM this same patient_condition elsewhere - going straight to
+    the source here instead of through that sync)."""
+    union_sql = ' UNION ALL '.join(
+        f"SELECT parent FROM `tab{doctype}` WHERE patient_condition = 'Risk'"
+        for doctype in ANC_FOLLOWUP_CHILD_DOCTYPES.values()
+    )
+    rows = frappe.db.sql(f"SELECT DISTINCT parent FROM ({union_sql}) AS t", as_dict=True)
+    return {row.parent for row in rows}
+
+
 def _clinic_segment_map(village, health_worker):
     scope = set(_new_indicator_anc_scope(village, health_worker))
     if not scope:
         return {}
-    anc_rows = frappe.get_all('ANC Follow-up', filters={'name': ['in', list(scope)]}, fields=['name', 'pregnant_id'])
-    pregnant_ids = [r.pregnant_id for r in anc_rows if r.pregnant_id]
-    high_risk_ids = set(frappe.get_all(
-        'Pregnancy Registration', filters={'name': ['in', pregnant_ids], 'high_risk': 'Yes'}, pluck='name',
-    )) if pregnant_ids else set()
-    high_risk_anc_names = {r.name for r in anc_rows if r.pregnant_id in high_risk_ids}
+    high_risk_anc_names = _anc_high_risk_names() & scope
 
     drc_names = _anc_clinic_referral_names(['DRC'])
     chc_names = _anc_clinic_referral_names(['CHC'])
@@ -2609,15 +2619,16 @@ def _enrich_postpartum_records_live(records):
 
 def _enrich_child_6w_1y_records_live(records):
     """From-date AND High-Risk for Child 6w-1y records, computed live from
-    the Child 6w-1y Visit Interval Master's repeating-window policy + the
+    the Child 6w-1y Visit Interval Master's named Visit Schedule rows + the
     record's own followup rows - mirroring
     Child6wto1YearRegandFollowup.set_next_visit_date/currently_high_risk
-    exactly (an open Urgent row wins first, otherwise the current
-    repeating-window lookup anchored on Date of Visit; High Risk reflects
-    the most recently COMPLETED row's Baby Condition, not a stored flag).
-    alert_date stays read from the real stored child_risk_alert field
-    elsewhere - unaffected by this. Mutates and returns the same list;
-    non-Child-6w-1y records pass through untouched."""
+    exactly (an open Urgent row wins first, otherwise the schedule row
+    matching however many visits are already Completed, anchored on the
+    child's own Date of Birth; High Risk reflects the most recently
+    COMPLETED row's Baby Condition, not a stored flag). alert_date stays
+    read from the real stored child_risk_alert field elsewhere - unaffected
+    by this. Mutates and returns the same list; non-Child-6w-1y records
+    pass through untouched."""
     child_records = [r for r in records if r.get('doctype') == 'Child 6w to 1 Year Reg and Followup']
     if not child_records:
         return records
@@ -2628,9 +2639,12 @@ def _enrich_child_6w_1y_records_live(records):
 
     names = [r['name'] for r in child_records]
     regs = frappe.get_all(
-        'Child 6w to 1 Year Reg and Followup', filters=[['name', 'in', names]], fields=['name', 'date_of_visit', 'creation']
+        'Child 6w to 1 Year Reg and Followup', filters=[['name', 'in', names]], fields=['name', 'date_of_birth', 'delivery_date'],
     )
-    reg_by_name = {d.name: d for d in regs}
+    # Date of Birth (from a linked Birth Registration) is preferred, but
+    # Delivery Date - a plain manual field already on this form - works as
+    # the schedule's anchor too whenever no Birth Registration is linked.
+    birth_date_by_name = {d.name: (d.date_of_birth or d.delivery_date) for d in regs}
 
     followup_rows = frappe.get_all(
         'Child 6w to 1 Year Followup',
@@ -2642,8 +2656,6 @@ def _enrich_child_6w_1y_records_live(records):
     for row in followup_rows:
         rows_by_parent.setdefault(row.parent, []).append(row)
 
-    policy = Child6wto1YearRegandFollowup.get_window_policy()
-
     for r in child_records:
         rows = rows_by_parent.get(r['name'], [])
         completed_rows = [row for row in rows if row.status == 'Completed']
@@ -2653,9 +2665,8 @@ def _enrich_child_6w_1y_records_live(records):
         else:
             r['high_risk'] = 'No'
 
-        reg = reg_by_name.get(r['name'])
-        anchor_date = reg and reg.date_of_visit
-        if not anchor_date:
+        birth_date = birth_date_by_name.get(r['name'])
+        if not birth_date:
             r['from_date'] = None
             continue
 
@@ -2669,17 +2680,8 @@ def _enrich_child_6w_1y_records_live(records):
             continue
 
         completed_count = len(completed_rows)
-        starting_window = Child6wto1YearRegandFollowup.get_window_index(
-            reg.creation or getdate(), anchor_date, policy.interval_days
-        )
-        current_window = Child6wto1YearRegandFollowup.get_current_window(
-            starting_window, completed_count, policy.visits_per_window
-        )
-        if current_window > policy.automatic_window_count:
-            r['from_date'] = None
-            continue
-        window_start = add_days(getdate(anchor_date), (current_window - 1) * policy.interval_days)
-        r['from_date'] = str(window_start)
+        window = Child6wto1YearRegandFollowup.get_visit_window(completed_count + 1)
+        r['from_date'] = str(add_days(getdate(birth_date), window.start_offset)) if window else None
 
     return records
 
