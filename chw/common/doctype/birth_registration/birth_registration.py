@@ -13,10 +13,10 @@ class BirthRegistration(Document):
 		self.validate_pregnancy_registration()
 
 	def validate_pregnancy_registration(self):
-		if not self.family_member_id:
+		if not self.fmid:
 			return
 
-		if not frappe.db.exists("Pregnancy Registration", {"familymember_id": self.family_member_id}):
+		if not frappe.db.exists("Pregnancy Registration", {"familymember_id": self.fmid}):
 			frappe.throw(_(
 				"Birth Registration can only be created for a family member who has a "
 				"Pregnancy Registration on record."
