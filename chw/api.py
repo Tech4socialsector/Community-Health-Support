@@ -444,17 +444,17 @@ def create_pnc_from_birth_registration(doc, method=None):
     remaining (now-moot) Pending visits stop counting as due/backlog. Runs on
     after_insert, so it never fires twice for the same Birth Registration.
     """
-    if not doc.family_member_id:
+    if not doc.fmid:
         return
 
     if frappe.db.exists('PNC', {'birth_registration_id': doc.name}):
         return
 
-    gender = frappe.db.get_value('Family members', doc.family_member_id, 'gender')
+    gender = frappe.db.get_value('Family members', doc.fmid, 'gender')
     if gender and gender != 'Female':
         return
 
-    anc_followup_id = find_matching_anc_followup(doc.family_member_id, doc.date_of_delivery)
+    anc_followup_id = find_matching_anc_followup(doc.fmid, doc.date_of_delivery)
 
     try:
         frappe.get_doc({
