@@ -47,8 +47,30 @@ def get_visit_schedule():
 
 class Child6wto1YearRegandFollowup(Document):
 	def validate(self):
+		self.calculate_followup_baby_age()
 		self.insert_urgent_followups_for_risk_rows()
 		self.set_next_visit_date()
+
+	def calculate_followup_baby_age(self):
+		# "X months Y days" as of each row's own Visit Ending Date, counted
+		# from the child's actual Date of Birth - a month counted as 30 days,
+		# same flat convention this app already uses everywhere else (visit
+		# windows, POG). Backstop recalculation on every save - the row's
+		# own .js trigger already does this live as the date is entered.
+		birth_date = self.get_birth_date()
+		if not birth_date:
+			return
+		birth_date = getdate(birth_date)
+		for row in self.followup_visits:
+			if not row.date_of_visit:
+				row.baby_age = ""
+				continue
+			total_days = (getdate(row.date_of_visit) - birth_date).days
+			if total_days < 0:
+				row.baby_age = ""
+				continue
+			months, days = divmod(total_days, 30)
+			row.baby_age = f"{months} months {days} days"
 
 	def on_update(self):
 		sync_next_visit_todo(

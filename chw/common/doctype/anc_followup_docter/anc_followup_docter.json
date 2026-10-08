@@ -501,7 +501,7 @@
   {
    "fieldname": "signature_of_mch_nurse",
    "fieldtype": "Signature",
-   "label": "Signature of MCH Nurse"
+   "label": "Signature of MCH Docter"
   },
   {
    "fieldname": "date_reffe",
@@ -576,7 +576,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-07 15:53:17.738963",
+ "modified": "2026-10-08 16:23:14.418314",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Docter",

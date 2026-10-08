@@ -12,6 +12,7 @@
   "village",
   "age",
   "gestational_age_by_ultrasound",
+  "vitamins",
   "column_break_hbdc",
   "phone_number",
   "date",
@@ -192,12 +193,18 @@
    "fieldname": "gestational_age_by_ultrasound",
    "fieldtype": "Small Text",
    "label": "Gestational Age by Ultrasound"
+  },
+  {
+   "fieldname": "vitamins",
+   "fieldtype": "Select",
+   "label": "Vitamins",
+   "options": "\nFolic Acid\nIron/calcium daily\nIron twice daily/ calcium daily"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-07 12:34:47.813153",
+ "modified": "2026-10-08 16:21:28.279833",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

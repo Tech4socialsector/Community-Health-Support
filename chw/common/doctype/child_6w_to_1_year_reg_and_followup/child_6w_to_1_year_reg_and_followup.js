@@ -42,6 +42,7 @@ frappe.ui.form.on("Child 6w to 1 Year Reg and Followup", {
 
 frappe.ui.form.on("Child 6w to 1 Year Followup", {
 	date_of_visit(frm, cdt, cdn) {
+		calculate_row_baby_age(frm, cdt, cdn);
 		calculate_next_visit_date(frm);
 	},
 	status(frm) {
@@ -112,6 +113,27 @@ function get_birth_date(frm) {
 	return frm.doc.date_of_birth || frm.doc.delivery_date;
 }
 
+function calculate_row_baby_age(frm, cdt, cdn) {
+	// "X months Y days" as of this row's own Visit Ending Date, counted
+	// from the child's actual Date of Birth - a month counted as 30 days,
+	// same flat convention used everywhere else in this app (visit windows,
+	// POG). The server recalculates this again on save as a backstop.
+	const row = locals[cdt][cdn];
+	const birth_date = get_birth_date(frm);
+	if (!birth_date || !row.date_of_visit) {
+		frappe.model.set_value(cdt, cdn, "baby_age", "");
+		return;
+	}
+	const total_days = frappe.datetime.get_diff(row.date_of_visit, birth_date);
+	if (total_days < 0) {
+		frappe.model.set_value(cdt, cdn, "baby_age", "");
+		return;
+	}
+	const months = Math.floor(total_days / 30);
+	const days = total_days % 30;
+	frappe.model.set_value(cdt, cdn, "baby_age", `${months} months ${days} days`);
+}
+
 function fill_new_row_date(frm, cdt, cdn) {
 	const row = locals[cdt][cdn];
 	const birth_date = get_birth_date(frm);
@@ -148,10 +170,16 @@ function generate_visit_schedule(frm) {
 		schedule_rows.forEach((row) => {
 			const window_start = frappe.datetime.add_days(birth_date, row.window_opens_day);
 			const window_end = frappe.datetime.add_days(birth_date, row.window_closes_day);
+			// frm.add_child() doesn't fire field change events (unlike
+			// frappe.model.set_value), so baby_age is computed inline here
+			// rather than relying on the date_of_visit trigger above.
+			const total_days = frappe.datetime.get_diff(window_end, birth_date);
+			const baby_age = `${Math.floor(total_days / 30)} months ${total_days % 30} days`;
 			frm.add_child("followup_visits", {
 				milestone_label: row.milestone_label,
 				window_start_date: window_start,
 				date_of_visit: window_end,
+				baby_age: baby_age,
 				status: "Pending",
 			});
 		});

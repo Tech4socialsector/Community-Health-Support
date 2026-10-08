@@ -249,8 +249,9 @@
   },
   {
    "fieldname": "any_pre_existing_diseases",
-   "fieldtype": "Data",
-   "label": "Any Pre-existing Health Problem"
+   "fieldtype": "Select",
+   "label": "Any Pre-existing Health Problem",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "availability_of_mcp_card",
@@ -697,7 +698,6 @@
    "depends_on": "eval:doc.any_pre_existing_diseases==\"Yes\"",
    "fieldname": "ifyes",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "If Any Pre-existing Health Problem Yes"
   },
   {
@@ -706,7 +706,7 @@
    "label": "HOPE ID"
   },
   {
-   "depends_on": "eval:doc.name_of_highrisk_factor && doc.name_of_highrisk_factor.includes(\"Other\")",
+   "depends_on": "eval:(doc.name_of_highrisk_factor || []).some(function(row) { return row.risk === \"Other\"; })",
    "fieldname": "if_other_high_risk",
    "fieldtype": "Data",
    "label": "If Other High Risk"
@@ -761,7 +761,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-07 17:37:23.359882",
+ "modified": "2026-10-08 16:15:28.318532",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

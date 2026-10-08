@@ -123,9 +123,11 @@
    "label": "Patient Symptoms / Concerns"
   },
   {
+   "description": "Automatic - calculated from the child's Date of Birth and this row's own Visit Ending Date, as \"X months Y days\" (a month counted as 30 days, same as the rest of this app's scheduling).",
    "fieldname": "baby_age",
    "fieldtype": "Data",
-   "label": "Baby's Age"
+   "label": "Baby's Age",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_v1",

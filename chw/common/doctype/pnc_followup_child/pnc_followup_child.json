@@ -192,41 +192,44 @@
    "description": "(< 60 or 110 +)",
    "fieldname": "hr",
    "fieldtype": "Int",
-   "label": "HR",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "HR"
   },
   {
    "description": "(< 12 or 24 +)",
    "fieldname": "rr",
    "fieldtype": "Int",
-   "label": "RR",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "RR"
   },
   {
    "description": "(38* C + )",
    "fieldname": "temperature",
    "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Temperature"
   },
   {
    "fieldname": "height",
    "fieldtype": "Int",
-   "label": "Height",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Height"
   },
   {
    "fieldname": "weight",
    "fieldtype": "Int",
-   "label": "Weight",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Weight"
   },
   {
    "fieldname": "bmi",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "BMI"
   },
   {
@@ -236,6 +239,8 @@
   {
    "fieldname": "mch_nurse_notified_of_abnormal_vital_signs",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "MCH nurse notified of abnormal vital signs",
    "options": "\nYes\nNo"
   },
@@ -284,6 +289,8 @@
   {
    "fieldname": "postpartum_depression_screen_phq_2_score",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Postpartum Depression Screen (PHQ 2) score"
   },
   {
@@ -300,24 +307,32 @@
    "default": "0",
    "fieldname": "responds_appropriately",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": " responds appropriately"
   },
   {
    "default": "0",
    "fieldname": "appears_comfortable",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "appears comfortable"
   },
   {
    "default": "0",
    "fieldname": "not_responding_appropriately",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "not responding appropriately"
   },
   {
    "default": "0",
    "fieldname": "appears_to_be_in_pain_or_distress",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "appears to be in pain or distress"
   },
   {
@@ -337,6 +352,8 @@
   {
    "fieldname": "weeks_postpartum",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Weeks postpartum"
   },
   {
@@ -346,6 +363,7 @@
    "options": "\nYes\nNo"
   },
   {
+   "depends_on": "eval:doc.wound==\"Yes\"",
    "fieldname": "wound_if_yes",
    "fieldtype": "Select",
    "label": "Wound if Yes",
@@ -481,9 +499,9 @@
    "default": "0",
    "fieldname": "iron_and_calcium_postnatal",
    "fieldtype": "Check",
-   "label": "Iron and Calcium (postnatal)",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Iron and Calcium (postnatal)"
   },
   {
    "default": "0",
@@ -495,41 +513,41 @@
    "default": "0",
    "fieldname": "family_planning_teaching_and_handout",
    "fieldtype": "Check",
-   "label": "Family planning teaching and handout",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Family planning teaching and handout"
   },
   {
    "default": "0",
    "fieldname": "kegel_exercises_postnatal",
    "fieldtype": "Check",
-   "label": "Kegel exercises (postnatal)",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Kegel exercises (postnatal)"
   },
   {
    "default": "0",
    "fieldname": "postpartum_depression_handout",
    "fieldtype": "Check",
-   "label": "Postpartum Depression (handout)",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Postpartum Depression (handout)"
   },
   {
    "default": "0",
    "fieldname": "child_immunization_schedule_0_to_1_year",
    "fieldtype": "Check",
-   "label": "Child Immunization Schedule (0 to 1 year)",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Child Immunization Schedule (0 to 1 year)"
   },
   {
    "default": "0",
    "fieldname": "child_weight_gain_chart_0_to_1_year",
    "fieldtype": "Check",
-   "label": "Child Weight Gain Chart (0 to 1 year)",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "Child Weight Gain Chart (0 to 1 year)"
   },
   {
    "fieldname": "column_break_qeho",
@@ -547,7 +565,7 @@
    "options": "\nYes\nNo"
   },
   {
-   "depends_on": "eval:doc.was_a_referral_neededwas_a_referral_needed==\"Yes\"",
+   "depends_on": "eval:doc.was_a_referral_needed==\"Yes\"",
    "fieldname": "if_yes_where",
    "fieldtype": "Data",
    "label": "If Yes where"
@@ -556,16 +574,16 @@
    "depends_on": "eval:doc.breast==\"Abnormal\"",
    "fieldname": "ifabnormalbreast",
    "fieldtype": "Data",
-   "label": "if Abnormal",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "if Abnormal"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-07 17:41:46.250838",
+ "modified": "2026-10-08 16:36:06.869285",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC Followup Child",
