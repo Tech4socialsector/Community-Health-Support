@@ -32,6 +32,7 @@ declare module 'vue' {
     ProfilePanel: typeof import('./src/components/ProfilePanel.vue')['default']
     ProgramOverview: typeof import('./src/components/ProgramOverview.vue')['default']
     PwaUpdatePrompt: typeof import('./src/components/PwaUpdatePrompt.vue')['default']
+    QuickCreateDialog: typeof import('./src/components/QuickCreateDialog.vue')['default']
     RecordChildTable: typeof import('./src/components/RecordChildTable.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

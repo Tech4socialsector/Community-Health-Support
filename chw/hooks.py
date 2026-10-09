@@ -210,6 +210,11 @@ after_migrate = ["chw.permissions.restore_standard_perms_hidden_by_custom"]
 # Hook on document methods and events
 
 doc_events = {
+	# Digits-only phone numbers on every chw doctype (forms and masters) -
+	# see chw.api.validate_phone_fields.
+	"*": {
+		"validate": "chw.api.validate_phone_fields",
+	},
 	"Birth Registration": {
 		"after_insert": "chw.api.close_anc_followup_from_birth_registration"
 	}

@@ -208,10 +208,13 @@
         </div>
 
         <template v-else>
-          <!-- Table from sm up; stacked cards on a phone. -->
-          <div :class="[ui.LIST_TABLE_WRAP, 'hidden sm:block', { 'opacity-60': loading }]">
+          <!-- Table from sm up; stacked cards on a phone. A data table like
+          Desk's: it scrolls inside its own box - down through every loaded
+          row and sideways when the columns are wider than the screen - with
+          the header row kept in view. -->
+          <div :class="[ui.LIST_TABLE_WRAP, 'hidden max-h-[calc(100vh-16rem)] min-h-[12rem] sm:block', { 'opacity-60': loading }]">
             <table :class="ui.TABLE">
-              <thead :class="ui.THEAD">
+              <thead :class="[ui.THEAD, 'sticky top-0 z-10 [&_th]:bg-gray-50 dark:[&_th]:bg-gray-800']">
                 <tr>
                   <th class="w-10 py-2.5 pl-3 pr-1">
                     <input
@@ -297,14 +300,15 @@
             </button>
           </div>
 
-          <!-- Footer: page size on the left, position + paging on the right. -->
+          <!-- Footer, as in Desk: page length on the left, how many are shown
+          and Load More on the right. -->
           <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-            <div class="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800" role="group" aria-label="Rows per page">
+            <div class="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800" role="group" aria-label="Rows per load">
               <button
                 v-for="size in PAGE_SIZES"
                 :key="size"
                 type="button"
-                class="rounded-md px-3 py-1 text-sm font-medium transition"
+                class="rounded-md px-3 py-1 text-sm font-medium tabular-nums transition"
                 :class="pageSize === size ? 'bg-white text-navy-900 shadow-sm dark:bg-gray-700 dark:text-gray-100' : 'text-gray-500 hover:text-navy-900 dark:text-gray-400'"
                 :aria-pressed="pageSize === size"
                 @click="pageSize = size"
@@ -314,16 +318,12 @@
             </div>
             <div class="flex items-center gap-3">
               <span class="text-sm tabular-nums text-gray-500 dark:text-gray-400">
-                {{ formatNumber(start + 1) }}–{{ formatNumber(start + rows.length) }} of {{ formatNumber(total) }}
+                {{ formatNumber(rows.length) }} of {{ formatNumber(total) }}
               </span>
-              <div class="flex items-center gap-1">
-                <button type="button" :class="ui.BTN_SECONDARY" aria-label="Previous page" :disabled="loading || page === 0" @click="page--">
-                  <LucideIcon name="chevron-left" class="h-4 w-4" />
-                </button>
-                <button type="button" :class="ui.BTN_SECONDARY" aria-label="Next page" :disabled="loading || start + rows.length >= total" @click="page++">
-                  <LucideIcon name="chevron-right" class="h-4 w-4" />
-                </button>
-              </div>
+              <button v-if="canLoadMore" type="button" :class="ui.BTN_SECONDARY" :disabled="loading" @click="loadMore">
+                <LucideIcon :name="loading ? 'loader-circle' : 'chevrons-down'" class="h-4 w-4" :class="{ 'animate-spin': loading }" />
+                Load More
+              </button>
             </div>
           </div>
         </template>
@@ -612,17 +612,15 @@ watch(
 )
 
 // ---- Paging + loading ----
-// Own paging via chw.api.get_list_page (rows + matching total in one
-// call) rather than frappe-ui's useList, which only appends pages and has
-// no total - neither page-size buttons nor "31-60 of 92" were possible.
-const PAGE_SIZES = [15, 30, 50, 100]
-const PAGE_SIZE_KEY = 'chw-list-page-size'
-const savedSize = stored(PAGE_SIZE_KEY, 30)
-const pageSize = ref(PAGE_SIZES.includes(savedSize) ? savedSize : 30)
+// Desk's paging: a page length (20 / 100 / 500 / 2500) and "Load More",
+// which adds the next batch under the rows already shown, so everything
+// loaded is one table to scroll through. Via chw.api.get_list_page (rows +
+// matching total in one call) - frappe-ui's useList has no total.
+const PAGE_SIZES = [20, 100, 500, 2500]
+const PAGE_SIZE_KEY = 'chw-list-page-length'
+const savedSize = stored(PAGE_SIZE_KEY, 20)
+const pageSize = ref(PAGE_SIZES.includes(savedSize) ? savedSize : 20)
 watch(pageSize, (size) => store(PAGE_SIZE_KEY, size))
-
-const page = ref(0)
-const start = computed(() => page.value * pageSize.value)
 
 const rows = ref([])
 const total = ref(null)
@@ -641,7 +639,8 @@ const requestedFields = computed(() => {
   return names
 })
 
-async function load() {
+// append: Load More - the next batch after the rows already shown.
+async function load(append = false) {
   if (!metaResource.data) return
   const id = ++requestId
   loading.value = true
@@ -653,11 +652,12 @@ async function load() {
       filters: JSON.stringify(listFilters.value),
       search: search.value.trim(),
       order_by: `${sortField.value} ${sortOrder.value}`,
-      start: start.value,
+      start: append ? rows.value.length : 0,
       page_length: pageSize.value,
     })
     if (id !== requestId) return
-    rows.value = data?.rows || []
+    const batch = data?.rows || []
+    rows.value = append ? [...rows.value, ...batch] : batch
     total.value = data?.total ?? rows.value.length
   } catch (e) {
     if (id !== requestId) return
@@ -665,6 +665,11 @@ async function load() {
   } finally {
     if (id === requestId) loading.value = false
   }
+}
+
+const canLoadMore = computed(() => total.value != null && rows.value.length < total.value)
+function loadMore() {
+  if (!loading.value && canLoadMore.value) load(true)
 }
 
 // ---- Selection ----
@@ -683,13 +688,12 @@ function toggleAllOnPage() {
     : [...new Set([...selected.value, ...names])]
 }
 
-// Any change to what's being asked for (not just the page) starts again
-// from page 1 - else page 3 of an old search could come back empty - and
-// drops a selection that no longer matches what's shown.
+// Any change to what's being asked for (filters, sort, page length,
+// columns) loads afresh from the first row, and drops a selection that no
+// longer matches what's shown.
 function restart() {
   selected.value = []
-  if (page.value !== 0) page.value = 0
-  else load()
+  load()
 }
 
 const queryKey = computed(() =>
@@ -698,8 +702,7 @@ const queryKey = computed(() =>
 watch(queryKey, restart)
 // Typing in search waits for a pause rather than fetching per keystroke.
 watchDebounced(search, restart, { debounce: 300 })
-watch(page, load)
-watch(() => metaResource.data, load, { immediate: true })
+watch(() => metaResource.data, () => load(), { immediate: true })
 
 const numberFormat = new Intl.NumberFormat()
 function formatNumber(value) {

@@ -126,7 +126,7 @@
     :description="field.description || undefined"
     :disabled="readOnly"
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="$emit('update:modelValue', toFieldValue($event))"
   />
 </template>
 
@@ -152,6 +152,16 @@ const props = defineProps({
   parentDoc: { type: Object, default: null },
 })
 defineEmits(['update:modelValue'])
+
+// A number box gives text ("2"); Desk sends a real number, and server code
+// doing arithmetic with it (e.g. Household's pending members = total -
+// added) failed on text with a TypeError. Empty stays empty.
+function toFieldValue(value) {
+  if (controlType.value !== 'number') return value
+  if (value === '' || value == null) return null
+  const n = props.field.fieldtype === 'Int' ? parseInt(value, 10) : parseFloat(value)
+  return Number.isNaN(n) ? null : n
+}
 
 // Desk's read_only / read_only_depends_on: shown, but not editable - e.g.
 // Age, Village and other values the form or server fills in. Read-only

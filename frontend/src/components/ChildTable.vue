@@ -6,8 +6,8 @@
   <div>
     <h3 class="mb-2 text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</h3>
 
-    <div class="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
-      <table class="w-full table-fixed border-collapse text-left text-sm">
+    <div class="overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
+      <table class="w-full table-fixed border-collapse text-left text-sm" :style="{ minWidth: rows.length ? tableMinWidth : undefined }">
         <thead class="bg-gray-50 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
           <tr>
             <th class="w-9 border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700">
@@ -107,7 +107,6 @@
 
 <script setup>
 import { computed, nextTick, reactive, ref } from 'vue'
-import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import { Button, Dialog } from 'frappe-ui'
 import DynamicField from '@/components/DynamicField.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
@@ -134,16 +133,10 @@ const emit = defineEmits(['update:modelValue', 'row-added', 'rows-removed'])
 const childMetaResource = useMeta(field.options)
 const columns = useFormFields(childMetaResource)
 
-// Desk's grid shows every in_list_view field of the child doctype (the
-// rest are behind the row form). A phone only has room for two beside the
-// tick box and No.: the first column plus Status when the table has one
-// (Pending / Completed is what tells visit rows apart), else the first
-// two. Chosen in script rather than hidden with CSS, so an empty table's
-// "No Data" row and header always span exactly the columns shown.
-//
-// On wider screens, Desk fits in_list_view fields by width, not count:
-// each takes its `columns` setting (Check 1, others 2 by default) out of
-// a 12-unit row, and fields that don't fit move to the row form only.
+// Desk's grid shows the child doctype's in_list_view fields, as many as fit
+// its 12-unit row (each field takes its `columns` setting - Check 1, others
+// 2 by default); the rest are on the row form. Same columns on a phone,
+// where the grid scrolls sideways, as Desk's does.
 const ROW_UNITS = 12
 function fitsDeskRow(fields) {
   const shown = []
@@ -157,19 +150,15 @@ function fitsDeskRow(fields) {
   return shown.length ? shown : fields.slice(0, 1)
 }
 
-const isPhone = useBreakpoints(breakpointsTailwind).smaller('sm')
 const gridColumns = computed(() => {
   const inListView = columns.value.filter((c) => c.in_list_view)
-  const all = fitsDeskRow(inListView.length ? inListView : columns.value.slice(0, 4))
-  if (!isPhone.value || all.length <= 2) return all
-  // The first column that has a value in some row - a column that's blank
-  // everywhere (e.g. an unused "Visit Starting Date") would waste half the
-  // phone's width.
-  const status = all.find((c) => c.fieldname === 'status')
-  const others = all.filter((c) => c !== status)
-  const first = others.find((c) => rows.value.some((r) => !isEmptyValue(r[c.fieldname]))) || others[0]
-  return status ? [first, status] : [first, others.find((c) => c !== first)].filter(Boolean)
+  return fitsDeskRow(inListView.length ? inListView : columns.value.slice(0, 4))
 })
+
+// Narrow screens: each column keeps a readable width and the grid scrolls
+// sideways instead of squeezing every value to a few letters. An empty grid
+// stays screen-wide, so its "No Data" isn't scrolled out of view.
+const tableMinWidth = computed(() => `${5 + 2.25 + gridColumns.value.length * 8.5}rem`)
 
 const rows = computed({
   get: () => modelValue || [],

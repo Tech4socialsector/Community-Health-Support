@@ -12,7 +12,11 @@
 // keystroke.
 const compiled = new Map()
 
-function compile(code) {
+function compile(rawCode) {
+  // Desk runs the expression as a statement, so a trailing ";" is fine there
+  // (e.g. Family members' "eval:doc.age >=60;") - wrapped as an expression
+  // here it was a syntax error, and the field showed regardless.
+  const code = String(rawCode).trim().replace(/;+\s*$/, '')
   if (!compiled.has(code)) {
     // Same as Desk (frappe.utils.eval): the expression is plain JavaScript
     // written by whoever designed the DocType.

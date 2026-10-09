@@ -66,15 +66,51 @@
           <span v-if="r.label && r.label !== r.value" class="block truncate text-xs text-gray-600 dark:text-gray-300">{{ r.label }}</span>
           <span v-if="r.description" class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ r.description }}</span>
         </li>
+        <!-- Desk's "+ Create a new ..." - for people allowed to create it. -->
+        <li
+          v-if="canCreate"
+          role="option"
+          class="mt-1 flex cursor-pointer items-center gap-1.5 rounded-md border-t border-gray-100 px-3 py-2 font-medium text-forest-700 hover:bg-forest-50 dark:border-gray-800 dark:text-forest-300 dark:hover:bg-gray-800"
+          @click="startCreate"
+        >
+          <LucideIcon name="plus" class="h-4 w-4" />
+          Create a new {{ field.options }}<template v-if="text.trim() && text !== modelValue">: "{{ text.trim() }}"</template>
+        </li>
       </ul>
     </Teleport>
+    <QuickCreateDialog
+      v-if="createOpen || createMounted"
+      v-model="createOpen"
+      :doctype="field.options"
+      :initial-name="createName"
+      @created="onCreated"
+    />
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref, watch } from 'vue'
+import { defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
 import { call } from 'frappe-ui'
 import LucideIcon from '@/components/LucideIcon.vue'
+
+// Loaded when first needed - it renders fields itself (including Links),
+// so a plain import would be circular.
+const QuickCreateDialog = defineAsyncComponent(() => import('@/components/QuickCreateDialog.vue'))
+
+// "May this user create <doctype>?" - asked once per doctype per session,
+// as Desk only offers "Create a new ..." to roles with create permission.
+const createPermission = new Map()
+function canCreateDoctype(doctype) {
+  if (!createPermission.has(doctype)) {
+    createPermission.set(
+      doctype,
+      call('frappe.client.has_permission', { doctype, docname: '', perm_type: 'create' })
+        .then((r) => !!r?.has_permission)
+        .catch(() => false),
+    )
+  }
+  return createPermission.get(doctype)
+}
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -96,6 +132,29 @@ const loading = ref(false)
 const results = ref([])
 const active = ref(0)
 const panelStyle = ref({})
+
+const canCreate = ref(false)
+watch(
+  () => [props.field.options, props.readOnly],
+  async ([doctype, readOnly]) => {
+    canCreate.value = !readOnly && !!doctype && (await canCreateDoctype(doctype))
+  },
+  { immediate: true },
+)
+
+const createOpen = ref(false)
+const createMounted = ref(false)
+const createName = ref('')
+function startCreate() {
+  createName.value = text.value !== props.modelValue ? text.value.trim() : ''
+  close(false)
+  createMounted.value = true
+  createOpen.value = true
+}
+function onCreated(name) {
+  text.value = name
+  emit('update:modelValue', name)
+}
 
 watch(
   () => props.modelValue,

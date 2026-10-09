@@ -48,12 +48,15 @@ export default defineConfig({
         // The logo's navy (tailwind navy-900) - colours the installed app's
         // title bar / Android status bar.
         theme_color: '#031530',
+        // ?v=: Chrome keeps the icon it saved at install time and only
+        // refreshes it when the icon address changes - bump this when the
+        // logo changes, so installed copies pick up the new one.
         icons: [
-          { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-64x64.png?v=2', sizes: '64x64', type: 'image/png' },
+          { src: 'pwa-192x192.png?v=2', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png?v=2', sizes: '512x512', type: 'image/png' },
           {
-            src: 'maskable-icon-512x512.png',
+            src: 'maskable-icon-512x512.png?v=2',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',

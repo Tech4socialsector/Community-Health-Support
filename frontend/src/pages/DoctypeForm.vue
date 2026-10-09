@@ -186,6 +186,7 @@ import { useMeta, useFormFields, useTableFields } from '@/data/useMeta'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
+import { isPhoneField, warnIfNotDigits } from '@/doctype-hooks/utils'
 import { getDoctypeHooks } from '@/doctype-hooks'
 import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
 import { currentHealthWorkerResource } from '@/data/currentHealthWorker'
@@ -427,7 +428,16 @@ function initSnapshots() {
 }
 
 function runScalarDiffLoop() {
-  if (!hooks?.onFieldChange || applyingHookChange) return
+  if (applyingHookChange) return
+  // Desk's phone check, on every form - including ones with no hook module.
+  if (!hooks?.onFieldChange) {
+    const current = scalarSnapshot()
+    for (const k of Object.keys(current)) {
+      if (current[k] !== lastScalarSnapshot[k] && isPhoneField(hookCtx().getField(k))) warnIfNotDigits(current[k])
+    }
+    lastScalarSnapshot = current
+    return
+  }
   applyingHookChange = true
   try {
     for (let i = 0; i < 20; i++) {
@@ -437,7 +447,10 @@ function runScalarDiffLoop() {
       const changed = Object.keys(current).filter((k) => current[k] !== lastScalarSnapshot[k])
       if (!changed.length) break
       lastScalarSnapshot = current
-      for (const fieldname of changed) hooks.onFieldChange(fieldname, values, hookCtx())
+      for (const fieldname of changed) {
+        if (isPhoneField(hookCtx().getField(fieldname))) warnIfNotDigits(values[fieldname])
+        hooks.onFieldChange(fieldname, values, hookCtx())
+      }
     }
     lastScalarSnapshot = scalarSnapshot()
   } finally {
@@ -775,16 +788,14 @@ async function save() {
   saveError.value = null
   try {
     if (isNew) {
-      Object.assign(newDoc.doc, values)
-      let created = null
-      try {
-        created = await newDoc.submit()
-      } catch {
-        // frappe-ui throws a TypeError here when the server refused the
-        // insert (it reads `.name` off a null response) - the real reason
-        // is on newDoc.error, checked just below.
-      }
-      if (!created?.name) throw newDoc.error || new Error('The record could not be created.')
+      // Inserted with frappe.client.insert rather than useNewDoc's submit:
+      // when the server refused (e.g. "Could not find Village: Bhaim"),
+      // submit swallowed the reason and only "The record could not be
+      // created." was shown. call() throws with the server's own message.
+      const doc = { ...values, doctype }
+      if (!doc.name || String(doc.name).startsWith('new-')) delete doc.name
+      const created = await call('frappe.client.insert', { doc })
+      if (!created?.name) throw new Error('The record could not be created.')
       toast.success(`Created ${created.name}`)
       // Saved - moving on to the new record's own page isn't "leaving edits".
       skipLeaveCheck = true

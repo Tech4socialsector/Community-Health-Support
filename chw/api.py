@@ -1,3 +1,4 @@
+import re
 import frappe
 from frappe import _
 from frappe.query_builder import Order
@@ -591,6 +592,44 @@ def validate_phone_number(phone_number):
     """Raise if phone_number contains anything other than digits."""
     if phone_number and not phone_number.isdigit():
         frappe.throw(_('Phone Number must contain digits only'))
+
+
+# A plain text phone-number field, by name: phone_number, phone_no,
+# husbands_phone_number, ..._mobile... A combined free-text field like
+# "phonecontact_number" (number *and* relationship) isn't one, and Frappe's
+# own Phone fieldtype / Data "Phone" option is left to Frappe, which
+# validates those itself and stores them with a country code (+91-...).
+PHONE_FIELDNAME = re.compile(r'(^|_)(phone|mobile)(_|$)', re.I)
+
+
+def is_phone_field(df):
+    return df.fieldtype == 'Data' and df.options != 'Phone' and bool(PHONE_FIELDNAME.search(df.fieldname or ''))
+
+
+def _chw_modules():
+    return frappe.cache.get_value(
+        'chw_app_modules',
+        lambda: set(frappe.get_all('Module Def', filters={'app_name': 'chw'}, pluck='name')),
+    )
+
+
+def validate_phone_fields(doc, method=None):
+    """doc_events "*" validate: every phone-number field on every chw
+    doctype - forms and masters, and any added later - must be digits only.
+    Several forms checked their own phone field and others (Mental Health,
+    Palliative followup, the husband's number on Child 6w-1y / Postpartum /
+    Preconception) didn't check at all."""
+    if doc.meta.module not in _chw_modules():
+        return
+    for df in doc.meta.fields:
+        if not is_phone_field(df):
+            continue
+        value = doc.get(df.fieldname)
+        if value and not str(value).isdigit():
+            frappe.throw(
+                _('{0} must contain digits only').format(_(df.label or 'Phone Number')),
+                title=_('Invalid Phone Number'),
+            )
 
 
 def sync_next_visit_todo(doc, date_field, description):

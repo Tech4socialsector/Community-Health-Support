@@ -87,11 +87,21 @@ export function pogText(lmp, date) {
 }
 
 // Desk's live phone check on every CHW form: a warning only (the value is
-// kept); the server refuses non-digits on save.
+// kept); the server refuses non-digits on save. One toast at a time - the
+// form's generic check and a doctype hook can both fire for one change.
+const PHONE_WARNING_ID = 'chw-phone-warning'
 export function warnIfNotDigits(value) {
   if (value && !/^\d*$/.test(String(value))) {
-    toast.warning('Invalid Phone Number: letters are not allowed. Please enter numbers only.')
+    toast.remove(PHONE_WARNING_ID)
+    toast.warning('Invalid Phone Number: letters are not allowed. Please enter numbers only.', { id: PHONE_WARNING_ID })
   }
+}
+
+// Same rule as the server's chw.api.is_phone_field: a plain text field named
+// ..._phone_... / ..._mobile...; Frappe's own Phone fields are left to Frappe.
+const PHONE_FIELDNAME = /(^|_)(phone|mobile)(_|$)/i
+export function isPhoneField(field) {
+  return !!field && field.fieldtype === 'Data' && field.options !== 'Phone' && PHONE_FIELDNAME.test(field.fieldname || '')
 }
 
 // Desk's BMI: kg / m², 1 decimal; null when height or weight is missing.
