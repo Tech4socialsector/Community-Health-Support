@@ -11,6 +11,8 @@
   "hope_id",
   "rchid",
   "village",
+  "subcenter",
+  "gram_panchayat",
   "first_name",
   "father_husband_name",
   "age",
@@ -108,12 +110,7 @@
   "date_blood",
   "ga_blood",
   "select_type",
-  "additional_blood_sugar_tests",
   "result_blood",
-  "other_lab_test_date",
-  "gaother",
-  "type_of_the_test",
-  "resultother",
   "past_delivery_history_section",
   "past_delivery_history",
   "number_of_anc_visits"
@@ -687,7 +684,7 @@
    "fieldname": "select_type",
    "fieldtype": "Select",
    "label": "Select Type",
-   "options": "\nRBS\nFBS\n1hr GTT\n2hr GTT\nAdditional Blood Sugar Tests"
+   "options": "\nRBS\nFBS\n1hr GTT\n2hr GTT"
   },
   {
    "fieldname": "result_blood",
@@ -723,30 +720,22 @@
    "options": "Previous ANC Visits for Mother"
   },
   {
-   "fieldname": "other_lab_test_date",
+   "fetch_from": "familymember_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "subcenter",
    "fieldtype": "Data",
-   "label": "Other Lab Test Date"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Subcenter"
   },
   {
-   "fieldname": "gaother",
+   "fetch_from": "familymember_id.village",
+   "fetch_if_empty": 1,
+   "fieldname": "gram_panchayat",
    "fieldtype": "Data",
-   "label": "GA"
-  },
-  {
-   "fieldname": "type_of_the_test",
-   "fieldtype": "Data",
-   "label": "Type of the Test"
-  },
-  {
-   "fieldname": "resultother",
-   "fieldtype": "Data",
-   "label": "Result"
-  },
-  {
-   "depends_on": "eval:doc.select_type==\"Additional Blood Sugar Tests\"",
-   "fieldname": "additional_blood_sugar_tests",
-   "fieldtype": "Data",
-   "label": "Additional Blood Sugar Tests"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gram Panchayat"
   }
  ],
  "grid_page_length": 50,
@@ -761,7 +750,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-08 16:15:28.318532",
+ "modified": "2026-10-09 10:14:52.255257",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

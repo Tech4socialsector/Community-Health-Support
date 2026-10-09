@@ -1,150 +1,162 @@
 // Ports chw/common/doctype/child_growth_monitoring/child_growth_monitoring.js
-// (a frappe.ui.form.on desk client script) into the Vue app's diff-triggered
-// hook contract. See doctype-hooks/index.js and DoctypeForm.vue for how
-// onLoad/onFieldChange/onChildFieldChange get called.
+// (the Desk form script) into the Vue app's hook contract - see
+// doctype-hooks/index.js and DoctypeForm.vue. Results must match what the
+// controller (child_growth_monitoring.py) recomputes on save: age, age in
+// months and care stage via relativedelta, and the next follow-up date.
+//
+// Not ported: Desk's onload Health Worker default (DoctypeForm.vue applies
+// it generically) and its familymember_id -> date_of_birth lookup (the
+// field's fetch_from already fills it).
 
-import { toast } from 'frappe-ui'
+import { addDays, addMonths, parseDate, today, toDateStr, warnIfNotDigits } from './utils'
+
+const TABLE = 'growth_followup'
+const STAGE_5Y_TO_11Y = '5 Years to 11 Years'
 
 function getCareStage(ageInMonths) {
   if (ageInMonths <= 6) return '0-6 Months'
   if (ageInMonths <= 60) return '6 Months to 5 Years'
-  if (ageInMonths <= 132) return '5 Years to 11 Years'
+  if (ageInMonths <= 132) return STAGE_5Y_TO_11Y
   return 'Above 11 Years'
 }
 
+// Whole months from dob to date, counted the way the server's relativedelta
+// does: the most months that can be added to dob (month-end clamped, so
+// 31 Jan + 1 month = 28 Feb) without passing date.
 function monthsBetween(dobStr, dateStr) {
-  const dob = new Date(dobStr)
-  const date = new Date(dateStr)
+  const dob = parseDate(dobStr)
+  const date = parseDate(dateStr)
+  let months = (date.getFullYear() - dob.getFullYear()) * 12 + (date.getMonth() - dob.getMonth())
+  if (addMonths(toDateStr(dob), months) > toDateStr(date)) months -= 1
+  return months
+}
 
-  let years = date.getFullYear() - dob.getFullYear()
-  let months = date.getMonth() - dob.getMonth()
-  const days = date.getDate() - dob.getDate()
-
-  if (days < 0) months -= 1
-  if (months < 0) {
-    years -= 1
-    months += 12
+// Per-form state. Hook modules are singletons shared by every open form, so
+// anything remembered between calls is keyed on that form's `values`.
+const states = new WeakMap()
+function stateFor(values, ctx) {
+  let s = states.get(values)
+  if (!s) {
+    // A saved record's DOB is already accounted for; on a new one any DOB
+    // that turns up is news.
+    s = { dob: ctx?.isNew ? null : values.date_of_birth || null, calcSeq: 0, genSeq: 0 }
+    states.set(values, s)
   }
-  return years * 12 + months
+  return s
 }
 
-function todayStr() {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function addDays(dateStr, days) {
-  const d = new Date(dateStr)
-  d.setDate(d.getDate() + days)
-  return d.toISOString().slice(0, 10)
-}
-
-function addMonths(dateStr, months) {
-  const d = new Date(dateStr)
-  d.setMonth(d.getMonth() + months)
-  return d.toISOString().slice(0, 10)
-}
-
-function calculateAge(values) {
+// Desk's calculate_age. A future DOB is refused and cleared (Desk shows an
+// error dialog); the clearing then comes back as a DOB change of its own,
+// which empties the derived fields - again as in Desk.
+function calculateAge(values, ctx) {
   if (!values.date_of_birth) {
     values.age = ''
     values.age_in_months = 0
     values.care_stage = ''
-    return
+    return false
   }
-
-  const dob = new Date(values.date_of_birth)
-  const now = new Date(todayStr())
-
-  if (dob > now) {
-    toast.warning('Date of Birth cannot be in the future.')
+  const now = today()
+  if (values.date_of_birth > now) {
+    ctx.toast.error('Invalid Date of Birth: Date of Birth cannot be in the future.')
     values.date_of_birth = ''
-    return
+    return false
   }
-
-  const ageInMonths = monthsBetween(values.date_of_birth, todayStr())
+  const ageInMonths = monthsBetween(values.date_of_birth, now)
   values.age = String(Math.floor(ageInMonths / 12))
   values.age_in_months = ageInMonths
   values.care_stage = getCareStage(ageInMonths)
+  return true
 }
 
-async function generateVisitSchedule(values, ctx) {
-  if (!values.date_of_birth || (values.growth_followup || []).length) return
-
-  const dob = values.date_of_birth
-  let intervalDays = 30
+// Malnutrition Category Master's interval for a classification (Normal /
+// MAM / SAM); 30 days when it isn't set or can't be read, as on the server.
+async function getIntervalDays(ctx, classification) {
   try {
     const res = await ctx.call('frappe.client.get_value', {
       doctype: 'Malnutrition Category Master',
-      filters: 'Normal',
+      filters: classification,
       fieldname: 'interval_days',
     })
-    intervalDays = res?.interval_days || 30
+    return res?.interval_days || 30
   } catch {
-    // fall back to the 30-day default
+    return 30
   }
+}
+
+// Pre-fill the table, only while it's empty: 0-5 years every "Normal"
+// interval (the same monthly schedule as the retired Malnutrition doctype),
+// then yearly visits from age 6 to 11 - the rows the server's
+// generate_visit_schedule() would make.
+async function generateVisitSchedule(values, ctx) {
+  if (!values.date_of_birth || (values[TABLE] || []).length) return
+  const state = stateFor(values, ctx)
+  const seq = ++state.genSeq
+  const dob = values.date_of_birth
+  const intervalDays = await getIntervalDays(ctx, 'Normal')
+  // Dropped if DOB changed or rows appeared while the interval was loading.
+  if (seq !== state.genSeq || values.date_of_birth !== dob || (values[TABLE] || []).length) return
 
   const rows = []
   const endDate0to5y = addMonths(dob, 60)
   let visitDate = addDays(dob, intervalDays)
   while (visitDate <= endDate0to5y) {
-    rows.push({
-      date: visitDate,
-      stage: getCareStage(monthsBetween(dob, visitDate)),
-      status: 'Pending',
-    })
+    rows.push({ date: visitDate, stage: getCareStage(monthsBetween(dob, visitDate)), status: 'Pending' })
     visitDate = addDays(visitDate, intervalDays)
   }
-
   for (let m = 72; m <= 132; m += 12) {
-    rows.push({
-      date: addMonths(dob, m),
-      stage: '5 Years to 11 Years',
-      status: 'Pending',
-    })
+    rows.push({ date: addMonths(dob, m), stage: STAGE_5Y_TO_11Y, status: 'Pending' })
   }
-
-  values.growth_followup = [...(values.growth_followup || []), ...rows]
-  calculateNextFollowupDate(values)
+  values[TABLE] = rows
+  await calculateNextFollowupDate(values, ctx)
 }
 
-function calculateNextFollowupDate(values) {
+async function calculateNextFollowupDate(values, ctx) {
   const current = values.next_followup_date
   const lastAuto = values.next_followup_date_auto
   if (current && lastAuto && current !== lastAuto) {
-    // user has manually overridden the date; leave it alone
+    // User has manually overridden the date; leave it alone.
     return
   }
 
-  const datedRows = (values.growth_followup || []).filter((row) => row.date)
+  const datedRows = (values[TABLE] || []).filter((row) => row.date)
   if (!datedRows.length) return
 
-  const pendingRows = datedRows.filter((row) => row.status !== 'Completed')
-
-  const setNextDate = (calculatedDate) => {
-    values.next_followup_date = calculatedDate
-    values.next_followup_date_auto = calculatedDate
+  // Only the newest calculation may write - an older one still waiting on
+  // an interval lookup must not overwrite it.
+  const state = stateFor(values, ctx)
+  const seq = ++state.calcSeq
+  const setNextDate = (date) => {
+    if (seq !== state.calcSeq) return
+    values.next_followup_date = date
+    values.next_followup_date_auto = date
   }
 
+  // Next visit due is the earliest visit not yet marked Completed.
+  const pendingRows = datedRows.filter((row) => row.status !== 'Completed')
   if (pendingRows.length) {
-    const nextDate = pendingRows.reduce((earliest, row) => (row.date < earliest ? row.date : earliest), pendingRows[0].date)
-    setNextDate(nextDate)
+    setNextDate(pendingRows.reduce((min, row) => (row.date < min ? row.date : min), pendingRows[0].date))
     return
   }
 
+  // All done: continue from the latest visit (first of equal dates, like
+  // max() on the server) - yearly in the 5-11 stage, otherwise after the
+  // interval for that visit's classification.
   const lastRow = datedRows.reduce((latest, row) => (row.date > latest.date ? row : latest), datedRows[0])
-
-  if (lastRow.stage === '5 Years to 11 Years') {
+  if (lastRow.stage === STAGE_5Y_TO_11Y) {
     setNextDate(addMonths(lastRow.date, 12))
     return
   }
-
   if (lastRow.classification) {
-    setNextDate(addDays(lastRow.date, 30))
+    const intervalDays = await getIntervalDays(ctx, lastRow.classification)
+    setNextDate(addDays(lastRow.date, intervalDays))
   } else {
     setNextDate(addDays(lastRow.date, 30))
   }
 }
 
+// Desk's set_row_classification, on the live row: oedema means SAM
+// outright, otherwise MUAC (cm) < 11.5 SAM, < 12.5 MAM, else Normal; blank
+// when neither is recorded.
 function setRowClassification(row) {
   let classification = ''
   if (row.edema === 'Yes') {
@@ -159,47 +171,46 @@ function setRowClassification(row) {
 }
 
 export default {
-  // health_worker_name ("Data Collector") is now defaulted generically for
-  // every doctype that has the field - see applyCurrentHealthWorkerDefault
-  // in DoctypeForm.vue - so no onLoad hook is needed here for that anymore.
-
-  async onFieldChange(fieldname, values, ctx) {
-    if (fieldname === 'familymember_id') {
-      if (!values.familymember_id) return
-      try {
-        const res = await ctx.call('frappe.client.get_value', {
-          doctype: 'Family members',
-          filters: values.familymember_id,
-          fieldname: 'date_of_birth',
-        })
-        if (res?.date_of_birth) values.date_of_birth = res.date_of_birth
-      } catch {
-        // family member has no date_of_birth on record
-      }
-    }
-
-    if (fieldname === 'date_of_birth') {
-      calculateAge(values)
-      await generateVisitSchedule(values, ctx)
-    }
-
-    if (fieldname === 'phone_number') {
-      if (values.phone_number && !/^\d*$/.test(values.phone_number)) {
-        toast.warning('Phone number can only contain digits.')
-      }
-    }
+  onAfterLoad(values, ctx) {
+    // Re-baseline after opening / saving, so a reloaded DOB isn't news.
+    stateFor(values, ctx).dob = values.date_of_birth || null
   },
 
-  onChildFieldChange(tableField, fieldname, row, values) {
-    if (tableField !== 'growth_followup') return
+  // Desk's set_query: only children up to 11 years can be picked.
+  getLinkQuery(fieldname) {
+    if (fieldname === 'familymember_id') return { filters: { age_in_months: ['<=', 132] } }
+    return null
+  },
 
-    if (fieldname === 'muac' || fieldname === 'edema') {
-      setRowClassification(row)
-      calculateNextFollowupDate(values)
+  onFieldChange(fieldname, values, ctx) {
+    const state = stateFor(values, ctx)
+
+    // Desk's date_of_birth handler. Compared against the last seen value on
+    // every call rather than trusting `fieldname`: DOB arrives by fetch from
+    // the family member together with name, village, phone ... and only one
+    // of those may be reported. Our own writes fall through as no-ops.
+    const dob = values.date_of_birth || null
+    if (dob !== state.dob) {
+      state.dob = dob
+      if (calculateAge(values, ctx)) generateVisitSchedule(values, ctx)
     }
 
-    if (fieldname === 'date' || fieldname === 'status') {
-      calculateNextFollowupDate(values)
+    if (fieldname === 'phone_number') warnIfNotDigits(values.phone_number)
+  },
+
+  onChildRowRemove(tableField, removedRows, values, ctx) {
+    if (tableField === TABLE) calculateNextFollowupDate(values, ctx)
+  },
+
+  // Child Growth Followup's muac / edema / date / status handlers. The
+  // classification this hook writes is deliberately not listened to.
+  onChildFieldChange(tableField, fieldname, row, values, ctx) {
+    if (tableField !== TABLE) return
+    if (fieldname === 'muac' || fieldname === 'edema') {
+      setRowClassification(row)
+      calculateNextFollowupDate(values, ctx)
+    } else if (fieldname === 'date' || fieldname === 'status') {
+      calculateNextFollowupDate(values, ctx)
     }
   },
 }

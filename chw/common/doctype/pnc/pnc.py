@@ -59,8 +59,10 @@ class PNC(Document):
 		if not self.birth_registration_id:
 			return
 
+		# `fmid` is the mother's Family member ID; `family_member_id` was its
+		# old, renamed column - always empty now, so this check never ran.
 		family_member_id = frappe.db.get_value(
-			"Birth Registration", self.birth_registration_id, "family_member_id"
+			"Birth Registration", self.birth_registration_id, "fmid"
 		)
 		gender = family_member_id and frappe.db.get_value("Family members", family_member_id, "gender")
 		if gender and gender != "Female":

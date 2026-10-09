@@ -28,6 +28,12 @@ onMounted(async () => {
 
   let refreshPromptShown = false
   const showRefreshPrompt = () => {
+    // One prompt per page load: a second deploy landing while the tab is
+    // still open fires `installed` again, which used to stack a duplicate
+    // toast (and a duplicate reload listener). The existing toast's Refresh
+    // already activates whichever version is newest - messageSkipWaiting()
+    // targets the currently waiting worker - so a second one adds nothing.
+    if (refreshPromptShown) return
     refreshPromptShown = true
     wb.addEventListener('controlling', () => window.location.reload())
     toast.info('A new version of the app is available.', {

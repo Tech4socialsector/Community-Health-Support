@@ -100,11 +100,27 @@ def module_visible_to_user(module_doc, user_roles):
     return bool(allowed_roles & user_roles)
 
 
+def _doctype_connection_links(doctype):
+    """The DocType's own Desk "Connections" (its Links table, plus any
+    Customize Form additions, both merged into meta.links) as plain
+    {doctype, fieldname} pairs. Child-table links are skipped - their link
+    field sits on a child row, not on the connected document itself, so a
+    plain {fieldname: name} filter can't count or prefill them."""
+    links = []
+    for link in frappe.get_meta(doctype).links or []:
+        if link.hidden or link.is_child_table or not link.link_doctype or not link.link_fieldname:
+            continue
+        links.append({'doctype': link.link_doctype, 'fieldname': link.link_fieldname})
+    return links
+
+
 @frappe.whitelist()
 def get_app_modules():
     """Return the CHW Vue app's navigation modules (from the standalone App
     Module Setting doctype), filtered to those enabled and visible to the
-    current user's roles. Each module lists the sidebar DocTypes it exposes."""
+    current user's roles. Each module lists the sidebar DocTypes it exposes,
+    each with its Desk connections (`links`) so the sidebar can nest a
+    DocType's connected forms under it."""
     if frappe.session.user == 'Guest':
         frappe.throw(_('Not permitted'), frappe.PermissionError)
 
@@ -122,6 +138,7 @@ def get_app_modules():
                 'label': item.label or item.doctype_name,
                 'icon': item.icon or module_doc.icon or 'file-text',
                 'route': item.route or frappe.scrub(item.doctype_name).replace('_', '-'),
+                'links': _doctype_connection_links(item.doctype_name),
             }
             for item in (module_doc.doctypes or [])
             if item.doctype_name
@@ -134,6 +151,223 @@ def get_app_modules():
             'doctypes': doctypes,
         })
     return modules
+
+
+def _permitted_count(doctype, filters=None):
+    """How many `doctype` records the current user can see that match
+    `filters` - through frappe.get_list, so user permissions apply.
+
+    Deliberately *not* frappe.client.get_count: that one reads its arguments
+    back out of the incoming request (frappe.form_dict), so called from
+    inside another whitelisted method it picks up that method's own request
+    params (e.g. doctype=Pregnancy Registration, name=PREG-00007) and fails
+    in a real browser request - even though it works from bench execute,
+    where there is no request. That silently blanked every Connections and
+    Home count."""
+    rows = frappe.get_list(doctype, fields=[{'COUNT': 'name', 'as': 'total'}], filters=filters or {})
+    return (rows[0].get('total') if rows else 0) or 0
+
+
+@frappe.whitelist()
+def get_module_record_counts():
+    """Record count per DocType on the Vue Home page tiles, in one round trip
+    instead of one request per tile. Counts respect the user's own read
+    permissions and user-permission restrictions (see _permitted_count) - a
+    CHW only ever sees their own numbers. A DocType the user can't read (or
+    that errors) maps to None, which the tile simply hides rather than
+    failing the whole Home page."""
+    counts = {}
+    for module in get_app_modules():
+        for item in module['doctypes']:
+            doctype = item['doctype_name']
+            if doctype in counts:
+                continue
+            if not frappe.has_permission(doctype, 'read'):
+                counts[doctype] = None
+                continue
+            try:
+                counts[doctype] = _permitted_count(doctype)
+            except Exception:
+                frappe.log_error(f"Error counting {doctype} for the Home page")
+                counts[doctype] = None
+    return counts
+
+
+@frappe.whitelist()
+def get_doc_connections(doctype, name):
+    """Record counts for one document's Desk connections - the Vue form's
+    Connections panel (the same cards Desk shows above a form). Each count
+    respects the user's own read permissions on the connected DocType (see
+    _permitted_count); DocTypes the user can't read are left out entirely
+    rather than shown as 0."""
+    if not frappe.has_permission(doctype, 'read', doc=name):
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    connections = []
+    for link in _doctype_connection_links(doctype):
+        if not frappe.has_permission(link['doctype'], 'read'):
+            continue
+        try:
+            count = _permitted_count(link['doctype'], {link['fieldname']: name})
+        except Exception:
+            frappe.log_error(f"Error counting {link['doctype']} connections for {doctype} {name}")
+            count = None
+        connections.append({**link, 'count': count})
+    return connections
+
+
+LIST_STANDARD_FIELDS = {'name', 'creation', 'modified', 'owner', 'modified_by'}
+LIST_SEARCH_FIELDTYPES = {'Data', 'Link', 'Select', 'Small Text', 'Phone', 'Read Only', 'Dynamic Link'}
+
+
+@frappe.whitelist()
+def get_list_page(doctype, fields=None, filters=None, search=None, order_by=None, start=0, page_length=20):
+    """One page of a DocType's list for the Vue list view, plus the total
+    matching the same filters + search - so the page-size buttons and
+    "30 of 45" always agree. `search` matches the ID, the title field and
+    the list-view text columns (any of them). Field names are checked
+    against the DocType's meta, so neither `fields` nor `order_by` can ask
+    for anything that isn't a real column. frappe.get_list applies the
+    user's own permissions to both the rows and the count."""
+    meta = frappe.get_meta(doctype)
+    valid = LIST_STANDARD_FIELDS | {df.fieldname for df in meta.fields}
+
+    requested = frappe.parse_json(fields) if fields else []
+    select = ['name'] + [f for f in requested if isinstance(f, str) and f in valid and f != 'name']
+    if 'modified' not in select:
+        select.append('modified')
+
+    filters = frappe.parse_json(filters) if filters else {}
+
+    or_filters = None
+    term = (search or '').strip()
+    if term:
+        search_fields = {'name'}
+        if meta.title_field and meta.has_field(meta.title_field):
+            search_fields.add(meta.title_field)
+        search_fields |= {
+            df.fieldname for df in meta.fields if df.in_list_view and df.fieldtype in LIST_SEARCH_FIELDTYPES
+        }
+        or_filters = [[f, 'like', f'%{term}%'] for f in sorted(search_fields)]
+
+    # "fieldname asc|desc" on a real column only; anything else -> newest first.
+    order = 'modified desc'
+    parts = (order_by or '').split()
+    if len(parts) == 2 and parts[0] in valid and parts[1].lower() in ('asc', 'desc'):
+        order = f'{parts[0]} {parts[1].lower()}'
+
+    rows = frappe.get_list(
+        doctype,
+        fields=select,
+        filters=filters,
+        or_filters=or_filters,
+        order_by=order,
+        limit_start=cint(start),
+        limit_page_length=min(max(cint(page_length), 1), 5000),
+    )
+    total = frappe.get_list(
+        doctype,
+        fields=[{'COUNT': 'name', 'as': 'total'}],
+        filters=filters,
+        or_filters=or_filters,
+    )
+    return {'rows': rows, 'total': (total[0].get('total') if total else 0) or 0}
+
+
+@frappe.whitelist()
+def get_connection_records(doctype, fieldname, value, limit=20):
+    """The individual records behind one Connections card, so the Vue
+    form's card can expand into a clickable list (Desk's connection count
+    only links to a filtered list). `doctype` is the connected DocType and
+    `fieldname` its link field pointing back at `value`. frappe.get_list
+    applies the user's own permissions, same as the count beside it."""
+    meta = frappe.get_meta(doctype)
+    if not meta.has_field(fieldname):
+        frappe.throw(_('Invalid field'), frappe.ValidationError)
+
+    title_field = meta.title_field if meta.title_field and meta.has_field(meta.title_field) else None
+    fields = ['name', 'creation']
+    if title_field:
+        fields.append(title_field)
+
+    rows = frappe.get_list(
+        doctype,
+        filters={fieldname: value},
+        fields=fields,
+        order_by='creation desc',
+        limit_page_length=min(cint(limit) or 20, 100),
+    )
+    return [
+        {'name': r.name, 'title': r.get(title_field) if title_field else None, 'creation': r.creation}
+        for r in rows
+    ]
+
+
+@frappe.whitelist()
+def get_doc_activity(doctype, name):
+    """The record's history for the Activity section under the Vue form -
+    the same story Desk's form timeline tells: who created it and when,
+    then each saved edit (field, old value -> new value) from its Version
+    log, newest first. Version rows are only written for DocTypes with
+    "Track Changes" on; for the rest this falls back to Desk's own "last
+    edited by" line. Version itself is admin-only, so it's read with
+    get_all - after checking the user can read this record, which is the
+    same rule Desk's timeline applies."""
+    from frappe.utils import get_fullname
+
+    if not frappe.has_permission(doctype, 'read', doc=name):
+        frappe.throw(_('Not permitted'), frappe.PermissionError)
+
+    doc = frappe.db.get_value(doctype, name, ['owner', 'creation', 'modified_by', 'modified'], as_dict=True)
+    if not doc:
+        return []
+    meta = frappe.get_meta(doctype)
+
+    def label(fieldname):
+        df = meta.get_field(fieldname)
+        return (df.label if df else None) or frappe.unscrub(fieldname)
+
+    def fieldtype(fieldname):
+        df = meta.get_field(fieldname)
+        return df.fieldtype if df else None
+
+    def entry(kind, user, at, **extra):
+        return {'type': kind, 'user': user, 'user_name': get_fullname(user), 'at': at, **extra}
+
+    entries = [entry('created', doc.owner, doc.creation)]
+
+    versions = frappe.get_all(
+        'Version',
+        filters={'ref_doctype': doctype, 'docname': name},
+        fields=['owner', 'creation', 'data'],
+        order_by='creation asc',
+        limit_page_length=100,
+    )
+    for version in versions:
+        data = frappe.parse_json(version.data or '{}') or {}
+        changes = [
+            {'label': label(c[0]), 'fieldtype': fieldtype(c[0]), 'from': c[1], 'to': c[2]}
+            for c in (data.get('changed') or [])
+            if isinstance(c, (list, tuple)) and len(c) >= 3
+        ]
+        # Child-table edits: [table_field, row] for added/removed rows,
+        # [table_field, idx, row_name, changes] for edited ones.
+        tables = {
+            'added': sorted({label(r[0]) for r in (data.get('added') or []) if r}),
+            'removed': sorted({label(r[0]) for r in (data.get('removed') or []) if r}),
+            'changed': sorted({label(r[0]) for r in (data.get('row_changed') or []) if r}),
+        }
+        if not changes and not any(tables.values()):
+            continue
+        entries.append(entry('changed', version.owner, version.creation, changes=changes[:12],
+                             more=max(0, len(changes) - 12), tables=tables))
+
+    # No change log (Track Changes off) but saved again after creation.
+    if len(entries) == 1 and doc.modified and doc.modified != doc.creation:
+        entries.append(entry('edited', doc.modified_by, doc.modified))
+
+    entries.reverse()
+    return entries
 
 
 @frappe.whitelist()
@@ -444,6 +678,8 @@ def create_pnc_from_birth_registration(doc, method=None):
     remaining (now-moot) Pending visits stop counting as due/backlog. Runs on
     after_insert, so it never fires twice for the same Birth Registration.
     """
+    # `fmid` - the mother's Family member ID. This read `family_member_id`,
+    # a renamed field, which raised an AttributeError on every new record.
     if not doc.fmid:
         return
 
@@ -456,6 +692,10 @@ def create_pnc_from_birth_registration(doc, method=None):
 
     anc_followup_id = find_matching_anc_followup(doc.fmid, doc.date_of_delivery)
 
+    # A failed PNC insert leaves its own error ("Data missing in table ...")
+    # in the message queue, which then popped up as an error on a birth
+    # record that saved fine - so drop it and say plainly what happened.
+    messages_before = len(frappe.local.message_log)
     try:
         frappe.get_doc({
             'doctype': 'PNC',
@@ -471,8 +711,15 @@ def create_pnc_from_birth_registration(doc, method=None):
         }).insert(ignore_permissions=True)
     except Exception:
         frappe.log_error(frappe.get_traceback(), 'Failed to auto-create PNC from Birth Registration')
+        del frappe.local.message_log[messages_before:]
+        frappe.msgprint(
+            _('Birth Registration saved, but the PNC record could not be created automatically. Please create it from PNC.'),
+            indicator='orange',
+            alert=True,
+        )
 
     if anc_followup_id:
+        messages_before = len(frappe.local.message_log)
         try:
             anc_followup = frappe.get_doc('ANC Follow-up', anc_followup_id)
             if anc_followup.status != 'Closed':
@@ -480,6 +727,14 @@ def create_pnc_from_birth_registration(doc, method=None):
                 anc_followup.save(ignore_permissions=True)
         except Exception:
             frappe.log_error(frappe.get_traceback(), 'Failed to close ANC Follow-up from Birth Registration')
+            # Same as above: its "Value missing for ANC Follow-up" errors
+            # aren't about the birth record the user just saved.
+            del frappe.local.message_log[messages_before:]
+            frappe.msgprint(
+                _('Birth Registration saved, but ANC Follow-up {0} could not be closed automatically. Please close it from ANC Follow-up.').format(anc_followup_id),
+                indicator='orange',
+                alert=True,
+            )
 
 
 @frappe.whitelist()

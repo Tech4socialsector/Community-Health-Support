@@ -1,0 +1,21 @@
+{
+ "app": "chw",
+ "bg_color": "gray",
+ "creation": "2026-10-09 11:39:34.542922",
+ "docstatus": 0,
+ "doctype": "Desktop Icon",
+ "hidden": 0,
+ "icon_type": "App",
+ "idx": 0,
+ "label": "CHW App",
+ "link_to": "",
+ "link_type": "External",
+ "logo_url": "chw/home",
+ "modified": "2026-10-09 12:26:38.231796",
+ "modified_by": "Administrator",
+ "name": "CHW App",
+ "owner": "Administrator",
+ "restrict_removal": 0,
+ "roles": [],
+ "standard": 1
+}

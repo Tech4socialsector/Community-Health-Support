@@ -46,6 +46,7 @@ class Familymembers(Document):
 			# so those always reset regardless.
 			self.age_in_months = 0
 			self.age_in_days = 0
+			self.age_detail = ""
 			return
 
 		dob = getdate(self.date_of_birth)
@@ -54,8 +55,37 @@ class Familymembers(Document):
 		if dob > now:
 			frappe.throw(_("Date of Birth cannot be in the future."))
 
-		delta = relativedelta(now, dob)
+		self.update(get_age_values(dob, now))
 
-		self.age = str(delta.years)
-		self.age_in_months = delta.years * 12 + delta.months
-		self.age_in_days = (now - dob).days
+
+def get_age_values(dob, on_date):
+	"""Every age field of a Family member, from its date of birth as of
+	on_date. Shared by validate() and the daily refresh (chw.tasks), so a
+	saved record and an overnight update can never disagree.
+
+	`age` stays the whole number of years: NCD does int(age) and ANC
+	Follow-up stores it in an Int field (both fetch it from here), so the
+	years / months / days wording goes in its own field, age_detail."""
+	delta = relativedelta(on_date, dob)
+	return {
+		"age": str(delta.years),
+		"age_in_months": delta.years * 12 + delta.months,
+		"age_in_days": (on_date - dob).days,
+		"age_detail": format_age_detail(delta.years, delta.months, delta.days),
+	}
+
+
+def format_age_detail(years, months, days):
+	"""'2 years, 3 months, 10 days' - leading zero units are left out, so a
+	baby reads '4 months, 2 days' or '12 days', not '0 years, 0 months'."""
+
+	def part(count, unit):
+		return f"{count} {unit}" + ("" if count == 1 else "s")
+
+	parts = []
+	if years:
+		parts.append(part(years, "year"))
+	if years or months:
+		parts.append(part(months, "month"))
+	parts.append(part(days, "day"))
+	return ", ".join(parts)

@@ -34,6 +34,7 @@
   "birth_status",
   "section_break_yrgg",
   "baby_name",
+  "baby_family_member",
   "gender",
   "date_of_birth",
   "baby_cry",
@@ -177,6 +178,14 @@
    "reqd": 1
   },
   {
+   "fieldname": "baby_family_member",
+   "fieldtype": "Link",
+   "label": "Baby's Family Member ID",
+   "options": "Family members",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
    "fieldname": "gender",
    "fieldtype": "Select",
    "label": "Gender of Child",
@@ -312,7 +321,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-10-08 17:54:15.199973",
+ "modified": "2026-10-09 11:30:00.000000",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",

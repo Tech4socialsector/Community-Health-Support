@@ -19,8 +19,8 @@
   "caste",
   "others_caste",
   "house",
-  "type_of_housing",
   "column_break_kkvt",
+  "type_of_housing",
   "electricity",
   "farming",
   "drinkingwater",
@@ -260,7 +260,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-07 14:56:45.760127",
+ "modified": "2026-10-09 09:26:02.050252",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

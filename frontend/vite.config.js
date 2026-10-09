@@ -45,7 +45,9 @@ export default defineConfig({
         scope: '/chw/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#111827',
+        // The logo's navy (tailwind navy-900) - colours the installed app's
+        // title bar / Android status bar.
+        theme_color: '#031530',
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },

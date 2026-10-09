@@ -1,5 +1,5 @@
 <template>
-  <div ref="sidebarRef" class="flex h-full flex-shrink-0">
+  <div ref="sidebarRef" class="chw-sidebar flex h-full flex-shrink-0">
     <Sidebar
       v-model:collapsed="collapsed"
       :header="header"
@@ -8,15 +8,23 @@
     >
       <template #sidebar-item="{ item }">
         <hr v-if="item.dividerBefore" class="my-2 border-gray-200 dark:border-gray-800" />
-        <SidebarItem
-          :label="item.label"
-          :accessKey="item.accessKey"
-          :icon="item.icon"
-          :suffix="item.suffix"
-          :to="item.to"
-          :isActive="item.isActive"
-          :onClick="item.onClick"
-        />
+        <!-- Nested connected forms are indented per level, with a guide
+        line; no indent when icon-collapsed, where it would push icons off. -->
+        <div
+          :class="{ 'border-l border-gray-200 dark:border-gray-800': item.depth && !collapsed }"
+          :style="item.depth && !collapsed ? { marginLeft: `${item.depth * 0.75}rem` } : null"
+        >
+          <SidebarItem
+            :label="item.label"
+            :accessKey="item.accessKey"
+            :icon="item.icon"
+            :suffix="item.suffix"
+            :to="item.to"
+            :isActive="item.isActive"
+            :onClick="item.onClick"
+            :class="{ 'chw-nav-active': item.isActive }"
+          />
+        </div>
       </template>
       <template #footer-items="{ isCollapsed }">
         <UserHoverCard>
@@ -53,8 +61,9 @@ import SettingsDialog from '@/components/SettingsDialog.vue'
 import AiAssistant from '@/components/AiAssistant.vue'
 import { session, logoutResource } from '@/data/session'
 import { clearSiteData } from '@/data/clearSiteData'
-import { brandingResource } from '@/data/branding'
-import { activeModule } from '@/data/activeModule'
+import { brandingResource, appLogo } from '@/data/branding'
+import { activeModule, sidebarTrail } from '@/data/activeModule'
+import { childItemsOf } from '@/data/modules'
 import { notificationsResource, unreadCount, toggleNotifications } from '@/data/notifications'
 import { showSettingsDialog, openSettingsDialog } from '@/data/settingsDialog'
 import { userContextResource } from '@/data/userContext'
@@ -81,7 +90,7 @@ notificationsResource.fetch()
 const header = computed(() => ({
   title: appName.value,
   subtitle: session.full_name || session.user,
-  logo: brandingResource.data?.app_logo || null,
+  logo: appLogo.value,
   menuItems: [
     {
       label: 'Settings',
@@ -133,47 +142,74 @@ const sections = computed(() => {
           dividerBefore: true,
           isActive: route.name === 'Home',
         },
-        {
-          label: 'Worklist',
-          icon: moduleIcon('check-square'),
-          to: { name: 'Worklist' },
-          isActive: route.name === 'Worklist',
-        },
+      ],
+    },
+    {
+      label: 'My work',
+      items: [
         {
           label: 'Work Orders',
           icon: moduleIcon('clipboard-list'),
           to: { name: 'WorkOrders' },
           isActive: route.name === 'WorkOrders',
         },
-        // Overview mirrors the Desk chw-dashboard page, which is
-        // privileged-only (Administrator/System Manager/Program
-        // Coordinator) on the backend - hidden here rather than shown and
-        // then throwing a Permission Error once opened.
-        ...(userContextResource.data?.is_privileged
-          ? [
-              {
-                label: 'Overview',
-                icon: moduleIcon('bar-chart-2'),
-                to: { name: 'Overview' },
-                isActive: route.name === 'Overview',
-              },
-            ]
-          : []),
       ],
     },
   ]
 
-  if (activeModule.value) {
-    const mod = activeModule.value
+  // Overview mirrors the Desk chw-dashboard page, which is privileged-only
+  // (Administrator/System Manager/Program Coordinator) on the backend -
+  // hidden here rather than shown and then throwing a Permission Error once
+  // opened. Its whole section goes with it, so CHWs see no empty heading.
+  if (userContextResource.data?.is_privileged) {
     sectionList.push({
-      label: mod.label,
-      items: (mod.doctypes || []).map((item) => ({
-        label: item.label || item.doctype_name,
-        icon: moduleIcon(item.icon || mod.icon),
-        to: { name: 'DoctypeList', params: { doctypeRoute: item.route } },
-        isActive: route.params.doctypeRoute === item.route,
-      })),
+      label: 'Administration',
+      items: [
+        {
+          label: 'Overview',
+          icon: moduleIcon('bar-chart-2'),
+          to: { name: 'Overview' },
+          isActive: route.name === 'Overview',
+        },
+      ],
     })
+  }
+
+  // The module's forms tree only belongs on its own list/form pages - Work
+  // Orders, Overview and Home hide it. activeModule / sidebarTrail are left
+  // untouched, so the same branch reappears when a form is opened again.
+  if (activeModule.value && route.params.doctypeRoute) {
+    const mod = activeModule.value
+    const doctypes = mod.doctypes || []
+
+    // Top level = forms no other form in this module connects down to
+    // (Household profile). Everything else nests under its parent and only
+    // appears once that parent is on the open branch (sidebarTrail). A
+    // module whose forms have no connections at all stays a flat list.
+    const childRoutes = new Set(doctypes.flatMap((d) => childItemsOf(d).map((c) => c.route)))
+    const roots = doctypes.filter((d) => !childRoutes.has(d.route))
+    const trail = sidebarTrail.value
+    const items = []
+
+    // Matching trail[depth] (not just "is on the trail") keeps a form with
+    // two parents from expanding in both places - only the copy at the
+    // position the user actually walked down to opens.
+    const addLevel = (nodes, depth) => {
+      for (const node of nodes) {
+        const onBranch = trail[depth] === node.route
+        items.push({
+          label: node.label || node.doctype_name,
+          icon: moduleIcon(node.icon || mod.icon),
+          to: { name: 'DoctypeList', params: { doctypeRoute: node.route } },
+          depth,
+          isActive: onBranch && depth === trail.length - 1 && route.params.doctypeRoute === node.route,
+        })
+        if (onBranch) addLevel(childItemsOf(node), depth + 1)
+      }
+    }
+    addLevel(roots.length ? roots : doctypes, 0)
+
+    sectionList.push({ label: mod.label, items })
   }
 
   return sectionList

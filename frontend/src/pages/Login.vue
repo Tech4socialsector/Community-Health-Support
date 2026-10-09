@@ -1,10 +1,12 @@
 <template>
   <div class="flex h-screen flex-col bg-white dark:bg-gray-900 lg:flex-row">
-    <div class="relative flex flex-shrink-0 flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 to-gray-700 p-6 text-white sm:p-8 lg:w-1/2 lg:justify-between lg:p-12">
-      <div class="flex items-center gap-3">
-        <span class="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
-          <img v-if="brandingResource.data?.app_logo" :src="brandingResource.data.app_logo" class="h-14 w-14 rounded-xl object-cover" />
-          <FeatherIcon v-else name="activity" class="h-11 w-11" />
+    <!-- Brand panel in the logo's own colours: navy (the cross) into
+    forest green (the hills). The logo sits on a white tile - it's drawn
+    for a white background. -->
+    <div class="relative flex flex-shrink-0 flex-col justify-between overflow-hidden bg-gradient-to-br from-navy-900 via-navy-800 to-forest-700 p-6 text-white sm:p-8 lg:w-1/2 lg:justify-between lg:p-12">
+      <div class="flex items-center gap-4">
+        <span class="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-white p-2 shadow-lg shadow-black/20">
+          <img :src="appLogo" alt="Logo" class="h-full w-full object-contain" />
         </span>
         <span class="text-xl font-semibold">{{ brandingResource.data?.app_name || 'CHW' }}</span>
       </div>
@@ -18,15 +20,18 @@
         </p>
       </div>
 
-      <p class="mt-6 hidden text-xs text-white/40 lg:mt-0 lg:block">
-        &copy; {{ new Date().getFullYear() }} {{ brandingResource.data?.app_name || 'CHW' }}
-      </p>
+      <div class="mt-6 hidden lg:mt-0 lg:block">
+        <p class="text-sm font-medium italic text-white/80">Healing hands, caring hearts in Christ · Since 1938</p>
+        <p class="mt-1 text-xs text-white/40">
+          &copy; {{ new Date().getFullYear() }} {{ brandingResource.data?.app_name || 'CHW' }}
+        </p>
+      </div>
 
       <div class="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/5 lg:-right-24 lg:-top-24 lg:h-72 lg:w-72" />
       <div class="pointer-events-none absolute -bottom-24 -left-12 h-64 w-64 rounded-full bg-white/5 lg:-bottom-32 lg:-left-16 lg:h-80 lg:w-80" />
     </div>
 
-    <div class="flex flex-1 items-center justify-center overflow-y-auto bg-gray-50 px-6 py-8 dark:bg-gray-950 sm:px-8">
+    <div class="flex flex-1 items-center justify-center overflow-y-auto bg-gray-50 px-6 py-8 dark:bg-gray-900 sm:px-8">
       <div class="w-full max-w-sm">
         <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Welcome back</h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Log in to continue to your dashboard.</p>
@@ -70,7 +75,13 @@
             </button>
           </div>
           <ErrorMessage :message="loginResource.error" />
-          <Button variant="solid" :loading="loginResource.loading" type="submit" size="lg">
+          <Button
+            variant="solid"
+            :loading="loginResource.loading"
+            type="submit"
+            size="lg"
+            class="!bg-forest-700 hover:!bg-forest-800 dark:!bg-forest-600 dark:hover:!bg-forest-500"
+          >
             Log in
           </Button>
         </form>
@@ -107,7 +118,7 @@
 import { ref } from 'vue'
 import { FormControl, Button, ErrorMessage, Dialog, FeatherIcon, call } from 'frappe-ui'
 import { loginResource } from '@/data/session'
-import { brandingResource } from '@/data/branding'
+import { brandingResource, appLogo } from '@/data/branding'
 
 const email = ref('')
 const password = ref('')

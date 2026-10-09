@@ -56,6 +56,34 @@ def refresh_child_growth_ages():
 	frappe.db.commit()
 
 
+def refresh_family_member_ages():
+	"""Recalculate every Family member's age fields from today's date. An
+	age is only worked out when the record is saved, so without this a
+	baby's "4 months, 2 days" (and the years every other form fetches)
+	would stay frozen at the last save. Records without a Date of Birth are
+	left alone - their Age was typed in by hand."""
+	from chw.common.doctype.family_members.family_members import get_age_values
+
+	today_date = getdate(today())
+	fields = ["age", "age_in_months", "age_in_days", "age_detail"]
+	records = frappe.get_all(
+		"Family members",
+		filters={"date_of_birth": ["is", "set"]},
+		fields=["name", "date_of_birth", *fields],
+	)
+
+	for record in records:
+		dob = getdate(record.date_of_birth)
+		if dob > today_date:
+			continue
+		values = get_age_values(dob, today_date)
+		if all(str(values[f]) == str(record.get(f) if record.get(f) is not None else "") for f in fields):
+			continue
+		frappe.db.set_value("Family members", record.name, values, update_modified=False)
+
+	frappe.db.commit()
+
+
 def snapshot_dashboard_stats():
 	"""Record today's program-wide dashboard stats (chw.api.chw_visit_summary,
 	called unscoped so it returns global totals) so the Vue app's Dashboard can

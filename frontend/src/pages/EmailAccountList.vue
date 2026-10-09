@@ -46,13 +46,13 @@
         <div class="flex flex-shrink-0 items-center gap-1.5">
           <span
             v-if="row.default_outgoing"
-            class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+            class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
           >
             Default Sending
           </span>
           <span
             v-if="row.default_incoming"
-            class="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600 dark:bg-green-950 dark:text-green-400"
+            class="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600 dark:bg-green-900/40 dark:text-green-400"
           >
             Default Incoming
           </span>

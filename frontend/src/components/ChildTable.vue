@@ -1,88 +1,97 @@
 <template>
+  <!-- Desk's child-table grid, at every screen size: label, a bordered
+  grid (tick box, No., the in_list_view columns, an edit pencil), and Add
+  Row / Delete underneath. A row opens its full set of fields in a dialog,
+  like Desk's row form. -->
   <div>
-    <div class="mb-2 flex items-center justify-between">
-      <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ field.label }}</h3>
-      <Button variant="ghost" @click="addRow">
-        + Add Row
-      </Button>
-    </div>
+    <h3 class="mb-2 text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</h3>
 
-    <div class="overflow-x-auto rounded-lg border dark:border-gray-800">
-      <table class="w-full min-w-[28rem] border-collapse text-left text-sm">
-        <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+    <div class="overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
+      <table class="w-full table-fixed border-collapse text-left text-sm">
+        <thead class="bg-gray-50 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
           <tr>
-            <th class="w-10 whitespace-nowrap border-b border-r px-3 py-2 dark:border-gray-800">#</th>
+            <th class="w-9 border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700">
+              <input
+                type="checkbox"
+                class="h-3.5 w-3.5 rounded border-gray-300"
+                :checked="rows.length > 0 && selectedKeys.size === rows.length"
+                :disabled="!rows.length"
+                aria-label="Select all rows"
+                @change="toggleAll($event.target.checked)"
+              />
+            </th>
+            <th class="w-11 border-b border-r border-gray-200 px-2 py-2 font-medium dark:border-gray-700">No.</th>
             <th
-              v-for="col in summaryColumns"
+              v-for="col in gridColumns"
               :key="col.fieldname"
-              class="whitespace-nowrap border-b border-r px-3 py-2 dark:border-gray-800"
+              class="truncate border-b border-r border-gray-200 px-2 py-2 font-medium dark:border-gray-700"
+              :title="col.label"
             >
               {{ col.label }}
             </th>
-            <th class="w-16 border-b dark:border-gray-800"></th>
+            <th class="w-9 border-b border-gray-200 dark:border-gray-700" />
           </tr>
         </thead>
         <tbody>
           <tr v-if="!rows.length">
-            <td :colspan="summaryColumns.length + 2" class="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
-              No rows yet.
-            </td>
+            <td :colspan="gridColumns.length + 3" class="px-3 py-6 text-center text-sm text-gray-400">No Data</td>
           </tr>
           <tr
             v-for="(row, idx) in rows"
-            :key="row.__key"
-            class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+            :key="keyOf(row)"
+            class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60"
+            :class="[{ 'bg-gray-50 dark:bg-gray-800/60': selectedKeys.has(keyOf(row)) }, rowClass ? rowClass(row) : '']"
             @click="openRow(idx)"
           >
-            <td class="whitespace-nowrap border-b border-r px-3 py-2 text-gray-500 dark:border-gray-800 dark:text-gray-400">
-              {{ idx + 1 }}
+            <td class="border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700" @click.stop>
+              <input
+                type="checkbox"
+                class="h-3.5 w-3.5 rounded border-gray-300"
+                :checked="selectedKeys.has(keyOf(row))"
+                :aria-label="`Select row ${idx + 1}`"
+                @change="toggleRow(row, $event.target.checked)"
+              />
             </td>
+            <td class="border-b border-r border-gray-200 px-2 py-2 text-gray-500 dark:border-gray-700 dark:text-gray-400">{{ idx + 1 }}</td>
             <td
-              v-for="col in summaryColumns"
+              v-for="col in gridColumns"
               :key="col.fieldname"
-              class="whitespace-nowrap border-b border-r px-3 py-2 text-gray-900 dark:border-gray-800 dark:text-gray-100"
+              class="truncate border-b border-r border-gray-200 px-2 py-2 text-gray-900 dark:border-gray-700 dark:text-gray-100"
             >
-              {{ formatValue(row[col.fieldname], col) }}
+              {{ formatFieldValue(row[col.fieldname], col) }}
             </td>
-            <td class="border-b px-3 py-2 text-right dark:border-gray-800" @click.stop>
-              <div class="flex items-center justify-end gap-1">
-                <Tooltip text="Edit row">
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                    @click="openRow(idx)"
-                  >
-                    <FeatherIcon name="edit-2" class="h-4 w-4" />
-                  </button>
-                </Tooltip>
-                <Tooltip text="Remove row">
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
-                    @click="confirmRemoveRow(idx)"
-                  >
-                    <FeatherIcon name="trash-2" class="h-4 w-4" />
-                  </button>
-                </Tooltip>
-              </div>
+            <td class="border-b border-gray-200 px-1 py-1 text-center dark:border-gray-700">
+              <button
+                type="button"
+                class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700"
+                :aria-label="`Edit row ${idx + 1}`"
+                @click.stop="openRow(idx)"
+              >
+                <LucideIcon name="pencil" class="h-3.5 w-3.5" />
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <Dialog
-      v-model="showRowEditor"
-      :options="{ title: `${field.label} - Row ${(editingIdx ?? 0) + 1}`, size: 'xl' }"
-    >
+    <div class="mt-2 flex items-center gap-2">
+      <Button size="sm" @click="addRow">Add Row</Button>
+      <Button v-if="selectedKeys.size" size="sm" theme="red" @click="deleteSelected">Delete</Button>
+    </div>
+
+    <Dialog v-model="showRowEditor" :options="{ title: `${field.label} - Row ${(editingIdx ?? 0) + 1}`, size: 'xl' }">
       <template #body-content>
         <div v-if="editingRow" class="grid grid-cols-1 gap-4">
           <DynamicField
-            v-for="col in columns"
+            v-for="col in editorColumns"
             :key="col.fieldname"
             :field="col"
             :doctype="doctype"
             :docname="docname"
+            :doc="editingRow"
+            :parent-doc="parentDoc"
+            :link-query="col.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(col.fieldname, editingRow) : null"
             v-model="editingRow[col.fieldname]"
           />
         </div>
@@ -93,53 +102,82 @@
         </Button>
       </template>
     </Dialog>
-
-    <Dialog
-      v-model="showRemoveConfirm"
-      :options="{
-        title: 'Remove row?',
-        message: 'This row will be removed once you save the form. This cannot be undone.',
-        icon: { name: 'alert-triangle', appearance: 'danger' },
-        actions: [
-          { label: 'Remove', variant: 'solid', theme: 'red', onClick: doRemoveRow },
-          { label: 'Cancel' },
-        ],
-      }"
-    />
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { Button, FeatherIcon, Dialog, Tooltip } from 'frappe-ui'
+import { computed, nextTick, reactive, ref } from 'vue'
+import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
+import { Button, Dialog } from 'frappe-ui'
 import DynamicField from '@/components/DynamicField.vue'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { useMeta, useFormFields } from '@/data/useMeta'
+import { formatFieldValue, isEmptyValue } from '@/data/recordFormat'
+import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
+import { applyDefaults } from '@/data/defaults'
+import { rowKey } from '@/data/rowKey'
 
-const { field, modelValue, doctype, docname } = defineProps({
+const { field, modelValue, doctype, docname, parentDoc, linkQueryFor, rowClass } = defineProps({
   field: { type: Object, required: true },
   modelValue: { type: Array, default: () => [] },
   doctype: { type: String, default: null },
   docname: { type: String, default: null },
+  // The main record - Desk conditions inside a row can test it as `parent`.
+  parentDoc: { type: Object, default: null },
+  // From the doctype's hook module: Desk set_query for a Link inside a row,
+  // and a CSS class per row (e.g. an open urgent visit tinted red).
+  linkQueryFor: { type: Function, default: null },
+  rowClass: { type: Function, default: null },
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'row-added', 'rows-removed'])
 
 const childMetaResource = useMeta(field.options)
 const columns = useFormFields(childMetaResource)
 
-// The row summary in the table only needs enough columns to identify the
-// row at a glance - matching Desk's grid, which shows a handful of
-// in_list_view fields and pushes the rest behind the row-edit dialog. Wide
-// child tables (10+ fields) are unusable as an all-columns-inline table.
-const summaryColumns = computed(() => {
+// Desk's grid shows every in_list_view field of the child doctype (the
+// rest are behind the row form). A phone only has room for two beside the
+// tick box and No.: the first column plus Status when the table has one
+// (Pending / Completed is what tells visit rows apart), else the first
+// two. Chosen in script rather than hidden with CSS, so an empty table's
+// "No Data" row and header always span exactly the columns shown.
+//
+// On wider screens, Desk fits in_list_view fields by width, not count:
+// each takes its `columns` setting (Check 1, others 2 by default) out of
+// a 12-unit row, and fields that don't fit move to the row form only.
+const ROW_UNITS = 12
+function fitsDeskRow(fields) {
+  const shown = []
+  let used = 0
+  for (const f of fields) {
+    const size = Number(f.columns) || (f.fieldtype === 'Check' ? 1 : 2)
+    if (used + size > ROW_UNITS) break
+    used += size
+    shown.push(f)
+  }
+  return shown.length ? shown : fields.slice(0, 1)
+}
+
+const isPhone = useBreakpoints(breakpointsTailwind).smaller('sm')
+const gridColumns = computed(() => {
   const inListView = columns.value.filter((c) => c.in_list_view)
-  return (inListView.length ? inListView : columns.value).slice(0, 3)
+  const all = fitsDeskRow(inListView.length ? inListView : columns.value.slice(0, 4))
+  if (!isPhone.value || all.length <= 2) return all
+  // The first column that has a value in some row - a column that's blank
+  // everywhere (e.g. an unused "Visit Starting Date") would waste half the
+  // phone's width.
+  const status = all.find((c) => c.fieldname === 'status')
+  const others = all.filter((c) => c !== status)
+  const first = others.find((c) => rows.value.some((r) => !isEmptyValue(r[c.fieldname]))) || others[0]
+  return status ? [first, status] : [first, others.find((c) => c !== first)].filter(Boolean)
 })
 
-let rowKeyCounter = 0
 const rows = computed({
   get: () => modelValue || [],
   set: (v) => emit('update:modelValue', v),
 })
+
+// Shared with DoctypeForm, which uses the same keys to tell which row changed.
+const keyOf = rowKey
 
 function addRow() {
   // Mutate the array in place (it's the same reactive array the parent form
@@ -148,37 +186,56 @@ function addRow() {
   // reading rows.value.length right after that in the same tick can still
   // see the pre-update array, opening the row editor on the wrong (stale)
   // index.
-  const newRow = { __key: `new-${rowKeyCounter++}` }
-  rows.value.push(newRow)
-  openRow(rows.value.indexOf(newRow))
+  // Desk fills a new row's field defaults (e.g. a visit's status
+  // "Pending") as soon as it's added.
+  rows.value.push(applyDefaults(childMetaResource.data?.fields, {}))
+  const idx = rows.value.length - 1
+  // Desk's <table>_add - the form's script may fill the new row (a visit's
+  // dates from the schedule, the pregnancy's LMP ...). The live row, so its
+  // changes land in the form.
+  emit('row-added', rows.value[idx], idx)
+  openRow(idx)
 }
 
-function formatValue(value, field) {
-  if (value == null || value === '') return '-'
-  if (field.fieldtype === 'Check') return value ? 'Yes' : 'No'
-  return value
+// ---- Tick boxes + Delete, as in Desk's grid ----
+const selectedKeys = reactive(new Set())
+
+function toggleRow(row, checked) {
+  const key = keyOf(row)
+  if (checked) selectedKeys.add(key)
+  else selectedKeys.delete(key)
+}
+
+function toggleAll(checked) {
+  selectedKeys.clear()
+  if (checked) rows.value.forEach((row) => selectedKeys.add(keyOf(row)))
+}
+
+// Removed rows only leave the record when the form is saved - the form's
+// "Not saved" label shows until then, as Desk's does.
+function deleteSelected() {
+  const removed = rows.value.filter((row) => selectedKeys.has(keyOf(row)))
+  rows.value = rows.value.filter((row) => !selectedKeys.has(keyOf(row)))
+  selectedKeys.clear()
+  // Desk's <table>_remove - e.g. recalculate the next visit date.
+  if (removed.length) nextTick(() => emit('rows-removed', removed))
 }
 
 const showRowEditor = ref(false)
 const editingIdx = ref(null)
 const editingRow = computed(() => (editingIdx.value == null ? null : rows.value[editingIdx.value]))
 
+// The row form shows what Desk's row form would: fields whose depends_on
+// holds for this row (`doc`) and the main record (`parent`), with
+// mandatory_depends_on shown as required.
+const editorColumns = computed(() => {
+  if (!editingRow.value) return []
+  const visible = visibleFieldnames(childMetaResource.data?.fields, editingRow.value, parentDoc)
+  return columns.value.filter((c) => visible.has(c.fieldname)).map((c) => withLiveRequired(c, editingRow.value, parentDoc))
+})
+
 function openRow(idx) {
   editingIdx.value = idx
   showRowEditor.value = true
-}
-
-const showRemoveConfirm = ref(false)
-const pendingRemoveIdx = ref(null)
-
-function confirmRemoveRow(idx) {
-  pendingRemoveIdx.value = idx
-  showRemoveConfirm.value = true
-}
-
-function doRemoveRow(close) {
-  rows.value = rows.value.filter((_, i) => i !== pendingRemoveIdx.value)
-  pendingRemoveIdx.value = null
-  close()
 }
 </script>

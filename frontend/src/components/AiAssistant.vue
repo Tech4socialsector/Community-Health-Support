@@ -89,7 +89,7 @@
                 type="button"
                 class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
                 :class="listening
-                  ? 'bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400'
+                  ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
                   : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'"
                 @click="toggleVoice"
               >

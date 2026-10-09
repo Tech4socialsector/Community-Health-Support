@@ -61,6 +61,8 @@
     :label="field.label"
     :required="!!field.reqd"
     :options="selectOptions"
+    :description="field.description || undefined"
+    :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   />
@@ -68,6 +70,8 @@
     v-else-if="controlType === 'checkbox'"
     type="checkbox"
     :label="field.label"
+    :description="field.description || undefined"
+    :disabled="readOnly"
     :model-value="!!modelValue"
     @update:model-value="$emit('update:modelValue', $event ? 1 : 0)"
   />
@@ -76,6 +80,8 @@
     type="textarea"
     :label="field.label"
     :required="!!field.reqd"
+    :description="field.description || undefined"
+    :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   />
@@ -84,7 +90,8 @@
       type="text"
       :label="field.label"
       :required="!!field.reqd"
-      :description="linkDescription"
+      :description="field.description || undefined"
+      :disabled="readOnly"
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
     >
@@ -95,12 +102,22 @@
       </template>
     </FormControl>
   </div>
+  <LinkField
+    v-else-if="controlType === 'link'"
+    :field="field"
+    :model-value="modelValue"
+    :read-only="readOnly"
+    :link-query="linkQuery"
+    :reference-doctype="doctype"
+    @update:model-value="$emit('update:modelValue', $event)"
+  />
   <FormControl
     v-else
     :type="controlType"
     :label="field.label"
     :required="!!field.reqd"
-    :description="linkDescription"
+    :description="field.description || undefined"
+    :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   />
@@ -112,14 +129,30 @@ import { FormControl, FileUploader, Button, FeatherIcon, Tooltip } from 'frappe-
 import UserLinkHoverCard from '@/components/UserLinkHoverCard.vue'
 import GeoLocationField from '@/components/GeoLocationField.vue'
 import TableMultiSelectField from '@/components/TableMultiSelectField.vue'
+import LinkField from '@/components/LinkField.vue'
+import { evaluateDependsOn } from '@/data/dependsOn'
 
 const props = defineProps({
   field: { type: Object, required: true },
   modelValue: { default: null },
   doctype: { type: String, default: null },
   docname: { type: String, default: null },
+  // Desk's set_query for a Link field: { filters } and/or { query }.
+  linkQuery: { type: Object, default: null },
+  // Desk conditions on the form (parent doc and, in a child row, the row).
+  doc: { type: Object, default: null },
+  parentDoc: { type: Object, default: null },
 })
 defineEmits(['update:modelValue'])
+
+// Desk's read_only / read_only_depends_on: shown, but not editable - e.g.
+// Age, Village and other values the form or server fills in. Read-only
+// fields used to be ordinary editable boxes here.
+const readOnly = computed(
+  () =>
+    !!props.field.read_only ||
+    (!!props.field.read_only_depends_on && evaluateDependsOn(props.field.read_only_depends_on, props.doc || {}, props.parentDoc || props.doc)),
+)
 
 const controlType = computed(() => {
   switch (props.field.fieldtype) {
@@ -142,6 +175,10 @@ const controlType = computed(() => {
       return 'date'
     case 'Datetime':
       return 'datetime-local'
+    case 'Time':
+      return 'time'
+    case 'Link':
+      return props.field.options === 'User' ? 'text' : 'link'
     case 'Password':
       return 'password'
     case 'Attach':
@@ -177,14 +214,4 @@ const selectOptions = computed(() => {
     .map((v) => ({ label: v, value: v }))
 })
 
-// Link fields don't have a dedicated autocomplete widget in this build - a
-// plain text input, with the linked doctype named in the description, is
-// the fallback so the generic form still works for every fieldtype without
-// hardcoding per-doctype pickers.
-const linkDescription = computed(() => {
-  if (props.field.fieldtype === 'Link' && props.field.options) {
-    return `Links to ${props.field.options}`
-  }
-  return props.field.description || undefined
-})
 </script>

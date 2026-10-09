@@ -154,6 +154,11 @@ page_renderer = ["chw.website.sw_renderer.ServiceWorkerRenderer"]
 # before_install = "chw.install.before_install"
 # after_install = "chw.install.after_install"
 
+# metta's Custom DocPerm fixture (CHW Coordinator) would otherwise hide
+# these doctypes' own permission rules after every migrate - see
+# chw/permissions.py.
+after_migrate = ["chw.permissions.restore_standard_perms_hidden_by_custom"]
+
 # Uninstallation
 # ------------
 
@@ -216,6 +221,7 @@ doc_events = {
 scheduler_events = {
 	"daily": [
 		"chw.tasks.refresh_child_growth_ages",
+		"chw.tasks.refresh_family_member_ages",
 		"chw.tasks.snapshot_dashboard_stats"
 	],
 }

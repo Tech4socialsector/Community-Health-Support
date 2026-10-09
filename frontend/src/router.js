@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, START_LOCATION } from 'vue-router'
 import { session, initialUserCheck, userResource } from '@/data/session'
 import { modulesResource, findModuleByRoute } from '@/data/modules'
-import { setActiveModule } from '@/data/activeModule'
+import { setActiveModule, updateSidebarTrail } from '@/data/activeModule'
 
 const routes = [
   {
@@ -37,6 +37,16 @@ const routes = [
     path: '/overview',
     name: 'Overview',
     component: () => import('@/pages/Overview.vue'),
+  },
+  // Read-only detail page for any record (opened from the Overview
+  // drilldown). Three segments, so it can't collide with the generic
+  // two-segment /:doctypeRoute/:name form route below.
+  {
+    path: '/record/:doctype/:name',
+    name: 'RecordView',
+    component: () => import('@/pages/RecordView.vue'),
+    props: true,
+    meta: { remountOnParamChange: true },
   },
   {
     path: '/email-accounts',
@@ -170,6 +180,7 @@ router.beforeEach(async (to, from, next) => {
     // Keep the sidebar's module section in sync while browsing that
     // module's list/form pages, so it persists across navigation there.
     setActiveModule(item.module)
+    updateSidebarTrail(item)
   }
 
   next()

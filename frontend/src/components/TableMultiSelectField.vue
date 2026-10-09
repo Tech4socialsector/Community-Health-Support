@@ -11,8 +11,8 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
-import { MultiSelect, useCall } from 'frappe-ui'
+import { computed, ref, watch } from 'vue'
+import { MultiSelect, call, useCall } from 'frappe-ui'
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -42,28 +42,31 @@ const targetDoctype = computed(() => {
   return linkField?.options || ''
 })
 
-const targetRecordsResource = useCall({
-  url: () => `/api/v2/document/${targetDoctype.value}`,
-  method: 'GET',
-  // The v2 API has no "unlimited" sentinel (limit: 0 fetches zero rows, not
-  // all of them) - this is a multi-select options list, not a paged view,
-  // so a large fixed limit stands in for "effectively all".
-  params: () => ({ fields: JSON.stringify(['name']), limit: 1000 }),
-  immediate: false,
-})
-
+// The choices: every record of the target doctype. Loaded with call()
+// once that doctype is known - useCall can't take a URL that changes
+// (given a function it requested the function's source text as a page,
+// so these lists - e.g. Pregnancy Registration's high-risk factors -
+// always came up empty).
+const targetRecords = ref([])
+let requestId = 0
 watch(
   targetDoctype,
-  (value) => {
-    if (value) targetRecordsResource.fetch()
+  async (doctype) => {
+    if (!doctype) return
+    const id = ++requestId
+    try {
+      // limit_page_length 0 = all; a multi-select needs every option.
+      const rows = await call('frappe.client.get_list', { doctype, fields: ['name'], limit_page_length: 0, order_by: 'name asc' })
+      if (id === requestId) targetRecords.value = rows || []
+    } catch (e) {
+      if (id === requestId) targetRecords.value = []
+      console.warn(`Could not load options for ${props.field.label}`, e)
+    }
   },
   { immediate: true },
 )
 
-const options = computed(() => {
-  const rows = targetRecordsResource.data || []
-  return rows.map((r) => ({ label: r.name, value: r.name }))
-})
+const options = computed(() => targetRecords.value.map((r) => ({ label: r.name, value: r.name })))
 
 const selectedValues = computed(() => {
   if (!linkFieldname.value) return []

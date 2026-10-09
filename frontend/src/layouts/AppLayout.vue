@@ -6,7 +6,7 @@
     <AppSidebar />
     <div class="flex min-w-0 flex-1 flex-col">
       <TopNavbar />
-      <main class="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
+      <main class="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
         <slot />
       </main>
     </div>

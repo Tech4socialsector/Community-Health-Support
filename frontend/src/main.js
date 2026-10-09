@@ -2,6 +2,10 @@ import './index.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import { installServerMessages } from './data/serverMessages'
+
+// Server msgprint()s after saves / calls, as Desk shows them.
+installServerMessages()
 
 // A browser can restore this page from bfcache on Back/Forward instead of
 // re-running the app - that would show whatever was in memory (including a

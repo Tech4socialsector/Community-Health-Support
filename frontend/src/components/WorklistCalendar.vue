@@ -30,7 +30,7 @@
           v-for="cell in calendarCells"
           :key="cell.key"
           class="min-h-[6rem] bg-white p-1.5 dark:bg-gray-900"
-          :class="{ 'bg-gray-50 dark:bg-gray-950': !cell.inMonth }"
+          :class="{ 'bg-gray-50 dark:bg-gray-800/60': !cell.inMonth }"
         >
           <span
             class="mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px]"
