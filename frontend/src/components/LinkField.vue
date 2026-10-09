@@ -14,10 +14,15 @@
         :value="text"
         type="text"
         :readonly="readOnly"
+        :tabindex="readOnly ? -1 : undefined"
         :placeholder="readOnly ? '' : `Search ${field.options}…`"
         autocomplete="off"
-        class="h-9 w-full rounded-lg border-0 bg-gray-100 px-3 pr-8 text-sm text-gray-900 placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-forest-400 dark:bg-gray-800 dark:text-gray-100"
-        :class="{ 'cursor-default bg-gray-50 text-gray-600 focus:ring-0 dark:bg-gray-800/60': readOnly }"
+        class="h-9 w-full rounded-lg border-0 px-3 pr-8 text-sm focus:outline-none dark:text-gray-100"
+        :class="
+          readOnly
+            ? 'cursor-default bg-gray-50 text-gray-700 dark:bg-gray-800/60'
+            : 'bg-gray-100 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-forest-400 dark:bg-gray-800'
+        "
         role="combobox"
         :aria-expanded="open"
         @focus="onFocus"
