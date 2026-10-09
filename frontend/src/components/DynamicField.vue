@@ -102,6 +102,13 @@
       </template>
     </FormControl>
   </div>
+  <SignatureField
+    v-else-if="controlType === 'signature'"
+    :field="field"
+    :model-value="modelValue"
+    :read-only="readOnly"
+    @update:model-value="$emit('update:modelValue', $event)"
+  />
   <LinkField
     v-else-if="controlType === 'link'"
     :field="field"
@@ -130,6 +137,7 @@ import UserLinkHoverCard from '@/components/UserLinkHoverCard.vue'
 import GeoLocationField from '@/components/GeoLocationField.vue'
 import TableMultiSelectField from '@/components/TableMultiSelectField.vue'
 import LinkField from '@/components/LinkField.vue'
+import SignatureField from '@/components/SignatureField.vue'
 import { evaluateDependsOn } from '@/data/dependsOn'
 
 const props = defineProps({
@@ -177,6 +185,8 @@ const controlType = computed(() => {
       return 'datetime-local'
     case 'Time':
       return 'time'
+    case 'Signature':
+      return 'signature'
     case 'Link':
       return props.field.options === 'User' ? 'text' : 'link'
     case 'Password':

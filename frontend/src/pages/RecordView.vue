@@ -142,6 +142,13 @@
                   {{ doc[field.fieldname] }}
                 </router-link>
 
+                <!-- A signature is a PNG data URL - show the signature, not its code. -->
+                <img
+                  v-else-if="field.fieldtype === 'Signature'"
+                  :src="doc[field.fieldname]"
+                  :alt="field.label"
+                  class="max-h-32 rounded-lg bg-white ring-1 ring-gray-200 dark:ring-gray-800"
+                />
                 <a v-else-if="field.fieldtype === 'Attach Image'" :href="doc[field.fieldname]" target="_blank" rel="noopener">
                   <img :src="doc[field.fieldname]" :alt="field.label" class="max-h-40 rounded-lg ring-1 ring-gray-200 dark:ring-gray-800" />
                 </a>
@@ -320,7 +327,7 @@ const visibleSections = computed(() => (doc.value ? sections.value : []))
 
 const LONG_TEXT_FIELDTYPES = new Set(['Small Text', 'Text', 'Long Text', 'Text Editor', 'Code', 'Markdown Editor', 'JSON'])
 // Wide fields stack label over value instead of the label | value row.
-const WIDE_FIELDTYPES = new Set([...LONG_TEXT_FIELDTYPES, 'Table', 'Attach Image', 'Geolocation'])
+const WIDE_FIELDTYPES = new Set([...LONG_TEXT_FIELDTYPES, 'Table', 'Attach Image', 'Geolocation', 'Signature'])
 
 function isLongText(field) {
   return LONG_TEXT_FIELDTYPES.has(field.fieldtype)

@@ -1,5 +1,5 @@
 <template>
-  <!-- Desk-style filters: "No filters applied" / one row per filter (field,
+  <!-- Desk-style filters: one row per filter (field,
   condition, value, remove), "+ Add a Filter", then Apply. Edits stay a
   draft until Apply, so half-built rows never reload the list. -->
   <div class="space-y-3 sm:w-[30rem] sm:max-w-[calc(100vw-2rem)] sm:p-1">
@@ -18,7 +18,6 @@
       </p>
     </template>
 
-    <p v-if="!draft.length" class="text-sm text-gray-500 dark:text-gray-400">No filters applied.</p>
 
     <div
       v-for="(row, index) in draft"
@@ -75,29 +74,21 @@
       <FormControl v-else type="text" placeholder="Value" v-model="row.value" />
     </div>
 
-    <button
-      type="button"
-      class="flex h-9 w-full items-center justify-center gap-1.5 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-      @click="addRow"
-    >
-      <LucideIcon name="plus" class="h-4 w-4" />
-      Add a Filter
-    </button>
-
-    <div class="flex items-center justify-between gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+    <!-- Desk's footer: "+ Add a Filter" on the left, Clear Filters and
+    Apply Filters on the right. -->
+    <div class="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
       <button
-        v-if="draft.length || modelValue.length || hasQuickValues"
         type="button"
-        class="text-sm font-medium text-gray-500 hover:text-red-600 dark:text-gray-400"
-        @click="clearAll"
+        class="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+        @click="addRow"
       >
-        Clear all
+        <LucideIcon name="plus" class="h-4 w-4" />
+        Add a Filter
       </button>
-      <span v-else />
-      <button type="button" :class="[ui.BTN_PRIMARY, '!h-8']" @click="apply">
-        <LucideIcon name="check" class="h-4 w-4" />
-        Apply Filters
-      </button>
+      <div class="flex items-center gap-2">
+        <button type="button" :class="[ui.BTN_SECONDARY, '!h-8']" @click="clearAll">Clear Filters</button>
+        <button type="button" :class="[ui.BTN_PRIMARY, '!h-8']" @click="apply">Apply Filters</button>
+      </div>
     </div>
   </div>
 </template>
@@ -127,11 +118,24 @@ const emit = defineEmits(['update:modelValue', 'update:quickValues', 'applied'])
 const quickDraft = reactive(Object.fromEntries(props.quickFields.map((f) => [f.fieldname, props.quickValues[f.fieldname] ?? ''])))
 const hasQuickValues = computed(() => Object.values(props.quickValues).some((v) => v !== '' && v != null))
 
+// Desk starts a new condition on "Equals" where the field offers it.
+function firstOperator(field) {
+  const ops = operatorsFor(field)
+  return ops.includes('=') ? '=' : ops[0]
+}
+
 let keySeq = 0
 const withKey = (row) => ({ ...row, key: ++keySeq })
 
 // A working copy - taken each time the panel opens (it re-mounts then).
 const draft = ref(props.modelValue.map(withKey))
+// Desk opens the popup with one blank row (ID / Equals) ready to fill when
+// nothing is filtered yet; a row left without a value is dropped on Apply.
+if (!draft.value.length && props.fields.length) {
+  const field = props.fields[0]
+  const operator = firstOperator(field)
+  draft.value.push(withKey({ fieldname: field.fieldname, operator, value: defaultValue(field, operator) }))
+}
 
 const fieldOptions = computed(() => props.fields.map((f) => ({ label: f.label || f.fieldname, value: f.fieldname })))
 
@@ -150,7 +154,7 @@ function defaultValue(field, operator) {
 
 function addRow() {
   const field = props.fields[0]
-  const operator = operatorsFor(field)[0]
+  const operator = firstOperator(field)
   draft.value.push(withKey({ fieldname: field?.fieldname, operator, value: defaultValue(field, operator) }))
 }
 
@@ -158,7 +162,7 @@ function addRow() {
 function setField(row, fieldname) {
   row.fieldname = fieldname
   const field = fieldFor(row)
-  row.operator = operatorsFor(field)[0]
+  row.operator = firstOperator(field)
   row.value = defaultValue(field, row.operator)
 }
 

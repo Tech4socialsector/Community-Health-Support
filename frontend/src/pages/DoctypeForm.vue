@@ -9,12 +9,8 @@
       the negative `top` cancels that same padding, which sticky positioning
       otherwise keeps as a gap above the bar (content showed through it). -->
       <div
-        class="sticky -top-4 z-20 -mx-4 -mt-4 space-y-2 border-b sm:space-y-0 border-gray-200 bg-gray-50/95 px-4 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-900/95 sm:-top-6 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-4"
+        class="sticky -top-4 z-20 -mx-4 -mt-4 border-b border-gray-200 bg-gray-50/95 px-4 py-3 backdrop-blur dark:border-gray-800 dark:bg-gray-900/95 sm:-top-6 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-4"
       >
-        <!-- Where this record sits: Home / Household profile / HH-00027 /
-        Family members / FM-00064 - each part a way back up. Shown here on
-        phones; desktop shows it in the top navbar. -->
-        <Breadcrumbs v-if="isGenericRoute" :crumbs="crumbs" class="sm:hidden" />
         <div class="flex items-center gap-2 sm:gap-3">
         <button
           type="button"
@@ -127,6 +123,12 @@
               >
                 {{ item.label }}
               </h3>
+              <div
+                v-else-if="item.kind === 'html'"
+                class="mb-5 break-inside-avoid rounded-lg bg-gray-50 p-4 text-sm leading-relaxed text-gray-800 sm:[column-span:all] dark:bg-gray-800/60 dark:text-gray-200 [&_hr]:my-3 [&_hr]:border-gray-200 [&_p+p]:mt-3 [&_strong]:font-semibold"
+                :data-fieldname="item.key"
+                v-html="item.html"
+              />
               <div v-else-if="item.kind === 'table'" class="mb-5 min-w-0 break-inside-avoid sm:[column-span:all]" :data-fieldname="item.key">
                 <ChildTable
                   :field="item.field"
@@ -176,7 +178,6 @@ import DynamicField from '@/components/DynamicField.vue'
 import ChildTable from '@/components/ChildTable.vue'
 import DocConnections from '@/components/DocConnections.vue'
 import DocActivity from '@/components/DocActivity.vue'
-import Breadcrumbs from '@/components/Breadcrumbs.vue'
 import { formCrumbs, findParentRecord } from '@/data/breadcrumbs'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { findModuleByRoute } from '@/data/modules'
@@ -295,7 +296,14 @@ const formSections = computed(() => {
       close()
       current = { key: f.fieldname, label: f.label || '', collapsible: !!f.collapsible, items: [] }
     } else if (f.fieldtype === 'Heading') {
-      if (f.label && !f.hidden && visibleNames.value.has(f.fieldname)) current.items.push({ kind: 'heading', key: f.fieldname, label: f.label })
+      // Labels like "<h5>Cardiovascular</h5>" - Desk renders the tag; here
+      // the heading style does that job, so only the text is kept.
+      const label = (f.label || '').replace(/<[^>]*>/g, '').trim()
+      if (label && !f.hidden && visibleNames.value.has(f.fieldname)) current.items.push({ kind: 'heading', key: f.fieldname, label })
+    } else if (f.fieldtype === 'HTML') {
+      // Fixed text from the form's design (e.g. the Palliative consent
+      // wording, English + Hindi) - Desk shows it as written.
+      if (f.options && !f.hidden && visibleNames.value.has(f.fieldname)) current.items.push({ kind: 'html', key: f.fieldname, html: f.options })
     } else if (tableByName.has(f.fieldname)) {
       current.items.push({ kind: 'table', key: f.fieldname, field: tableByName.get(f.fieldname) })
     } else if (formByName.has(f.fieldname)) {

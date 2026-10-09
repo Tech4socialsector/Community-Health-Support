@@ -102,8 +102,9 @@ export function bmi(heightCm, weightKg) {
   return Math.round((w / (h / 100) ** 2) * 10) / 10
 }
 
-// The tint Desk gives an open urgent follow-up row (#FEE2E2 there).
-export const URGENT_ROW_CLASS = '!bg-red-50 dark:!bg-red-900/20'
+// An open urgent follow-up row (added for a high-risk visit): a deeper
+// tint than Desk's pale #FEE2E2, so it stands out on a phone at a glance.
+export const URGENT_ROW_CLASS = '!bg-[#FCA5A5] font-medium text-red-900 dark:!bg-red-900/60 dark:text-red-100'
 export function isOpenUrgent(row) {
   return !!row?.urgent_followup && row.status !== 'Completed'
 }

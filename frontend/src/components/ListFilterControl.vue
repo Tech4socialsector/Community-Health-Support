@@ -18,11 +18,16 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event ?? '')"
   />
+  <!-- A date box shows its field's name until it's used, as in Desk - a bare
+  "mm/dd/yyyy" box in a row of filters doesn't say what it filters. -->
   <FormControl
     v-else-if="field.fieldtype === 'Date' || field.fieldtype === 'Datetime'"
-    type="date"
+    :type="dateFocused || modelValue ? 'date' : 'text'"
+    :placeholder="field.label"
     :title="field.label"
     :model-value="modelValue"
+    @focusin="dateFocused = true"
+    @focusout="dateFocused = false"
     @update:model-value="$emit('update:modelValue', $event ?? '')"
   />
   <FormControl
@@ -35,7 +40,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { FormControl } from 'frappe-ui'
 
 const props = defineProps({
@@ -44,6 +49,8 @@ const props = defineProps({
 })
 
 defineEmits(['update:modelValue'])
+
+const dateFocused = ref(false)
 
 const selectOptions = computed(() =>
   (props.field.options || '')

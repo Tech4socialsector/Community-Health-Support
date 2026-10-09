@@ -37,6 +37,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SettingsDialog: typeof import('./src/components/SettingsDialog.vue')['default']
     SettingsDoctypePanel: typeof import('./src/components/SettingsDoctypePanel.vue')['default']
+    SignatureField: typeof import('./src/components/SignatureField.vue')['default']
     Skeleton: typeof import('./src/components/Skeleton.vue')['default']
     SparklesIcon: typeof import('./src/components/SparklesIcon.vue')['default']
     TableMultiSelectField: typeof import('./src/components/TableMultiSelectField.vue')['default']

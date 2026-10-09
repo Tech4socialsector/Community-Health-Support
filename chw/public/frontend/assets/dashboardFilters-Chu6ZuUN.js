@@ -1,2 +1,0 @@
-import{i as e}from"./index-C2GUuMmK.js";const l=e({url:"/api/v2/method/chw.api.get_villages",method:"GET",immediate:!1,cacheKey:"chw-filter-villages"}),s=e({url:"/api/v2/method/chw.api.get_health_workers",method:"GET",immediate:!1,cacheKey:"chw-filter-health-workers"}),t="All Villages",h="All Health Workers";export{h as A,t as a,s as h,l as v};
-//# sourceMappingURL=dashboardFilters-Chu6ZuUN.js.map

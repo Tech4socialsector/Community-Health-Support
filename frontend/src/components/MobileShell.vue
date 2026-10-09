@@ -11,10 +11,6 @@
       </span>
     </div>
 
-    <div class="border-b bg-white px-4 py-2 dark:border-gray-800 dark:bg-gray-900">
-      <AwesomeBar class="w-full" />
-    </div>
-
     <main class="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4">
       <slot />
     </main>
@@ -26,7 +22,6 @@
 </template>
 
 <script setup>
-import AwesomeBar from '@/components/AwesomeBar.vue'
 import MobileNav from '@/components/MobileNav.vue'
 import NotificationPanel from '@/components/NotificationPanel.vue'
 import AiAssistant from '@/components/AiAssistant.vue'

@@ -46,30 +46,35 @@
           </span>
         </div>
 
-        <!-- Toolbar, one row. Desktop (lg+): search, the form's first quick
-        filters, then the buttons. Narrower screens: search + buttons only
-        (icons on a phone, like Desk's mobile list) - every filter lives in
-        the one Filter button there. Filter / Sort / Columns open as
-        dropdowns on desktop, bottom sheets on a phone. -->
-        <div class="flex items-center gap-2">
-          <div class="relative min-w-0 flex-1 lg:w-60 lg:flex-none">
-            <LucideIcon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              v-model="search"
-              type="search"
-              :placeholder="isPhone ? 'Search' : `Search ${pageTitle}`"
-              class="h-8 w-full rounded-lg border-0 bg-white pl-9 pr-3 text-sm text-gray-900 ring-1 ring-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-forest-400 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700"
-            />
-          </div>
-          <div v-if="inlineFilterFields.length" class="flex min-w-0 flex-1 items-center gap-2">
-            <div v-for="field in inlineFilterFields" :key="field.fieldname" class="w-40 flex-shrink-0">
+        <!-- Toolbar. Desktop (lg+), like Desk: ID / search, then a box for
+        every standard filter (wrapping onto more lines when there are
+        many), with the buttons at the right. Narrower screens: search +
+        buttons only (icons on a phone) - the filters live in the Filter
+        sheet there. Filter / Sort / Columns open as dropdowns on desktop,
+        bottom sheets on a phone. -->
+        <div class="flex items-start gap-2">
+          <div class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <div class="relative min-w-0 flex-1 lg:w-44 lg:flex-none">
+              <LucideIcon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                v-model="search"
+                type="search"
+                :placeholder="isPhone ? 'Search' : 'ID or name'"
+                class="h-8 w-full rounded-lg border-0 bg-white pl-9 pr-3 text-sm text-gray-900 ring-1 ring-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-forest-400 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700"
+              />
+            </div>
+            <div v-for="field in inlineFilterFields" :key="field.fieldname" class="w-44 flex-shrink-0">
               <ListFilterControl :field="field" v-model="filterValues[field.fieldname]" />
             </div>
-            <button v-if="hasQuickFilters" type="button" class="text-sm font-medium text-forest-700 hover:underline dark:text-forest-300" @click="clearQuickFilters">
+            <button
+              v-if="inlineFilterFields.length && hasQuickFilters"
+              type="button"
+              class="text-sm font-medium text-forest-700 hover:underline dark:text-forest-300"
+              @click="clearQuickFilters"
+            >
               Clear
             </button>
           </div>
-          <div v-else class="hidden flex-1 lg:block" />
 
           <div class="flex flex-shrink-0 items-center gap-1.5 sm:gap-2">
             <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2']" aria-label="Refresh" title="Refresh" :disabled="loading" @click="load">
@@ -80,13 +85,14 @@
               <span class="hidden sm:inline">Export</span>
             </button>
 
-            <!-- All the form's standard filters, then "Add a Filter" rows. -->
+            <!-- Desk's filter popup: condition rows. On a phone / tablet the
+            standard filters are in it too, as there are no boxes there. -->
             <ToolbarMenu label="Filter" icon="list-filter" :badge="activeFilterCount || null" align="right" width="sm:w-auto" icon-only-on-phone>
               <template #default="{ close }">
                 <FilterBuilder
                   v-model="advancedFilters"
                   :fields="filterableFields"
-                  :quick-fields="filterFields"
+                  :quick-fields="showInlineFilters ? [] : filterFields"
                   :quick-values="filterValues"
                   @update:quick-values="Object.assign(filterValues, $event)"
                   @applied="close"
@@ -459,18 +465,14 @@ watch(
   { immediate: true },
 )
 
-// Only text / dropdown filters go inline: a bare date box ("mm/dd/yyyy")
-// can't show which field it filters. None below lg - the phone toolbar has
-// one Filter button holding them all - two on a laptop, three if very wide.
+// Desk's list: every "In Standard Filter" field as a box above the list
+// (dates included - they show their label until picked). From lg up;
+// narrower screens keep them all in the one Filter sheet instead.
 const breakpoints = useBreakpoints(breakpointsTailwind)
 // The phone toolbar's search box is narrow - a short placeholder fits it.
 const isPhone = breakpoints.smaller('sm')
-const inlineCount = computed(() =>
-  breakpoints.greaterOrEqual('2xl').value ? 3 : breakpoints.greaterOrEqual('lg').value ? 2 : 0,
-)
-const inlineFilterFields = computed(() =>
-  filterFields.value.filter((f) => f.fieldtype !== 'Date' && f.fieldtype !== 'Datetime').slice(0, inlineCount.value),
-)
+const showInlineFilters = breakpoints.greaterOrEqual('lg')
+const inlineFilterFields = computed(() => (showInlineFilters.value ? filterFields.value : []))
 const isSet = (value) => value !== '' && value != null
 const hasQuickFilters = computed(() => filterFields.value.some((f) => isSet(filterValues[f.fieldname])))
 
@@ -490,7 +492,9 @@ const quickChips = computed(() =>
 
 // Badge on the Filter button: everything it holds that is switched on.
 const activeFilterCount = computed(
-  () => filterFields.value.filter((f) => isSet(filterValues[f.fieldname])).length + advancedFilters.value.length,
+  () =>
+    (showInlineFilters.value ? 0 : filterFields.value.filter((f) => isSet(filterValues[f.fieldname])).length) +
+    advancedFilters.value.length,
 )
 
 function clearQuickFilters() {
