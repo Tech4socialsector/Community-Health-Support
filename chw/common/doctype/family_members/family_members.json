@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "primary_details_tab",
+  "hmis_patient_registration",
   "hhid",
   "village",
   "gram_panchayat",
@@ -30,9 +31,7 @@
   "education",
   "date",
   "health_worker_name",
-  "suggested_charity_percentage",
   "status",
-  "hmis_patient_registration",
   "section_break_kdnz",
   "disability",
   "type_of_disability",
@@ -51,7 +50,17 @@
   "does_the_person_require_home_visit",
   "referal_for_the_pallative_care",
   "is_the_patient_postpartum",
-  "is_the_patient_a_child_0_to_1"
+  "is_the_patient_a_child_0_to_1",
+  "charity_section",
+  "charity_breadwinner_occupation",
+  "charity_dependent_ratio",
+  "charity_health_condition",
+  "charity_living_conditions",
+  "charity_disability_severity",
+  "charity_mch_assessment",
+  "charity_column_break",
+  "charity_assessment_score",
+  "suggested_charity_percentage"
  ],
  "fields": [
   {
@@ -209,8 +218,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "hhid.charity_percentage_band",
-   "fetch_if_empty": 1,
+   "description": "LCH Palliative Care Charity Criteria: 20-24 = >80%, 17-19 = 60-80%, 12-16 = 40-60%, 7-11 = 20-40%, below 7 = 0-20%.",
    "fieldname": "suggested_charity_percentage",
    "fieldtype": "Data",
    "label": "Suggested Charity %",
@@ -355,6 +363,60 @@
    "fieldtype": "Link",
    "label": "Sub Center",
    "options": "Sub Centre"
+  },
+  {
+   "fieldname": "charity_section",
+   "fieldtype": "Section Break",
+   "label": "Charity Assessment (LCH Criteria)"
+  },
+  {
+   "fieldname": "charity_breadwinner_occupation",
+   "fieldtype": "Select",
+   "label": "Occupation of the Primary Breadwinner",
+   "options": "\nDoes not have any reasonable breadwinners in the family.\nBreadwinners are daily wage laborers.\nBreadwinners have a monthly source of income, but on a contract basis.\nHas an established source of income from the government or private firm."
+  },
+  {
+   "fieldname": "charity_dependent_ratio",
+   "fieldtype": "Select",
+   "label": "Ratio of Family Members Earning Income to Number of Dependents",
+   "options": "\nFor every 1 person earning income, more than 6 people are dependents.\nFor every 1 person earning income, 5-6 people are dependents.\nFor every 1 person earning income, 3-4 people are dependents.\nFor every 1 person earning income, 1-2 people are dependents."
+  },
+  {
+   "fieldname": "charity_health_condition",
+   "fieldtype": "Select",
+   "label": "Health Condition of Family Members",
+   "options": "\nMore than one family member has a disability or a chronic illness.\nAny of the family members are undergoing regular medical treatment and have to pay from their pocket.\nFamily member is undergoing regular medical treatment and have insurance support.\nNo health concerns, avails medical support as and when needed without financial constraints."
+  },
+  {
+   "fieldname": "charity_living_conditions",
+   "fieldtype": "Select",
+   "label": "Living Conditions",
+   "options": "\nLiving in temporary tents or in houses made of mud with thatched roof.\nLiving in rented house without an owned one, with the required amenities.\nLiving in own house with multiple members sharing the same space or paying house loans.\nLiving in their own house with control over electricity and water."
+  },
+  {
+   "depends_on": "eval:doc.is_the_person_currently_pregnant!=\"Yes\"",
+   "fieldname": "charity_disability_severity",
+   "fieldtype": "Select",
+   "label": "Disability Severity",
+   "options": "\nNeeds to be carried around and requires assistance on a mobility device.\nRequires a wheelchair for mobility. Can propel wheelchair independently.\nCan walk with support /assistive device.\nCan move around independently."
+  },
+  {
+   "depends_on": "eval:doc.does_the_person_require_palliative_care!=\"Yes\"",
+   "fieldname": "charity_mch_assessment",
+   "fieldtype": "Select",
+   "label": "MCH Charity Assessment",
+   "options": "\nUnwanted girl child.\nChild with signs of malnutrition/ neglect.\nGirl Child.\nPregnancy with high risk factors."
+  },
+  {
+   "fieldname": "charity_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Sum of the 6 criteria above (each scored 1-4, highest need = 4). Range 6-24.",
+   "fieldname": "charity_assessment_score",
+   "fieldtype": "Int",
+   "label": "Overall Score",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -385,7 +447,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-10-09 15:00:00.000000",
+ "modified": "2026-10-09 15:29:20.615754",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",
@@ -430,12 +492,11 @@
  ],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
- "show_title_field_in_link": 0,
+ "search_fields": "family_member,hhid",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "family_member",
  "track_changes": 1,
- "track_seen": 1,
- "search_fields": "family_member,hhid"
+ "track_seen": 1
 }

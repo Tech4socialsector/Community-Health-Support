@@ -27,20 +27,7 @@
   "toilet",
   "cattles",
   "address",
-  "health_worker_name",
-  "charity_section",
-  "charity_breadwinner_occupation",
-  "charity_dependent_ratio",
-  "charity_health_condition",
-  "charity_living_conditions",
-  "charity_disability_severity",
-  "unwanted_girl_child",
-  "hild_with_signs_of_malnutrition_neglect",
-  "girl_child",
-  "pregnancy_with_high_risk_factors",
-  "charity_column_break",
-  "charity_assessment_score",
-  "charity_percentage_band"
+  "health_worker_name"
  ],
  "fields": [
   {
@@ -178,82 +165,6 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nI live here\nI work outside\nout of town"
-  },
-  {
-   "fieldname": "charity_section",
-   "fieldtype": "Section Break",
-   "label": "Charity Assessment (LCH Criteria)"
-  },
-  {
-   "fieldname": "charity_breadwinner_occupation",
-   "fieldtype": "Select",
-   "label": "Occupation of the Primary Breadwinner",
-   "options": "\nDoes not have any reasonable breadwinners in the family.\nBreadwinners are daily wage laborers.\nBreadwinners have a monthly source of income, but on a contract basis.\nHas an established source of income from the government or private firm."
-  },
-  {
-   "fieldname": "charity_dependent_ratio",
-   "fieldtype": "Select",
-   "label": "Ratio of Family Members Earning Income to Number of Dependents",
-   "options": "\nFor every 1 person earning income, more than 6 people are dependents.\nFor every 1 person earning income, 5-6 people are dependents.\nFor every 1 person earning income, 3-4 people are dependents.\nFor every 1 person earning income, 1-2 people are dependents."
-  },
-  {
-   "fieldname": "charity_health_condition",
-   "fieldtype": "Select",
-   "label": "Health Condition of Family Members",
-   "options": "\nMore than one family member has a disability or a chronic illness.\nAny of the family members are undergoing regular medical treatment and have to pay from their pocket.\nFamily member is undergoing regular medical treatment and have insurance support.\nNo health concerns, avails medical support as and when needed without financial constraints."
-  },
-  {
-   "fieldname": "charity_living_conditions",
-   "fieldtype": "Select",
-   "label": "Living Conditions",
-   "options": "\nLiving in temporary tents or in houses made of mud with thatched roof.\nLiving in rented house without an owned one, with the required amenities.\nLiving in own house with multiple members sharing the same space or paying house loans.\nLiving in their own house with control over electricity and water."
-  },
-  {
-   "fieldname": "charity_disability_severity",
-   "fieldtype": "Heading",
-   "label": "<h5>MCH Charity Assessment</h5>"
-  },
-  {
-   "fieldname": "charity_column_break",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Sum of the 5 criteria above (each scored 1-4, highest need = 4). Range 5-20.",
-   "fieldname": "charity_assessment_score",
-   "fieldtype": "Int",
-   "label": "Overall Score",
-   "read_only": 1
-  },
-  {
-   "description": "LCH Palliative Care Charity Criteria: 17-20 = >80%, 14-16 = 60-80%, 10-13 = 40-60%, 6-9 = 20-40%, below 6 = 0-20%.",
-   "fieldname": "charity_percentage_band",
-   "fieldtype": "Data",
-   "label": "Suggested Charity %",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "unwanted_girl_child",
-   "fieldtype": "Check",
-   "label": "Unwanted girl child"
-  },
-  {
-   "default": "0",
-   "fieldname": "hild_with_signs_of_malnutrition_neglect",
-   "fieldtype": "Check",
-   "label": "hild with signs of malnutrition/ neglect"
-  },
-  {
-   "default": "0",
-   "fieldname": "girl_child",
-   "fieldtype": "Check",
-   "label": "Girl Child"
-  },
-  {
-   "default": "0",
-   "fieldname": "pregnancy_with_high_risk_factors",
-   "fieldtype": "Check",
-   "label": "Pregnancy with high risk factors"
   }
  ],
  "grid_page_length": 50,
