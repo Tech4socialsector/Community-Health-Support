@@ -211,7 +211,7 @@ after_migrate = ["chw.permissions.restore_standard_perms_hidden_by_custom"]
 
 doc_events = {
 	"Birth Registration": {
-		"after_insert": "chw.api.create_pnc_from_birth_registration"
+		"after_insert": "chw.api.close_anc_followup_from_birth_registration"
 	}
 }
 

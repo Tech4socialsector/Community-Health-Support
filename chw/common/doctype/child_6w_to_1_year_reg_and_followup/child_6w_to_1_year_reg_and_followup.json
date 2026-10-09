@@ -11,6 +11,8 @@
   "hhid",
   "patient_name",
   "village",
+  "gram_panchayat",
+  "sub_cemtre",
   "age",
   "occupation",
   "column_break_vl1",
@@ -106,7 +108,7 @@
    "fieldname": "village",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Address / Village",
+   "label": "Village",
    "read_only": 1
   },
   {
@@ -437,12 +439,26 @@
    "label": "Child 6w to 1y Docter Notes",
    "options": "Child 6w to 1y Followup Docter",
    "print_hide": 1
+  },
+  {
+   "fetch_from": "fmid.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "fmid.sub_center",
+   "fieldname": "sub_cemtre",
+   "fieldtype": "Link",
+   "label": "Sub Cemtre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-08 22:02:34.713025",
+ "modified": "2026-10-09 12:03:53.299403",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Reg and Followup",

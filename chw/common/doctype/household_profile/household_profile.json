@@ -83,16 +83,20 @@
    "options": "Village"
   },
   {
+   "fetch_from": "village.village_code",
    "fieldname": "gram_panchayat",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Gram Panchayat"
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
   },
   {
+   "fetch_from": "village.sub_center",
    "fieldname": "subcenter",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Subcenter"
+   "label": "Subcenter",
+   "options": "Sub Centre"
   },
   {
    "fieldname": "phone_no",
@@ -260,7 +264,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-09 09:26:02.050252",
+ "modified": "2026-10-09 10:26:18.780727",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

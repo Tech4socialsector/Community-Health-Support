@@ -11,8 +11,8 @@
   "hope_id",
   "rchid",
   "village",
-  "subcenter",
   "gram_panchayat",
+  "sub_centre",
   "first_name",
   "father_husband_name",
   "age",
@@ -720,22 +720,18 @@
    "options": "Previous ANC Visits for Mother"
   },
   {
-   "fetch_from": "familymember_id.village",
-   "fetch_if_empty": 1,
-   "fieldname": "subcenter",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Subcenter"
+   "fetch_from": "familymember_id.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
   },
   {
-   "fetch_from": "familymember_id.village",
-   "fetch_if_empty": 1,
-   "fieldname": "gram_panchayat",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Gram Panchayat"
+   "fetch_from": "familymember_id.sub_center",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
@@ -750,7 +746,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-09 10:14:52.255257",
+ "modified": "2026-10-09 10:49:27.121591",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

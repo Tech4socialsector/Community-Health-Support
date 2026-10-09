@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:name_of_child",
+ "autoname": "PNC-.#####",
  "creation": "2026-08-10 15:25:41.737279",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,6 +10,8 @@
   "anc_followup_id",
   "first_name",
   "village",
+  "gram_panchayat",
+  "sub_centre",
   "father_husband_name",
   "name_of_child",
   "column_break_gvxz",
@@ -81,8 +83,7 @@
    "fetch_if_empty": 1,
    "fieldname": "name_of_child",
    "fieldtype": "Data",
-   "label": "Name of the child ",
-   "unique": 1
+   "label": "Name of the child "
   },
   {
    "fieldname": "column_break_gvxz",
@@ -186,18 +187,31 @@
    "fieldname": "mother_followup_docter_notes",
    "fieldtype": "Table",
    "label": "Mother Followup Docter Notes",
-   "options": "PNC Followup Mother Docter Notes",
-   "reqd": 1
+   "options": "PNC Followup Mother Docter Notes"
+  },
+  {
+   "fetch_from": "birth_registration_id.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "birth_registration_id.sub_centre",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-07 16:52:38.590076",
+ "modified": "2026-10-09 11:18:09.977547",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

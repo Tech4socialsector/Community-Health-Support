@@ -11,6 +11,8 @@
   "hhid",
   "patient_name",
   "village",
+  "gram_panchayat",
+  "sub_centre",
   "age",
   "occupation",
   "health_worker_name",
@@ -100,7 +102,7 @@
    "fieldname": "village",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Address / Village"
+   "label": "Village"
   },
   {
    "fetch_from": "fmid.age",
@@ -396,12 +398,26 @@
   {
    "fieldname": "column_break_pwye",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "fmid.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "fmid.sub_center",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-01 11:24:58.692526",
+ "modified": "2026-10-09 12:02:35.604993",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",

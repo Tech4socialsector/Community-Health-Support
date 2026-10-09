@@ -524,7 +524,7 @@ def current_child_growth_classification_counts(village=None):
 def anc_fully_completed_names(village=None):
     """Names of ANC Follow-up records counted as exited: primarily those explicitly
     `status = 'Closed'` (set automatically once her Birth Registration is recorded -
-    see create_pnc_from_birth_registration), falling back to the older heuristic of
+    see close_anc_followup_from_birth_registration), falling back to the older heuristic of
     every generated visit row (LMP to EDD, pre-filled by ANCFollowup.generate_visit_schedule)
     being marked Completed, for any record that finished before that status field
     existed."""
@@ -670,71 +670,38 @@ def find_matching_anc_followup(family_member_id, date_of_delivery):
     return frappe.db.get_value('ANC Follow-up', {'pregnant_id': pregnancy_registration}, 'name')
 
 
-def create_pnc_from_birth_registration(doc, method=None):
-    """Move a mother from ANC into postnatal tracking automatically: when a Birth
-    Registration is saved, create her linked PNC record (skipping if one already
-    exists, or if the family member isn't female - PNC.validate_gender() would
-    reject it anyway), and close out her matched ANC Follow-up record so its
-    remaining (now-moot) Pending visits stop counting as due/backlog. Runs on
-    after_insert, so it never fires twice for the same Birth Registration.
-    """
-    # `fmid` - the mother's Family member ID. This read `family_member_id`,
-    # a renamed field, which raised an AttributeError on every new record.
+def close_anc_followup_from_birth_registration(doc, method=None):
+    """When a Birth Registration is saved, close her matched ANC Follow-up
+    record so its remaining (now-moot) Pending visits stop counting as
+    due/backlog. Runs on after_insert, so it never fires twice for the same
+    Birth Registration. PNC is no longer auto-created here - staff create it
+    manually now."""
     if not doc.fmid:
         return
 
-    if frappe.db.exists('PNC', {'birth_registration_id': doc.name}):
-        return
-
-    gender = frappe.db.get_value('Family members', doc.fmid, 'gender')
-    if gender and gender != 'Female':
-        return
-
     anc_followup_id = find_matching_anc_followup(doc.fmid, doc.date_of_delivery)
+    if not anc_followup_id:
+        return
 
-    # A failed PNC insert leaves its own error ("Data missing in table ...")
-    # in the message queue, which then popped up as an error on a birth
-    # record that saved fine - so drop it and say plainly what happened.
+    # A failed ANC Follow-up save leaves its own error in the message queue,
+    # which would otherwise pop up as an error on a birth record that saved
+    # fine - so drop it and say plainly what happened instead.
     messages_before = len(frappe.local.message_log)
     try:
-        frappe.get_doc({
-            'doctype': 'PNC',
-            'birth_registration_id': doc.name,
-            'anc_followup_id': anc_followup_id,
-            'first_name': doc.first_name,
-            'village': doc.village,
-            'father_husband_name': doc.husbands_name,
-            'name_of_child': doc.baby_name,
-            'date_of_delivery': doc.date_of_delivery,
-            'phone_number': doc.phone_number,
-            'health_worker_name': doc.health_worker_name,
-        }).insert(ignore_permissions=True)
+        anc_followup = frappe.get_doc('ANC Follow-up', anc_followup_id)
+        if anc_followup.status != 'Closed':
+            anc_followup.status = 'Closed'
+            anc_followup.save(ignore_permissions=True)
     except Exception:
-        frappe.log_error(frappe.get_traceback(), 'Failed to auto-create PNC from Birth Registration')
+        frappe.log_error(frappe.get_traceback(), 'Failed to close ANC Follow-up from Birth Registration')
+        # Its "Value missing for ANC Follow-up" errors aren't about the
+        # birth record the user just saved.
         del frappe.local.message_log[messages_before:]
         frappe.msgprint(
-            _('Birth Registration saved, but the PNC record could not be created automatically. Please create it from PNC.'),
+            _('Birth Registration saved, but ANC Follow-up {0} could not be closed automatically. Please close it from ANC Follow-up.').format(anc_followup_id),
             indicator='orange',
             alert=True,
         )
-
-    if anc_followup_id:
-        messages_before = len(frappe.local.message_log)
-        try:
-            anc_followup = frappe.get_doc('ANC Follow-up', anc_followup_id)
-            if anc_followup.status != 'Closed':
-                anc_followup.status = 'Closed'
-                anc_followup.save(ignore_permissions=True)
-        except Exception:
-            frappe.log_error(frappe.get_traceback(), 'Failed to close ANC Follow-up from Birth Registration')
-            # Same as above: its "Value missing for ANC Follow-up" errors
-            # aren't about the birth record the user just saved.
-            del frappe.local.message_log[messages_before:]
-            frappe.msgprint(
-                _('Birth Registration saved, but ANC Follow-up {0} could not be closed automatically. Please close it from ANC Follow-up.').format(anc_followup_id),
-                indicator='orange',
-                alert=True,
-            )
 
 
 @frappe.whitelist()

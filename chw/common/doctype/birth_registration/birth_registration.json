@@ -12,6 +12,8 @@
   "first_name",
   "husbands_name",
   "village",
+  "gram_panchayat",
+  "sub_centre",
   "age",
   "phone_number",
   "delivery_doneby",
@@ -27,9 +29,9 @@
   "did_the_baby_have_any_complications",
   "if_yes_did_the_baby_have_any_complications",
   "family_planning",
+  "if_yes_specify_the_method",
   "was_the_baby_born_preterm__37_weeks",
   "what_gestational_age_in_weeks_was_the_baby_born",
-  "if_yes_specify_the_method",
   "delivery_outcome",
   "birth_status",
   "section_break_yrgg",
@@ -311,6 +313,20 @@
    "fieldname": "what_gestational_age_in_weeks_was_the_baby_born",
    "fieldtype": "Data",
    "label": "What gestational age in weeks was the baby born "
+  },
+  {
+   "fetch_from": "prid.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "prid.sub_centre",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
@@ -321,7 +337,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-10-09 11:30:00.000000",
+ "modified": "2026-10-09 12:26:12.073683",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",

@@ -10,6 +10,8 @@
   "first_name",
   "hh_id",
   "village",
+  "gram__panchayat",
+  "sub_centre",
   "age",
   "gestational_age_by_ultrasound",
   "vitamins",
@@ -199,12 +201,26 @@
    "fieldtype": "Select",
    "label": "Vitamins",
    "options": "\nFolic Acid\nIron/calcium daily\nIron twice daily/ calcium daily"
+  },
+  {
+   "fetch_from": "pregnant_id.gram_panchayat",
+   "fieldname": "gram__panchayat",
+   "fieldtype": "Link",
+   "label": "Gram  Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "pregnant_id.sub_centre",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-08 16:21:28.279833",
+ "modified": "2026-10-09 10:58:22.330542",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

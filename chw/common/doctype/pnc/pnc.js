@@ -88,6 +88,14 @@ const DEFAULT_VISIT_SCHEDULE = [
 ];
 const DEFAULT_RISK_ALERT_DAYS = 1;
 
+// calculate_next_pnc_visit_date kicks off an unawaited async chain each
+// time it's called. If it's triggered again before an earlier run's chain
+// resolves, that older call can finish AFTER the newer one and overwrite an
+// already-correct, already-saved value - marking the form dirty again right
+// after a save. This token lets only the most recently triggered call apply
+// its result; every earlier one quietly no-ops once it resolves.
+let pnc_visit_date_calc_token = 0;
+
 function get_full_schedule() {
 	// A child table (PNC Visit Schedule Row) has no permission rules of its
 	// own, so it can't reliably be listed directly from the client - fetched
@@ -281,8 +289,10 @@ function compute_track(frm, rows, schedule_rows) {
 
 function calculate_next_pnc_visit_date(frm) {
 	if (!frm.doc.date_of_delivery) return;
+	const my_token = ++pnc_visit_date_calc_token;
 
 	get_full_schedule().then((schedule_rows) => {
+		if (my_token !== pnc_visit_date_calc_token) return;
 		// Mother and baby are tracked independently - each gets its own
 		// effective next-visit date (an open urgent row if either table has
 		// one, otherwise the normal schedule lookup) - but they share the

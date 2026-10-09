@@ -58,6 +58,14 @@ const DEFAULT_VISIT_SCHEDULE = [
 ];
 const DEFAULT_RISK_ALERT_DAYS = 1;
 
+// calculate_next_visit_date kicks off an unawaited async chain each time
+// it's called. If triggered again before an earlier run's chain resolves,
+// that older call can finish AFTER the newer one and overwrite an
+// already-correct, already-saved value - marking the form dirty again right
+// after a save. This token lets only the most recently triggered call apply
+// its result; every earlier one quietly no-ops once it resolves.
+let visit_date_calc_token = 0;
+
 function get_full_schedule() {
 	// A child table (Postpartum Visit Schedule Row) has no permission rules
 	// of its own, so it can't reliably be listed directly from the client -
@@ -214,8 +222,10 @@ function calculate_next_visit_date(frm) {
 	const high_risk = currently_high_risk(rows);
 	const completed_count = rows.filter((row) => row.status === "Completed").length;
 	const visit_number = completed_count + 1;
+	const my_token = ++visit_date_calc_token;
 
 	get_full_schedule().then((schedule_rows) => {
+		if (my_token !== visit_date_calc_token) return;
 		const window = get_visit_window(visit_number, schedule_rows);
 		if (!window) {
 			// every scheduled visit has been completed

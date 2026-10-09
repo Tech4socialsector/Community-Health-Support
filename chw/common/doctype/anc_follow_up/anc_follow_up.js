@@ -11,6 +11,16 @@
 const FOLLOWUP_TABLE_FIELDS = ["anc_followup", "anc_followup_for_nurse", "anc_followup_for_docter"];
 const NURSE_TABLE_FIELD = "anc_followup_for_nurse";
 
+// calculate_next_anc_visit_date is triggered from several places (a Nurse
+// row's date/status changing, pregnant_id changing) and each run kicks off
+// an unawaited chain of async server calls. If it's triggered again before
+// an earlier run's chain has resolved, the OLDER call can finish AFTER the
+// newer one - overwriting an already-correct, already-saved value with a
+// stale result and marking the form dirty again right after a save. This
+// token makes only the most recently triggered call actually allowed to
+// apply its result; every earlier one quietly no-ops once it resolves.
+let anc_visit_date_calc_token = 0;
+
 frappe.ui.form.on("ANC Follow-up", {
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
@@ -314,6 +324,8 @@ function get_pending_urgent(frm) {
 }
 
 function calculate_next_anc_visit_date(frm) {
+	const my_token = ++anc_visit_date_calc_token;
+
 	if (frm.doc.status === "Closed") {
 		// She's delivered - no more ANC visits are due.
 		frm.set_value("next_anc_visit_date", null);
@@ -339,6 +351,11 @@ function calculate_next_anc_visit_date(frm) {
 		if (!info.lmp_date) return;
 
 		get_window_policy().then(({ window_days, visits_per_window, alert_within_days, automatic_window_count }) => {
+			// A newer call to this function has started since this chain
+			// began - let that one's result stand instead of overwriting it
+			// with this now-stale one.
+			if (my_token !== anc_visit_date_calc_token) return;
+
 			const completed_count = (frm.doc[NURSE_TABLE_FIELD] || []).filter((row) => row.status === "Completed").length;
 			const starting_window = get_window_index(
 				frm.doc.creation || frappe.datetime.get_today(),

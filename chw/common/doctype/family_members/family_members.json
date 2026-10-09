@@ -10,7 +10,7 @@
   "hhid",
   "village",
   "gram_panchayat",
-  "subcenter",
+  "sub_center",
   "head_of_the_family_member",
   "family_member",
   "relationship",
@@ -178,9 +178,9 @@
   },
   {
    "fieldname": "occupation",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Occupation",
-   "options": "\nStudying\nWorking\nHomemaker\nUnemployed\nRetired\nOther"
+   "options": "Occupation"
   },
   {
    "depends_on": "eval:doc.occupation==\"Other\"",
@@ -345,20 +345,16 @@
   {
    "fetch_from": "hhid.gram_panchayat",
    "fieldname": "gram_panchayat",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
+   "fieldtype": "Link",
    "label": "Gram Panchayat",
-   "read_only": 1
+   "options": "Gram Panchayat"
   },
   {
    "fetch_from": "hhid.subcenter",
-   "fieldname": "subcenter",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Subcenter",
-   "read_only": 1
+   "fieldname": "sub_center",
+   "fieldtype": "Link",
+   "label": "Sub Center",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,

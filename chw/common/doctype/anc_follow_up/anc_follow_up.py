@@ -47,7 +47,7 @@ class ANCFollowup(Document):
 	def close_on_delivery_or_abortion(self):
 		# Two independent signals can close this record, whichever arrives
 		# first - Birth Registration (handled separately, in chw.api's
-		# create_pnc_from_birth_registration) is the guaranteed eventual
+		# close_anc_followup_from_birth_registration) is the guaranteed eventual
 		# backstop, but it's a different document that may not get created
 		# until well after the delivery itself. Delivery Status / Aboration
 		# Status set directly here close it immediately instead of waiting.

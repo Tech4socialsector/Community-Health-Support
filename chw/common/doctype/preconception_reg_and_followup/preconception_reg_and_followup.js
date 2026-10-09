@@ -12,7 +12,20 @@ frappe.ui.form.on("Preconception Reg and Followup", {
 			frappe.model.set_value(cdt, cdn, "date_of_visit", frappe.datetime.get_today());
 		}
 	},
+	followup_nurse_notes_add(frm, cdt, cdn) {
+		fill_today_if_blank(cdt, cdn, "visit_date");
+	},
+	followup_docter_notes_add(frm, cdt, cdn) {
+		fill_today_if_blank(cdt, cdn, "visit_date");
+	},
 });
+
+function fill_today_if_blank(cdt, cdn, fieldname) {
+	const row = locals[cdt][cdn];
+	if (!row[fieldname]) {
+		frappe.model.set_value(cdt, cdn, fieldname, frappe.datetime.get_today());
+	}
+}
 
 // Height (cm) and Weight (kg), live as the CHW types either one into a
 // followup row - the server's own validate() recalculates the same way as a

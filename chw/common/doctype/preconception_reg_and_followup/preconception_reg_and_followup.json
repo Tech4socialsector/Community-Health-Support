@@ -9,10 +9,12 @@
   "visit_logistics_section",
   "fmid",
   "hhid",
+  "hope_id",
   "patient_name",
   "village",
+  "gram_panchayat",
+  "sub_centre",
   "age",
-  "hope_id",
   "column_break_vl1",
   "occupation",
   "health_worker_name",
@@ -95,7 +97,7 @@
    "fieldname": "village",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Address / Village",
+   "label": "Village",
    "read_only": 1
   },
   {
@@ -362,12 +364,26 @@
    "fieldtype": "Table",
    "label": "Followup Docter Notes",
    "options": "Preconception Docter Notes"
+  },
+  {
+   "fetch_from": "fmid.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "fmid.sub_center",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-08 21:56:38.472774",
+ "modified": "2026-10-09 13:01:33.032375",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Preconception Reg and Followup",
