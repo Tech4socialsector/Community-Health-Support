@@ -8,6 +8,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { toast } from 'frappe-ui'
+import { t } from '@/data/i18n'
 
 // virtual:pwa-register bakes its service-worker URL as `buildBase + filename`
 // (vite-plugin-pwa always couples the two - there's no option to separate
@@ -36,10 +37,10 @@ onMounted(async () => {
     if (refreshPromptShown) return
     refreshPromptShown = true
     wb.addEventListener('controlling', () => window.location.reload())
-    toast.info('A new version of the app is available.', {
+    toast.info(t('A new version of the app is available.'), {
       duration: 0,
       action: {
-        label: 'Refresh',
+        label: t('Refresh'),
         onClick: () => updateServiceWorker.value(),
       },
     })
@@ -49,7 +50,7 @@ onMounted(async () => {
     if (event.isUpdate || event.isExternal) {
       showRefreshPrompt()
     } else {
-      toast.success('The app is ready to work offline.')
+      toast.success(t('The app is ready to work offline.'))
     }
   })
   wb.addEventListener('waiting', () => {

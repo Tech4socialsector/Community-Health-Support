@@ -6,7 +6,7 @@
   <div class="sm:w-72">
     <div class="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-500">
       <LucideIcon name="lock" class="h-3.5 w-3.5" />
-      ID
+      {{ t('ID') }}
     </div>
     <ul>
       <li
@@ -27,7 +27,7 @@
           type="button"
           class="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-navy-900 disabled:opacity-30 dark:hover:bg-gray-700 sm:hidden"
           :disabled="index === 0"
-          :aria-label="`Move ${labelFor(fieldname)} up`"
+          :aria-label="t('Move {0} up', [labelFor(fieldname)])"
           @click="move(index, index - 1)"
         >
           <LucideIcon name="chevron-up" class="h-4 w-4" />
@@ -35,7 +35,7 @@
         <button
           type="button"
           class="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-700"
-          :aria-label="`Remove ${labelFor(fieldname)}`"
+          :aria-label="t('Remove {0}', [labelFor(fieldname)])"
           @click="remove(index)"
         >
           <LucideIcon name="x" class="h-4 w-4" />
@@ -52,13 +52,13 @@
         @click="adding = true"
       >
         <LucideIcon name="plus" class="h-4 w-4" />
-        Add Column
+        {{ t('Add Column') }}
       </button>
       <div v-else class="space-y-1">
         <input
           v-model="addSearch"
           type="search"
-          placeholder="Find a field…"
+          :placeholder="t('Find a field…')"
           class="h-8 w-full rounded-md border-0 bg-gray-50 px-2.5 text-sm ring-1 ring-gray-200 focus:outline-none focus:ring-2 focus:ring-forest-400 dark:bg-gray-800 dark:ring-gray-700"
         />
         <div class="max-h-48 overflow-y-auto">
@@ -69,9 +69,9 @@
             class="block w-full truncate rounded-md px-2 py-1.5 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-800"
             @click="add(field.fieldname)"
           >
-            {{ field.label || field.fieldname }}
+            {{ t(field.label || field.fieldname) }}
           </button>
-          <p v-if="!filteredAddable.length" class="px-2 py-1.5 text-sm text-gray-400">No matching fields.</p>
+          <p v-if="!filteredAddable.length" class="px-2 py-1.5 text-sm text-gray-400">{{ t('No matching fields.') }}</p>
         </div>
       </div>
       <button
@@ -80,7 +80,7 @@
         @click="$emit('reset'); adding = false"
       >
         <LucideIcon name="rotate-ccw" class="h-3.5 w-3.5" />
-        Reset to Default
+        {{ t('Reset to Default') }}
       </button>
     </div>
   </div>
@@ -89,6 +89,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import LucideIcon from '@/components/LucideIcon.vue'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   // Every field that could be a column.
@@ -100,7 +101,7 @@ const emit = defineEmits(['update:modelValue', 'reset'])
 
 function labelFor(fieldname) {
   const field = props.fields.find((f) => f.fieldname === fieldname)
-  return field?.label || fieldname
+  return t(field?.label || fieldname)
 }
 
 function update(list) {
@@ -133,7 +134,12 @@ const addSearch = ref('')
 const addable = computed(() => props.fields.filter((f) => !props.modelValue.includes(f.fieldname)))
 const filteredAddable = computed(() => {
   const term = addSearch.value.trim().toLowerCase()
-  return term ? addable.value.filter((f) => (f.label || f.fieldname).toLowerCase().includes(term)) : addable.value
+  // Search what the user sees - the translated label - or the English one.
+  return term
+    ? addable.value.filter((f) =>
+        [t(f.label || f.fieldname), f.label || f.fieldname].some((s) => s.toLowerCase().includes(term)),
+      )
+    : addable.value
 })
 
 function add(fieldname) {

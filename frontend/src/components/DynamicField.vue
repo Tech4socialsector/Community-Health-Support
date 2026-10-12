@@ -14,7 +14,7 @@
   />
 
   <div v-else-if="controlType === 'attach'">
-    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
     <div v-if="modelValue" class="flex items-center gap-3 rounded-lg border p-2 dark:border-gray-800">
       <img
         v-if="isImageField"
@@ -30,7 +30,7 @@
       >
         {{ fileName }}
       </a>
-      <Tooltip text="Remove file">
+      <Tooltip :text="t('Remove file')">
         <button
           type="button"
           class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
@@ -48,7 +48,7 @@
     >
       <template #default="{ uploading, progress, openFileSelector }">
         <Button variant="outline" :loading="uploading" @click="openFileSelector">
-          {{ uploading ? `Uploading ${progress}%` : `Attach ${isImageField ? 'Image' : 'File'}` }}
+          {{ uploading ? t('Uploading {0}%', [progress]) : isImageField ? t('Attach Image') : t('Attach File') }}
         </Button>
       </template>
     </FileUploader>
@@ -57,11 +57,12 @@
   <FormControl
     v-else-if="controlType === 'select'"
     type="select"
+    :placeholder="t('Select option')"
     class="[&_[data-slot=trigger]]:w-full"
-    :label="field.label"
+    :label="t(field.label)"
     :required="!!field.reqd"
     :options="selectOptions"
-    :description="field.description || undefined"
+    :description="t(field.description) || undefined"
     :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
@@ -69,8 +70,8 @@
   <FormControl
     v-else-if="controlType === 'checkbox'"
     type="checkbox"
-    :label="field.label"
-    :description="field.description || undefined"
+    :label="t(field.label)"
+    :description="t(field.description) || undefined"
     :disabled="readOnly"
     :model-value="!!modelValue"
     @update:model-value="$emit('update:modelValue', $event ? 1 : 0)"
@@ -78,9 +79,9 @@
   <FormControl
     v-else-if="controlType === 'textarea'"
     type="textarea"
-    :label="field.label"
+    :label="t(field.label)"
     :required="!!field.reqd"
-    :description="field.description || undefined"
+    :description="t(field.description) || undefined"
     :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
@@ -88,9 +89,9 @@
   <div v-else-if="isUserLink">
     <FormControl
       type="text"
-      :label="field.label"
+      :label="t(field.label)"
       :required="!!field.reqd"
-      :description="field.description || undefined"
+      :description="t(field.description) || undefined"
       :disabled="readOnly"
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
@@ -121,9 +122,9 @@
   <FormControl
     v-else
     :type="controlType"
-    :label="field.label"
+    :label="t(field.label)"
     :required="!!field.reqd"
-    :description="field.description || undefined"
+    :description="t(field.description) || undefined"
     :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', toFieldValue($event))"
@@ -139,6 +140,7 @@ import TableMultiSelectField from '@/components/TableMultiSelectField.vue'
 import LinkField from '@/components/LinkField.vue'
 import SignatureField from '@/components/SignatureField.vue'
 import { evaluateDependsOn } from '@/data/dependsOn'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -231,7 +233,8 @@ const selectOptions = computed(() => {
     .split('\n')
     .map((v) => v.trim())
     .filter(Boolean)
-    .map((v) => ({ label: v, value: v }))
+    // Shown in the user's language; the English option is what's stored.
+    .map((v) => ({ label: t(v), value: v }))
 })
 
 </script>

@@ -3,13 +3,13 @@
     <!-- Filters: one row above the cards, all driving the counts. -->
     <div :class="ui.FILTER_BAR">
       <div class="w-full sm:w-auto">
-        <span :class="ui.FILTER_LABEL">Date range</span>
+        <span :class="ui.FILTER_LABEL">{{ t('Date range') }}</span>
         <!-- Segmented control: equal-width cells across the full width on a
         phone, a compact strip from sm up. -->
         <div
           class="grid w-full grid-cols-4 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800 sm:inline-flex sm:w-auto"
           role="group"
-          aria-label="Date range"
+          :aria-label="t('Date range')"
         >
           <button
             v-for="opt in DATE_RANGES"
@@ -24,23 +24,23 @@
             "
             @click="filters.date_range = opt.value"
           >
-            {{ opt.label }}
+            {{ t(opt.label) }}
           </button>
         </div>
       </div>
       <div :class="ui.FILTER_FIELD">
-        <span :class="ui.FILTER_LABEL">Village</span>
+        <span :class="ui.FILTER_LABEL">{{ t('Village') }}</span>
         <FormControl type="select" class="[&_[data-slot=trigger]]:w-full" :options="villageOptions" v-model="filters.village" />
       </div>
       <div :class="ui.FILTER_FIELD">
-        <span :class="ui.FILTER_LABEL">Health Worker</span>
+        <span :class="ui.FILTER_LABEL">{{ t('Health Worker') }}</span>
         <FormControl type="select" class="[&_[data-slot=trigger]]:w-full" :options="healthWorkerOptions" v-model="filters.health_worker" />
       </div>
       <div class="flex w-full items-center justify-between gap-3 sm:ml-auto sm:w-auto sm:justify-end">
-        <span v-if="updatedAt" class="text-xs text-gray-400">Updated {{ updatedAt }}</span>
+        <span v-if="updatedAt" class="text-xs text-gray-400">{{ t('Updated {0}', [updatedAt]) }}</span>
         <button type="button" :disabled="cardsLoading" :class="ui.BTN_PRIMARY" @click="refresh">
           <LucideIcon name="refresh-cw" class="h-4 w-4" :class="{ 'animate-spin': cardsLoading }" />
-          Refresh
+          {{ t('Refresh') }}
         </button>
       </div>
     </div>
@@ -52,7 +52,7 @@
     icon itself tells them apart), so the page reads as one calm set. -->
     <section v-else>
       <div class="mb-3 flex items-center gap-3">
-        <h2 :class="ui.SECTION_LABEL">Overview</h2>
+        <h2 :class="ui.SECTION_LABEL">{{ t('Overview') }}</h2>
         <span class="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
       </div>
       <div :class="ui.STAT_GRID_4">
@@ -75,14 +75,14 @@
             @click="openDrilldown(card)"
           >
             <span class="flex w-full items-start justify-between gap-2">
-              <span :class="ui.STAT_LABEL" :title="card.label">{{ card.label }}</span>
+              <span :class="ui.STAT_LABEL" :title="t(card.label)">{{ t(card.label) }}</span>
               <span :class="ui.ICON_TILE">
                 <LucideIcon :name="card.icon || 'file-text'" class="h-[18px] w-[18px]" />
               </span>
             </span>
             <span :class="ui.statCountAt(index)">{{ formatNumber(card.count) }}</span>
             <span :class="ui.STAT_CTA">
-              View records
+              {{ t('View records') }}
               <LucideIcon name="arrow-right" class="h-4 w-4 transition group-hover:translate-x-0.5" />
             </span>
           </button>
@@ -104,7 +104,7 @@
           <span :class="ui.ICON_TILE">
             <LucideIcon :name="activeCard.icon || 'file-text'" class="h-[18px] w-[18px]" />
           </span>
-          <h3 class="truncate text-base font-semibold text-navy-900 dark:text-gray-100 sm:text-lg">{{ activeCard.label }}</h3>
+          <h3 class="truncate text-base font-semibold text-navy-900 dark:text-gray-100 sm:text-lg">{{ t(activeCard.label) }}</h3>
           <span v-if="!drill.loading || drill.total" :class="ui.COUNT_BADGE">{{ formatNumber(drill.total) }}</span>
         </div>
       </template>
@@ -117,7 +117,7 @@
           </div>
           <div v-else-if="!drill.records.length" :class="ui.EMPTY_STATE">
             <LucideIcon name="inbox" class="h-8 w-8 text-gray-300 dark:text-gray-600" />
-            No records for this program.
+            {{ t('No records for this program.') }}
           </div>
           <template v-else>
             <div :class="[ui.TABLE_WRAP, 'hidden max-h-[60vh] sm:block', { 'opacity-60': drill.loading }]">
@@ -125,7 +125,7 @@
                 <thead :class="ui.THEAD">
                   <tr>
                     <th v-for="col in drill.columns" :key="col.fieldname" :class="ui.TH">
-                      {{ col.fieldname === 'name' ? 'ID' : col.label }}
+                      {{ col.fieldname === 'name' ? t('ID') : t(col.label) }}
                     </th>
                   </tr>
                 </thead>
@@ -165,7 +165,7 @@
                 </span>
                 <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
                   <div v-for="col in mobileColumns" :key="col.fieldname" class="min-w-0">
-                    <dt class="truncate text-[11px] font-medium uppercase tracking-wide text-gray-500">{{ col.label }}</dt>
+                    <dt class="truncate text-[11px] font-medium uppercase tracking-wide text-gray-500">{{ t(col.label) }}</dt>
                     <dd class="truncate text-sm text-gray-800 dark:text-gray-200">
                       <span v-if="isEmptyValue(row[col.fieldname])" class="text-gray-300 dark:text-gray-600">—</span>
                       <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
@@ -179,20 +179,19 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               <template v-if="drill.total">
-                {{ formatNumber(drill.start + 1) }}–{{ formatNumber(drill.start + drill.records.length) }}
-                of {{ formatNumber(drill.total) }}
+                {{ t('{0}–{1} of {2}', [formatNumber(drill.start + 1), formatNumber(drill.start + drill.records.length), formatNumber(drill.total)]) }}
               </template>
             </span>
             <div class="flex items-center gap-2">
               <a v-if="drill.total" :href="excelUrl" target="_blank" rel="noopener" :class="ui.BTN_SECONDARY">
                 <LucideIcon name="download" class="h-4 w-4 text-forest-700 dark:text-forest-300" />
-                Excel
+                {{ t('Excel') }}
               </a>
               <button
                 type="button"
                 :class="ui.BTN_SECONDARY"
                 :disabled="drill.loading || drill.start === 0"
-                aria-label="Previous page"
+                :aria-label="t('Previous page')"
                 @click="changePage(-1)"
               >
                 <LucideIcon name="chevron-left" class="h-4 w-4" />
@@ -201,7 +200,7 @@
                 type="button"
                 :class="ui.BTN_SECONDARY"
                 :disabled="drill.loading || drill.start + drill.records.length >= drill.total"
-                aria-label="Next page"
+                :aria-label="t('Next page')"
                 @click="changePage(1)"
               >
                 <LucideIcon name="chevron-right" class="h-4 w-4" />
@@ -224,6 +223,7 @@ import NewIndicators from '@/components/NewIndicators.vue'
 import { villagesResource, healthWorkersResource, ALL_VILLAGES, ALL_HEALTH_WORKERS } from '@/data/dashboardFilters'
 import { isEmptyValue, formatFieldValue } from '@/data/recordFormat'
 import * as ui from '@/data/ui'
+import { t } from '@/data/i18n'
 
 // Coordinator program overview - the Vue equivalent of the Desk
 // chw-dashboard page, using the same backend calls. Parents must only render
@@ -253,11 +253,11 @@ if (!villagesResource.data) villagesResource.fetch()
 if (!healthWorkersResource.data) healthWorkersResource.fetch()
 
 const villageOptions = computed(() => [
-  { label: ALL_VILLAGES, value: ALL_VILLAGES },
+  { label: t(ALL_VILLAGES), value: ALL_VILLAGES },
   ...(villagesResource.data || []).map((v) => ({ label: v, value: v })),
 ])
 const healthWorkerOptions = computed(() => [
-  { label: ALL_HEALTH_WORKERS, value: ALL_HEALTH_WORKERS },
+  { label: t(ALL_HEALTH_WORKERS), value: ALL_HEALTH_WORKERS },
   ...(healthWorkersResource.data || []).map((v) => ({ label: v, value: v })),
 ])
 
@@ -287,7 +287,7 @@ async function loadCards() {
     updatedAt.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   } catch (e) {
     if (requestId !== cardsRequestId) return
-    cardsError.value = errorText(e, 'Could not load the dashboard.')
+    cardsError.value = errorText(e, t('Could not load the dashboard.'))
   } finally {
     if (requestId === cardsRequestId) cardsLoading.value = false
   }
@@ -331,7 +331,7 @@ async function fetchDrillRecords() {
     drill.total = data?.total_count || 0
   } catch (e) {
     if (requestId !== drillRequestId) return
-    drill.error = errorText(e, 'Could not load records.')
+    drill.error = errorText(e, t('Could not load records.'))
   } finally {
     if (requestId === drillRequestId) drill.loading = false
   }
@@ -367,7 +367,7 @@ async function openDrilldown(card, start = 0) {
   } catch (e) {
     if (requestId !== drillRequestId) return
     drill.loading = false
-    drill.error = errorText(e, 'Could not load this program.')
+    drill.error = errorText(e, t('Could not load this program.'))
     return
   }
   fetchDrillRecords()

@@ -1,6 +1,7 @@
 import { reactive } from 'vue'
 import { createResource, setConfig, frappeRequest } from 'frappe-ui'
 import router from '@/router'
+import { initLanguage } from '@/data/i18n'
 
 // createResource() below fires an immediate fetch at module-evaluation time
 // (see initialUserCheck) - that's before main.js reaches its own
@@ -57,6 +58,9 @@ export const userLanguageResource = createResource({
     session.user_language = data?.language || null
     session.user_image = data?.user_image || null
     session.full_name = data?.full_name || null
+    // The screens follow the user's language (set from the app's Language
+    // menu, or in Desk).
+    initLanguage(session.user_language)
   },
 })
 

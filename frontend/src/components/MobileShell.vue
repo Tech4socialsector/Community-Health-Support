@@ -7,7 +7,7 @@
       <img :src="appLogo" alt="Logo" class="h-9 w-9 flex-shrink-0 rounded-lg bg-white object-contain p-0.5 ring-1 ring-gray-200 dark:ring-gray-700" />
       <span class="min-w-0">
         <span class="block truncate text-base font-bold leading-tight text-navy-900 dark:text-gray-100">{{ appName }}</span>
-        <span class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ pageTitle }}</span>
+        <span class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ t(pageTitle) }}</span>
       </span>
     </div>
 

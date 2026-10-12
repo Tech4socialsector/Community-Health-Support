@@ -9,12 +9,12 @@
     <template v-if="quickFields.length">
       <div class="grid grid-cols-2 gap-x-2 gap-y-2.5">
         <label v-for="field in quickFields" :key="field.fieldname" class="block min-w-0">
-          <span class="mb-1 block truncate text-xs font-medium text-gray-500 dark:text-gray-400">{{ field.label }}</span>
+          <span class="mb-1 block truncate text-xs font-medium text-gray-500 dark:text-gray-400">{{ t(field.label) }}</span>
           <ListFilterControl :field="field" v-model="quickDraft[field.fieldname]" />
         </label>
       </div>
       <p class="border-t border-gray-100 pt-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-800 dark:text-gray-400">
-        More conditions
+        {{ t('More conditions') }}
       </p>
     </template>
 
@@ -34,7 +34,7 @@
       <button
         type="button"
         class="row-span-3 flex h-8 w-8 items-center justify-center self-start rounded-md text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800 sm:order-last sm:row-span-1 sm:self-center"
-        :aria-label="`Remove filter ${index + 1}`"
+        :aria-label="t('Remove filter {0}', [index + 1])"
         @click="draft.splice(index, 1)"
       >
         <LucideIcon name="x" class="h-4 w-4" />
@@ -51,27 +51,27 @@
         v-if="valueKind(fieldFor(row), row.operator) === 'set'"
         type="select"
         class="[&_[data-slot=trigger]]:h-8 [&_[data-slot=trigger]]:w-full"
-        :options="[{ label: 'Set', value: 'set' }, { label: 'Not set', value: 'not set' }]"
+        :options="[{ label: t('Set'), value: 'set' }, { label: t('Not set'), value: 'not set' }]"
         v-model="row.value"
       />
       <FormControl
         v-else-if="valueKind(fieldFor(row), row.operator) === 'check'"
         type="select"
         class="[&_[data-slot=trigger]]:h-8 [&_[data-slot=trigger]]:w-full"
-        :options="[{ label: 'Yes', value: '1' }, { label: 'No', value: '0' }]"
+        :options="[{ label: t('Yes'), value: '1' }, { label: t('No'), value: '0' }]"
         v-model="row.value"
       />
       <FormControl
         v-else-if="valueKind(fieldFor(row), row.operator) === 'select'"
         type="select"
         class="[&_[data-slot=trigger]]:h-8 [&_[data-slot=trigger]]:w-full"
-        placeholder="Choose…"
-        :options="selectOptions(fieldFor(row)).map((v) => ({ label: v, value: v }))"
+        :placeholder="t('Choose…')"
+        :options="selectOptions(fieldFor(row)).map((v) => ({ label: t(v), value: v }))"
         v-model="row.value"
       />
       <FormControl v-else-if="valueKind(fieldFor(row), row.operator) === 'date'" type="date" v-model="row.value" />
-      <FormControl v-else-if="valueKind(fieldFor(row), row.operator) === 'number'" type="number" placeholder="Value" v-model="row.value" />
-      <FormControl v-else type="text" placeholder="Value" v-model="row.value" />
+      <FormControl v-else-if="valueKind(fieldFor(row), row.operator) === 'number'" type="number" :placeholder="t('Value')" v-model="row.value" />
+      <FormControl v-else type="text" :placeholder="t('Value')" v-model="row.value" />
     </div>
 
     <!-- Desk's footer: "+ Add a Filter" on the left, Clear Filters and
@@ -83,11 +83,11 @@
         @click="addRow"
       >
         <LucideIcon name="plus" class="h-4 w-4" />
-        Add a Filter
+        {{ t('Add a Filter') }}
       </button>
       <div class="flex items-center gap-2">
-        <button type="button" :class="[ui.BTN_SECONDARY, '!h-8']" @click="clearAll">Clear Filters</button>
-        <button type="button" :class="[ui.BTN_PRIMARY, '!h-8']" @click="apply">Apply Filters</button>
+        <button type="button" :class="[ui.BTN_SECONDARY, '!h-8']" @click="clearAll">{{ t('Clear Filters') }}</button>
+        <button type="button" :class="[ui.BTN_PRIMARY, '!h-8']" @click="apply">{{ t('Apply Filters') }}</button>
       </div>
     </div>
   </div>
@@ -100,6 +100,7 @@ import LucideIcon from '@/components/LucideIcon.vue'
 import ListFilterControl from '@/components/ListFilterControl.vue'
 import { operatorsFor, operatorLabel, valueKind, selectOptions, isComplete } from '@/data/listFilters'
 import * as ui from '@/data/ui'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   // The fields that can be filtered ({ fieldname, label, fieldtype, options }).
@@ -137,7 +138,8 @@ if (!draft.value.length && props.fields.length) {
   draft.value.push(withKey({ fieldname: field.fieldname, operator, value: defaultValue(field, operator) }))
 }
 
-const fieldOptions = computed(() => props.fields.map((f) => ({ label: f.label || f.fieldname, value: f.fieldname })))
+// Labels shown translated; the value (fieldname) stays as the key.
+const fieldOptions = computed(() => props.fields.map((f) => ({ label: t(f.label || f.fieldname), value: f.fieldname })))
 
 function fieldFor(row) {
   return props.fields.find((f) => f.fieldname === row.fieldname)

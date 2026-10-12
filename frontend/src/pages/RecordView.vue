@@ -23,8 +23,8 @@
 
       <template v-else-if="doc">
         <!-- Breadcrumb -->
-        <nav class="flex min-w-0 items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400" aria-label="Breadcrumb">
-          <router-link :to="{ name: 'Home' }" class="flex-shrink-0 hover:text-navy-900 dark:hover:text-gray-100" aria-label="Home">
+        <nav class="flex min-w-0 items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400" :aria-label="t('Breadcrumb')">
+          <router-link :to="{ name: 'Home' }" class="flex-shrink-0 hover:text-navy-900 dark:hover:text-gray-100" :aria-label="t('Home')">
             <LucideIcon name="house" class="h-4 w-4" />
           </router-link>
           <LucideIcon name="chevron-right" class="h-3.5 w-3.5 flex-shrink-0 text-gray-300" />
@@ -33,9 +33,9 @@
             :to="{ name: 'DoctypeList', params: { doctypeRoute: appItem.route } }"
             class="truncate hover:text-navy-900 dark:hover:text-gray-100"
           >
-            {{ formLabel }}
+            {{ t(formLabel) }}
           </router-link>
-          <span v-else class="truncate">{{ formLabel }}</span>
+          <span v-else class="truncate">{{ t(formLabel) }}</span>
           <LucideIcon name="chevron-right" class="h-3.5 w-3.5 flex-shrink-0 text-gray-300" />
           <span class="truncate font-medium text-navy-900 dark:text-gray-100">{{ doc.name }}</span>
         </nav>
@@ -47,21 +47,21 @@
               <LucideIcon :name="appItem?.icon || 'file-text'" class="h-6 w-6" />
             </span>
             <div class="min-w-0">
-              <h1 class="truncate text-xl font-bold text-navy-900 dark:text-gray-100 sm:text-2xl">{{ formLabel }}</h1>
+              <h1 class="truncate text-xl font-bold text-navy-900 dark:text-gray-100 sm:text-2xl">{{ t(formLabel) }}</h1>
               <div class="mt-0.5 flex flex-wrap items-center gap-2">
                 <span class="truncate text-base font-medium text-gray-700 dark:text-gray-300">{{ title }}</span>
-                <span v-if="doc.status" :class="[ui.PILL, TONE_CLASSES[toneFor(doc.status)]]">{{ doc.status }}</span>
+                <span v-if="doc.status" :class="[ui.PILL, TONE_CLASSES[toneFor(doc.status)]]">{{ t(doc.status) }}</span>
               </div>
             </div>
           </div>
           <div class="flex w-full flex-shrink-0 items-center gap-2 sm:w-auto">
             <button v-if="appItem" type="button" :class="[ui.BTN_PRIMARY, 'flex-1 sm:flex-none']" @click="editRecord">
               <LucideIcon name="pencil" class="h-4 w-4" />
-              Edit
+              {{ t('Edit') }}
             </button>
             <button type="button" :class="[ui.BTN_SECONDARY, 'flex-1 sm:flex-none']" @click="goBack">
               <LucideIcon name="x" class="h-4 w-4" />
-              Close
+              {{ t('Close') }}
             </button>
           </div>
         </header>
@@ -90,7 +90,7 @@
             >
               <LucideIcon name="clock" class="h-5 w-5 flex-shrink-0 text-navy-600 dark:text-navy-300" />
               <span class="min-w-0">
-                <span class="block text-xs font-medium text-navy-600 dark:text-navy-300">Last Updated</span>
+                <span class="block text-xs font-medium text-navy-600 dark:text-navy-300">{{ t('Last Updated') }}</span>
                 <span class="block whitespace-nowrap text-sm font-semibold text-navy-900 dark:text-gray-100">
                   {{ formatFieldValue(doc.modified, { fieldtype: 'Datetime' }) }}
                 </span>
@@ -119,7 +119,7 @@
               class="min-w-0"
               :class="{ 'sm:col-span-2 lg:col-span-3': isWide(field) }"
             >
-              <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ field.label || field.fieldname }}</dt>
+              <dt class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ t(field.label) || field.fieldname }}</dt>
               <dd class="mt-1 min-w-0 break-words text-[15px] font-semibold leading-snug text-gray-900 dark:text-gray-100">
                 <span v-if="isEmptyValue(doc[field.fieldname])" class="font-normal text-gray-300 dark:text-gray-600">—</span>
 
@@ -146,11 +146,11 @@
                 <img
                   v-else-if="field.fieldtype === 'Signature'"
                   :src="doc[field.fieldname]"
-                  :alt="field.label"
+                  :alt="t(field.label)"
                   class="max-h-32 rounded-lg bg-white ring-1 ring-gray-200 dark:ring-gray-800"
                 />
                 <a v-else-if="field.fieldtype === 'Attach Image'" :href="doc[field.fieldname]" target="_blank" rel="noopener">
-                  <img :src="doc[field.fieldname]" :alt="field.label" class="max-h-40 rounded-lg ring-1 ring-gray-200 dark:ring-gray-800" />
+                  <img :src="doc[field.fieldname]" :alt="t(field.label)" class="max-h-40 rounded-lg ring-1 ring-gray-200 dark:ring-gray-800" />
                 </a>
 
                 <a
@@ -174,7 +174,7 @@
 
         <div v-if="!visibleSections.length" :class="ui.EMPTY_STATE">
           <LucideIcon name="file-text" class="h-8 w-8 text-gray-300 dark:text-gray-600" />
-          This form has no fields to show.
+          {{ t('This form has no fields to show.') }}
         </div>
 
         <DocActivity :doctype="doctype" :name="doc.name" />
@@ -197,6 +197,7 @@ import { findModuleByDoctype } from '@/data/modules'
 import { setPageTitle } from '@/data/pageTitle'
 import { isEmptyValue, formatFieldValue, isLayoutField, iconForField, toneFor } from '@/data/recordFormat'
 import * as ui from '@/data/ui'
+import { t } from '@/data/i18n'
 
 // Read-only detail page for any record - opened from the Overview
 // drilldown, so a coordinator can look a record over without landing in its
@@ -223,7 +224,7 @@ call('frappe.client.get', { doctype: props.doctype, name: props.name })
     doc.value = data
   })
   .catch((e) => {
-    docError.value = e?.messages?.join(', ') || e?.message || 'Could not load this record.'
+    docError.value = e?.messages?.join(', ') || e?.message || t('Could not load this record.')
   })
   .finally(() => {
     docLoading.value = false
@@ -286,12 +287,12 @@ const facts = computed(() => {
     )
     .slice(0, 5)
   return [
-    { key: '__name', icon: 'id-card', value: doc.value.name, label: `${formLabel.value} ID` },
+    { key: '__name', icon: 'id-card', value: doc.value.name, label: t('{0} ID', [t(formLabel.value)]) },
     ...fields.map((f) => ({
       key: f.fieldname,
       icon: iconForField(f),
       value: String(f.fieldtype === 'Currency' ? formatCurrency(doc.value[f.fieldname]) : formatFieldValue(doc.value[f.fieldname], f)),
-      label: f.label || f.fieldname,
+      label: t(f.label) || f.fieldname,
     })),
   ]
 })
@@ -317,8 +318,8 @@ const sections = computed(() => {
     current.fields.push(f)
   }
   push()
-  const genericLabel = `${appItem.value?.label || props.doctype} Information`
-  return result.map((s, i) => ({ ...s, label: s.label || (i === 0 ? genericLabel : 'More details') }))
+  const genericLabel = t('{0} Information', [t(appItem.value?.label || props.doctype)])
+  return result.map((s, i) => ({ ...s, label: s.label ? t(s.label) : i === 0 ? genericLabel : t('More details') }))
 })
 
 // Every field is shown, empty ones as "—", so the page always reflects the

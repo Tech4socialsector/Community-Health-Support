@@ -10,7 +10,7 @@
           v-if="crumb.to && index < crumbs.length - 1"
           :to="crumb.to"
           class="flex items-center gap-1 whitespace-nowrap rounded hover:text-forest-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-400 dark:hover:text-forest-300"
-          :aria-label="crumb.home ? 'Home' : undefined"
+          :aria-label="crumb.home ? t('Home') : undefined"
         >
           <LucideIcon v-if="crumb.home" name="house" class="h-4 w-4" />
           <template v-else>{{ crumb.label }}</template>

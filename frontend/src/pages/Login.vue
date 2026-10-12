@@ -13,15 +13,15 @@
 
       <div class="mt-6 max-w-sm lg:mt-0">
         <h2 class="text-xl font-semibold leading-tight sm:text-2xl lg:text-3xl">
-          {{ brandingResource.data?.login_headline || 'Care coordination for every household you serve.' }}
+          {{ t(brandingResource.data?.login_headline || 'Care coordination for every household you serve.') }}
         </h2>
         <p class="mt-2 hidden text-sm text-white/70 sm:block lg:mt-4">
-          {{ brandingResource.data?.login_description || 'Track visits, follow-ups, and growth monitoring in one place — built for community health workers on the ground.' }}
+          {{ t(brandingResource.data?.login_description || 'Track visits, follow-ups, and growth monitoring in one place — built for community health workers on the ground.') }}
         </p>
       </div>
 
       <div class="mt-6 hidden lg:mt-0 lg:block">
-        <p class="text-sm font-medium italic text-white/80">Healing hands, caring hearts in Christ · Since 1938</p>
+        <p class="text-sm font-medium italic text-white/80">{{ t('Healing hands, caring hearts in Christ · Since 1938') }}</p>
         <p class="mt-1 text-xs text-white/40">
           &copy; {{ new Date().getFullYear() }} {{ brandingResource.data?.app_name || 'CHW' }}
         </p>
@@ -33,8 +33,8 @@
 
     <div class="flex flex-1 items-center justify-center overflow-y-auto bg-gray-50 px-6 py-8 dark:bg-gray-900 sm:px-8">
       <div class="w-full max-w-sm">
-        <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">Welcome back</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Log in to continue to your dashboard.</p>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100 sm:text-2xl">{{ t('Welcome back') }}</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('Log in to continue to your dashboard.') }}</p>
 
         <form
           class="mt-6 flex flex-col gap-5 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg shadow-gray-200/60 dark:border-gray-800 dark:bg-gray-900 dark:shadow-none sm:mt-8 sm:p-7"
@@ -42,7 +42,7 @@
         >
           <FormControl
             type="text"
-            label="Email"
+            :label="t('Email')"
             v-model="email"
             autocomplete="username"
             required
@@ -50,7 +50,7 @@
           <div>
             <FormControl
               :type="showPassword ? 'text' : 'password'"
-              label="Password"
+              :label="t('Password')"
               v-model="password"
               autocomplete="current-password"
               required
@@ -71,7 +71,7 @@
               class="mt-1.5 text-xs text-gray-500 hover:text-gray-700 hover:underline dark:text-gray-400 dark:hover:text-gray-200"
               @click="openForgotPassword"
             >
-              Forgot password?
+              {{ t('Forgot password?') }}
             </button>
           </div>
           <ErrorMessage :message="loginResource.error" />
@@ -82,32 +82,32 @@
             size="lg"
             class="!bg-forest-700 hover:!bg-forest-800 dark:!bg-forest-600 dark:hover:!bg-forest-500"
           >
-            Log in
+            {{ t('Log in') }}
           </Button>
         </form>
       </div>
     </div>
 
-    <Dialog v-model="showForgotPassword" :options="{ title: 'Reset Password' }">
+    <Dialog v-model="showForgotPassword" :options="{ title: t('Reset Password') }">
       <template #body-content>
         <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-          Enter your email and we'll send you a link to reset your password.
+          {{ t("Enter your email and we'll send you a link to reset your password.") }}
         </p>
         <FormControl
           type="text"
-          label="Email"
+          :label="t('Email')"
           v-model="resetEmail"
           autocomplete="username"
           required
         />
         <ErrorMessage class="mt-3" :message="resetError" />
         <p v-if="resetSent" class="mt-3 text-sm text-green-600 dark:text-green-400">
-          If that email is registered with us, a reset link is on its way. Please check your inbox.
+          {{ t('If that email is registered with us, a reset link is on its way. Please check your inbox.') }}
         </p>
       </template>
       <template #actions>
         <Button variant="solid" :loading="resetLoading" class="w-full" @click="submitForgotPassword">
-          Send reset link
+          {{ t('Send reset link') }}
         </Button>
       </template>
     </Dialog>

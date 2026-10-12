@@ -6,7 +6,7 @@
   it were an ID. -->
   <div ref="root">
     <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">
-      {{ field.label }}<span v-if="field.reqd" class="text-red-500"> *</span>
+      {{ t(field.label) }}<span v-if="field.reqd" class="text-red-500"> *</span>
     </label>
     <div class="relative">
       <input
@@ -15,7 +15,7 @@
         type="text"
         :readonly="readOnly"
         :tabindex="readOnly ? -1 : undefined"
-        :placeholder="readOnly ? '' : `Search ${field.options}…`"
+        :placeholder="readOnly ? '' : t('Search {0}…', [t(field.options)])"
         autocomplete="off"
         class="h-9 w-full rounded-lg border-0 px-3 pr-8 text-sm focus:outline-none dark:text-gray-100"
         :class="
@@ -37,13 +37,13 @@
         v-if="modelValue && !readOnly"
         type="button"
         class="absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-700"
-        aria-label="Clear"
+        :aria-label="t('Clear')"
         @mousedown.prevent="clear"
       >
         <LucideIcon name="x" class="h-3.5 w-3.5" />
       </button>
     </div>
-    <p v-if="field.description" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ field.description }}</p>
+    <p v-if="field.description" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ t(field.description) }}</p>
 
     <!-- Fixed to the screen at the box's position: the form's two-column
     layout and cards would otherwise clip a list that hangs below them. -->
@@ -55,8 +55,8 @@
         role="listbox"
         @mousedown.prevent
       >
-        <li v-if="loading && !results.length" class="px-3 py-2 text-gray-400">Searching…</li>
-        <li v-else-if="!results.length" class="px-3 py-2 text-gray-400">No {{ field.options }} found</li>
+        <li v-if="loading && !results.length" class="px-3 py-2 text-gray-400">{{ t('Searching…') }}</li>
+        <li v-else-if="!results.length" class="px-3 py-2 text-gray-400">{{ t('No {0} found', [t(field.options)]) }}</li>
         <li
           v-for="(r, i) in results"
           :key="r.value"
@@ -79,7 +79,7 @@
           @click="startCreate"
         >
           <LucideIcon name="plus" class="h-4 w-4" />
-          Create a new {{ field.options }}<template v-if="text.trim() && text !== modelValue">: "{{ text.trim() }}"</template>
+          {{ t('Create a new {0}', [t(field.options)]) }}<template v-if="text.trim() && text !== modelValue">: "{{ text.trim() }}"</template>
         </li>
       </ul>
     </Teleport>
@@ -97,6 +97,7 @@
 import { defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
 import { call } from 'frappe-ui'
 import LucideIcon from '@/components/LucideIcon.vue'
+import { t } from '@/data/i18n'
 
 // Loaded when first needed - it renders fields itself (including Links),
 // so a plain import would be circular.

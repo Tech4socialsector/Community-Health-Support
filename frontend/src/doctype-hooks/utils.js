@@ -5,6 +5,7 @@
 // server (Python dates) both work in local dates.
 
 import { call, toast } from 'frappe-ui'
+import { t } from '@/data/i18n'
 
 const DAY_MS = 86400000
 
@@ -93,7 +94,7 @@ const PHONE_WARNING_ID = 'chw-phone-warning'
 export function warnIfNotDigits(value) {
   if (value && !/^\d*$/.test(String(value))) {
     toast.remove(PHONE_WARNING_ID)
-    toast.warning('Invalid Phone Number: letters are not allowed. Please enter numbers only.', { id: PHONE_WARNING_ID })
+    toast.warning(t('Invalid Phone Number: letters are not allowed. Please enter numbers only.'), { id: PHONE_WARNING_ID })
   }
 }
 

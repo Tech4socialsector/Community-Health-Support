@@ -9,6 +9,7 @@
 
 import { toast } from 'frappe-ui'
 import { warnIfNotDigits } from './utils'
+import { t } from '@/data/i18n'
 
 // Same list and order as CHARITY_CRITERIA_FIELDS on the server.
 const CHARITY_CRITERIA_FIELDS = [
@@ -126,7 +127,7 @@ function calculateAge(values) {
 
   const now = todayLocal()
   if (dob > now) {
-    toast.warning('Date of Birth cannot be in the future.')
+    toast.warning(t('Date of Birth cannot be in the future.'))
     values.date_of_birth = ''
     values.age = ''
     values.age_in_months = 0

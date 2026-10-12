@@ -1,10 +1,10 @@
 <template>
   <div>
-    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
     <MultiSelect
       :model-value="selectedValues"
       :options="options"
-      :placeholder="`Select ${targetDoctype}...`"
+      :placeholder="t('Select {0}...', [t(targetDoctype)])"
       @update:model-value="onUpdate"
     />
   </div>
@@ -13,6 +13,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { MultiSelect, call, useCall } from 'frappe-ui'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   field: { type: Object, required: true },

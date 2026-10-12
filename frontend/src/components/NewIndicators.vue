@@ -5,11 +5,11 @@
   people in it; "View all" opens the whole card. -->
   <section>
     <div class="mb-1 flex items-center gap-3">
-      <h2 :class="ui.SECTION_LABEL">New Indicators</h2>
+      <h2 :class="ui.SECTION_LABEL">{{ t('New Indicators') }}</h2>
       <span class="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
     </div>
     <p class="mb-3 text-[13px] text-gray-500 dark:text-gray-400">
-      Worked out from the recorded followups using each programme's own criteria. Select a slice or a legend row to see the people in it.
+      {{ t("Worked out from the recorded followups using each programme's own criteria. Select a slice or a legend row to see the people in it.") }}
     </p>
 
     <ErrorMessage v-if="error" :message="error" />
@@ -36,8 +36,8 @@
       >
         <div class="flex w-full items-start justify-between gap-3">
           <div class="min-w-0">
-            <h3 class="text-[15px] font-semibold text-navy-900 dark:text-gray-100">{{ item.label }}</h3>
-            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ item.subtitle }}</p>
+            <h3 class="text-[15px] font-semibold text-navy-900 dark:text-gray-100">{{ t(item.label) }}</h3>
+            <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ t(item.subtitle) }}</p>
           </div>
           <button
             type="button"
@@ -45,7 +45,7 @@
             :disabled="!item.total"
             @click="openDrilldown(item, null)"
           >
-            View all
+            {{ t('View all') }}
             <LucideIcon name="arrow-right" class="h-3.5 w-3.5" />
           </button>
         </div>
@@ -54,7 +54,7 @@
           <!-- Donut: one arc per segment, a 2px gap between arcs so
           neighbouring colours never run together; the centre is the
           number of people the indicator counts. -->
-          <svg width="132" height="132" viewBox="0 0 132 132" class="flex-shrink-0" role="img" :aria-label="`${item.label}: ${item.total} people`">
+          <svg width="132" height="132" viewBox="0 0 132 132" class="flex-shrink-0" role="img" :aria-label="t('{0}: {1} people', [t(item.label), item.total])">
             <circle cx="66" cy="66" :r="RADIUS" fill="none" stroke-width="18" class="stroke-gray-100 dark:stroke-gray-800" />
             <circle
               v-for="arc in arcs(item)"
@@ -71,17 +71,17 @@
               class="cursor-pointer transition-[stroke-width] focus:outline-none"
               tabindex="0"
               role="button"
-              :aria-label="`${arc.label}: ${arc.count}`"
+              :aria-label="`${t(arc.label)}: ${arc.count}`"
               @mouseenter="hovered = `${item.key}:${arc.key}`"
               @mouseleave="hovered = null"
               @click="openDrilldown(item, arc)"
               @keydown.enter.prevent="openDrilldown(item, arc)"
               @keydown.space.prevent="openDrilldown(item, arc)"
             >
-              <title>{{ arc.label }}: {{ arc.count }} ({{ percent(arc.count, item.total) }}%)</title>
+              <title>{{ t(arc.label) }}: {{ arc.count }} ({{ percent(arc.count, item.total) }}%)</title>
             </circle>
             <text x="66" y="64" text-anchor="middle" class="fill-navy-900 text-[22px] font-bold dark:fill-gray-100">{{ formatNumber(item.total) }}</text>
-            <text x="66" y="81" text-anchor="middle" class="fill-gray-500 text-[10px]">people</text>
+            <text x="66" y="81" text-anchor="middle" class="fill-gray-500 text-[10px]">{{ t('people') }}</text>
           </svg>
 
           <!-- Legend: colour, label, count, share - each row opens its people. -->
@@ -97,14 +97,14 @@
               @click="openDrilldown(item, seg)"
             >
               <span class="h-2.5 w-2.5 flex-shrink-0 rounded-sm" :style="{ background: colorFor(seg.color) }" />
-              <span class="min-w-0 flex-1 text-gray-800 dark:text-gray-200">{{ seg.label }}</span>
+              <span class="min-w-0 flex-1 text-gray-800 dark:text-gray-200">{{ t(seg.label) }}</span>
               <span class="w-8 text-right font-semibold text-gray-900 dark:text-gray-100">{{ formatNumber(seg.count) }}</span>
               <span class="w-9 text-right text-xs text-gray-500 dark:text-gray-400">{{ percent(seg.count, item.total) }}%</span>
             </button>
             <!-- People without this reading yet: counted, but no list to open. -->
             <div v-if="item.no_data" class="flex items-center gap-2 px-2 py-1.5 text-[13px]">
               <span class="h-2.5 w-2.5 flex-shrink-0 rounded-sm bg-gray-200 dark:bg-gray-700" />
-              <span class="min-w-0 flex-1 text-gray-500 dark:text-gray-400">{{ item.no_data.label }}</span>
+              <span class="min-w-0 flex-1 text-gray-500 dark:text-gray-400">{{ t(item.no_data.label) }}</span>
               <span class="w-8 text-right font-semibold text-gray-700 dark:text-gray-300">{{ formatNumber(item.no_data.count) }}</span>
               <span class="w-9" />
             </div>
@@ -132,15 +132,15 @@
           </div>
           <div v-else-if="!drill.records.length" :class="ui.EMPTY_STATE">
             <LucideIcon name="inbox" class="h-8 w-8 text-gray-300 dark:text-gray-600" />
-            No records for this selection.
+            {{ t('No records for this selection.') }}
           </div>
           <template v-else>
             <div :class="[ui.TABLE_WRAP, 'hidden max-h-[60vh] sm:block', { 'opacity-60': drill.loading }]">
               <table :class="ui.TABLE">
                 <thead :class="ui.THEAD">
                   <tr>
-                    <th :class="ui.TH">ID</th>
-                    <th v-for="col in drill.columns" :key="col.fieldname" :class="ui.TH">{{ col.label }}</th>
+                    <th :class="ui.TH">{{ t('ID') }}</th>
+                    <th v-for="col in drill.columns" :key="col.fieldname" :class="ui.TH">{{ t(col.label) }}</th>
                   </tr>
                 </thead>
                 <tbody :class="ui.TBODY">
@@ -176,7 +176,7 @@
                 </span>
                 <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
                   <div v-for="col in drill.columns" :key="col.fieldname" class="min-w-0">
-                    <dt class="truncate text-[11px] font-medium uppercase tracking-wide text-gray-500">{{ col.label }}</dt>
+                    <dt class="truncate text-[11px] font-medium uppercase tracking-wide text-gray-500">{{ t(col.label) }}</dt>
                     <dd class="truncate text-sm text-gray-800 dark:text-gray-200">
                       <span v-if="isEmptyValue(row[col.fieldname])" class="text-gray-300 dark:text-gray-600">—</span>
                       <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
@@ -190,23 +190,22 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               <template v-if="drill.total">
-                {{ formatNumber(drill.start + 1) }}–{{ formatNumber(drill.start + drill.records.length) }}
-                of {{ formatNumber(drill.total) }}
+                {{ t('{0}–{1} of {2}', [formatNumber(drill.start + 1), formatNumber(drill.start + drill.records.length), formatNumber(drill.total)]) }}
               </template>
             </span>
             <div class="flex items-center gap-2">
               <a v-if="drill.total" :href="excelUrl" target="_blank" rel="noopener" :class="ui.BTN_SECONDARY">
                 <LucideIcon name="download" class="h-4 w-4 text-forest-700 dark:text-forest-300" />
-                Excel
+                {{ t('Excel') }}
               </a>
-              <button type="button" :class="ui.BTN_SECONDARY" :disabled="drill.loading || drill.start === 0" aria-label="Previous page" @click="changePage(-1)">
+              <button type="button" :class="ui.BTN_SECONDARY" :disabled="drill.loading || drill.start === 0" :aria-label="t('Previous page')" @click="changePage(-1)">
                 <LucideIcon name="chevron-left" class="h-4 w-4" />
               </button>
               <button
                 type="button"
                 :class="ui.BTN_SECONDARY"
                 :disabled="drill.loading || drill.start + drill.records.length >= drill.total"
-                aria-label="Next page"
+                :aria-label="t('Next page')"
                 @click="changePage(1)"
               >
                 <LucideIcon name="chevron-right" class="h-4 w-4" />
@@ -227,6 +226,7 @@ import Skeleton from '@/components/Skeleton.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { isEmptyValue, formatFieldValue } from '@/data/recordFormat'
 import * as ui from '@/data/ui'
+import { t } from '@/data/i18n'
 
 // Like the Desk section, these only take Village / Health Worker - none of
 // the 5 indicators is bounded by the page's date range.
@@ -281,7 +281,7 @@ async function loadSummary() {
     indicators.value = Object.entries(data || {}).map(([key, value]) => ({ key, ...value }))
   } catch (e) {
     if (requestId !== summaryRequestId) return
-    error.value = errorText(e, 'Could not load the new indicators.')
+    error.value = errorText(e, t('Could not load the new indicators.'))
   } finally {
     if (requestId === summaryRequestId) loading.value = false
   }
@@ -314,7 +314,7 @@ let drillRequestId = 0
 const activeTitle = computed(() => {
   if (!active.value) return ''
   const { indicator, segment } = active.value
-  return segment ? `${indicator.label}: ${segment.label}` : indicator.label
+  return segment ? `${t(indicator.label)}: ${t(segment.label)}` : t(indicator.label)
 })
 
 // The backend sends labels only; dates are recognisable by name, so they
@@ -343,7 +343,7 @@ async function fetchDrillRecords() {
     drill.doctype = data?.doctype || null
   } catch (e) {
     if (requestId !== drillRequestId) return
-    drill.error = errorText(e, 'Could not load records.')
+    drill.error = errorText(e, t('Could not load records.'))
   } finally {
     if (requestId === drillRequestId) drill.loading = false
   }

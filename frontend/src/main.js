@@ -3,6 +3,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import { installServerMessages } from './data/serverMessages'
+import { t, initLanguage } from './data/i18n'
+
+// Show the last-used language from the phone at once (also offline), before
+// the user's details arrive from the server.
+initLanguage(null)
 
 // Server msgprint()s after saves / calls, as Desk shows them.
 installServerMessages()
@@ -19,6 +24,10 @@ window.addEventListener('pageshow', (event) => {
 })
 
 let app = createApp(App)
+
+// t() in every template without importing it: {{ t('Save') }}. Reactive -
+// switching language re-renders the screens.
+app.config.globalProperties.t = t
 
 app.use(router)
 app.mount('#app')

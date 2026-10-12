@@ -48,7 +48,7 @@
         </div>
         <div class="mb-2 flex items-center justify-between sm:hidden">
           <span class="text-base font-semibold text-navy-900 dark:text-gray-100">{{ label }}</span>
-          <button type="button" class="text-sm font-semibold text-forest-700 dark:text-forest-300" @click="open = false">Done</button>
+          <button type="button" class="text-sm font-semibold text-forest-700 dark:text-forest-300" @click="open = false">{{ t('Done') }}</button>
         </div>
         <slot :close="() => (open = false)" />
       </div>

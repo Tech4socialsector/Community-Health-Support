@@ -5,7 +5,7 @@
   opening its own form, plus "View all" for the full filtered list; "+"
   starts a new entry already linked to this record. -->
   <section v-if="loading || connections.length">
-    <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Connections</h2>
+    <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ t('Connections') }}</h2>
     <div class="grid grid-cols-1 items-start gap-2 min-[480px]:grid-cols-2 lg:grid-cols-3">
       <template v-if="loading && !connections.length">
         <Skeleton v-for="i in 3" :key="i" height="3rem" />
@@ -22,7 +22,7 @@
               type="button"
               class="flex min-w-0 flex-1 items-center gap-2 text-left focus:outline-none focus-visible:underline"
               :aria-expanded="isOpen(conn)"
-              :title="conn.label"
+              :title="t(conn.label)"
               @click="toggle(conn)"
             >
               <LucideIcon
@@ -30,7 +30,7 @@
                 class="h-4 w-4 flex-shrink-0 opacity-60 transition-transform"
                 :class="{ 'rotate-90': isOpen(conn) }"
               />
-              <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ conn.label }}</span>
+              <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ t(conn.label) }}</span>
               <!-- The count, 0 included - every card always says how many. -->
               <span
                 v-if="conn.count != null"
@@ -43,8 +43,8 @@
               :to="{ name: 'DoctypeNew', params: { doctypeRoute: conn.item.route }, query: conn.query }"
               :class="ui.BTN_ADD"
               class="!h-7 !w-7 !rounded-md"
-              :title="`New ${conn.label}`"
-              :aria-label="`New ${conn.label}`"
+              :title="t('New {0}', [t(conn.label)])"
+              :aria-label="t('New {0}', [t(conn.label)])"
             >
               <LucideIcon name="plus" class="h-4 w-4" />
             </router-link>
@@ -55,9 +55,9 @@
             <div v-if="records[conn.key]?.loading" class="space-y-1.5 p-2">
               <Skeleton v-for="i in Math.min(conn.count || 2, 3)" :key="i" height="2.25rem" />
             </div>
-            <p v-else-if="records[conn.key]?.error" class="px-3 py-3 text-sm text-gray-500">Couldn't load these records.</p>
+            <p v-else-if="records[conn.key]?.error" class="px-3 py-3 text-sm text-gray-500">{{ t("Couldn't load these records.") }}</p>
             <p v-else-if="!records[conn.key]?.rows.length" class="px-3 py-3 text-sm text-gray-500 dark:text-gray-400">
-              No {{ conn.label }} records yet.
+              {{ t('No {0} records yet.', [t(conn.label)]) }}
             </p>
             <ul v-else class="divide-y divide-gray-100 dark:divide-gray-800">
               <li v-for="row in records[conn.key].rows.slice(0, PREVIEW)" :key="row.name">
@@ -80,7 +80,7 @@
               :to="{ name: 'DoctypeList', params: { doctypeRoute: conn.item.route }, query: conn.query }"
               class="flex items-center justify-center gap-1 border-t border-gray-100 px-3 py-2 text-xs font-semibold text-forest-700 hover:bg-forest-50/60 dark:border-gray-800 dark:text-forest-300 dark:hover:bg-gray-800/60"
             >
-              View all {{ conn.count }}
+              {{ t('View all {0}', [conn.count]) }}
               <LucideIcon name="arrow-right" class="h-3.5 w-3.5" />
             </router-link>
           </div>
@@ -97,6 +97,7 @@ import Skeleton from '@/components/Skeleton.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { findModuleByDoctype } from '@/data/modules'
 import * as ui from '@/data/ui'
+import { t, dateLocale } from '@/data/i18n'
 
 const props = defineProps({
   doctype: { type: String, required: true },
@@ -176,6 +177,6 @@ async function toggle(conn) {
 
 function formatDate(value) {
   const d = new Date(String(value).replace(' ', 'T'))
-  return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+  return isNaN(d) ? '' : d.toLocaleDateString(dateLocale(), { day: '2-digit', month: 'short', year: 'numeric' })
 }
 </script>

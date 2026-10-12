@@ -17,7 +17,7 @@
         class="absolute inset-x-6 top-0 h-0.5 rounded-full bg-forest-600"
       />
       <LucideIcon :name="tab.icon" class="h-5 w-5" />
-      {{ tab.label }}
+      {{ t(tab.label) }}
     </router-link>
 
     <button
@@ -34,7 +34,7 @@
           {{ unreadCount > 9 ? '9+' : unreadCount }}
         </span>
       </span>
-      Alerts
+      {{ t('Alerts') }}
     </button>
 
     <button
@@ -43,7 +43,7 @@
       @click="showMenu = true"
     >
       <LucideIcon name="menu" class="h-5 w-5" />
-      Menu
+      {{ t('Menu') }}
     </button>
   </nav>
 

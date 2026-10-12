@@ -15,26 +15,26 @@
         <button
           type="button"
           class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-white text-gray-600 ring-1 ring-gray-200 transition hover:text-navy-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-400 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700"
-          aria-label="Back"
+          :aria-label="t('Back')"
           @click="goBack"
         >
           <LucideIcon name="arrow-left" class="h-4 w-4" />
         </button>
         <div class="min-w-0 flex-1">
-          <p :class="[ui.SECTION_LABEL, 'truncate']">{{ formLabel }}</p>
+          <p :class="[ui.SECTION_LABEL, 'truncate']">{{ t(formLabel) }}</p>
           <div class="flex min-w-0 items-center gap-2">
             <h1 class="truncate text-base font-semibold text-navy-900 dark:text-gray-100 sm:text-lg">
-              {{ isNew ? `New ${formLabel}` : name }}
+              {{ isNew ? t('New {0}', [t(formLabel)]) : name }}
             </h1>
             <!-- Desk's "Not Saved": stays until a save actually succeeds, so
             an edited form is never mistaken for a saved one. -->
-            <span v-if="showNotSaved" :class="[ui.PILL, ui.TONE.amber, 'flex-shrink-0 !px-2 !py-0 text-[11px]']">Not saved</span>
+            <span v-if="showNotSaved" :class="[ui.PILL, ui.TONE.amber, 'flex-shrink-0 !px-2 !py-0 text-[11px]']">{{ t('Not saved') }}</span>
           </div>
         </div>
         <!-- Desk's "..." menu: Delete lives here, not as a button beside
         Save, so it can't be tapped by mistake. Only shown to people whose
         role may delete this record. -->
-        <ToolbarMenu v-if="canDelete" label="More actions" icon="ellipsis" icon-only align="right" width="sm:w-48" class="flex-shrink-0">
+        <ToolbarMenu v-if="canDelete" :label="t('More actions')" icon="ellipsis" icon-only align="right" width="sm:w-48" class="flex-shrink-0">
           <template #default="{ close }">
             <button
               type="button"
@@ -42,26 +42,26 @@
               @click="close(); confirmDelete = true"
             >
               <LucideIcon name="trash-2" class="h-4 w-4" />
-              Delete
+              {{ t('Delete') }}
             </button>
           </template>
         </ToolbarMenu>
         <button type="button" :class="[ui.BTN_PRIMARY, 'flex-shrink-0']" :disabled="saving" @click="save">
           <LucideIcon :name="saving ? 'loader-circle' : 'check'" class="h-4 w-4" :class="{ 'animate-spin': saving }" />
-          Save
+          {{ t('Save') }}
         </button>
         </div>
       </div>
 
-      <Dialog v-model="confirmDelete" :options="{ title: `Delete ${name}?`, size: 'sm' }">
+      <Dialog v-model="confirmDelete" :options="{ title: t('Delete {0}?', [name]), size: 'sm' }">
         <template #body-content>
           <p class="text-sm text-gray-600 dark:text-gray-300">
-            This permanently deletes this {{ formLabel }} record. It cannot be undone.
+            {{ t('This permanently deletes this {0} record. It cannot be undone.', [t(formLabel)]) }}
           </p>
         </template>
         <template #actions>
           <div class="flex justify-end gap-2">
-            <button type="button" :class="ui.BTN_SECONDARY" :disabled="deleting" @click="confirmDelete = false">Cancel</button>
+            <button type="button" :class="ui.BTN_SECONDARY" :disabled="deleting" @click="confirmDelete = false">{{ t('Cancel') }}</button>
             <button
               type="button"
               class="inline-flex h-9 items-center gap-1.5 rounded-lg bg-red-600 px-3 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
@@ -69,7 +69,7 @@
               @click="deleteRecord"
             >
               <LucideIcon :name="deleting ? 'loader-circle' : 'trash-2'" class="h-4 w-4" :class="{ 'animate-spin': deleting }" />
-              Delete
+              {{ t('Delete') }}
             </button>
           </div>
         </template>
@@ -110,10 +110,10 @@
             :aria-expanded="openSections.has(sec.key)"
             @click="toggleSection(sec.key)"
           >
-            <h2 class="text-sm font-semibold text-navy-900 dark:text-gray-100">{{ sec.label }}</h2>
+            <h2 class="text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h2>
             <LucideIcon :name="openSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" class="h-4 w-4 text-gray-400" />
           </button>
-          <h2 v-else-if="sec.label" class="mb-4 text-sm font-semibold text-navy-900 dark:text-gray-100">{{ sec.label }}</h2>
+          <h2 v-else-if="sec.label" class="mb-4 text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h2>
 
           <div v-show="!sec.collapsible || openSections.has(sec.key)" class="sm:columns-2 sm:gap-x-8" :class="{ 'mt-4': sec.label && sec.collapsible }">
             <template v-for="item in sec.items" :key="item.key">
@@ -121,7 +121,7 @@
                 v-if="item.kind === 'heading'"
                 class="mb-3 break-inside-avoid text-xs font-semibold uppercase tracking-wide text-gray-500 sm:[column-span:all] dark:text-gray-400"
               >
-                {{ item.label }}
+                {{ t(item.label) }}
               </h3>
               <div
                 v-else-if="item.kind === 'html'"
@@ -190,6 +190,7 @@ import { isPhoneField, warnIfNotDigits } from '@/doctype-hooks/utils'
 import { getDoctypeHooks } from '@/doctype-hooks'
 import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
 import { currentHealthWorkerResource } from '@/data/currentHealthWorker'
+import { t } from '@/data/i18n'
 
 const { doctype, isNew, name } = defineProps({
   doctype: { type: String, required: true },
@@ -256,7 +257,7 @@ function isWideField(field) {
 }
 
 watchEffect(() => {
-  setPageTitle(isNew ? `New ${metaResource.data?.name || doctype}` : name)
+  setPageTitle(isNew ? t('New {0}', [t(metaResource.data?.name || doctype)]) : name)
 })
 
 const newDoc = isNew ? useNewDoc(doctype) : null
@@ -365,7 +366,7 @@ const showNotSaved = computed(() => isNew || isDirty.value)
 let skipLeaveCheck = false
 function confirmLeave() {
   if (skipLeaveCheck || !isDirty.value) return true
-  return window.confirm('You have unsaved changes. Leave without saving?')
+  return window.confirm(t('You have unsaved changes. Leave without saving?'))
 }
 onBeforeRouteLeave(confirmLeave)
 onBeforeRouteUpdate(confirmLeave)
@@ -743,7 +744,7 @@ function saveErrorText(e) {
   const messages = e?.messages?.length ? e.messages : [e?.message || String(e || '')]
   // Server messages can carry HTML (<b>GBLAD</b>) - toasts show plain text.
   const text = messages.map((m) => String(m).replace(/<[^>]*>/g, '')).join(' ').trim()
-  return text || 'The record could not be saved.'
+  return text || t('The record could not be saved.')
 }
 
 const saveErrorBox = ref(null)
@@ -769,13 +770,13 @@ async function deleteRecord() {
     // Most often "Cannot delete ... because it is linked with ..." - the
     // household still has members, the pregnancy still has follow-ups.
     confirmDelete.value = false
-    toast.error(saveErrorText(e) || 'The record could not be deleted.')
+    toast.error(saveErrorText(e) || t('The record could not be deleted.'))
     return
   } finally {
     deleting.value = false
   }
   confirmDelete.value = false
-  toast.success(`Deleted ${name}`)
+  toast.success(t('Deleted {0}', [name]))
   // Gone - leaving can't lose anything, and Back would land on a page for
   // a record that no longer exists, so go to its list instead.
   skipLeaveCheck = true
@@ -795,8 +796,8 @@ async function save() {
       const doc = { ...values, doctype }
       if (!doc.name || String(doc.name).startsWith('new-')) delete doc.name
       const created = await call('frappe.client.insert', { doc })
-      if (!created?.name) throw new Error('The record could not be created.')
-      toast.success(`Created ${created.name}`)
+      if (!created?.name) throw new Error(t('The record could not be created.'))
+      toast.success(t('Created {0}', [created.name]))
       // Saved - moving on to the new record's own page isn't "leaving edits".
       skipLeaveCheck = true
       if (isGenericRoute) {
@@ -810,7 +811,7 @@ async function save() {
     } else {
       const result = await existingDoc.setValue.submit(values)
       if (existingDoc.setValue.error || !result) {
-        throw existingDoc.setValue.error || new Error('The record could not be saved.')
+        throw existingDoc.setValue.error || new Error(t('The record could not be saved.'))
       }
       // The saved doc has just been copied back into `values` (the load
       // watcher, on the next tick) - that, server-side fills included, is
@@ -819,7 +820,7 @@ async function save() {
       markSaved()
       afterLoadDone = false
       runAfterLoad()
-      toast.success(`${formLabel.value} saved`)
+      toast.success(t('{0} saved', [t(formLabel.value)]))
       activityKey.value++
     }
   } catch (e) {

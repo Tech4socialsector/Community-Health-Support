@@ -6,7 +6,7 @@
       pages show their plain title. -->
       <Breadcrumbs v-if="crumbs" :crumbs="crumbs" class="min-w-0" />
       <template v-else>
-        <Tooltip text="Home">
+        <Tooltip :text="t('Home')">
           <router-link
             :to="{ name: 'Home' }"
             class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
@@ -15,7 +15,7 @@
           </router-link>
         </Tooltip>
         <h1 class="truncate text-base font-semibold text-navy-900 dark:text-gray-100">
-          {{ pageTitle }}
+          {{ t(pageTitle) }}
         </h1>
       </template>
     </div>

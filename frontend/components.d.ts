@@ -20,6 +20,7 @@ declare module 'vue' {
     EmailSettingsPanel: typeof import('./src/components/EmailSettingsPanel.vue')['default']
     FilterBuilder: typeof import('./src/components/FilterBuilder.vue')['default']
     GeoLocationField: typeof import('./src/components/GeoLocationField.vue')['default']
+    LanguageMenu: typeof import('./src/components/LanguageMenu.vue')['default']
     LinkField: typeof import('./src/components/LinkField.vue')['default']
     ListFilterControl: typeof import('./src/components/ListFilterControl.vue')['default']
     LucideIcon: typeof import('./src/components/LucideIcon.vue')['default']

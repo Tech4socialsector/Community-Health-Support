@@ -6,9 +6,9 @@
     :style="{ insetInlineStart: isMobile ? '0' : sidebarWidth }"
   >
     <div class="flex items-center justify-between border-b px-4 py-3 dark:border-gray-800">
-      <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Notifications</h2>
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ t('Notifications') }}</h2>
       <div class="flex items-center gap-1">
-        <Tooltip v-if="unreadCount > 0" text="Mark all as read">
+        <Tooltip v-if="unreadCount > 0" :text="t('Mark all as read')">
           <button
             class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             @click="markAllRead"
@@ -16,7 +16,7 @@
             <FeatherIcon name="check-circle" class="h-4 w-4" />
           </button>
         </Tooltip>
-        <Tooltip text="Close">
+        <Tooltip :text="t('Close')">
           <button
             class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             @click="notificationsState.visible = false"
@@ -33,7 +33,7 @@
           class="flex items-center gap-1.5 px-1 py-2.5 text-sm font-medium"
           :class="selected ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'"
         >
-          {{ tab.label }}
+          {{ t(tab.label) }}
           <span
             v-if="tab.label === 'Unread' && unreadCount > 0"
             class="flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-100 px-1 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300"
@@ -58,7 +58,7 @@
             class="flex flex-col items-center gap-2 py-16 text-center text-gray-500 dark:text-gray-400"
           >
             <FeatherIcon name="bell" class="h-6 w-6" />
-            <span class="text-sm">{{ tabIndex === 1 ? "You're all caught up!" : 'No notifications yet.' }}</span>
+            <span class="text-sm">{{ tabIndex === 1 ? t("You're all caught up!") : t('No notifications yet.') }}</span>
           </div>
           <button
             v-for="n in visibleLogs"
@@ -76,7 +76,7 @@
               <span class="flex items-start justify-between gap-2">
                 <span
                   class="block text-sm font-medium text-gray-900 dark:text-gray-100"
-                  v-html="n.title || n.subject || 'Notification'"
+                  v-html="n.title || n.subject || t('Notification')"
                 />
                 <span
                   v-if="!n.read"
@@ -114,6 +114,7 @@ import {
   markRead,
 } from '@/data/notifications'
 import { findModuleByDoctype } from '@/data/modules'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   sidebarWidth: { type: String, default: '15rem' },
@@ -165,11 +166,11 @@ function formatTime(dateStr) {
   if (!dateStr) return ''
   const diffMs = Date.now() - new Date(dateStr).getTime()
   const diffMin = Math.round(diffMs / 60000)
-  if (diffMin < 1) return 'just now'
-  if (diffMin < 60) return `${diffMin}m ago`
+  if (diffMin < 1) return t('just now')
+  if (diffMin < 60) return t('{0}m ago', [diffMin])
   const diffHr = Math.round(diffMin / 60)
-  if (diffHr < 24) return `${diffHr}h ago`
-  return `${Math.round(diffHr / 24)}d ago`
+  if (diffHr < 24) return t('{0}h ago', [diffHr])
+  return t('{0}d ago', [Math.round(diffHr / 24)])
 }
 
 function open(n) {

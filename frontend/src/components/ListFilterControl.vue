@@ -6,7 +6,7 @@
     v-if="field.fieldtype === 'Select'"
     type="select"
     class="[&_[data-slot=trigger]]:h-8 [&_[data-slot=trigger]]:w-full"
-    :options="[{ label: `All ${field.label}`, value: '' }, ...selectOptions]"
+    :options="[{ label: t('All {0}', [t(field.label)]), value: '' }, ...selectOptions]"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event ?? '')"
   />
@@ -14,7 +14,11 @@
     v-else-if="field.fieldtype === 'Check'"
     type="select"
     class="[&_[data-slot=trigger]]:h-8 [&_[data-slot=trigger]]:w-full"
-    :options="[{ label: `${field.label}: Any`, value: '' }, { label: `${field.label}: Yes`, value: '1' }, { label: `${field.label}: No`, value: '0' }]"
+    :options="[
+      { label: `${t(field.label)}: ${t('Any')}`, value: '' },
+      { label: `${t(field.label)}: ${t('Yes')}`, value: '1' },
+      { label: `${t(field.label)}: ${t('No')}`, value: '0' },
+    ]"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event ?? '')"
   />
@@ -23,8 +27,8 @@
   <FormControl
     v-else-if="field.fieldtype === 'Date' || field.fieldtype === 'Datetime'"
     :type="dateFocused || modelValue ? 'date' : 'text'"
-    :placeholder="field.label"
-    :title="field.label"
+    :placeholder="t(field.label)"
+    :title="t(field.label)"
     :model-value="modelValue"
     @focusin="dateFocused = true"
     @focusout="dateFocused = false"
@@ -33,7 +37,7 @@
   <FormControl
     v-else
     type="text"
-    :placeholder="field.label"
+    :placeholder="t(field.label)"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event ?? '')"
   />
@@ -42,6 +46,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { FormControl } from 'frappe-ui'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -57,6 +62,7 @@ const selectOptions = computed(() =>
     .split('\n')
     .map((v) => v.trim())
     .filter(Boolean)
-    .map((v) => ({ label: v, value: v })),
+    // Option shown translated; the value stays English (it's what's filtered on).
+    .map((v) => ({ label: t(v), value: v })),
 )
 </script>

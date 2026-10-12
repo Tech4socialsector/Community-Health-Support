@@ -1,6 +1,8 @@
 // Display helpers for the read-only record detail page (RecordView.vue) and
 // its child tables - turning raw field values into what a person reads.
 
+import { t, dateLocale } from '@/data/i18n'
+
 const LAYOUT_FIELDTYPES = new Set([
   'Section Break',
   'Column Break',
@@ -48,16 +50,19 @@ export function formatFieldValue(value, field) {
   switch (field.fieldtype) {
     case 'Date': {
       const d = parseLocalDate(value)
-      return d ? d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : value
+      return d ? d.toLocaleDateString(dateLocale(), { day: '2-digit', month: 'short', year: 'numeric' }) : value
     }
     case 'Datetime': {
       const d = new Date(String(value).replace(' ', 'T'))
       return isNaN(d)
         ? value
-        : d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : d.toLocaleString(dateLocale(), { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     }
     case 'Check':
-      return value ? 'Yes' : 'No'
+      return value ? t('Yes') : t('No')
+    // The stored English option, shown in the user's language.
+    case 'Select':
+      return t(String(value))
     case 'Int':
     case 'Float':
     case 'Currency':

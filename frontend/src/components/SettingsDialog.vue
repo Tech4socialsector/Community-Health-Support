@@ -3,7 +3,7 @@
     <template #body>
       <div class="flex h-[34rem] max-h-[80vh] flex-col">
         <div class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800">
-          <h1 class="text-base font-semibold text-gray-900 dark:text-gray-100">Settings</h1>
+          <h1 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ t('Settings') }}</h1>
           <button
             class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             @click="show = false"
@@ -16,7 +16,7 @@
           <nav class="w-48 flex-shrink-0 overflow-y-auto border-r px-3 py-4 dark:border-gray-800 sm:w-56">
             <div v-for="group in groupedTabs" :key="group.label" class="mb-4">
               <div class="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                {{ group.label }}
+                {{ t(group.label) }}
               </div>
               <button
                 v-for="tab in group.tabs"
@@ -28,7 +28,7 @@
                 @click="activeTab = tab.key"
               >
                 <component :is="tab.icon" class="h-4 w-4 flex-shrink-0" />
-                {{ tab.label }}
+                {{ t(tab.label) }}
               </button>
             </div>
           </nav>
@@ -39,27 +39,30 @@
               <NotificationSettingsPanel v-else-if="activeTab === 'notifications'" />
 
               <div v-else-if="activeTab === 'appearance'">
-                <div class="mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">Appearance</div>
-                <TabButtons v-model="theme" :buttons="themeButtons" />
+                <div class="mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('Appearance') }}</div>
+                <TabButtons v-model="theme" :buttons="themeButtons.map((b) => ({ ...b, label: t(b.label) }))" />
               </div>
 
               <div v-else-if="activeTab === 'language'">
+                <!-- The same language system as the Home page's Language
+                menu: the app's screens switch at once, Desk and emails follow
+                the user's language, and missing translations fill in. -->
                 <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                  Choose the language used for emails and other Frappe-side text.
+                  {{ t('Choose the language for the app, Desk and emails.') }}
                 </p>
-                <div v-if="languagesResource.loading && !languagesResource.data" class="space-y-1">
+                <div v-if="!languageOptions.length" class="space-y-1">
                   <Skeleton v-for="i in 6" :key="i" height="2.25rem" />
                 </div>
                 <div v-else class="flex flex-col gap-1">
                   <button
-                    v-for="opt in languagesResource.data"
+                    v-for="opt in languageOptions"
                     :key="opt.value"
                     class="flex items-center justify-between rounded px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-                    :class="{ 'bg-gray-100 dark:bg-gray-800': session.user_language === opt.value }"
+                    :class="{ 'bg-gray-100 dark:bg-gray-800': i18n.lang === opt.value }"
                     @click="selectLanguage(opt.value)"
                   >
                     <span>{{ opt.label }}</span>
-                    <FeatherIcon v-if="session.user_language === opt.value" name="check" class="h-4 w-4" />
+                    <FeatherIcon v-if="i18n.lang === opt.value" name="check" class="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -77,7 +80,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { Dialog, FeatherIcon, TabButtons } from 'frappe-ui'
+import { Dialog, FeatherIcon, TabButtons, toast } from 'frappe-ui'
 import SettingsDoctypePanel from '@/components/SettingsDoctypePanel.vue'
 import ProfilePanel from '@/components/ProfilePanel.vue'
 import NotificationSettingsPanel from '@/components/NotificationSettingsPanel.vue'
@@ -85,7 +88,7 @@ import EmailSettingsPanel from '@/components/EmailSettingsPanel.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import moduleIcon from '@/components/moduleIcon'
 import { session } from '@/data/session'
-import { languagesResource, setUserLanguage } from '@/data/language'
+import { i18n, languageOptions, loadLanguageOptions, switchLanguage, t } from '@/data/i18n'
 import { currentTheme } from '@/data/theme'
 import { userContextResource } from '@/data/userContext'
 
@@ -151,7 +154,10 @@ const theme = computed({
   set: (v) => (currentTheme.value = v),
 })
 
+loadLanguageOptions()
+
 function selectLanguage(value) {
-  setUserLanguage(value)
+  if (value === i18n.lang) return
+  switchLanguage(value).catch((e) => toast.error(e?.messages?.[0] || e?.message || t('Could not change the language.')))
 }
 </script>

@@ -1,12 +1,12 @@
 <template>
   <div>
     <div class="mb-1.5 flex items-center justify-between">
-      <label class="text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+      <label class="text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
       <div class="flex items-center gap-1">
         <span v-if="point" class="text-xs text-gray-400 dark:text-gray-500">
           {{ point.lat.toFixed(5) }}, {{ point.lng.toFixed(5) }}
         </span>
-        <Tooltip v-if="point" text="Clear location">
+        <Tooltip v-if="point" :text="t('Clear location')">
           <button
             type="button"
             class="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
@@ -20,7 +20,7 @@
 
     <div class="relative h-64 w-full overflow-hidden rounded-lg border dark:border-gray-800">
       <div ref="mapEl" class="h-full w-full" />
-      <Tooltip text="Use my current location" placement="left">
+      <Tooltip :text="t('Use my current location')" placement="left">
         <button
           type="button"
           class="absolute right-2 top-2 z-[1000] flex h-9 w-9 items-center justify-center rounded-lg border bg-white text-gray-600 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -34,7 +34,7 @@
 
     <p v-if="locateError" class="mt-1.5 text-xs text-red-500">{{ locateError }}</p>
     <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-      {{ field.description || 'Click the map to set a location, or drag the pin to adjust it.' }}
+      {{ t(field.description || 'Click the map to set a location, or drag the pin to adjust it.') }}
     </p>
   </div>
 </template>
@@ -43,6 +43,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { FeatherIcon, Tooltip, LoadingIndicator } from 'frappe-ui'
 import L from 'leaflet'
+import { t } from '@/data/i18n'
 import 'leaflet/dist/leaflet.css'
 import markerIconUrl from 'leaflet/dist/images/marker-icon.png'
 import markerIcon2xUrl from 'leaflet/dist/images/marker-icon-2x.png'
@@ -148,7 +149,7 @@ function syncMarker() {
 
 function captureLocation() {
   if (!navigator.geolocation) {
-    locateError.value = 'Geolocation is not supported by this browser.'
+    locateError.value = t('Geolocation is not supported by this browser.')
     return
   }
   locating.value = true
@@ -160,7 +161,7 @@ function captureLocation() {
     },
     (err) => {
       locating.value = false
-      locateError.value = err.message || 'Could not get your location.'
+      locateError.value = err.message || t('Could not get your location.')
     },
     { enableHighAccuracy: true, timeout: 10000 },
   )

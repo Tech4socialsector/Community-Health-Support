@@ -2,7 +2,11 @@
 // can be filtered, which conditions suit each field type, and how a
 // filter row turns into a Frappe filter ([fieldname, operator, value]).
 
-// Every record has these, whatever the form - Desk offers them too.
+import { t } from '@/data/i18n'
+
+// Every record has these, whatever the form - Desk offers them too. The
+// labels stay English here (they're the translation keys); screens show
+// them through t() like any form field label.
 export const STANDARD_FILTER_FIELDS = [
   { fieldname: 'name', label: 'ID', fieldtype: 'Data' },
   { fieldname: 'creation', label: 'Created On', fieldtype: 'Datetime' },
@@ -39,9 +43,11 @@ export function operatorsFor(field) {
 
 const isDateLike = (field) => field?.fieldtype === 'Date' || field?.fieldtype === 'Datetime'
 
+// Shown to the user, so translated; the operator itself ('=', 'like') is
+// what gets sent to the server and never changes.
 export function operatorLabel(operator, field) {
   const dates = isDateLike(field)
-  return (
+  const label =
     {
       like: 'Contains',
       'not like': "Doesn't contain",
@@ -53,7 +59,7 @@ export function operatorLabel(operator, field) {
       '<=': dates ? 'On or before' : 'At most',
       is: 'Is',
     }[operator] || operator
-  )
+  return t(label)
 }
 
 // What kind of value box a row needs.

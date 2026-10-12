@@ -1,14 +1,14 @@
 <template>
   <AppLayout>
     <div :class="ui.PAGE">
-      <PageHeader description="Today, upcoming and overdue visits across ANC, PNC, Palliative Care, Postpartum and Child 6 wk–1 year.">
+      <PageHeader :description="t('Today, upcoming and overdue visits across ANC, PNC, Palliative Care, Postpartum and Child 6 wk–1 year.')">
         <template #title>
-          <h1 class="text-lg font-semibold text-navy-900 dark:text-gray-100">Work Orders</h1>
+          <h1 class="text-lg font-semibold text-navy-900 dark:text-gray-100">{{ t('Work Orders') }}</h1>
         </template>
         <template #actions>
           <span :class="[ui.PILL, ui.TONE.navy, 'gap-1.5']">
             <LucideIcon name="user-round" class="h-3.5 w-3.5" />
-            {{ session.full_name || session.user }} · {{ isPrivileged ? 'Coordinator' : 'CHW Health Worker' }}
+            {{ session.full_name || session.user }} · {{ isPrivileged ? t('Coordinator') : t('CHW Health Worker') }}
           </span>
         </template>
       </PageHeader>
@@ -18,12 +18,12 @@
       server-side. -->
       <div :class="ui.FILTER_BAR">
         <div v-for="control in filterControls" :key="control.key" :class="ui.FILTER_FIELD">
-          <span :class="ui.FILTER_LABEL">{{ control.label }}</span>
+          <span :class="ui.FILTER_LABEL">{{ t(control.label) }}</span>
           <FormControl type="select" class="[&_[data-slot=trigger]]:w-full" :options="control.options" v-model="filters[control.key]" />
         </div>
         <button v-if="hasActiveFilters" type="button" :class="ui.BTN_SECONDARY" @click="clearFilters">
           <LucideIcon name="x" class="h-4 w-4" />
-          Clear filters
+          {{ t('Clear filters') }}
         </button>
       </div>
 
@@ -33,8 +33,7 @@
       >
         <LucideIcon name="triangle-alert" class="mt-0.5 h-4 w-4 flex-shrink-0" />
         <span>
-          No Health Worker record is linked to your login. Ask your coordinator to set the
-          <strong>User</strong> field on your Health Worker record so your work order list can show here.
+          {{ t('No Health Worker record is linked to your login. Ask your coordinator to set the User field on your Health Worker record so your work order list can show here.') }}
         </span>
       </div>
 
@@ -53,7 +52,7 @@
           @click="openStatus(card.key)"
         >
           <span class="flex w-full items-start justify-between gap-2">
-            <span :class="ui.STAT_LABEL">{{ card.label }}</span>
+            <span :class="ui.STAT_LABEL">{{ t(card.label) }}</span>
             <span :class="[ui.ICON_TILE_BASE, card.iconClass]">
               <LucideIcon :name="card.icon" class="h-[18px] w-[18px]" />
             </span>
@@ -61,7 +60,7 @@
           <Skeleton v-if="summaryLoading && !summaryLoaded" width="3rem" height="2rem" />
           <span v-else :class="ui.statCountTone(card.tone)">{{ summary[card.key] || 0 }}</span>
           <span :class="ui.STAT_CTA">
-            View visits
+            {{ t('View visits') }}
             <LucideIcon name="arrow-right" class="h-4 w-4 transition group-hover:translate-x-0.5" />
           </span>
         </button>
@@ -91,20 +90,20 @@
               <input
                 v-model="search"
                 type="search"
-                placeholder="Search patient on this page"
+                :placeholder="t('Search patient on this page')"
                 class="h-9 w-full rounded-lg border-0 bg-white pl-9 pr-3 text-sm text-gray-900 ring-1 ring-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-forest-400 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700"
               />
             </div>
             <a v-if="records.total" :href="excelUrl" target="_blank" rel="noopener" :class="[ui.BTN_SECONDARY, 'flex-shrink-0']">
               <LucideIcon name="download" class="h-4 w-4 text-forest-700 dark:text-forest-300" />
-              Excel
+              {{ t('Excel') }}
             </a>
           </div>
 
           <div v-if="summary.by_type?.length" class="flex flex-wrap gap-2">
-            <span v-for="t in summary.by_type" :key="t.key" :class="[ui.PILL, ui.TONE.gray, 'gap-1.5']">
-              {{ t.label }}
-              <span class="font-bold tabular-nums text-navy-900 dark:text-gray-100">{{ byTypeCountFor(t) }}</span>
+            <span v-for="vt in summary.by_type" :key="vt.key" :class="[ui.PILL, ui.TONE.gray, 'gap-1.5']">
+              {{ t(vt.label) }}
+              <span class="font-bold tabular-nums text-navy-900 dark:text-gray-100">{{ byTypeCountFor(vt) }}</span>
             </span>
           </div>
 
@@ -114,18 +113,18 @@
           </div>
           <div v-else-if="!visibleRows.length" :class="ui.EMPTY_STATE">
             <LucideIcon name="inbox" class="h-8 w-8 text-gray-300 dark:text-gray-600" />
-            {{ records.rows.length ? 'No visits match the search / risk filter on this page.' : 'No visits for this selection.' }}
+            {{ records.rows.length ? t('No visits match the search / risk filter on this page.') : t('No visits for this selection.') }}
           </div>
           <template v-else>
             <div :class="[ui.TABLE_WRAP, 'hidden max-h-[50vh] sm:block', { 'opacity-60': records.loading }]">
               <table :class="ui.TABLE">
                 <thead :class="ui.THEAD">
                   <tr>
-                    <th :class="ui.TH">Patient</th>
-                    <th :class="ui.TH">Visit Type</th>
-                    <th :class="ui.TH">Village</th>
-                    <th :class="ui.TH">Visit Window</th>
-                    <th :class="ui.TH">Status</th>
+                    <th :class="ui.TH">{{ t('Patient') }}</th>
+                    <th :class="ui.TH">{{ t('Visit Type') }}</th>
+                    <th :class="ui.TH">{{ t('Village') }}</th>
+                    <th :class="ui.TH">{{ t('Visit Window') }}</th>
+                    <th :class="ui.TH">{{ t('Status') }}</th>
                   </tr>
                 </thead>
                 <tbody :class="ui.TBODY">
@@ -139,16 +138,16 @@
                   >
                     <td :class="ui.TD_STRONG">
                       {{ row.patient || row.name }}
-                      <span v-if="row.high_risk === 'Yes'" :class="[ui.FLAG, ui.TONE.red, 'ml-2']">High risk</span>
+                      <span v-if="row.high_risk === 'Yes'" :class="[ui.FLAG, ui.TONE.red, 'ml-2']">{{ t('High risk') }}</span>
                     </td>
-                    <td :class="ui.TD">{{ row.visit_type }}</td>
+                    <td :class="ui.TD">{{ t(row.visit_type) }}</td>
                     <td :class="ui.TD">
                       <span v-if="row.village">{{ row.village }}</span>
                       <span v-else class="text-gray-300 dark:text-gray-600">—</span>
                     </td>
                     <td :class="[ui.TD, 'tabular-nums']">{{ windowRange(row) }}</td>
                     <td :class="ui.TD">
-                      <span :class="[ui.PILL, statusBadgeClass(row.status)]">{{ row.status }}</span>
+                      <span :class="[ui.PILL, statusBadgeClass(row.status)]">{{ t(row.status) }}</span>
                     </td>
                   </tr>
                 </tbody>
@@ -166,16 +165,16 @@
                 <span class="flex items-start justify-between gap-2">
                   <span class="min-w-0">
                     <span class="block truncate font-semibold text-navy-900 dark:text-gray-100">{{ row.patient || row.name }}</span>
-                    <span class="block truncate text-xs text-gray-500">{{ row.visit_type }}<template v-if="row.village"> · {{ row.village }}</template></span>
+                    <span class="block truncate text-xs text-gray-500">{{ t(row.visit_type) }}<template v-if="row.village"> · {{ row.village }}</template></span>
                   </span>
-                  <span :class="[ui.PILL, statusBadgeClass(row.status), 'flex-shrink-0']">{{ row.status }}</span>
+                  <span :class="[ui.PILL, statusBadgeClass(row.status), 'flex-shrink-0']">{{ t(row.status) }}</span>
                 </span>
                 <span class="mt-2 flex items-center justify-between gap-2 text-xs">
                   <span class="inline-flex items-center gap-1 tabular-nums text-gray-600 dark:text-gray-300">
                     <LucideIcon name="calendar-range" class="h-3.5 w-3.5 text-gray-400" />
                     {{ windowRange(row) }}
                   </span>
-                  <span v-if="row.high_risk === 'Yes'" :class="[ui.FLAG, ui.TONE.red]">High risk</span>
+                  <span v-if="row.high_risk === 'Yes'" :class="[ui.FLAG, ui.TONE.red]">{{ t('High risk') }}</span>
                 </span>
               </button>
             </div>
@@ -184,7 +183,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <span class="text-sm text-gray-500 dark:text-gray-400">
               <template v-if="records.total">
-                {{ records.start + 1 }}–{{ records.start + records.rows.length }} of {{ records.total }}
+                {{ t('{0}–{1} of {2}', [records.start + 1, records.start + records.rows.length, records.total]) }}
               </template>
             </span>
             <div class="flex items-center gap-2">
@@ -192,7 +191,7 @@
                 type="button"
                 :class="ui.BTN_SECONDARY"
                 :disabled="records.loading || records.start === 0"
-                aria-label="Previous page"
+                :aria-label="t('Previous page')"
                 @click="changePage(-1)"
               >
                 <LucideIcon name="chevron-left" class="h-4 w-4" />
@@ -201,7 +200,7 @@
                 type="button"
                 :class="ui.BTN_SECONDARY"
                 :disabled="records.loading || records.start + records.rows.length >= records.total"
-                aria-label="Next page"
+                :aria-label="t('Next page')"
                 @click="changePage(1)"
               >
                 <LucideIcon name="chevron-right" class="h-4 w-4" />
@@ -229,6 +228,7 @@ import { VISIT_TYPES, PAGE_SIZE, STATUS_CARDS, STATUS_OPTIONS, RISK_OPTIONS, sta
 import { setPageTitle } from '@/data/pageTitle'
 import * as ui from '@/data/ui'
 import { goToRecord } from '@/data/openRecord'
+import { t, dateLocale } from '@/data/i18n'
 
 setPageTitle('Work Orders')
 
@@ -261,13 +261,17 @@ function clearFilters() {
   })
 }
 
+// Option labels are translated for display only; the values sent to the
+// server stay English.
+const withLabels = (options) => options.map((o) => ({ ...o, label: t(o.label) }))
+
 const visitTypeOptions = [{ label: 'All Visit Types', value: '' }, ...VISIT_TYPES.map((v) => ({ label: v, value: v }))]
 const villageOptions = computed(() => [
-  { label: ALL_VILLAGES, value: ALL_VILLAGES },
+  { label: t(ALL_VILLAGES), value: ALL_VILLAGES },
   ...(villagesResource.data || []).map((v) => ({ label: v, value: v })),
 ])
 const healthWorkerOptions = computed(() => [
-  { label: ALL_HEALTH_WORKERS, value: ALL_HEALTH_WORKERS },
+  { label: t(ALL_HEALTH_WORKERS), value: ALL_HEALTH_WORKERS },
   ...(healthWorkersResource.data || []).map((v) => ({ label: v, value: v })),
 ])
 
@@ -275,9 +279,9 @@ const healthWorkerOptions = computed(() => [
 // two copies can never drift apart. Village / Health Worker are
 // coordinator-only - a CHW is always scoped to themselves server-side.
 const filterControls = computed(() => [
-  { key: 'status', label: 'Status', options: STATUS_OPTIONS, width: 'min-[480px]:w-44' },
-  { key: 'visit_type', label: 'Visit Type', options: visitTypeOptions, width: 'min-[480px]:w-52' },
-  { key: 'risk', label: 'Risk', options: RISK_OPTIONS, width: 'min-[480px]:w-36' },
+  { key: 'status', label: 'Status', options: withLabels(STATUS_OPTIONS), width: 'min-[480px]:w-44' },
+  { key: 'visit_type', label: 'Visit Type', options: withLabels(visitTypeOptions), width: 'min-[480px]:w-52' },
+  { key: 'risk', label: 'Risk', options: withLabels(RISK_OPTIONS), width: 'min-[480px]:w-36' },
   ...(isPrivileged.value
     ? [
         { key: 'village', label: 'Village', options: villageOptions.value, width: 'min-[480px]:w-44' },
@@ -335,7 +339,7 @@ async function loadSummary() {
     summaryLoaded.value = true
   } catch (e) {
     if (requestId !== summaryRequestId) return
-    summaryError.value = errorText(e, 'Could not load the work order summary.')
+    summaryError.value = errorText(e, t('Could not load the work order summary.'))
   } finally {
     if (requestId === summaryRequestId) summaryLoading.value = false
   }
@@ -367,7 +371,7 @@ async function loadRecords() {
     records.total = data?.total_count ?? records.rows.length
   } catch (e) {
     if (requestId !== recordsRequestId) return
-    records.error = errorText(e, 'Could not load visits.')
+    records.error = errorText(e, t('Could not load visits.'))
   } finally {
     if (requestId === recordsRequestId) records.loading = false
   }
@@ -417,7 +421,7 @@ const showDrilldown = computed({
 const selectedCard = computed(() => STATUS_CARDS.find((c) => c.key === filters.status) || null)
 
 const selectedStatusLabel = computed(
-  () => STATUS_OPTIONS.find((o) => o.value === filters.status)?.label || '',
+  () => t(STATUS_OPTIONS.find((o) => o.value === filters.status)?.label || ''),
 )
 
 function byTypeCountFor(t) {
@@ -464,7 +468,7 @@ function parseDate(value) {
 }
 
 function formatDate(date) {
-  return date.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+  return date.toLocaleDateString(dateLocale(), { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 // Always a full range - with no stored window start (older records, or the

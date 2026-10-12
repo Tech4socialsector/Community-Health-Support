@@ -4,7 +4,7 @@
   Row / Delete underneath. A row opens its full set of fields in a dialog,
   like Desk's row form. -->
   <div>
-    <h3 class="mb-2 text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</h3>
+    <h3 class="mb-2 text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</h3>
 
     <div class="overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
       <table class="w-full table-fixed border-collapse text-left text-sm" :style="{ minWidth: rows.length ? tableMinWidth : undefined }">
@@ -16,25 +16,25 @@
                 class="h-3.5 w-3.5 rounded border-gray-300"
                 :checked="rows.length > 0 && selectedKeys.size === rows.length"
                 :disabled="!rows.length"
-                aria-label="Select all rows"
+                :aria-label="t('Select all rows')"
                 @change="toggleAll($event.target.checked)"
               />
             </th>
-            <th class="w-11 border-b border-r border-gray-200 px-2 py-2 font-medium dark:border-gray-700">No.</th>
+            <th class="w-11 border-b border-r border-gray-200 px-2 py-2 font-medium dark:border-gray-700">{{ t('No.') }}</th>
             <th
               v-for="col in gridColumns"
               :key="col.fieldname"
               class="truncate border-b border-r border-gray-200 px-2 py-2 font-medium dark:border-gray-700"
-              :title="col.label"
+              :title="t(col.label)"
             >
-              {{ col.label }}
+              {{ t(col.label) }}
             </th>
             <th class="w-9 border-b border-gray-200 dark:border-gray-700" />
           </tr>
         </thead>
         <tbody>
           <tr v-if="!rows.length">
-            <td :colspan="gridColumns.length + 3" class="px-3 py-6 text-center text-sm text-gray-400">No Data</td>
+            <td :colspan="gridColumns.length + 3" class="px-3 py-6 text-center text-sm text-gray-400">{{ t('No Data') }}</td>
           </tr>
           <tr
             v-for="(row, idx) in rows"
@@ -48,7 +48,7 @@
                 type="checkbox"
                 class="h-3.5 w-3.5 rounded border-gray-300"
                 :checked="selectedKeys.has(keyOf(row))"
-                :aria-label="`Select row ${idx + 1}`"
+                :aria-label="t('Select row {0}', [idx + 1])"
                 @change="toggleRow(row, $event.target.checked)"
               />
             </td>
@@ -64,7 +64,7 @@
               <button
                 type="button"
                 class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700"
-                :aria-label="`Edit row ${idx + 1}`"
+                :aria-label="t('Edit row {0}', [idx + 1])"
                 @click.stop="openRow(idx)"
               >
                 <LucideIcon name="pencil" class="h-3.5 w-3.5" />
@@ -76,11 +76,11 @@
     </div>
 
     <div class="mt-2 flex items-center gap-2">
-      <Button size="sm" @click="addRow">Add Row</Button>
-      <Button v-if="selectedKeys.size" size="sm" theme="red" @click="deleteSelected">Delete</Button>
+      <Button size="sm" @click="addRow">{{ t('Add Row') }}</Button>
+      <Button v-if="selectedKeys.size" size="sm" theme="red" @click="deleteSelected">{{ t('Delete') }}</Button>
     </div>
 
-    <Dialog v-model="showRowEditor" :options="{ title: `${field.label} - Row ${(editingIdx ?? 0) + 1}`, size: 'xl' }">
+    <Dialog v-model="showRowEditor" :options="{ title: t('{0} - Row {1}', [t(field.label), (editingIdx ?? 0) + 1]), size: 'xl' }">
       <template #body-content>
         <div v-if="editingRow" class="grid grid-cols-1 gap-4">
           <DynamicField
@@ -98,7 +98,7 @@
       </template>
       <template #actions>
         <Button variant="solid" class="w-full" @click="showRowEditor = false">
-          Done
+          {{ t('Done') }}
         </Button>
       </template>
     </Dialog>
@@ -115,6 +115,7 @@ import { formatFieldValue, isEmptyValue } from '@/data/recordFormat'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
+import { t } from '@/data/i18n'
 
 const { field, modelValue, doctype, docname, parentDoc, linkQueryFor, rowClass } = defineProps({
   field: { type: Object, required: true },

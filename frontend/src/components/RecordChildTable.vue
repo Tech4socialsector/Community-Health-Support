@@ -2,7 +2,7 @@
   <!-- Read-only rows of one child table on the record detail page. Columns
   come from the child DocType's own in_list_view fields (falling back to its
   first few visible fields), like Desk's grid. -->
-  <div v-if="!rows.length" class="text-sm text-gray-400 dark:text-gray-500">No rows.</div>
+  <div v-if="!rows.length" class="text-sm text-gray-400 dark:text-gray-500">{{ t('No rows.') }}</div>
   <div v-else-if="metaResource.loading && !metaResource.data" class="space-y-2">
     <Skeleton v-for="i in Math.min(rows.length, 3)" :key="i" height="2rem" />
   </div>
@@ -12,7 +12,7 @@
         <tr>
           <th class="w-10 px-3 py-2 font-medium">#</th>
           <th v-for="col in columns" :key="col.fieldname" class="whitespace-nowrap px-3 py-2 font-medium">
-            {{ col.label || col.fieldname }}
+            {{ t(col.label) || col.fieldname }}
           </th>
         </tr>
       </thead>
@@ -34,6 +34,7 @@ import { computed } from 'vue'
 import Skeleton from '@/components/Skeleton.vue'
 import { useMeta } from '@/data/useMeta'
 import { isEmptyValue, formatFieldValue, isLayoutField } from '@/data/recordFormat'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   // The parent's Table DocField - its `options` is the child DocType.

@@ -6,7 +6,7 @@
   <div>
     <div class="mb-1.5 flex items-center justify-between gap-2">
       <label class="text-sm text-gray-700 dark:text-gray-300">
-        {{ field.label }}<span v-if="field.reqd" class="text-red-500"> *</span>
+        {{ t(field.label) }}<span v-if="field.reqd" class="text-red-500"> *</span>
       </label>
       <button
         v-if="modelValue && !readOnly"
@@ -15,14 +15,14 @@
         @click="clear"
       >
         <LucideIcon name="rotate-ccw" class="h-3.5 w-3.5" />
-        Clear
+        {{ t('Clear') }}
       </button>
     </div>
 
     <img
       v-if="readOnly"
       :src="modelValue || undefined"
-      :alt="field.label"
+      :alt="t(field.label)"
       class="h-36 w-full rounded-lg bg-white object-contain ring-1 ring-gray-200 dark:ring-gray-700"
     />
     <div v-else class="relative">
@@ -30,7 +30,7 @@
       <canvas
         ref="canvas"
         class="block h-36 w-full touch-none rounded-lg bg-white ring-1 ring-gray-200 dark:ring-gray-700"
-        :aria-label="`${field.label} - sign here`"
+        :aria-label="t('{0} - sign here', [t(field.label)])"
         @pointerdown="start"
         @pointermove="move"
         @pointerup="end"
@@ -41,16 +41,17 @@
         v-if="!modelValue && !drawing"
         class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-gray-400"
       >
-        Sign here
+        {{ t('Sign here') }}
       </span>
     </div>
-    <p v-if="field.description" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ field.description }}</p>
+    <p v-if="field.description" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ t(field.description) }}</p>
   </div>
 </template>
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import LucideIcon from '@/components/LucideIcon.vue'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   field: { type: Object, required: true },

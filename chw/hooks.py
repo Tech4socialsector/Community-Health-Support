@@ -94,6 +94,8 @@ add_to_apps_screen = [
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+# "Auto-translate CHW" on the Translation list - see chw/translation_tool.py.
+doctype_list_js = {"Translation": "public/js/translation_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 

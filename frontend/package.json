@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "node scripts/extract-ui-strings.mjs && vite build"
   },
   "dependencies": {
     "@vueuse/core": "^10.11.1",

@@ -67,6 +67,7 @@ import { childItemsOf } from '@/data/modules'
 import { notificationsResource, unreadCount, toggleNotifications } from '@/data/notifications'
 import { showSettingsDialog, openSettingsDialog } from '@/data/settingsDialog'
 import { userContextResource } from '@/data/userContext'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   // Forced open (never icon-collapsed) when rendered inside the mobile
@@ -93,50 +94,52 @@ const header = computed(() => ({
   logo: appLogo.value,
   menuItems: [
     {
-      label: 'Settings',
+      label: t('Settings'),
       icon: 'settings',
       onClick: openSettingsDialog,
     },
     {
-      label: 'Help',
+      label: t('Help'),
       icon: 'help-circle',
       onClick: () => window.open('https://frappeframework.com/docs', '_blank', 'noopener'),
     },
     {
-      label: 'Clear site data',
+      label: t('Clear site data'),
       icon: 'refresh-cw',
       onClick: () => {
-        if (window.confirm('This clears cached app data and reloads the page. Continue?')) {
+        if (window.confirm(t('This clears cached app data and reloads the page. Continue?'))) {
           clearSiteData()
         }
       },
     },
     {
-      label: 'Go to Desk',
+      label: t('Go to Desk'),
       icon: 'grid',
       onClick: () => window.open('/app', '_self'),
     },
     {
-      label: 'Logout',
+      label: t('Logout'),
       icon: 'log-out',
       onClick: () => logoutResource.submit(),
     },
   ],
 }))
 
+// Labels are translated here (not in the template) because frappe-ui's
+// Sidebar draws the section headings and header menu itself.
 const sections = computed(() => {
   const sectionList = [
     {
       label: '',
       items: [
         {
-          label: 'Notifications',
+          label: t('Notifications'),
           icon: moduleIcon('bell'),
           suffix: unreadCount.value > 0 ? String(unreadCount.value > 9 ? '9+' : unreadCount.value) : undefined,
           onClick: toggleNotifications,
         },
         {
-          label: 'Home',
+          label: t('Home'),
           icon: moduleIcon('home'),
           to: { name: 'Home' },
           dividerBefore: true,
@@ -145,10 +148,10 @@ const sections = computed(() => {
       ],
     },
     {
-      label: 'My work',
+      label: t('My work'),
       items: [
         {
-          label: 'Work Orders',
+          label: t('Work Orders'),
           icon: moduleIcon('clipboard-list'),
           to: { name: 'WorkOrders' },
           isActive: route.name === 'WorkOrders',
@@ -163,10 +166,10 @@ const sections = computed(() => {
   // opened. Its whole section goes with it, so CHWs see no empty heading.
   if (userContextResource.data?.is_privileged) {
     sectionList.push({
-      label: 'Administration',
+      label: t('Administration'),
       items: [
         {
-          label: 'Overview',
+          label: t('Overview'),
           icon: moduleIcon('bar-chart-2'),
           to: { name: 'Overview' },
           isActive: route.name === 'Overview',
@@ -198,7 +201,7 @@ const sections = computed(() => {
       for (const node of nodes) {
         const onBranch = trail[depth] === node.route
         items.push({
-          label: node.label || node.doctype_name,
+          label: t(node.label || node.doctype_name),
           icon: moduleIcon(node.icon || mod.icon),
           to: { name: 'DoctypeList', params: { doctypeRoute: node.route } },
           depth,
@@ -209,7 +212,7 @@ const sections = computed(() => {
     }
     addLevel(roots.length ? roots : doctypes, 0)
 
-    sectionList.push({ label: mod.label, items })
+    sectionList.push({ label: t(mod.label), items })
   }
 
   return sectionList

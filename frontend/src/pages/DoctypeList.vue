@@ -14,7 +14,7 @@
         <template #actions>
           <button v-if="metaResource.data" type="button" :class="ui.BTN_PRIMARY" @click="goToNew">
             <LucideIcon name="plus" class="h-4 w-4" />
-            New
+            {{ t('New') }}
           </button>
         </template>
       </PageHeader>
@@ -38,7 +38,7 @@
             <button
               type="button"
               class="flex h-5 w-5 items-center justify-center rounded-full hover:bg-navy-100 dark:hover:bg-navy-800"
-              :aria-label="`Remove ${chip.label} filter`"
+              :aria-label="t('Remove {0} filter', [chip.label])"
               @click="clearLinkFilters"
             >
               <LucideIcon name="x" class="h-3.5 w-3.5" />
@@ -59,7 +59,7 @@
               <input
                 v-model="search"
                 type="search"
-                :placeholder="isPhone ? 'Search' : 'ID or name'"
+                :placeholder="isPhone ? t('Search') : t('ID or name')"
                 class="h-8 w-full rounded-lg border-0 bg-white pl-9 pr-3 text-sm text-gray-900 ring-1 ring-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-forest-400 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700"
               />
             </div>
@@ -72,22 +72,22 @@
               class="text-sm font-medium text-forest-700 hover:underline dark:text-forest-300"
               @click="clearQuickFilters"
             >
-              Clear
+              {{ t('Clear') }}
             </button>
           </div>
 
           <div class="flex flex-shrink-0 items-center gap-1.5 sm:gap-2">
-            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2']" aria-label="Refresh" title="Refresh" :disabled="loading" @click="load">
+            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2']" :aria-label="t('Refresh')" :title="t('Refresh')" :disabled="loading" @click="load">
               <LucideIcon name="refresh-cw" class="h-4 w-4" :class="{ 'animate-spin': loading }" />
             </button>
-            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2 sm:!px-3']" :disabled="exporting || !total" aria-label="Export" title="Export" @click="exportCsv()">
+            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2 sm:!px-3']" :disabled="exporting || !total" :aria-label="t('Export')" :title="t('Export')" @click="exportCsv()">
               <LucideIcon :name="exporting ? 'loader-circle' : 'download'" class="h-4 w-4" :class="{ 'animate-spin': exporting }" />
-              <span class="hidden sm:inline">Export</span>
+              <span class="hidden sm:inline">{{ t('Export') }}</span>
             </button>
 
             <!-- Desk's filter popup: condition rows. On a phone / tablet the
             standard filters are in it too, as there are no boxes there. -->
-            <ToolbarMenu label="Filter" icon="list-filter" :badge="activeFilterCount || null" align="right" width="sm:w-auto" icon-only-on-phone>
+            <ToolbarMenu :label="t('Filter')" icon="list-filter" :badge="activeFilterCount || null" align="right" width="sm:w-auto" icon-only-on-phone>
               <template #default="{ close }">
                 <FilterBuilder
                   v-model="advancedFilters"
@@ -113,7 +113,7 @@
                     @click="sortOrder = dir.value"
                   >
                     <LucideIcon :name="dir.icon" class="h-4 w-4" />
-                    {{ dir.label }}
+                    {{ t(dir.label) }}
                   </button>
                 </div>
                 <button
@@ -131,7 +131,7 @@
             </ToolbarMenu>
 
             <!-- Columns: also what the phone cards show. -->
-            <ToolbarMenu label="Columns" icon="columns-3" align="right" width="sm:w-auto" icon-only-on-phone>
+            <ToolbarMenu :label="t('Columns')" icon="columns-3" align="right" width="sm:w-auto" icon-only-on-phone>
               <ColumnManager
                 :fields="availableColumns"
                 :model-value="visibleColumnNames"
@@ -153,7 +153,7 @@
             <button
               type="button"
               class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full hover:bg-forest-100 dark:hover:bg-forest-800"
-              aria-label="Remove filter"
+              :aria-label="t('Remove filter')"
               @click="filterValues[chip.fieldname] = ''"
             >
               <LucideIcon name="x" class="h-3 w-3" />
@@ -168,13 +168,13 @@
             <button
               type="button"
               class="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full hover:bg-forest-100 dark:hover:bg-forest-800"
-              aria-label="Remove filter"
+              :aria-label="t('Remove filter')"
               @click="advancedFilters = advancedFilters.filter((_, i) => i !== index)"
             >
               <LucideIcon name="x" class="h-3 w-3" />
             </button>
           </span>
-          <button type="button" class="text-xs font-semibold text-gray-500 hover:text-red-600" @click="advancedFilters = []; clearQuickFilters()">Clear all</button>
+          <button type="button" class="text-xs font-semibold text-gray-500 hover:text-red-600" @click="advancedFilters = []; clearQuickFilters()">{{ t('Clear all') }}</button>
         </div>
 
         <!-- Bulk bar: appears once any row is ticked. -->
@@ -182,16 +182,16 @@
           v-if="selected.length"
           class="flex flex-wrap items-center gap-3 rounded-xl bg-navy-900 px-4 py-2.5 text-sm text-white shadow-sm dark:bg-navy-800"
         >
-          <span class="font-semibold">{{ selected.length }} selected</span>
+          <span class="font-semibold">{{ t('{0} selected', [selected.length]) }}</span>
           <button type="button" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-medium hover:bg-white/10" @click="exportCsv(selected)">
             <LucideIcon name="download" class="h-4 w-4" />
-            Export
+            {{ t('Export') }}
           </button>
           <button type="button" class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-medium text-red-200 hover:bg-white/10" @click="confirmDelete = true">
             <LucideIcon name="trash-2" class="h-4 w-4" />
-            Delete
+            {{ t('Delete') }}
           </button>
-          <button type="button" class="ml-auto rounded-md px-2 py-1 text-navy-100 hover:bg-white/10" @click="selected = []">Clear</button>
+          <button type="button" class="ml-auto rounded-md px-2 py-1 text-navy-100 hover:bg-white/10" @click="selected = []">{{ t('Clear') }}</button>
         </div>
 
         <div v-if="loading && !rows.length" class="space-y-2">
@@ -200,10 +200,10 @@
         <ErrorMessage v-else-if="error" :message="error" />
         <div v-else-if="!rows.length" :class="ui.EMPTY_STATE">
           <LucideIcon name="inbox" class="h-8 w-8 text-gray-300 dark:text-gray-600" />
-          <span>{{ isFiltered ? 'No records match these filters.' : 'No records yet.' }}</span>
+          <span>{{ isFiltered ? t('No records match these filters.') : t('No records yet.') }}</span>
           <button v-if="!isFiltered" type="button" :class="[ui.BTN_PRIMARY, 'mt-2']" @click="goToNew">
             <LucideIcon name="plus" class="h-4 w-4" />
-            Create the first one
+            {{ t('Create the first one') }}
           </button>
         </div>
 
@@ -220,15 +220,15 @@
                     <input
                       type="checkbox"
                       class="h-4 w-4 rounded border-gray-300 text-forest-700 focus:ring-forest-400"
-                      aria-label="Select all on this page"
+                      :aria-label="t('Select all on this page')"
                       :checked="allOnPageSelected"
                       :indeterminate.prop="someOnPageSelected && !allOnPageSelected"
                       @change="toggleAllOnPage"
                     />
                   </th>
-                  <th :class="ui.LIST_TH">ID</th>
-                  <th v-for="col in columns" :key="col.fieldname" :class="ui.LIST_TH">{{ col.label }}</th>
-                  <th :class="[ui.LIST_TH, 'text-right']">Last Modified</th>
+                  <th :class="ui.LIST_TH">{{ t('ID') }}</th>
+                  <th v-for="col in columns" :key="col.fieldname" :class="ui.LIST_TH">{{ t(col.label) }}</th>
+                  <th :class="[ui.LIST_TH, 'text-right']">{{ t('Last Modified') }}</th>
                 </tr>
               </thead>
               <tbody :class="ui.TBODY">
@@ -244,7 +244,7 @@
                     <input
                       type="checkbox"
                       class="h-4 w-4 rounded border-gray-300 text-forest-700 focus:ring-forest-400"
-                      :aria-label="`Select ${row.name}`"
+                      :aria-label="t('Select {0}', [row.name])"
                       :checked="selected.includes(row.name)"
                       @change="toggleRow(row.name)"
                     />
@@ -257,7 +257,7 @@
                     <span v-else-if="isEmptyValue(row[col.fieldname])" class="text-gray-300 dark:text-gray-600">—</span>
                     <span v-else-if="col.fieldtype === 'Select'" class="inline-flex items-center gap-1.5">
                       <span class="h-2 w-2 flex-shrink-0 rounded-full" :class="DOT[toneFor(row[col.fieldname])]" />
-                      {{ row[col.fieldname] }}
+                      {{ t(row[col.fieldname]) }}
                     </span>
                     <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
                   </td>
@@ -279,7 +279,7 @@
                 </span>
                 <span class="flex flex-shrink-0 items-center gap-1.5">
                   <span v-if="statusColumn && !isEmptyValue(row[statusColumn.fieldname])" :class="[ui.PILL, ui.TONE[toneFor(row[statusColumn.fieldname])]]">
-                    {{ row[statusColumn.fieldname] }}
+                    {{ t(row[statusColumn.fieldname]) }}
                   </span>
                   <LucideIcon name="chevron-right" class="h-4 w-4 text-gray-400" />
                 </span>
@@ -289,21 +289,21 @@
               </span>
               <dl v-if="mobileColumns.length" class="mt-2 grid grid-cols-2 gap-x-3 gap-y-2">
                 <div v-for="col in mobileColumns" :key="col.fieldname" class="min-w-0">
-                  <dt class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ col.label }}</dt>
+                  <dt class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ t(col.label) }}</dt>
                   <dd class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
                     <span v-if="isEmptyValue(row[col.fieldname])" class="font-normal text-gray-300 dark:text-gray-600">—</span>
                     <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
                   </dd>
                 </div>
               </dl>
-              <span class="mt-2 block text-xs text-gray-500 dark:text-gray-400">Updated {{ shortAgo(row.modified) }} ago</span>
+              <span class="mt-2 block text-xs text-gray-500 dark:text-gray-400">{{ t('Updated {0} ago', [shortAgo(row.modified)]) }}</span>
             </button>
           </div>
 
           <!-- Footer, as in Desk: page length on the left, how many are shown
           and Load More on the right. -->
           <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-            <div class="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800" role="group" aria-label="Rows per load">
+            <div class="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800" role="group" :aria-label="t('Rows per load')">
               <button
                 v-for="size in PAGE_SIZES"
                 :key="size"
@@ -318,11 +318,11 @@
             </div>
             <div class="flex items-center gap-3">
               <span class="text-sm tabular-nums text-gray-500 dark:text-gray-400">
-                {{ formatNumber(rows.length) }} of {{ formatNumber(total) }}
+                {{ t('{0} of {1}', [formatNumber(rows.length), formatNumber(total)]) }}
               </span>
               <button v-if="canLoadMore" type="button" :class="ui.BTN_SECONDARY" :disabled="loading" @click="loadMore">
                 <LucideIcon :name="loading ? 'loader-circle' : 'chevrons-down'" class="h-4 w-4" :class="{ 'animate-spin': loading }" />
-                Load More
+                {{ t('Load More') }}
               </button>
             </div>
           </div>
@@ -332,11 +332,14 @@
 
     <Dialog
       v-model="confirmDelete"
-      :options="{ title: `Delete ${selected.length} record${selected.length === 1 ? '' : 's'}?`, message: 'This permanently deletes the selected records. It cannot be undone.' }"
+      :options="{
+        title: selected.length === 1 ? t('Delete 1 record?') : t('Delete {0} records?', [selected.length]),
+        message: t('This permanently deletes the selected records. It cannot be undone.'),
+      }"
     >
       <template #actions>
         <div class="flex justify-end gap-2">
-          <button type="button" :class="ui.BTN_SECONDARY" @click="confirmDelete = false">Cancel</button>
+          <button type="button" :class="ui.BTN_SECONDARY" @click="confirmDelete = false">{{ t('Cancel') }}</button>
           <button
             type="button"
             class="inline-flex h-9 items-center gap-1.5 rounded-lg bg-red-600 px-3.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-60"
@@ -344,7 +347,7 @@
             @click="deleteSelected"
           >
             <LucideIcon :name="deleting ? 'loader-circle' : 'trash-2'" class="h-4 w-4" :class="{ 'animate-spin': deleting }" />
-            Delete
+            {{ t('Delete') }}
           </button>
         </div>
       </template>
@@ -373,6 +376,7 @@ import { findModuleByRoute } from '@/data/modules'
 import { listCrumbs } from '@/data/breadcrumbs'
 import { STANDARD_FILTER_FIELDS, operatorLabel, toServerFilter } from '@/data/listFilters'
 import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
+import { t } from '@/data/i18n'
 import * as ui from '@/data/ui'
 
 const props = defineProps({
@@ -386,8 +390,9 @@ const metaResource = useMeta(props.doctype)
 const defaultColumns = useListFields(metaResource)
 const filterFields = useFilterFields(metaResource)
 
-const pageTitle = findModuleByRoute(route.params.doctypeRoute)?.label || props.doctype
-setPageTitle(pageTitle)
+// Shown translated; props.doctype itself stays English for the API calls.
+const pageTitle = computed(() => t(findModuleByRoute(route.params.doctypeRoute)?.label || props.doctype))
+watchEffect(() => setPageTitle(pageTitle.value))
 
 // Doctypes reached via the generic /:doctypeRoute path use the shared
 // DoctypeNew/DoctypeForm route names with a doctypeRoute param; doctypes
@@ -484,9 +489,10 @@ const quickChips = computed(() =>
     .map((f) => {
       const value = filterValues[f.fieldname]
       let text = value
-      if (f.fieldtype === 'Check') text = Number(value) ? 'Yes' : 'No'
+      if (f.fieldtype === 'Check') text = Number(value) ? t('Yes') : t('No')
+      else if (f.fieldtype === 'Select') text = t(value)
       else if (f.fieldtype === 'Date' || f.fieldtype === 'Datetime') text = formatFieldValue(value, { fieldtype: 'Date' })
-      return { fieldname: f.fieldname, text: `${f.label}: ${text}` }
+      return { fieldname: f.fieldname, text: `${t(f.label)}: ${text}` }
     }),
 )
 
@@ -517,10 +523,12 @@ function filterFieldFor(fieldname) {
 function filterChipText(row) {
   const field = filterFieldFor(row.fieldname)
   let value = row.value
-  if (row.operator === 'is') value = row.value === 'not set' ? 'not set' : 'set'
-  else if (field?.fieldtype === 'Check') value = Number(row.value) ? 'Yes' : 'No'
+  // Display only - the row (sent to the server) keeps its English values.
+  if (row.operator === 'is') value = row.value === 'not set' ? t('not set') : t('set')
+  else if (field?.fieldtype === 'Check') value = Number(row.value) ? t('Yes') : t('No')
+  else if (field?.fieldtype === 'Select') value = t(row.value)
   else if (field?.fieldtype === 'Date' || field?.fieldtype === 'Datetime') value = formatFieldValue(row.value, { fieldtype: 'Date' })
-  return `${field?.label || row.fieldname} ${operatorLabel(row.operator, field).toLowerCase()} ${value}`
+  return `${t(field?.label || row.fieldname)} ${operatorLabel(row.operator, field).toLowerCase()} ${value}`
 }
 
 const hasActiveFilters = computed(() => hasQuickFilters.value || advancedFilters.value.length > 0)
@@ -543,7 +551,7 @@ const linkFilterChips = computed(() =>
   Object.entries(linkFilters.value).map(([fieldname, value]) => ({
     fieldname,
     value,
-    label: metaResource.data.fields.find((f) => f.fieldname === fieldname)?.label || fieldname,
+    label: t(metaResource.data.fields.find((f) => f.fieldname === fieldname)?.label || fieldname),
   })),
 )
 
@@ -589,16 +597,16 @@ const SORT_DIRECTIONS = [
 ]
 const sortOptions = computed(() => {
   const options = [
-    { label: 'Last Modified', value: 'modified' },
-    { label: 'Created On', value: 'creation' },
-    { label: 'ID', value: 'name' },
+    { label: t('Last Modified'), value: 'modified' },
+    { label: t('Created On'), value: 'creation' },
+    { label: t('ID'), value: 'name' },
   ]
   for (const col of columns.value) {
-    if (!options.some((o) => o.value === col.fieldname)) options.push({ label: col.label || col.fieldname, value: col.fieldname })
+    if (!options.some((o) => o.value === col.fieldname)) options.push({ label: t(col.label || col.fieldname), value: col.fieldname })
   }
   return options
 })
-const sortLabel = computed(() => sortOptions.value.find((o) => o.value === sortField.value)?.label || 'Sort')
+const sortLabel = computed(() => sortOptions.value.find((o) => o.value === sortField.value)?.label || t('Sort'))
 
 // The form's own default sort, once its meta is in (Desk's "sort_field").
 watch(
@@ -661,7 +669,7 @@ async function load(append = false) {
     total.value = data?.total ?? rows.value.length
   } catch (e) {
     if (id !== requestId) return
-    error.value = errorText(e, 'Could not load records.')
+    error.value = errorText(e, t('Could not load records.'))
   } finally {
     if (id === requestId) loading.value = false
   }
@@ -767,7 +775,7 @@ async function exportCsv(names = null) {
       start: 0,
       page_length: 5000,
     })
-    const header = ['ID', ...columns.value.map((c) => c.label || c.fieldname)]
+    const header = [t('ID'), ...columns.value.map((c) => t(c.label || c.fieldname))]
     const lines = [header, ...(data?.rows || []).map((r) => [r.name, ...columns.value.map((c) => r[c.fieldname])])]
     // Leading BOM so Excel opens it as UTF-8 (names in Indian scripts).
     const blob = new Blob([`﻿${lines.map((l) => l.map(csvCell).join(',')).join('\n')}`], { type: 'text/csv;charset=utf-8' })
@@ -778,7 +786,7 @@ async function exportCsv(names = null) {
     a.click()
     URL.revokeObjectURL(url)
   } catch (e) {
-    toast.error(errorText(e, 'Export failed.'))
+    toast.error(errorText(e, t('Export failed.')))
   } finally {
     exporting.value = false
   }
@@ -795,12 +803,18 @@ async function deleteSelected() {
   try {
     await call('frappe.desk.reportview.delete_items', { items: JSON.stringify(selected.value), doctype: props.doctype })
     // More than 10 are deleted in the background by Frappe.
-    toast.success(count > 10 ? `Deleting ${count} records in the background` : `Deleted ${count} record${count === 1 ? '' : 's'}`)
+    toast.success(
+      count > 10
+        ? t('Deleting {0} records in the background', [count])
+        : count === 1
+          ? t('Deleted 1 record')
+          : t('Deleted {0} records', [count]),
+    )
     selected.value = []
     confirmDelete.value = false
     load()
   } catch (e) {
-    toast.error(errorText(e, 'Delete failed.'))
+    toast.error(errorText(e, t('Delete failed.')))
   } finally {
     deleting.value = false
   }

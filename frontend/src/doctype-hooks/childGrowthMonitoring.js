@@ -9,6 +9,7 @@
 // field's fetch_from already fills it).
 
 import { addDays, addMonths, parseDate, today, toDateStr, warnIfNotDigits } from './utils'
+import { t } from '@/data/i18n'
 
 const TABLE = 'growth_followup'
 const STAGE_5Y_TO_11Y = '5 Years to 11 Years'
@@ -57,7 +58,7 @@ function calculateAge(values, ctx) {
   }
   const now = today()
   if (values.date_of_birth > now) {
-    ctx.toast.error('Invalid Date of Birth: Date of Birth cannot be in the future.')
+    ctx.toast.error(t('Invalid Date of Birth: Date of Birth cannot be in the future.'))
     values.date_of_birth = ''
     return false
   }

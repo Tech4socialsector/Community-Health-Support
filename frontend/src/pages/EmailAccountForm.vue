@@ -6,7 +6,7 @@
           <template #prefix>
             <FeatherIcon name="arrow-left" class="h-4 w-4" />
           </template>
-          Back
+          {{ t('Back') }}
         </Button>
       </template>
     </PageHeader>
@@ -22,10 +22,10 @@
         </span>
         <div>
           <div class="text-base font-semibold text-gray-900 dark:text-gray-100">
-            {{ isNew ? 'New Email' : 'Edit Email' }}
+            {{ isNew ? t('New Email') : t('Edit Email') }}
           </div>
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            {{ values.service || 'Configure your email account' }}
+            {{ values.service || t('Configure your email account') }}
           </div>
         </div>
       </div>
@@ -33,13 +33,13 @@
       <div class="mb-6 flex items-start gap-2 rounded-lg border bg-gray-50 p-3 text-sm text-gray-600 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300">
         <FeatherIcon name="info" class="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
         <span>
-          To know more about setting up email accounts,
+          {{ t('To know more about setting up email accounts,') }}
           <a
             href="https://frappeframework.com/docs/user/en/email"
             target="_blank"
             rel="noopener"
             class="underline"
-          >click here</a>.
+          >{{ t('click here') }}</a>.
           <a
             v-if="!isNew"
             :href="`/app/email-account/${name}`"
@@ -47,27 +47,27 @@
             rel="noopener"
             class="ml-1 underline"
           >
-            Open in Desk
+            {{ t('Open in Desk') }}
           </a>
         </span>
       </div>
 
       <div class="flex flex-col gap-4">
-        <FormControl type="text" label="Account name" v-model="values.email_account_name" required />
-        <FormControl type="text" label="Email ID" v-model="values.email_id" required />
-        <FormControl type="password" label="Password" v-model="values.password" autocomplete="new-password" />
+        <FormControl type="text" :label="t('Account name')" v-model="values.email_account_name" required />
+        <FormControl type="text" :label="t('Email ID')" v-model="values.email_id" required />
+        <FormControl type="password" :label="t('Password')" v-model="values.password" autocomplete="new-password" />
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <FormControl type="checkbox" label="Enable Incoming" v-model="incomingEnabled" />
+            <FormControl type="checkbox" :label="t('Enable Incoming')" v-model="incomingEnabled" />
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              If enabled, tickets can be created from the incoming emails on this account.
+              {{ t('If enabled, tickets can be created from the incoming emails on this account.') }}
             </p>
           </div>
           <div>
-            <FormControl type="checkbox" label="Enable Outgoing" v-model="outgoingEnabled" />
+            <FormControl type="checkbox" :label="t('Enable Outgoing')" v-model="outgoingEnabled" />
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              If enabled, outgoing emails can be sent from this account.
+              {{ t('If enabled, outgoing emails can be sent from this account.') }}
             </p>
           </div>
         </div>
@@ -76,23 +76,23 @@
           <div>
             <FormControl
               type="checkbox"
-              label="Default Incoming"
+              :label="t('Default Incoming')"
               v-model="defaultIncoming"
               :disabled="!incomingEnabled"
             />
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              If enabled, all replies will come to this account. Only one account can be default incoming.
+              {{ t('If enabled, all replies will come to this account. Only one account can be default incoming.') }}
             </p>
           </div>
           <div>
             <FormControl
               type="checkbox"
-              label="Default Outgoing"
+              :label="t('Default Outgoing')"
               v-model="defaultOutgoing"
               :disabled="!outgoingEnabled"
             />
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              If enabled, all outgoing emails will be sent from this account. Only one account can be default outgoing.
+              {{ t('If enabled, all outgoing emails will be sent from this account. Only one account can be default outgoing.') }}
             </p>
           </div>
         </div>
@@ -102,10 +102,10 @@
 
       <div class="mt-6 flex justify-between gap-2">
         <Button variant="outline" @click="router.push({ name: 'EmailAccountList' })">
-          Back
+          {{ t('Back') }}
         </Button>
         <Button variant="solid" :loading="saving" type="submit">
-          {{ isNew ? 'Create Account' : 'Update Account' }}
+          {{ isNew ? t('Create Account') : t('Update Account') }}
         </Button>
       </div>
     </form>
@@ -113,13 +113,14 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, watch, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDoc, useNewDoc, FormControl, Button, ErrorMessage, FeatherIcon, toast } from 'frappe-ui'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import { setPageTitle } from '@/data/pageTitle'
+import { t } from '@/data/i18n'
 
 const { isNew, name } = defineProps({
   isNew: { type: Boolean, default: false },
@@ -128,7 +129,8 @@ const { isNew, name } = defineProps({
 
 const router = useRouter()
 
-setPageTitle(isNew ? 'New Email Account' : name)
+// The record name stays as is; only the fixed title is translated.
+watchEffect(() => setPageTitle(isNew ? t('New Email Account') : name))
 
 const newDoc = isNew ? useNewDoc('Email Account') : null
 const existingDoc = isNew ? null : useDoc({ doctype: 'Email Account', name })
@@ -187,13 +189,13 @@ async function save() {
     if (isNew) {
       Object.assign(newDoc.doc, values)
       const created = await newDoc.submit()
-      toast.success('Created')
+      toast.success(t('Created'))
       router.replace({ name: 'EmailAccountForm', params: { name: created.name } })
     } else {
       const payload = { ...values }
       if (!payload.password) delete payload.password
       await existingDoc.setValue.submit(payload)
-      toast.success('Saved')
+      toast.success(t('Saved'))
     }
   } catch (e) {
     saveError.value = e

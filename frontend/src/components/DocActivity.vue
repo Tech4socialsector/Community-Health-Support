@@ -8,7 +8,7 @@
   <section :class="[ui.CARD, 'p-4 sm:p-5']">
     <h2 class="mb-3 flex items-center gap-2">
       <LucideIcon name="activity" class="h-4 w-4 text-gray-500" />
-      <span class="text-sm font-semibold text-navy-900 dark:text-gray-100">Activity</span>
+      <span class="text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t('Activity') }}</span>
       <span v-if="entries.length" :class="ui.COUNT_BADGE">{{ entries.length }}</span>
     </h2>
 
@@ -18,7 +18,7 @@
         <Skeleton width="70%" height="0.875rem" />
       </div>
     </div>
-    <p v-else-if="error" class="text-sm text-gray-500 dark:text-gray-400">Activity isn't available for this record.</p>
+    <p v-else-if="error" class="text-sm text-gray-500 dark:text-gray-400">{{ t("Activity isn't available for this record.") }}</p>
 
     <ul v-else class="divide-y divide-gray-100 dark:divide-gray-800">
       <li v-for="(entry, index) in entries" :key="index" class="flex gap-3 py-3 first:pt-1 last:pb-0">
@@ -33,18 +33,18 @@
           <div class="flex items-start justify-between gap-3">
             <p class="min-w-0 text-sm leading-6 text-gray-600 dark:text-gray-300">
               <span class="font-semibold text-gray-900 dark:text-gray-100">{{ who(entry) }}</span>
-              <template v-if="entry.type === 'created'"> created this document</template>
-              <template v-else-if="entry.type === 'edited'"> last edited this document</template>
+              <template v-if="entry.type === 'created'"> {{ t('created this document') }}</template>
+              <template v-else-if="entry.type === 'edited'"> {{ t('last edited this document') }}</template>
 
               <!-- One field: "set X to [v]" / "changed X from [a] to [b]". -->
               <template v-else-if="entry.changes?.length === 1 && !tableNotes(entry).length">
                 <template v-if="isBlank(entry.changes[0].from)">
-                  set <span class="font-medium text-gray-900 dark:text-gray-100">{{ entry.changes[0].label }}</span> to
+                  {{ t('set') }} <span class="font-medium text-gray-900 dark:text-gray-100">{{ t(entry.changes[0].label) }}</span> {{ t('to') }}
                   <span :class="CHIP">{{ shown(entry.changes[0].to, entry.changes[0].fieldtype) }}</span>
                 </template>
                 <template v-else>
-                  changed <span class="font-medium text-gray-900 dark:text-gray-100">{{ entry.changes[0].label }}</span> from
-                  <span :class="CHIP">{{ shown(entry.changes[0].from, entry.changes[0].fieldtype) }}</span> to
+                  {{ t('changed') }} <span class="font-medium text-gray-900 dark:text-gray-100">{{ t(entry.changes[0].label) }}</span> {{ t('from') }}
+                  <span :class="CHIP">{{ shown(entry.changes[0].from, entry.changes[0].fieldtype) }}</span> {{ t('to') }}
                   <span :class="CHIP">{{ shown(entry.changes[0].to, entry.changes[0].fieldtype) }}</span>
                 </template>
               </template>
@@ -65,17 +65,17 @@
               class="mt-1 text-xs font-semibold text-forest-700 hover:underline dark:text-forest-300"
               @click="expanded[index] = !expanded[index]"
             >
-              {{ expanded[index] ? 'Hide changes' : 'Show changes' }}
+              {{ expanded[index] ? t('Hide changes') : t('Show changes') }}
             </button>
             <ul v-if="expanded[index]" class="mt-2 space-y-1.5 border-l-2 border-gray-100 pl-3 text-[13px] dark:border-gray-800">
               <li v-for="(change, i) in entry.changes" :key="i" class="break-words text-gray-600 dark:text-gray-300">
-                <span class="font-medium text-gray-900 dark:text-gray-100">{{ change.label }}</span>:
+                <span class="font-medium text-gray-900 dark:text-gray-100">{{ t(change.label) }}</span>:
                 <template v-if="!isBlank(change.from)">
                   <span class="text-gray-400 line-through">{{ shown(change.from, change.fieldtype) }}</span> →
                 </template>
                 {{ shown(change.to, change.fieldtype) }}
               </li>
-              <li v-if="entry.more" class="text-gray-400">…and {{ entry.more }} more</li>
+              <li v-if="entry.more" class="text-gray-400">{{ t('…and {0} more', [entry.more]) }}</li>
               <li v-for="note in tableNotes(entry)" :key="note" class="text-gray-600 dark:text-gray-300">{{ note }}</li>
             </ul>
           </template>
@@ -92,6 +92,7 @@ import Skeleton from '@/components/Skeleton.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { session } from '@/data/session'
 import * as ui from '@/data/ui'
+import { t, dateLocale } from '@/data/i18n'
 
 const props = defineProps({
   doctype: { type: String, required: true },
@@ -131,7 +132,7 @@ const expanded = reactive({})
 
 // "You" for the person looking, like Desk.
 function who(entry) {
-  if (entry.user && entry.user === session.user) return 'You'
+  if (entry.user && entry.user === session.user) return t('You')
   return entry.user_name || entry.user
 }
 
@@ -140,11 +141,11 @@ function isBlank(value) {
 }
 
 function tableNotes(entry) {
-  const t = entry.tables || {}
+  const tables = entry.tables || {}
   return [
-    ...(t.added || []).map((x) => `Added rows to ${x}`),
-    ...(t.removed || []).map((x) => `Removed rows from ${x}`),
-    ...(t.changed || []).map((x) => `Edited rows in ${x}`),
+    ...(tables.added || []).map((x) => t('Added rows to {0}', [t(x)])),
+    ...(tables.removed || []).map((x) => t('Removed rows from {0}', [t(x)])),
+    ...(tables.changed || []).map((x) => t('Edited rows in {0}', [t(x)])),
   ]
 }
 
@@ -162,20 +163,21 @@ function summary(entry) {
   const labels = (entry.changes || []).map((c) => c.label)
   const total = labels.length + (entry.more || 0)
   const parts = []
-  if (total === 2 && labels.length === 2) parts.push(`changed ${labels[0]} and ${labels[1]}`)
-  else if (total) parts.push(`changed ${total} field${total === 1 ? '' : 's'}`)
+  if (total === 2 && labels.length === 2) parts.push(t('changed {0} and {1}', [t(labels[0]), t(labels[1])]))
+  else if (total) parts.push(total === 1 ? t('changed {0} field', [total]) : t('changed {0} fields', [total]))
   const notes = tableNotes(entry)
   if (notes.length) parts.push(notes.map((n) => n.charAt(0).toLowerCase() + n.slice(1)).join(', '))
-  return parts.join('; ') || 'made changes'
+  return parts.join('; ') || t('made changes')
 }
 
 // Old/new values as people read them - blanks spelled out, a tick box's
 // 0/1 as No/Yes (only for Check fields - a count going 1 -> 2 stays a
 // number), long text clipped.
 function shown(value, fieldtype) {
-  if (value === null || value === undefined || value === '') return '(empty)'
-  if (fieldtype === 'Check') return Number(value) ? 'Yes' : 'No'
-  const text = String(value)
+  if (value === null || value === undefined || value === '') return t('(empty)')
+  if (fieldtype === 'Check') return Number(value) ? t('Yes') : t('No')
+  // A Select's stored English option, shown in the user's language.
+  const text = fieldtype === 'Select' ? t(String(value)) : String(value)
   return text.length > 60 ? `${text.slice(0, 57)}…` : text
 }
 
@@ -188,7 +190,7 @@ function parse(value) {
 function exactTime(value) {
   const d = parse(value)
   return d
-    ? d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    ? d.toLocaleString(dateLocale(), { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : ''
 }
 
@@ -209,6 +211,6 @@ function relativeTime(value) {
   for (const [unit, size] of UNITS) {
     if (Math.abs(seconds) >= size) return relativeFormat.format(Math.round(seconds / size), unit)
   }
-  return 'just now'
+  return t('just now')
 }
 </script>

@@ -4,14 +4,14 @@
   Village, Sub Centre, Occupation ...), its required fields and any marked
   "In Quick Entry". Saved with frappe.client.insert, then picked into the
   Link that asked for it. -->
-  <Dialog v-model="open" :options="{ title: `New ${doctype}`, size: 'lg' }">
+  <Dialog v-model="open" :options="{ title: t('New {0}', [t(doctype)]), size: 'lg' }">
     <template #body-content>
-      <div v-if="metaResource.loading && !metaResource.data" class="py-6 text-center text-sm text-gray-400">Loading…</div>
+      <div v-if="metaResource.loading && !metaResource.data" class="py-6 text-center text-sm text-gray-400">{{ t('Loading…') }}</div>
       <div v-else class="space-y-4">
         <FormControl
           v-if="askName"
           type="text"
-          :label="`${doctype} Name`"
+          :label="t('{0} Name', [t(doctype)])"
           :required="true"
           v-model="newName"
           autofocus
@@ -25,17 +25,17 @@
           v-model="values[field.fieldname]"
         />
         <p v-if="!askName && !quickFields.length" class="text-sm text-gray-500 dark:text-gray-400">
-          A new {{ doctype }} will be created with its next number.
+          {{ t('A new {0} will be created with its next number.', [t(doctype)]) }}
         </p>
         <ErrorMessage v-if="error" :message="error" />
       </div>
     </template>
     <template #actions>
       <div class="flex justify-end gap-2">
-        <button type="button" :class="ui.BTN_SECONDARY" :disabled="saving" @click="open = false">Cancel</button>
+        <button type="button" :class="ui.BTN_SECONDARY" :disabled="saving" @click="open = false">{{ t('Cancel') }}</button>
         <button type="button" :class="ui.BTN_PRIMARY" :disabled="saving || (askName && !newName.trim())" @click="create">
           <LucideIcon :name="saving ? 'loader-circle' : 'check'" class="h-4 w-4" :class="{ 'animate-spin': saving }" />
-          Save
+          {{ t('Save') }}
         </button>
       </div>
     </template>
@@ -50,6 +50,7 @@ import LucideIcon from '@/components/LucideIcon.vue'
 import { useMeta } from '@/data/useMeta'
 import { applyDefaults } from '@/data/defaults'
 import * as ui from '@/data/ui'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   doctype: { type: String, required: true },
@@ -95,7 +96,7 @@ watch(open, (isOpen) => {
 
 function errorText(e) {
   const messages = e?.messages?.length ? e.messages : [e?.message || String(e || '')]
-  return messages.map((m) => String(m).replace(/<[^>]*>/g, '')).join(' ').trim() || 'Could not create the record.'
+  return messages.map((m) => String(m).replace(/<[^>]*>/g, '')).join(' ').trim() || t('Could not create the record.')
 }
 
 async function create() {
@@ -105,7 +106,7 @@ async function create() {
     const doc = { doctype: props.doctype, ...values }
     if (askName.value) doc.__newname = newName.value.trim()
     const created = await call('frappe.client.insert', { doc })
-    toast.success(`Created ${props.doctype}: ${created.name}`)
+    toast.success(t('Created {0}: {1}', [t(props.doctype), created.name]))
     emit('created', created.name)
     open.value = false
   } catch (e) {

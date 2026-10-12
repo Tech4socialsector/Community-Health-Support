@@ -1,11 +1,14 @@
 import { flatModuleItems, findModuleByRoute } from '@/data/modules'
 import { sidebarTrail } from '@/data/activeModule'
+import { t } from '@/data/i18n'
 
 // The "where did I come from" path shown above list and form pages, e.g.
 //   Home / Household profile / HH-00027 / Family members / FM-00064
 // built from the forms' own Desk connections (Household profile links to
 // Family members through `hhid`), so a record always offers a way back up
 // to the record it belongs to - not just to its own list.
+// Labels are translated for display (record IDs like HH-00027 are not);
+// routes and their params stay English.
 
 // The forms whose connections point at `item`, each with the link field
 // that does it: Family members -> [{ parent: Household profile, fieldname: 'hhid' }].
@@ -37,38 +40,38 @@ export function findParentRecord(item, values) {
 // { hhid: 'HH-00027' } when opened from a household's Connections).
 export function listCrumbs(doctypeRoute, filters) {
   const item = findModuleByRoute(doctypeRoute)
-  const crumbs = [{ label: 'Home', to: { name: 'Home' }, home: true }]
+  const crumbs = [{ label: t('Home'), to: { name: 'Home' }, home: true }]
   if (!item) return crumbs
   const parent = findParentRecord(item, filters)
   if (parent) {
     crumbs.push(
-      { label: parent.parent.label, to: { name: 'DoctypeList', params: { doctypeRoute: parent.parent.route } } },
+      { label: t(parent.parent.label), to: { name: 'DoctypeList', params: { doctypeRoute: parent.parent.route } } },
       { label: parent.value, to: { name: 'DoctypeForm', params: { doctypeRoute: parent.parent.route, name: parent.value } } },
     )
   }
-  crumbs.push({ label: item.label })
+  crumbs.push({ label: t(item.label) })
   return crumbs
 }
 
 // Crumbs for a form page; `values` are the record's field values.
 export function formCrumbs(doctypeRoute, name, values, isNew) {
   const item = findModuleByRoute(doctypeRoute)
-  const crumbs = [{ label: 'Home', to: { name: 'Home' }, home: true }]
+  const crumbs = [{ label: t('Home'), to: { name: 'Home' }, home: true }]
   if (!item) return crumbs
   const parent = findParentRecord(item, values)
   if (parent) {
     crumbs.push(
-      { label: parent.parent.label, to: { name: 'DoctypeList', params: { doctypeRoute: parent.parent.route } } },
+      { label: t(parent.parent.label), to: { name: 'DoctypeList', params: { doctypeRoute: parent.parent.route } } },
       { label: parent.value, to: { name: 'DoctypeForm', params: { doctypeRoute: parent.parent.route, name: parent.value } } },
       // This form's list, narrowed to the same parent - the sibling records.
       {
-        label: item.label,
+        label: t(item.label),
         to: { name: 'DoctypeList', params: { doctypeRoute: item.route }, query: { [parent.fieldname]: parent.value } },
       },
     )
   } else {
-    crumbs.push({ label: item.label, to: { name: 'DoctypeList', params: { doctypeRoute: item.route } } })
+    crumbs.push({ label: t(item.label), to: { name: 'DoctypeList', params: { doctypeRoute: item.route } } })
   }
-  crumbs.push({ label: isNew ? 'New' : name })
+  crumbs.push({ label: isNew ? t('New') : name })
   return crumbs
 }
