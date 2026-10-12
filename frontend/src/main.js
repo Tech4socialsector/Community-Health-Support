@@ -1,3 +1,5 @@
+// First, before anything can make a request - see the file.
+import './data/offline/install'
 import './index.css'
 import { createApp } from 'vue'
 import App from './App.vue'

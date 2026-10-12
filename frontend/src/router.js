@@ -48,6 +48,12 @@ const routes = [
     props: true,
     meta: { remountOnParamChange: true },
   },
+  // Offline mode: what's waiting to sync, refused records, conflicts.
+  {
+    path: '/outbox',
+    name: 'Outbox',
+    component: () => import('@/pages/Outbox.vue'),
+  },
   {
     path: '/email-accounts',
     name: 'EmailAccountList',

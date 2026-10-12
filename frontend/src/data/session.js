@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 import { createResource, setConfig, frappeRequest } from 'frappe-ui'
 import router from '@/router'
 import { initLanguage } from '@/data/i18n'
+import { clearOfflineData, startOfflineSync } from '@/data/offline/sync'
 
 // createResource() below fires an immediate fetch at module-evaluation time
 // (see initialUserCheck) - that's before main.js reaches its own
@@ -34,6 +35,9 @@ export const userResource = createResource({
   onSuccess(user) {
     session.user = user
     fetchUserLanguage()
+    // Download this user's data for offline use and send anything saved
+    // offline. (Offline, this answer comes from the phone's last one.)
+    startOfflineSync(user)
   },
 })
 
@@ -86,9 +90,11 @@ export const loginResource = createResource({
 
 export const logoutResource = createResource({
   url: 'logout',
-  onSuccess() {
+  async onSuccess() {
     session.user = null
     userResource.reset()
+    // Patient data must not stay on a phone nobody is logged in to.
+    await clearOfflineData()
     window.location.reload()
   },
 })

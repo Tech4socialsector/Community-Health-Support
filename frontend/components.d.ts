@@ -42,6 +42,7 @@ declare module 'vue' {
     SignatureField: typeof import('./src/components/SignatureField.vue')['default']
     Skeleton: typeof import('./src/components/Skeleton.vue')['default']
     SparklesIcon: typeof import('./src/components/SparklesIcon.vue')['default']
+    SyncStatus: typeof import('./src/components/SyncStatus.vue')['default']
     TableMultiSelectField: typeof import('./src/components/TableMultiSelectField.vue')['default']
     ToolbarMenu: typeof import('./src/components/ToolbarMenu.vue')['default']
     TopNavbar: typeof import('./src/components/TopNavbar.vue')['default']

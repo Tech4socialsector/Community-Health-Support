@@ -9,6 +9,7 @@
         <span class="block truncate text-base font-bold leading-tight text-navy-900 dark:text-gray-100">{{ appName }}</span>
         <span class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ t(pageTitle) }}</span>
       </span>
+      <SyncStatus class="ml-auto" />
     </div>
 
     <main class="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4">
@@ -25,6 +26,7 @@
 import MobileNav from '@/components/MobileNav.vue'
 import NotificationPanel from '@/components/NotificationPanel.vue'
 import AiAssistant from '@/components/AiAssistant.vue'
+import SyncStatus from '@/components/SyncStatus.vue'
 import { computed } from 'vue'
 import { appLogo, brandingResource } from '@/data/branding'
 import { pageTitle } from '@/data/pageTitle'

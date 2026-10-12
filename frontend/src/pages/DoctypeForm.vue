@@ -24,11 +24,19 @@
           <p :class="[ui.SECTION_LABEL, 'truncate']">{{ t(formLabel) }}</p>
           <div class="flex min-w-0 items-center gap-2">
             <h1 class="truncate text-base font-semibold text-navy-900 dark:text-gray-100 sm:text-lg">
-              {{ isNew ? t('New {0}', [t(formLabel)]) : name }}
+              {{ isNew ? t('New {0}', [t(formLabel)]) : isTempName(name) ? t('New {0}', [t(formLabel)]) : name }}
             </h1>
             <!-- Desk's "Not Saved": stays until a save actually succeeds, so
             an edited form is never mistaken for a saved one. -->
             <span v-if="showNotSaved" :class="[ui.PILL, ui.TONE.amber, 'flex-shrink-0 !px-2 !py-0 text-[11px]']">{{ t('Not saved') }}</span>
+            <!-- Saved, but only on this phone so far (offline mode). -->
+            <span
+              v-else-if="values.__offline"
+              :class="[ui.PILL, ui.TONE.blue, 'flex-shrink-0 gap-1 !px-2 !py-0 text-[11px]']"
+            >
+              <LucideIcon name="cloud-upload" class="h-3 w-3" />
+              {{ t('Not synced') }}
+            </span>
           </div>
         </div>
         <!-- Desk's "..." menu: Delete lives here, not as a button beside
@@ -93,7 +101,7 @@
           <ErrorMessage :message="saveError" />
         </div>
 
-        <DocConnections v-if="!isNew && name && isGenericRoute" :doctype="doctype" :name="name" />
+        <DocConnections v-if="!isNew && name && isGenericRoute && !isTempName(name)" :doctype="doctype" :name="name" />
 
         <!-- Desk's layout: one card per section (Section / Tab Break) with its
         title, collapsible ones closed until tapped, each table inside the
@@ -160,7 +168,7 @@
           </div>
         </section>
 
-        <DocActivity v-if="!isNew && name" :doctype="doctype" :name="name" :refresh-key="activityKey" />
+        <DocActivity v-if="!isNew && name && !isTempName(name) && offlineState.online" :doctype="doctype" :name="name" :refresh-key="activityKey" />
       </form>
     </div>
   </AppLayout>
@@ -191,6 +199,8 @@ import { getDoctypeHooks } from '@/doctype-hooks'
 import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
 import { currentHealthWorkerResource } from '@/data/currentHealthWorker'
 import { t } from '@/data/i18n'
+import { offlineState } from '@/data/offline/state'
+import { getRecord, isTempName } from '@/data/offline/store'
 
 const { doctype, isNew, name } = defineProps({
   doctype: { type: String, required: true },
@@ -753,7 +763,9 @@ const saveErrorBox = ref(null)
 // Asked of the server per record, so the menu matches the user's role
 // (Role Permission Manager) - most CHW roles may not delete.
 const canDelete = ref(false)
-if (!isNew && name) {
+// A record that exists only on this phone has nothing on the server to
+// delete - it's discarded from the Offline & Sync page instead.
+if (!isNew && name && !isTempName(name)) {
   call('frappe.client.has_permission', { doctype, docname: name, perm_type: 'delete' })
     .then((r) => (canDelete.value = !!r?.has_permission))
     .catch(() => (canDelete.value = false))
@@ -797,7 +809,8 @@ async function save() {
       if (!doc.name || String(doc.name).startsWith('new-')) delete doc.name
       const created = await call('frappe.client.insert', { doc })
       if (!created?.name) throw new Error(t('The record could not be created.'))
-      toast.success(t('Created {0}', [created.name]))
+      if (created.__offline) toast.success(t('Saved on this phone. It will sync when you are online.'))
+      else toast.success(t('Created {0}', [created.name]))
       // Saved - moving on to the new record's own page isn't "leaving edits".
       skipLeaveCheck = true
       if (isGenericRoute) {
@@ -820,7 +833,8 @@ async function save() {
       markSaved()
       afterLoadDone = false
       runAfterLoad()
-      toast.success(t('{0} saved', [t(formLabel.value)]))
+      if (result.__offline) toast.success(t('Saved on this phone. It will sync when you are online.'))
+      else toast.success(t('{0} saved', [t(formLabel.value)]))
       activityKey.value++
     }
   } catch (e) {
@@ -832,6 +846,31 @@ async function save() {
     saving.value = false
   }
 }
+
+// A record made offline gets its real ID when it syncs - move this form
+// to it (unless there are edits in progress, which save to it anyway).
+watch(
+  () => (isTempName(name) ? offlineState.renamed[name] : null),
+  (realName) => {
+    if (!realName || isDirty.value) return
+    skipLeaveCheck = true
+    if (isGenericRoute) router.replace({ name: 'DoctypeForm', params: { doctypeRoute: route.params.doctypeRoute, name: realName } })
+  },
+  { immediate: true },
+)
+
+// An offline edit to this record just synced - drop the "Not synced" mark.
+watch(
+  () => offlineState.syncing,
+  async (syncing) => {
+    if (syncing || !values.__offline || isNew || isTempName(name)) return
+    const record = await getRecord(doctype, name)
+    if (record && !record.__offline) {
+      delete values.__offline
+      if (savedState) delete savedState.__offline
+    }
+  },
+)
 
 onKeyStroke((e) => (e.key === 's' || e.key === 'S') && (e.metaKey || e.ctrlKey), (e) => {
   e.preventDefault()

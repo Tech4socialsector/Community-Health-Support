@@ -94,6 +94,23 @@ export default defineConfig({
               cacheName: 'chw-app-shell',
               networkTimeoutSeconds: 5,
               expiration: { maxEntries: 5 },
+              // Every /chw/... page is the same app page (the router picks
+              // the screen), so all are stored under one key - offline,
+              // any address opens, not only the ones visited online.
+              plugins: [{ cacheKeyWillBeUsed: async () => '/chw' }],
+            },
+          },
+          // The app's own files (screens load on demand). Names change with
+          // every build, so a stored copy never goes stale. Needed besides
+          // the precache: after an update the page is the new build while
+          // the old service worker (waiting for "Update" to be tapped) only
+          // holds the old files - offline, the new screens wouldn't load.
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/assets/chw/frontend/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'chw-app-files',
+              expiration: { maxEntries: 400 },
             },
           },
         ],

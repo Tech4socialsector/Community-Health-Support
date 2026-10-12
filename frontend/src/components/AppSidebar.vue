@@ -61,6 +61,17 @@ import SettingsDialog from '@/components/SettingsDialog.vue'
 import AiAssistant from '@/components/AiAssistant.vue'
 import { session, logoutResource } from '@/data/session'
 import { clearSiteData } from '@/data/clearSiteData'
+import { offlineState } from '@/data/offline/state'
+
+// Logging out or clearing site data wipes the phone's copy - records saved
+// offline that haven't reached the server would be lost for good.
+function confirmUnsyncedLoss() {
+  const count = offlineState.pending + offlineState.errors + offlineState.conflicts
+  if (!count) return true
+  return window.confirm(
+    t('{0} record(s) saved on this phone have not synced yet and will be lost. Sync first (connect to the internet) unless you are sure. Continue anyway?', [count]),
+  )
+}
 import { brandingResource, appLogo } from '@/data/branding'
 import { activeModule, sidebarTrail } from '@/data/activeModule'
 import { childItemsOf } from '@/data/modules'
@@ -107,7 +118,7 @@ const header = computed(() => ({
       label: t('Clear site data'),
       icon: 'refresh-cw',
       onClick: () => {
-        if (window.confirm(t('This clears cached app data and reloads the page. Continue?'))) {
+        if (window.confirm(t('This clears cached app data and reloads the page. Continue?')) && confirmUnsyncedLoss()) {
           clearSiteData()
         }
       },
@@ -120,7 +131,7 @@ const header = computed(() => ({
     {
       label: t('Logout'),
       icon: 'log-out',
-      onClick: () => logoutResource.submit(),
+      onClick: () => confirmUnsyncedLoss() && logoutResource.submit(),
     },
   ],
 }))

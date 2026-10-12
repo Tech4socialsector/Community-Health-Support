@@ -249,7 +249,11 @@
                       @change="toggleRow(row.name)"
                     />
                   </td>
-                  <td :class="ui.LIST_TD_STRONG">{{ row.name }}</td>
+                  <td :class="ui.LIST_TD_STRONG">
+                    {{ row.__offline === 'insert' ? t('New') : row.name }}
+                    <!-- Saved on this phone, not on the server yet (offline mode). -->
+                    <span v-if="row.__offline" :class="[ui.PILL, ui.TONE.blue, 'ml-1.5 !px-1.5 !py-0 text-[10px]']">{{ t('Not synced') }}</span>
+                  </td>
                   <td v-for="col in columns" :key="col.fieldname" :class="ui.LIST_TD">
                     <UserLinkHoverCard v-if="isUserLink(col) && row[col.fieldname]" :user="row[col.fieldname]" @click.stop>
                       <span class="underline decoration-dotted">{{ row[col.fieldname] }}</span>
@@ -275,9 +279,10 @@
             <button v-for="(row, index) in rows" :key="row.name" type="button" :class="ui.mobileRowClass(index)" @click="goToRow(row.name)">
               <span class="flex items-center justify-between gap-2">
                 <span class="truncate rounded-md bg-white/80 px-1.5 py-0.5 font-mono text-xs text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                  {{ row.name }}
+                  {{ row.__offline === 'insert' ? t('New') : row.name }}
                 </span>
                 <span class="flex flex-shrink-0 items-center gap-1.5">
+                  <span v-if="row.__offline" :class="[ui.PILL, ui.TONE.blue, '!px-1.5 !py-0 text-[10px]']">{{ t('Not synced') }}</span>
                   <span v-if="statusColumn && !isEmptyValue(row[statusColumn.fieldname])" :class="[ui.PILL, ui.TONE[toneFor(row[statusColumn.fieldname])]]">
                     {{ t(row[statusColumn.fieldname]) }}
                   </span>

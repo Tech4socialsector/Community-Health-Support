@@ -22,7 +22,9 @@
 
     <AwesomeBar class="w-full sm:w-96" />
 
-    <div></div>
+    <div class="flex justify-end">
+      <SyncStatus />
+    </div>
   </div>
 </template>
 
@@ -32,6 +34,7 @@ import { useRoute } from 'vue-router'
 import { FeatherIcon, Tooltip } from 'frappe-ui'
 import AwesomeBar from '@/components/AwesomeBar.vue'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
+import SyncStatus from '@/components/SyncStatus.vue'
 import { pageTitle, pageCrumbs } from '@/data/pageTitle'
 
 const route = useRoute()
