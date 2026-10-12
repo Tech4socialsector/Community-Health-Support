@@ -8,7 +8,8 @@
 // user logs in, so one CHW's patients never show for another.
 
 const DB_NAME = 'chw-offline'
-const VERSION = 1
+const VERSION = 2
+const STORES = ['records', 'metas', 'outbox', 'kv']
 
 let dbPromise = null
 
@@ -33,7 +34,26 @@ function open() {
       }
       if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv')
     }
-    req.onsuccess = () => resolve(req.result)
+    req.onsuccess = () => {
+      const db = req.result
+      // A database left without its stores (created by something else
+      // first, or a broken upgrade) can't be used - start it again.
+      if (STORES.some((s) => !db.objectStoreNames.contains(s))) {
+        db.close()
+        const del = indexedDB.deleteDatabase(DB_NAME)
+        del.onsuccess = del.onerror = del.onblocked = () => {
+          dbPromise = null
+          open().then(resolve, reject)
+        }
+        return
+      }
+      // Another tab upgrading the database: let it, and reopen next time.
+      db.onversionchange = () => {
+        db.close()
+        dbPromise = null
+      }
+      resolve(db)
+    }
     req.onerror = () => reject(req.error)
     // Another tab holds an older version open - let this one through.
     req.onblocked = () => console.warn('Offline store upgrade blocked by another tab')
@@ -89,4 +109,4 @@ export const idb = {
   available: () => open().then(() => true, () => false),
 }
 
-export const ALL_STORES = ['records', 'metas', 'outbox', 'kv']
+export const ALL_STORES = STORES

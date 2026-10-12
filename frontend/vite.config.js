@@ -85,6 +85,10 @@ export default defineConfig({
         // false fails validation even though the SW template's own check
         // would have treated it the same as null.)
         navigateFallback: null,
+        // A first-time install takes over the open page at once (an update
+        // still waits for "Refresh") - so the screens opened in this first
+        // visit are already stored for offline use.
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: ({ url, request }) =>

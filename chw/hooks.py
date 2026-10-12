@@ -66,7 +66,9 @@ add_to_apps_screen = [
 		"name": "chw",
 		"logo": "/assets/chw/frontend/favicon.png",
 		"title": "CHW",
-		"route": "/chw",
+		# With the trailing slash: the offline service worker covers /chw/...
+		# only - a page opened at /chw has no offline copy.
+		"route": "/chw/home",
 	}
 ]
 

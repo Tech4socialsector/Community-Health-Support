@@ -333,9 +333,27 @@ export async function syncNow({ full = false } = {}) {
 
 let queuedTimer = null
 
+// Store the app page for offline use right away. The service worker only
+// stores pages it serves itself - on a phone's very first visit the page
+// loaded before it existed, so going offline straight after showed the
+// browser's "no internet" page. Same key the service worker reads ('/chw').
+async function saveAppPage() {
+  if (!window.caches || !window.location.pathname.startsWith('/chw')) return
+  try {
+    const res = await networkFetch('/chw/home', { credentials: 'same-origin', cache: 'no-store' })
+    if (res.ok && (res.headers.get('content-type') || '').includes('text/html')) {
+      const cache = await caches.open('chw-app-shell')
+      await cache.put(new URL('/chw', window.location.origin).href, res)
+    }
+  } catch {
+    // Offline or storage blocked - the service worker stores it next visit.
+  }
+}
+
 // Load every screen's code once while online, so the service worker has
 // it all - a screen first opened offline would otherwise have no code.
 async function warmScreens() {
+  await saveAppPage()
   const { default: router } = await import('@/router')
   for (const route of router.getRoutes()) {
     const component = route.components?.default
