@@ -5,11 +5,12 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
 from chw.api import sync_next_visit_todo, validate_phone_number
+from chw.chw_master import visit_schedule
 
 DEFAULT_ANC_WINDOW_DAYS = 30
 DEFAULT_RISK_ALERT_DAYS = 7
-# Last-resort fallback only, if the Master record is missing entirely - the
-# real number always comes from ANC Visit Interval Master's own field.
+# Last-resort fallback only, if the Visit Schedule Master has no ANC rows
+# configured - the real number always comes from that master's own field.
 DEFAULT_AUTOMATIC_WINDOW_COUNT = 6
 
 # The three follow-up tables all describe the same patient, just recorded by
@@ -21,6 +22,23 @@ DEFAULT_AUTOMATIC_WINDOW_COUNT = 6
 # Work Order List connection of their own (see NURSE_TABLE_FIELD below).
 FOLLOWUP_TABLE_FIELDS = ["anc_followup", "anc_followup_for_nurse", "anc_followup_for_docter"]
 NURSE_TABLE_FIELD = "anc_followup_for_nurse"
+
+
+@frappe.whitelist()
+def get_window_policy_for_js(high_risk=None):
+	"""For anc_follow_up.js's live preview - a CHW Health Worker isn't
+	granted Desk access to Visit Schedule Master itself, so the client
+	fetches through this whitelisted method (which reads ignoring
+	permissions) instead of reading the master directly."""
+	return visit_schedule.get_continue_policy(
+		"ANC Follow-up",
+		high_risk,
+		defaults={
+			"window_days": DEFAULT_ANC_WINDOW_DAYS,
+			"alert_within_days": DEFAULT_RISK_ALERT_DAYS,
+			"automatic_window_count": DEFAULT_AUTOMATIC_WINDOW_COUNT,
+		},
+	)
 
 
 class ANCFollowup(Document):
@@ -104,7 +122,10 @@ class ANCFollowup(Document):
 			frappe.db.set_value("Pregnancy Registration", self.pregnant_id, "high_risk", "Yes")
 
 	def insert_urgent_followups_for_risk_rows(self):
-		_, _, alert_within_days, _ = self.get_window_policy()
+		high_risk = (
+			frappe.db.get_value("Pregnancy Registration", self.pregnant_id, "high_risk") if self.pregnant_id else None
+		)
+		_, alert_within_days, _ = self.get_window_policy(high_risk)
 		self._insert_urgent_followups(NURSE_TABLE_FIELD, alert_within_days)
 
 	def _insert_urgent_followups(self, table_field, alert_within_days):
@@ -159,10 +180,10 @@ class ANCFollowup(Document):
 			return
 
 		high_risk = reg.high_risk or "No"
-		window_days, visits_per_window, alert_within_days, automatic_window_count = self.get_window_policy()
+		window_days, alert_within_days, automatic_window_count = self.get_window_policy(high_risk)
 		completed_count = len([row for row in self.get(NURSE_TABLE_FIELD) if row.status == "Completed"])
 		starting_window = self.get_window_index(self.creation or getdate(), reg.lmp_date, window_days)
-		current_window = self.get_current_window(starting_window, completed_count, visits_per_window)
+		current_window = self.get_current_window(starting_window, completed_count)
 
 		window_start = add_days(getdate(reg.lmp_date), (current_window - 1) * window_days)
 		window_end = add_days(window_start, window_days)
@@ -248,17 +269,22 @@ class ANCFollowup(Document):
 		return frappe._dict(date=getdate(earliest.date), trigger_date=trigger_date)
 
 	@staticmethod
-	def get_window_policy():
-		# ANC Visit Interval Master is a one-time-setup Single - one policy,
-		# the same for every patient regardless of High Risk status (that
-		# field only controls whether the Risk Alert nudge is shown, not
-		# which cadence applies).
-		master = frappe.get_single("ANC Visit Interval Master")
-		window_days = master.interval_days or DEFAULT_ANC_WINDOW_DAYS
-		visits_per_window = master.visits_required_per_window or 1
-		alert_within_days = master.risk_alert_within_days or DEFAULT_RISK_ALERT_DAYS
-		automatic_window_count = master.automatic_window_count or DEFAULT_AUTOMATIC_WINDOW_COUNT
-		return window_days, visits_per_window, alert_within_days, automatic_window_count
+	def get_window_policy(high_risk=None):
+		# Reads from the shared Visit Schedule Master (Applies To = "ANC
+		# Follow-up", Schedule Type = Continue) instead of ANC's own separate
+		# Single - see chw.chw_master.visit_schedule. High Risk picks which
+		# configured row applies; if only one row is configured (or none),
+		# the same policy applies to every patient, exactly as before.
+		policy = visit_schedule.get_continue_policy(
+			"ANC Follow-up",
+			high_risk,
+			defaults={
+				"window_days": DEFAULT_ANC_WINDOW_DAYS,
+				"alert_within_days": DEFAULT_RISK_ALERT_DAYS,
+				"automatic_window_count": DEFAULT_AUTOMATIC_WINDOW_COUNT,
+			},
+		)
+		return policy.window_days, policy.alert_within_days, policy.automatic_window_count
 
 	@staticmethod
 	def get_window_index(reference_date, lmp_date, window_days):
@@ -268,13 +294,7 @@ class ANCFollowup(Document):
 		return (days_elapsed // window_days) + 1
 
 	@staticmethod
-	def get_current_window(starting_window, completed_count, visits_per_window):
-		# A window only closes once its quota of completed visits is met -
-		# 1 normally, more if the org's High Risk policy requires it (e.g. 2
-		# visits within the same month).
-		window = starting_window
-		remaining = completed_count
-		while remaining >= visits_per_window:
-			remaining -= visits_per_window
-			window += 1
-		return window
+	def get_current_window(starting_window, completed_count):
+		# Every completed visit closes its own window and advances to the
+		# next one - one visit always closes one window.
+		return starting_window + completed_count

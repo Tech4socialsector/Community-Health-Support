@@ -6,12 +6,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
 from chw.api import sync_next_visit_todo, validate_phone_number
+from chw.chw_master import visit_schedule
 
-# Last-resort fallback only, used if the PNC Visit Interval Master hasn't
-# been configured yet - the real policy always comes from that master's
-# Visit Schedule rows. (window_opens_day, window_closes_day) per visit,
-# 1-indexed by position - visit 1 opens at delivery, visit 2 is the last
-# week of a 6-week (42-day) postnatal period.
+# Last-resort fallback only, used if the Visit Schedule Master has no PNC
+# rows configured yet - the real policy always comes from that master's
+# Visit Schedule rows (Applies To = "PNC"). (window_opens_day,
+# window_closes_day) per visit, 1-indexed by position - visit 1 opens at
+# delivery, visit 2 is the last week of a 6-week (42-day) postnatal period.
 DEFAULT_VISIT_SCHEDULE = [(0, 7), (35, 42)]
 DEFAULT_RISK_ALERT_DAYS = 1
 
@@ -23,20 +24,9 @@ PNC_SCHEDULE_DURATION_MONTHS = 2
 
 @frappe.whitelist()
 def get_visit_schedule():
-	"""The master's Visit Schedule rows, for pnc.js's live preview. A child
-	table (PNC Visit Schedule Row) has no permission rules of its own -
-	only the parent Single does - so the client can't reliably list it
-	directly via frappe.db.get_list; fetching through the parent doc here
-	goes through normal, already-granted permission checks instead."""
-	master = frappe.get_single("PNC Visit Interval Master")
-	return [
-		{
-			"window_opens_day": row.window_opens_day,
-			"window_closes_day": row.window_closes_day,
-			"risk_alert_within_days": row.risk_alert_within_days,
-		}
-		for row in master.visit_schedule
-	]
+	"""The shared Visit Schedule Master's rows for PNC, for pnc.js's live
+	preview - see chw.chw_master.visit_schedule."""
+	return visit_schedule.get_visit_schedule_rows("PNC")
 
 
 class PNC(Document):
@@ -145,16 +135,11 @@ class PNC(Document):
 
 	@staticmethod
 	def get_urgent_visit_within_days(visit_number):
-		"""The schedule row matching visit_number's own Urgent Visit Within
-		Days - clamped to the last configured row if visit_number runs past
-		however many rows exist, so a risk finding beyond the configured
-		schedule still gets a sensible duration instead of failing."""
-		master = frappe.get_single("PNC Visit Interval Master")
-		rows = master.visit_schedule
-		if not rows:
-			return DEFAULT_RISK_ALERT_DAYS
-		index = max(min(visit_number, len(rows)) - 1, 0)
-		return rows[index].urgent_visit_within_days or DEFAULT_RISK_ALERT_DAYS
+		"""One shared Urgent Visit Within Days for all of PNC's visits - see
+		chw.chw_master.visit_schedule.get_urgent_visit_within_days.
+		visit_number is accepted (but unused) only so callers don't need to
+		change - every visit uses the same configured gap."""
+		return visit_schedule.get_urgent_visit_within_days("PNC", DEFAULT_RISK_ALERT_DAYS)
 
 	def set_next_pnc_visit_date(self):
 		# Mother and baby are tracked independently - each gets its own
@@ -250,28 +235,8 @@ class PNC(Document):
 
 	@staticmethod
 	def get_visit_window(visit_number):
-		"""visit_number is 1-indexed, matching row position in the master's
-		Visit Schedule table - row 1 is visit 1, row 2 is visit 2, and so on.
-		Returns None once visit_number exceeds however many rows exist -
-		there's no fixed cap, the row count *is* the cap."""
-		master = frappe.get_single("PNC Visit Interval Master")
-		rows = master.visit_schedule
-
-		if rows:
-			if visit_number < 1 or visit_number > len(rows):
-				return None
-			row = rows[visit_number - 1]
-			return frappe._dict(
-				start_offset=row.window_opens_day,
-				end_offset=row.window_closes_day,
-				risk_alert_within_days=row.risk_alert_within_days or DEFAULT_RISK_ALERT_DAYS,
-			)
-
-		if visit_number < 1 or visit_number > len(DEFAULT_VISIT_SCHEDULE):
-			return None
-		start_offset, end_offset = DEFAULT_VISIT_SCHEDULE[visit_number - 1]
-		return frappe._dict(
-			start_offset=start_offset,
-			end_offset=end_offset,
-			risk_alert_within_days=DEFAULT_RISK_ALERT_DAYS,
-		)
+		"""visit_number is 1-indexed - see
+		chw.chw_master.visit_schedule.get_visit_window. Returns None once
+		visit_number has no matching row - there's no fixed cap, the
+		configured rows *are* the cap."""
+		return visit_schedule.get_visit_window("PNC", visit_number, DEFAULT_VISIT_SCHEDULE, DEFAULT_RISK_ALERT_DAYS)

@@ -13,9 +13,9 @@ const TABLE = 'followup_visits'
 const SCHEDULE_METHOD =
   'chw.common.doctype.child_6w_to_1_year_reg_and_followup.child_6w_to_1_year_reg_and_followup.get_visit_schedule'
 
-// Last-resort fallback only, used if Child 6w-1y Visit Interval Master
-// hasn't been configured yet - same table as DEFAULT_VISIT_SCHEDULE in the
-// .py/.js. (label, opens_day, closes_day) from the child's date of birth.
+// Last-resort fallback only, used if the Visit Schedule Master has no
+// Child 6w-1y rows configured yet - same table as DEFAULT_VISIT_SCHEDULE in
+// the .py/.js. (label, opens_day, closes_day) from the child's date of birth.
 const DEFAULT_VISIT_SCHEDULE = [
   ['6th Week', 35, 42],
   ['10th Week', 63, 70],

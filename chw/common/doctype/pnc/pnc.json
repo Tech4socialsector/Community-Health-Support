@@ -157,7 +157,7 @@
    "read_only": 1
   },
   {
-   "description": "Set automatically from a Mother followup row's Patient Condition = Risk. Not manually editable - internal, drives the Risk Alert, the urgent follow-up chain, and the Work Order List's High Risk view.",
+   "description": "Set automatically from a Mother followup row's Patient Condition = Risk. Not manually editable - internal, drives the Risk Alert, the urgent follow-up chain, and My Work's High Risk view.",
    "fieldname": "high_risk",
    "fieldtype": "Select",
    "hidden": 1,

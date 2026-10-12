@@ -24,7 +24,6 @@ import {
   toDateStr,
   URGENT_ROW_CLASS,
   warnIfNotDigits,
-  cached,
 } from './utils'
 
 const FOLLOWUP_TABLE_FIELDS = ['anc_followup', 'anc_followup_for_nurse', 'anc_followup_for_docter']
@@ -32,7 +31,6 @@ const NURSE_TABLE_FIELD = 'anc_followup_for_nurse'
 
 // Same fallbacks as get_window_policy() in both Desk and the server.
 const DEFAULT_WINDOW_DAYS = 30
-const DEFAULT_VISITS_PER_WINDOW = 1
 const DEFAULT_RISK_ALERT_DAYS = 7
 const DEFAULT_AUTOMATIC_WINDOW_COUNT = 6
 
@@ -48,22 +46,29 @@ async function getPregnancyInfo(pregnantId) {
   return res || {}
 }
 
-// ANC Visit Interval Master is a one-time-setup Single - one policy for
-// every patient - so it's fetched once per session.
-const getWindowPolicy = cached(async () => {
-  const msg =
-    (await call('frappe.client.get_value', {
-      doctype: 'ANC Visit Interval Master',
-      filters: 'ANC Visit Interval Master',
-      fieldname: ['interval_days', 'visits_required_per_window', 'risk_alert_within_days', 'automatic_window_count'],
-    })) || {}
-  return {
-    windowDays: Number(msg.interval_days) || DEFAULT_WINDOW_DAYS,
-    visitsPerWindow: Number(msg.visits_required_per_window) || DEFAULT_VISITS_PER_WINDOW,
-    alertWithinDays: Number(msg.risk_alert_within_days) || DEFAULT_RISK_ALERT_DAYS,
-    automaticWindowCount: Number(msg.automatic_window_count) || DEFAULT_AUTOMATIC_WINDOW_COUNT,
+// Reads from the shared Visit Schedule Master (Applies To = "ANC
+// Follow-up") instead of ANC's own separate master - see
+// chw.chw_master.visit_schedule. High Risk picks which configured row
+// applies, so this is cached per risk value rather than once per session.
+const windowPolicyCache = {}
+async function getWindowPolicy(highRisk) {
+  const key = highRisk || 'No'
+  if (!windowPolicyCache[key]) {
+    windowPolicyCache[key] = call('chw.common.doctype.anc_follow_up.anc_follow_up.get_window_policy_for_js', {
+      high_risk: key,
+    })
+      .then((msg) => ({
+        windowDays: Number(msg?.window_days) || DEFAULT_WINDOW_DAYS,
+        alertWithinDays: Number(msg?.alert_within_days) || DEFAULT_RISK_ALERT_DAYS,
+        automaticWindowCount: Number(msg?.automatic_window_count) || DEFAULT_AUTOMATIC_WINDOW_COUNT,
+      }))
+      .catch((e) => {
+        delete windowPolicyCache[key]
+        throw e
+      })
   }
-})
+  return windowPolicyCache[key]
+}
 
 // The server compares rows with getdate(), which reads an empty date as
 // today - mirrored so ties/ordering pick the same row.
@@ -86,15 +91,10 @@ function getWindowIndex(referenceDate, lmpDate, windowDays) {
   return Math.floor(daysElapsed / windowDays) + 1
 }
 
-// A window only closes once its quota of completed visits is met.
-function getCurrentWindow(startingWindow, completedCount, visitsPerWindow) {
-  let window = startingWindow
-  let remaining = completedCount
-  while (remaining >= visitsPerWindow) {
-    remaining -= visitsPerWindow
-    window += 1
-  }
-  return window
+// Every completed visit closes its own window and advances to the next one
+// - one visit always closes one window.
+function getCurrentWindow(startingWindow, completedCount) {
+  return startingWindow + completedCount
 }
 
 // Assign only on a real change, so recalculating with the same answer
@@ -160,19 +160,19 @@ async function calculateNextAncVisitDate(values) {
   try {
     info = await getPregnancyInfo(values.pregnant_id)
     if (!info.lmp_date) return
-    policy = await getWindowPolicy()
+    policy = await getWindowPolicy(info.high_risk)
   } catch {
     return
   }
   if (seq !== calcSeq) return
 
-  const { windowDays, visitsPerWindow, alertWithinDays, automaticWindowCount } = policy
+  const { windowDays, alertWithinDays, automaticWindowCount } = policy
   const nurseRows = values[NURSE_TABLE_FIELD] || []
   const completedCount = nurseRows.filter((row) => row.status === 'Completed').length
   // Windows count from when the record was created (today for a new one),
   // exactly as the server's set_next_anc_visit_date does.
   const startingWindow = getWindowIndex(values.creation || today(), info.lmp_date, windowDays)
-  const currentWindow = getCurrentWindow(startingWindow, completedCount, visitsPerWindow)
+  const currentWindow = getCurrentWindow(startingWindow, completedCount)
   const windowStart = addDays(info.lmp_date, (currentWindow - 1) * windowDays)
   const windowEnd = addDays(windowStart, windowDays)
 
@@ -231,7 +231,7 @@ async function generateVisitSchedule(values, ctx) {
   try {
     info = await getPregnancyInfo(pregnantId)
     if (!info.lmp_date) return
-    policy = await getWindowPolicy()
+    policy = await getWindowPolicy(info.high_risk)
   } catch {
     return
   }

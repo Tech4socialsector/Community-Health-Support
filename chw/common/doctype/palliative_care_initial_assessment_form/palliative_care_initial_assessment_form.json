@@ -98,10 +98,12 @@
   "psychosocial_aspects_section",
   "family_members",
   "insight_of_the_patient",
+  "digno",
+  "progno",
   "patient_status",
-  "familycaregiver_health_concerns",
-  "support_status",
   "column_break_pzps",
+  "support_status",
+  "familycaregiver_health_concerns",
   "communication_status_at_first_visit",
   "primary_caregiver",
   "section_break_kxpw",
@@ -487,9 +489,9 @@
   },
   {
    "fieldname": "insight_of_the_patient",
-   "fieldtype": "Select",
-   "label": "Insight of the Patient",
-   "options": "Diagnosis\nPrognosis, Palliative Care)"
+   "fieldtype": "Heading",
+   "label": "<h5>Insight of the Patient</h5>",
+   "not_nullable": 1
   },
   {
    "fieldname": "patient_status",
@@ -767,6 +769,16 @@
    "fieldname": "consent_date",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "fieldname": "digno",
+   "fieldtype": "Small Text",
+   "label": "Diagnosis"
+  },
+  {
+   "fieldname": "progno",
+   "fieldtype": "Small Text",
+   "label": "Prognosis"
   }
  ],
  "grid_page_length": 50,
@@ -777,7 +789,7 @@
    "link_fieldname": "pcid"
   }
  ],
- "modified": "2026-09-30 11:42:09.597507",
+ "modified": "2026-10-12 15:54:55.409700",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",

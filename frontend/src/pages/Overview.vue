@@ -8,7 +8,7 @@
         <template #actions>
           <router-link :to="{ name: 'WorkOrders' }" :class="ui.BTN_SECONDARY">
             <LucideIcon name="clipboard-list" class="h-4 w-4 text-forest-700 dark:text-forest-300" />
-            {{ t('Work Orders') }}
+            {{ t('My Work') }}
           </router-link>
         </template>
       </PageHeader>

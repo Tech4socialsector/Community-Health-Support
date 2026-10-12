@@ -162,7 +162,7 @@ const sections = computed(() => {
       label: t('My work'),
       items: [
         {
-          label: t('Work Orders'),
+          label: t('My Work'),
           icon: moduleIcon('clipboard-list'),
           to: { name: 'WorkOrders' },
           isActive: route.name === 'WorkOrders',

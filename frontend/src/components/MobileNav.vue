@@ -81,7 +81,7 @@ const showMenu = ref(false)
 // from the Overview drilldown, a form opened from Home).
 const tabs = computed(() => [
   { name: 'Home', label: 'Home', icon: 'house', match: ['Home', 'DoctypeList', 'DoctypeNew', 'DoctypeForm'] },
-  { name: 'WorkOrders', label: 'Work Orders', icon: 'clipboard-list', match: ['WorkOrders'] },
+  { name: 'WorkOrders', label: 'My Work', icon: 'clipboard-list', match: ['WorkOrders'] },
   ...(userContextResource.data?.is_privileged
     ? [{ name: 'Overview', label: 'Overview', icon: 'chart-bar-big', match: ['Overview', 'RecordView'] }]
     : []),

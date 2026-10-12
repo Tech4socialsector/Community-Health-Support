@@ -7,7 +7,7 @@
 // generation, Next ANC Visit Date, risk alert, urgent follow-up chain) is
 // driven by the Nurse table alone. Volunteer and Doctor are open-ended,
 // manual logs: Add Row any time, current date/LMP/POG auto-fill, but no
-// calculated cadence and no Work Order List connection of their own.
+// calculated cadence and no My Work connection of their own.
 const FOLLOWUP_TABLE_FIELDS = ["anc_followup", "anc_followup_for_nurse", "anc_followup_for_docter"];
 const NURSE_TABLE_FIELD = "anc_followup_for_nurse";
 
@@ -167,24 +167,22 @@ function get_pregnancy_info(pregnant_id) {
 	return frappe.db.get_value("Pregnancy Registration", pregnant_id, ["lmp_date", "high_risk"]).then((r) => r.message || {});
 }
 
-function get_window_policy() {
-	// ANC Visit Interval Master is a one-time-setup Single - one policy,
-	// the same for every patient regardless of High Risk status (that
-	// field only controls whether the Risk Alert nudge is shown, not which
-	// cadence applies).
-	return frappe.db
-		.get_value("ANC Visit Interval Master", "ANC Visit Interval Master", [
-			"interval_days",
-			"visits_required_per_window",
-			"risk_alert_within_days",
-			"automatic_window_count",
-		])
+function get_window_policy(high_risk) {
+	// Reads from the shared Visit Schedule Master (Applies To = "ANC
+	// Follow-up") instead of ANC's own separate master - see
+	// chw.chw_master.visit_schedule. High Risk picks which configured row
+	// applies; if only one row is configured (or none), the same policy
+	// applies to every patient, exactly as before.
+	return frappe
+		.call({
+			method: "chw.common.doctype.anc_follow_up.anc_follow_up.get_window_policy_for_js",
+			args: { high_risk: high_risk || "No" },
+		})
 		.then((r) => {
 			const msg = r.message || {};
 			return {
-				window_days: msg.interval_days || 30,
-				visits_per_window: msg.visits_required_per_window || 1,
-				alert_within_days: msg.risk_alert_within_days || 7,
+				window_days: msg.window_days || 30,
+				alert_within_days: msg.alert_within_days || 7,
 				automatic_window_count: msg.automatic_window_count || 6,
 			};
 		});
@@ -196,15 +194,10 @@ function get_window_index(reference_date, lmp_date, window_days) {
 	return Math.floor(days_elapsed / window_days) + 1;
 }
 
-function get_current_window(starting_window, completed_count, visits_per_window) {
-	// A window only closes once its quota of completed visits is met.
-	let window = starting_window;
-	let remaining = completed_count;
-	while (remaining >= visits_per_window) {
-		remaining -= visits_per_window;
-		window += 1;
-	}
-	return window;
+function get_current_window(starting_window, completed_count) {
+	// Every completed visit closes its own window and advances to the next
+	// one - one visit always closes one window.
+	return starting_window + completed_count;
 }
 
 function calculate_pog(lmp_date, as_of_date) {
@@ -245,7 +238,7 @@ function generate_visit_schedule(frm) {
 	get_pregnancy_info(frm.doc.pregnant_id).then((info) => {
 		if (!info.lmp_date) return;
 
-		get_window_policy().then(({ window_days, automatic_window_count }) => {
+		get_window_policy(info.high_risk).then(({ window_days, automatic_window_count }) => {
 			const today = frappe.datetime.get_today();
 			const starting_window = get_window_index(today, info.lmp_date, window_days);
 
@@ -350,7 +343,7 @@ function calculate_next_anc_visit_date(frm) {
 	get_pregnancy_info(frm.doc.pregnant_id).then((info) => {
 		if (!info.lmp_date) return;
 
-		get_window_policy().then(({ window_days, visits_per_window, alert_within_days, automatic_window_count }) => {
+		get_window_policy(info.high_risk).then(({ window_days, alert_within_days, automatic_window_count }) => {
 			// A newer call to this function has started since this chain
 			// began - let that one's result stand instead of overwriting it
 			// with this now-stale one.
@@ -362,7 +355,7 @@ function calculate_next_anc_visit_date(frm) {
 				info.lmp_date,
 				window_days
 			);
-			const current_window = get_current_window(starting_window, completed_count, visits_per_window);
+			const current_window = get_current_window(starting_window, completed_count);
 			const window_start = frappe.datetime.add_days(info.lmp_date, (current_window - 1) * window_days);
 			const window_end = frappe.datetime.add_days(window_start, window_days);
 

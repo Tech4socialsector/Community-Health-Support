@@ -2736,7 +2736,7 @@ def _enrich_pnc_records_live(records):
 
 def _enrich_anc_records_live(records):
     """From-date / Alert-date / High-Risk for ANC records, computed live from
-    LMP date + the ANC Visit Interval Master + the Nurse follow-up rows only
+    LMP date + the Visit Schedule Master + the Nurse follow-up rows only
     - reusing the exact same calculation the ANC Follow-up form itself runs
     (chw.common.doctype.anc_follow_up.anc_follow_up.ANCFollowup), instead of
     reading fields that were pre-calculated and stored on save. Volunteer and
@@ -2803,10 +2803,10 @@ def _enrich_anc_records_live(records):
             r['alert_date'] = None
             continue
 
-        window_days, visits_per_window, alert_within_days, _ = ANCFollowup.get_window_policy()
+        window_days, alert_within_days, _ = ANCFollowup.get_window_policy(high_risk)
         completed_count = len(completed_rows)
         starting_window = ANCFollowup.get_window_index(r.get('creation') or getdate(), pregnancy.lmp_date, window_days)
-        current_window = ANCFollowup.get_current_window(starting_window, completed_count, visits_per_window)
+        current_window = ANCFollowup.get_current_window(starting_window, completed_count)
         window_start = add_days(getdate(pregnancy.lmp_date), (current_window - 1) * window_days)
         r['from_date'] = str(window_start)
         r['alert_date'] = str(add_days(window_start, alert_within_days)) if high_risk == 'Yes' else None
@@ -2816,7 +2816,7 @@ def _enrich_anc_records_live(records):
 
 def _enrich_postpartum_records_live(records):
     """From-date AND High-Risk for Postpartum records, computed live from
-    the Postpartum Visit Interval Master's Visit Schedule + the record's
+    the Visit Schedule Master's Postpartum rows + the record's
     own followup rows - mirroring PostpartumRegandFollowup's own
     set_next_visit_date/currently_high_risk exactly (an open Urgent row
     wins first for from_date, otherwise the normal schedule lookup; High
@@ -2880,7 +2880,7 @@ def _enrich_postpartum_records_live(records):
 
 def _enrich_child_6w_1y_records_live(records):
     """From-date AND High-Risk for Child 6w-1y records, computed live from
-    the Child 6w-1y Visit Interval Master's named Visit Schedule rows + the
+    the Visit Schedule Master's named Child 6w-1y rows + the
     record's own followup rows - mirroring
     Child6wto1YearRegandFollowup.set_next_visit_date/currently_high_risk
     exactly (an open Urgent row wins first, otherwise the schedule row
@@ -3345,8 +3345,8 @@ def chw_work_order_drilldown_excel(status='all', village=None, health_worker=Non
             r.get('status', ''),
         ])
 
-    xlsx_file = make_xlsx(rows, "CHW Work Order List")
+    xlsx_file = make_xlsx(rows, "CHW My Work")
 
-    frappe.response['filename'] = "work-order-list.xlsx"
+    frappe.response['filename'] = "my-work.xlsx"
     frappe.response['filecontent'] = xlsx_file.getvalue()
     frappe.response['type'] = 'binary'

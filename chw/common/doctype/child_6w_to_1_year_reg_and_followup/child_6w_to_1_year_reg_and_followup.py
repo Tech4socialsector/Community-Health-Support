@@ -6,11 +6,13 @@ from frappe.model.document import Document
 from frappe.utils import add_days, getdate
 
 from chw.api import sync_next_visit_todo
+from chw.chw_master import visit_schedule
 
-# Last-resort fallback only, used if Child 6w-1y Visit Interval Master hasn't
-# been configured yet - the real policy always comes from that master's
-# Visit Schedule rows. (window_opens_day, window_closes_day), counted from
-# the child's own date of birth (birth day itself = day 0).
+# Last-resort fallback only, used if the Visit Schedule Master has no
+# Child 6w-1y rows configured yet - the real policy always comes from that
+# master's Visit Schedule rows (Applies To = "Child 6w to 1 Year Reg and
+# Followup"). (window_opens_day, window_closes_day), counted from the
+# child's own date of birth (birth day itself = day 0).
 DEFAULT_VISIT_SCHEDULE = [
 	("6th Week", 35, 42),
 	("10th Week", 63, 70),
@@ -27,22 +29,9 @@ DEFAULT_URGENT_VISIT_WITHIN_DAYS = 7
 
 @frappe.whitelist()
 def get_visit_schedule():
-	"""The master's Visit Schedule rows, for this doctype's own .js live
-	preview. A child table (Child 6w-1y Visit Schedule Row) has no
-	permission rules of its own - only the parent Single does - so the
-	client can't reliably list it directly via frappe.db.get_list; fetching
-	through the parent doc here goes through normal, already-granted
-	permission checks instead."""
-	master = frappe.get_single("Child 6w-1y Visit Interval Master")
-	return [
-		{
-			"milestone_label": row.milestone_label,
-			"window_opens_day": row.window_opens_day,
-			"window_closes_day": row.window_closes_day,
-			"risk_alert_within_days": row.risk_alert_within_days,
-		}
-		for row in master.visit_schedule
-	]
+	"""The shared Visit Schedule Master's rows for Child 6w-1y, for this
+	doctype's own .js live preview - see chw.chw_master.visit_schedule."""
+	return visit_schedule.get_visit_schedule_rows("Child 6w to 1 Year Reg and Followup")
 
 
 class Child6wto1YearRegandFollowup(Document):
@@ -130,42 +119,22 @@ class Child6wto1YearRegandFollowup(Document):
 
 	@staticmethod
 	def get_urgent_visit_within_days(visit_number):
-		"""The schedule row matching visit_number's own Urgent Visit Within
-		Days - clamped to the last configured row if visit_number runs past
-		however many rows exist."""
-		master = frappe.get_single("Child 6w-1y Visit Interval Master")
-		rows = master.visit_schedule
-		if not rows:
-			return DEFAULT_URGENT_VISIT_WITHIN_DAYS
-		index = max(min(visit_number, len(rows)) - 1, 0)
-		return rows[index].urgent_visit_within_days or DEFAULT_URGENT_VISIT_WITHIN_DAYS
+		"""One shared Urgent Visit Within Days for all of Child 6w-1y's
+		visits - see chw.chw_master.visit_schedule.get_urgent_visit_within_days.
+		visit_number is accepted (but unused) only so callers don't need to
+		change - every visit uses the same configured gap."""
+		return visit_schedule.get_urgent_visit_within_days(
+			"Child 6w to 1 Year Reg and Followup", DEFAULT_URGENT_VISIT_WITHIN_DAYS
+		)
 
 	@staticmethod
 	def get_visit_window(visit_number):
-		"""visit_number is 1-indexed, matching row position in the master's
-		Visit Schedule table - row 1 is visit 1, row 2 is visit 2, and so
-		on. Returns None once visit_number exceeds however many rows exist
-		- there's no fixed cap, the row count *is* the cap."""
-		master = frappe.get_single("Child 6w-1y Visit Interval Master")
-		rows = master.visit_schedule
-
-		if rows:
-			if visit_number < 1 or visit_number > len(rows):
-				return None
-			row = rows[visit_number - 1]
-			return frappe._dict(
-				milestone_label=row.milestone_label,
-				start_offset=row.window_opens_day,
-				end_offset=row.window_closes_day,
-				risk_alert_within_days=row.risk_alert_within_days or DEFAULT_RISK_ALERT_DAYS,
-			)
-
-		if visit_number < 1 or visit_number > len(DEFAULT_VISIT_SCHEDULE):
-			return None
-		label, start_offset, end_offset = DEFAULT_VISIT_SCHEDULE[visit_number - 1]
-		return frappe._dict(
-			milestone_label=label, start_offset=start_offset, end_offset=end_offset,
-			risk_alert_within_days=DEFAULT_RISK_ALERT_DAYS,
+		"""visit_number is 1-indexed - see
+		chw.chw_master.visit_schedule.get_visit_window. Returns None once
+		visit_number has no matching row - there's no fixed cap, the
+		configured rows *are* the cap."""
+		return visit_schedule.get_visit_window(
+			"Child 6w to 1 Year Reg and Followup", visit_number, DEFAULT_VISIT_SCHEDULE, DEFAULT_RISK_ALERT_DAYS
 		)
 
 	def currently_high_risk(self):

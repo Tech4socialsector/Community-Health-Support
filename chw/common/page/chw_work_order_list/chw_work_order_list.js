@@ -1,7 +1,7 @@
 	// Copyright (c) 2026, tech4socialsector@azimpremjifoundation.org and contributors
 // For license information, please see license.txt
 
-// New Work Order List: Today / Upcoming / Overdue visits across the 5
+// My Work: Today / Upcoming / Overdue visits across the 5
 // programs this team actually runs (ANC, PNC, Palliative Care, Postpartum
 // 1-6 weeks, Child 6wk-1 year), always relative to the real current date.
 // Separate page, separate backend functions
@@ -13,7 +13,7 @@
 frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Work Order List',
+		title: 'My Work',
 		single_column: true,
 	});
 
@@ -255,7 +255,7 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 						<span style="width: 40px; height: 40px; border-radius: 10px; background: #0D9488; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; flex-shrink: 0;">C</span>
 						<div style="display: flex; flex-direction: column;">
 							<span style="font-size: 16px; font-weight: 800; color: #065F46;">CHW App</span>
-							<span style="font-size: 12px; color: #047857;">Work Order List</span>
+							<span style="font-size: 12px; color: #047857;">My Work</span>
 						</div>
 					</div>
 					<div style="display: flex; align-items: center; gap: 14px;">
@@ -424,7 +424,7 @@ frappe.pages['chw-work-order-list'].on_page_load = function (wrapper) {
 	function showDrilldownDialog() {
 		if (!drilldownDialog) {
 			drilldownDialog = new frappe.ui.Dialog({
-				title: 'Work Order List - Drilldown',
+				title: 'My Work - Drilldown',
 				size: 'extra-large',
 				fields: [{ fieldtype: 'HTML', fieldname: 'drilldown_body' }],
 			});

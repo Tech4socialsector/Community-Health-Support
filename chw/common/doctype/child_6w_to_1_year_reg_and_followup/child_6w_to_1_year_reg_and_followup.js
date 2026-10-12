@@ -53,8 +53,8 @@ frappe.ui.form.on("Child 6w to 1 Year Followup", {
 	},
 });
 
-// Last-resort fallback only, used if Child 6w-1y Visit Interval Master
-// hasn't been configured yet - the real policy always comes from that
+// Last-resort fallback only, used if the Visit Schedule Master has no
+// Child 6w-1y rows configured yet - the real policy always comes from that
 // master's Visit Schedule rows. (label, opens_day, closes_day), counted
 // from the child's own date of birth (birth day itself = 0).
 const DEFAULT_VISIT_SCHEDULE = [

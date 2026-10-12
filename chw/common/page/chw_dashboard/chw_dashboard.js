@@ -252,7 +252,7 @@ frappe.pages['chw-dashboard'].on_page_load = function (wrapper) {
 						<span style="font-size: 12px; color: #047857; display: flex; align-items: center; gap: 5px;">
 							<span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
 						</span>
-						<button class="btn" id="chw-dashboard-open-worklist" style="height: 36px; background: #0D9488; border-color: #0D9488; color: #FFFFFF;">&#8599; Go to Work Order List</button>
+						<button class="btn" id="chw-dashboard-open-worklist" style="height: 36px; background: #0D9488; border-color: #0D9488; color: #FFFFFF;">&#8599; Go to My Work</button>
 						<button class="btn btn-primary" id="chw-dashboard-open-workspace" style="height: 36px; background: #0D9488; border-color: #0D9488;">&#8599; Open Workspace</button>
 					</div>
 				</div>

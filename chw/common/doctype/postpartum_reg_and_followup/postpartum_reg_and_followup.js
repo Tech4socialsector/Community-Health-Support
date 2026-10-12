@@ -47,8 +47,8 @@ frappe.ui.form.on("Postpartum Followup", {
 	},
 });
 
-// Last-resort fallback only, used if the Postpartum Visit Interval Master
-// hasn't been configured yet - the real policy always comes from that
+// Last-resort fallback only, used if the Visit Schedule Master has no
+// Postpartum rows configured yet - the real policy always comes from that
 // master's Visit Schedule rows. (opens_day, closes_day) per visit,
 // 1-indexed by position - visit 1 opens at delivery, visit 2 is the last
 // week of a 6-week (42-day) postpartum period.

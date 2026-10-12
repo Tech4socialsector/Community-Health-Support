@@ -15,8 +15,8 @@ import { addDays, cached, formatDate, isOpenUrgent, RISK_ALERT_FIELD_CLASS, URGE
 const TABLE = 'followup_visits'
 const SCHEDULE_METHOD = 'chw.common.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule'
 
-// Last-resort fallback only, used if the Postpartum Visit Interval Master
-// hasn't been configured yet - same as DEFAULT_VISIT_SCHEDULE in the
+// Last-resort fallback only, used if the Visit Schedule Master has no
+// Postpartum rows configured yet - same as DEFAULT_VISIT_SCHEDULE in the
 // .py/.js. (opens_day, closes_day) from the delivery date: visit 1 opens at
 // delivery, visit 2 is the last week of the 6-week postpartum period.
 const DEFAULT_VISIT_SCHEDULE = [

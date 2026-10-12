@@ -169,7 +169,7 @@
   {
    "fetch_from": "husband_name.father_husband_name",
    "fieldname": "husbands_name",
-   "fieldtype": "Date",
+   "fieldtype": "Data",
    "label": "Partner's Name",
    "options": "Pregnancy Registration"
   },
@@ -383,7 +383,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-09 13:01:33.032375",
+ "modified": "2026-10-12 15:33:02.143073",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Preconception Reg and Followup",

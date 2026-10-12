@@ -3,7 +3,7 @@
     <div :class="ui.PAGE">
       <PageHeader :description="t('Today, upcoming and overdue visits across ANC, PNC, Palliative Care, Postpartum and Child 6 wk–1 year.')">
         <template #title>
-          <h1 class="text-lg font-semibold text-navy-900 dark:text-gray-100">{{ t('Work Orders') }}</h1>
+          <h1 class="text-lg font-semibold text-navy-900 dark:text-gray-100">{{ t('My Work') }}</h1>
         </template>
         <template #actions>
           <span :class="[ui.PILL, ui.TONE.navy, 'gap-1.5']">
@@ -33,7 +33,7 @@
       >
         <LucideIcon name="triangle-alert" class="mt-0.5 h-4 w-4 flex-shrink-0" />
         <span>
-          {{ t('No Health Worker record is linked to your login. Ask your coordinator to set the User field on your Health Worker record so your work order list can show here.') }}
+          {{ t('No Health Worker record is linked to your login. Ask your coordinator to set the User field on your Health Worker record so your My Work list can show here.') }}
         </span>
       </div>
 
@@ -230,7 +230,7 @@ import * as ui from '@/data/ui'
 import { goToRecord } from '@/data/openRecord'
 import { t, dateLocale } from '@/data/i18n'
 
-setPageTitle('Work Orders')
+setPageTitle('My Work')
 
 const router = useRouter()
 
@@ -339,7 +339,7 @@ async function loadSummary() {
     summaryLoaded.value = true
   } catch (e) {
     if (requestId !== summaryRequestId) return
-    summaryError.value = errorText(e, t('Could not load the work order summary.'))
+    summaryError.value = errorText(e, t('Could not load the My Work summary.'))
   } finally {
     if (requestId === summaryRequestId) summaryLoading.value = false
   }
