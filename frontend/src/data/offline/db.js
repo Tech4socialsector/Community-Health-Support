@@ -7,6 +7,8 @@
 // One database for the whole app; wiped on logout and when a different
 // user logs in, so one CHW's patients never show for another.
 
+import { offlineState } from './state'
+
 const DB_NAME = 'chw-offline'
 const VERSION = 2
 const STORES = ['records', 'metas', 'outbox', 'kv']
@@ -52,11 +54,15 @@ function open() {
         db.close()
         dbPromise = null
       }
+      offlineState.storageBlocked = false
       resolve(db)
     }
     req.onerror = () => reject(req.error)
-    // Another tab holds an older version open - let this one through.
-    req.onblocked = () => console.warn('Offline store upgrade blocked by another tab')
+    // Another tab still runs the older app and holds the storage open: the
+    // upgrade waits until it closes. Said on screen, not left silent.
+    req.onblocked = () => {
+      offlineState.storageBlocked = true
+    }
   })
   // A failed open (private window, storage blocked) must not stay cached:
   // the next call tries again, and callers fall back to online-only.
@@ -106,7 +112,9 @@ export const idb = {
     tx(stores, 'readwrite', (t) => {
       for (const s of stores) t.objectStore(s).clear()
     }),
-  available: () => open().then(() => true, () => false),
+  // Not stuck for long behind another tab's old version (see onblocked).
+  available: () =>
+    Promise.race([open().then(() => true, () => false), new Promise((r) => setTimeout(() => r(false), 5000))]),
 }
 
 export const ALL_STORES = STORES

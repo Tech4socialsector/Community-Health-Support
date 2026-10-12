@@ -23,27 +23,30 @@ const attention = computed(() => s.errors + s.conflicts)
 const busy = computed(() => s.online && (s.syncing || (s.downloading && !s.ready)))
 const spinning = computed(() => busy.value && !attention.value)
 // All well: an icon only on a phone, where the header is narrow.
-const quiet = computed(() => !attention.value && !s.pending && s.online && !busy.value)
+const quiet = computed(() => !attention.value && !s.pending && s.online && s.ready && !s.storageBlocked && !busy.value)
 
 const label = computed(() => {
+  if (s.storageBlocked) return t('Close other CHW tabs')
   if (attention.value) return attention.value === 1 ? t('1 needs attention') : t('{0} need attention', [attention.value])
   if (busy.value) return s.ready ? t('Syncing…') : t('Getting offline data…')
   if (s.pending) return s.pending === 1 ? t('1 to sync') : t('{0} to sync', [s.pending])
   if (!s.online) return t('Offline')
+  // Online, but this phone hasn't got its offline copy yet.
+  if (!s.ready) return t('Not ready offline')
   return t('Synced')
 })
 
 const icon = computed(() => {
-  if (attention.value) return 'triangle-alert'
+  if (attention.value || s.storageBlocked) return 'triangle-alert'
   if (busy.value) return 'loader-circle'
-  if (!s.online) return 'cloud-off'
+  if (!s.online || !s.ready) return 'cloud-off'
   if (s.pending) return 'cloud-upload'
   return 'cloud-check'
 })
 
 const tone = computed(() => {
-  if (attention.value) return 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-900/30 dark:text-red-200 dark:ring-red-800'
-  if (s.pending || !s.online) return 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:ring-amber-800'
+  if (attention.value || s.storageBlocked) return 'bg-red-50 text-red-700 ring-red-200 dark:bg-red-900/30 dark:text-red-200 dark:ring-red-800'
+  if (s.pending || !s.online || !s.ready) return 'bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:ring-amber-800'
   return 'bg-white text-forest-700 ring-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-forest-200 dark:ring-gray-700'
 })
 </script>

@@ -46,7 +46,11 @@
         <LucideIcon name="triangle-alert" class="h-5 w-5 flex-shrink-0" />
         <span>{{ s.lastSyncError }}</span>
       </div>
-      <div v-if="!s.ready" :class="ui.WARNING_BOX">
+      <div v-if="s.storageBlocked" :class="ui.WARNING_BOX">
+        <LucideIcon name="triangle-alert" class="h-5 w-5 flex-shrink-0" />
+        <span>{{ t('Another tab or window still has the older version of this app open, so offline storage cannot be prepared. Close every other CHW tab, then reload this page.') }}</span>
+      </div>
+      <div v-else-if="!s.ready" :class="ui.WARNING_BOX">
         <LucideIcon name="smartphone" class="h-5 w-5 flex-shrink-0" />
         <span>{{ t('This phone has no offline data yet. Stay online for a moment so the forms and your records can download.') }}</span>
       </div>

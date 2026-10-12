@@ -15,6 +15,8 @@ export const offlineState = reactive({
   lastSyncError: null,
   // Whether this phone has the CHW data at all (first download done).
   ready: false,
+  // Another tab with the older app keeps the phone storage from upgrading.
+  storageBlocked: false,
   // Temporary offline name -> the real one, once synced (open forms follow).
   renamed: {},
 })

@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { toast } from 'frappe-ui'
 import { t } from '@/data/i18n'
 
@@ -18,8 +18,6 @@ import { t } from '@/data/i18n'
 // that lives at /chw/. chw.website.sw_renderer.ServiceWorkerRenderer serves
 // the same built file at /chw/sw.js instead, so Workbox is driven directly
 // here (bypassing virtual:pwa-register) with that URL hardcoded.
-const needRefresh = ref(false)
-const updateServiceWorker = ref(() => {})
 
 onMounted(async () => {
   if (!('serviceWorker' in navigator)) return
@@ -27,37 +25,29 @@ onMounted(async () => {
   const { Workbox } = await import('workbox-window')
   const wb = new Workbox('/chw/sw.js', { scope: '/chw/' })
 
-  let refreshPromptShown = false
-  const showRefreshPrompt = () => {
-    // One prompt per page load: a second deploy landing while the tab is
-    // still open fires `installed` again, which used to stack a duplicate
-    // toast (and a duplicate reload listener). The existing toast's Refresh
-    // already activates whichever version is newest - messageSkipWaiting()
-    // targets the currently waiting worker - so a second one adds nothing.
-    if (refreshPromptShown) return
-    refreshPromptShown = true
-    wb.addEventListener('controlling', () => window.location.reload())
-    toast.info(t('A new version of the app is available.'), {
-      duration: 0,
+  // A new version installs itself straight away - for offline use it
+  // mustn't wait for someone to tap "Refresh": until it's active the phone
+  // keeps the old version's offline files, and a page reloaded offline
+  // can't open. Taking over doesn't reload the page (that could lose a
+  // form being filled in); the new version shows on the next reload.
+  let updateToastShown = false
+  const activateUpdate = () => {
+    wb.messageSkipWaiting()
+    if (updateToastShown) return
+    updateToastShown = true
+    toast.info(t('The app has been updated. Reload when convenient to use the new version.'), {
+      duration: 10000,
       action: {
-        label: t('Refresh'),
-        onClick: () => updateServiceWorker.value(),
+        label: t('Reload'),
+        onClick: () => window.location.reload(),
       },
     })
   }
 
   wb.addEventListener('installed', (event) => {
-    if (event.isUpdate || event.isExternal) {
-      showRefreshPrompt()
-    } else {
-      toast.success(t('The app is ready to work offline.'))
-    }
+    if (!event.isUpdate && !event.isExternal) toast.success(t('The app is ready to work offline.'))
   })
-  wb.addEventListener('waiting', () => {
-    if (!refreshPromptShown) showRefreshPrompt()
-  })
-
-  updateServiceWorker.value = () => wb.messageSkipWaiting()
+  wb.addEventListener('waiting', activateUpdate)
 
   wb.register().catch((error) => {
     // Non-fatal - the app still works online exactly as before, it just

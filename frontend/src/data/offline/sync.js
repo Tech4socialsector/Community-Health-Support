@@ -362,11 +362,19 @@ async function warmScreens() {
   await import('@/components/QuickCreateDialog.vue').catch(() => {})
 }
 
+let currentUser = null
+
 export async function startOfflineSync(user) {
   if (!user || user === 'Guest') return
+  currentUser = user
   if (started && offlineState.user === user) return
   started = true
-  if (!(await idb.available())) return
+  // Not available (private window) or waiting for another tab: try again
+  // the next time the app is opened or comes back into view.
+  if (!(await idb.available())) {
+    started = false
+    return
+  }
   await claimFor(user)
   if (offlineState.online) {
     syncNow()
@@ -378,6 +386,12 @@ export async function startOfflineSync(user) {
 
 if (typeof window !== 'undefined') {
   window.addEventListener('chw:online', () => started && syncNow())
+  // Back to the app (another tab closed, phone unlocked): catch up.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible' || !currentUser) return
+    if (!started) startOfflineSync(currentUser)
+    else if (offlineState.online && !offlineState.ready) syncNow()
+  })
   // A change saved offline - or saved online just as the network dropped -
   // goes out as soon as the network allows.
   window.addEventListener('chw:queued', () => {
