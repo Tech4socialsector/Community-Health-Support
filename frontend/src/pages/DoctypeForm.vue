@@ -796,10 +796,81 @@ async function deleteRecord() {
   else router.replace({ name: route.name.replace('Form', 'List') })
 }
 
+// --- Mandatory fields ----------------------------------------------------
+// The server refuses a record with a required field empty. Online that
+// refusal comes back at once; offline the record went into the Outbox and
+// was only refused at sync, after the CHW had left the house. So the form
+// checks first, by the server's own rule: every field marked mandatory
+// (or required by its mandatory_depends_on), in the record and in each
+// child row - except read-only fields filled from a Link (fetch_from), which
+// the server fills itself on save.
+const LAYOUT_TYPES = new Set(['Section Break', 'Column Break', 'Tab Break', 'HTML', 'Heading', 'Button', 'Image', 'Fold'])
+const isBlank = (v) => v == null || (Array.isArray(v) ? v.length === 0 : String(v).replace(/<[^>]*>/g, '').trim() === '')
+const serverFills = (f) => f.read_only && f.fetch_from
+
+const childMetas = new Map()
+function childMeta(childDoctype) {
+  if (!childMetas.has(childDoctype)) {
+    childMetas.set(
+      childDoctype,
+      fetch(`/api/v2/doctype/${encodeURIComponent(childDoctype)}/meta`)
+        .then((r) => r.json())
+        .then((b) => b.data || null)
+        .catch(() => null),
+    )
+  }
+  return childMetas.get(childDoctype)
+}
+
+async function missingMandatory() {
+  const missing = []
+  for (const f of metaResource.data?.fields || []) {
+    if (LAYOUT_TYPES.has(f.fieldtype) || serverFills(f)) continue
+    if (!withLiveRequired(f, values).reqd) continue
+    if (isBlank(values[f.fieldname])) missing.push({ fieldname: f.fieldname, label: t(f.label || f.fieldname) })
+  }
+  // Required columns inside child-table rows.
+  for (const f of tableFields.value) {
+    const rows = values[f.fieldname] || []
+    if (!rows.length) continue
+    const meta = await childMeta(f.options)
+    for (const [i, row] of rows.entries()) {
+      for (const cf of meta?.fields || []) {
+        if (LAYOUT_TYPES.has(cf.fieldtype) || serverFills(cf)) continue
+        if (!withLiveRequired(cf, row, values).reqd || !isBlank(row[cf.fieldname])) continue
+        missing.push({
+          fieldname: f.fieldname,
+          label: t('{0}, row {1}: {2}', [t(f.label || f.fieldname), i + 1, t(cf.label || cf.fieldname)]),
+        })
+      }
+    }
+  }
+  return missing
+}
+
+// Brings the first empty required field into view (opening its section if
+// it is a collapsed one).
+async function showField(fieldname) {
+  const sec = formSections.value.find((s) => s.items.some((i) => i.key === fieldname))
+  if (sec?.collapsible) openSections.add(sec.key)
+  await nextTick()
+  const el = document.querySelector(`[data-fieldname="${CSS.escape(fieldname)}"]`)
+  el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  el?.querySelector('input, textarea, select, button')?.focus({ preventScroll: true })
+}
+
 async function save() {
   saving.value = true
   saveError.value = null
   try {
+    const missing = await missingMandatory()
+    if (missing.length) {
+      const text = t('Mandatory fields required: {0}', [missing.map((m) => m.label).join(', ')])
+      saveError.value = new Error(text)
+      toast.error(text)
+      showField(missing[0].fieldname)
+      return
+    }
     if (isNew) {
       // Inserted with frappe.client.insert rather than useNewDoc's submit:
       // when the server refused (e.g. "Could not find Village: Bhaim"),

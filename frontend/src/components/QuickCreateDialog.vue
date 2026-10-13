@@ -100,6 +100,12 @@ function errorText(e) {
 }
 
 async function create() {
+  // Required boxes first - offline the server only sees this at sync.
+  const missing = quickFields.value.filter((f) => f.reqd && (values[f.fieldname] == null || String(values[f.fieldname]).trim() === ''))
+  if (missing.length) {
+    error.value = t('Mandatory fields required: {0}', [missing.map((f) => t(f.label || f.fieldname)).join(', ')])
+    return
+  }
   saving.value = true
   error.value = null
   try {
