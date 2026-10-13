@@ -59,24 +59,13 @@ import NotificationPanel from '@/components/NotificationPanel.vue'
 import UserHoverCard from '@/components/UserHoverCard.vue'
 import SettingsDialog from '@/components/SettingsDialog.vue'
 import AiAssistant from '@/components/AiAssistant.vue'
-import { session, logoutResource } from '@/data/session'
-import { clearSiteData } from '@/data/clearSiteData'
-import { offlineState } from '@/data/offline/state'
-
-// Logging out or clearing site data wipes the phone's copy - records saved
-// offline that haven't reached the server would be lost for good.
-function confirmUnsyncedLoss() {
-  const count = offlineState.pending + offlineState.errors + offlineState.conflicts
-  if (!count) return true
-  return window.confirm(
-    t('{0} record(s) saved on this phone have not synced yet and will be lost. Sync first (connect to the internet) unless you are sure. Continue anyway?', [count]),
-  )
-}
+import { session } from '@/data/session'
+import { accountActions } from '@/data/accountActions'
 import { brandingResource, appLogo } from '@/data/branding'
 import { activeModule, sidebarTrail } from '@/data/activeModule'
 import { childItemsOf } from '@/data/modules'
 import { notificationsResource, unreadCount, toggleNotifications } from '@/data/notifications'
-import { showSettingsDialog, openSettingsDialog } from '@/data/settingsDialog'
+import { showSettingsDialog } from '@/data/settingsDialog'
 import { userContextResource } from '@/data/userContext'
 import { t } from '@/data/i18n'
 
@@ -104,35 +93,11 @@ const header = computed(() => ({
   subtitle: session.full_name || session.user,
   logo: appLogo.value,
   menuItems: [
-    {
-      label: t('Settings'),
-      icon: 'settings',
-      onClick: openSettingsDialog,
-    },
-    {
-      label: t('Help'),
-      icon: 'help-circle',
-      onClick: () => window.open('https://frappeframework.com/docs', '_blank', 'noopener'),
-    },
-    {
-      label: t('Clear site data'),
-      icon: 'refresh-cw',
-      onClick: () => {
-        if (window.confirm(t('This clears cached app data and reloads the page. Continue?')) && confirmUnsyncedLoss()) {
-          clearSiteData()
-        }
-      },
-    },
-    {
-      label: t('Go to Desk'),
-      icon: 'grid',
-      onClick: () => window.open('/app', '_self'),
-    },
-    {
-      label: t('Logout'),
-      icon: 'log-out',
-      onClick: () => confirmUnsyncedLoss() && logoutResource.submit(),
-    },
+    { label: t('Settings'), icon: 'settings', onClick: accountActions.settings },
+    { label: t('Help'), icon: 'help-circle', onClick: accountActions.help },
+    { label: t('Clear site data'), icon: 'refresh-cw', onClick: accountActions.clearData },
+    { label: t('Go to Desk'), icon: 'grid', onClick: accountActions.desk },
+    { label: t('Logout'), icon: 'log-out', onClick: accountActions.logout },
   ],
 }))
 

@@ -24,6 +24,7 @@ declare module 'vue' {
     LinkField: typeof import('./src/components/LinkField.vue')['default']
     ListFilterControl: typeof import('./src/components/ListFilterControl.vue')['default']
     LucideIcon: typeof import('./src/components/LucideIcon.vue')['default']
+    MobileMenu: typeof import('./src/components/MobileMenu.vue')['default']
     MobileNav: typeof import('./src/components/MobileNav.vue')['default']
     MobileShell: typeof import('./src/components/MobileShell.vue')['default']
     NewIndicators: typeof import('./src/components/NewIndicators.vue')['default']

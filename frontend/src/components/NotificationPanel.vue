@@ -76,7 +76,7 @@
               <span class="flex items-start justify-between gap-2">
                 <span
                   class="block text-sm font-medium text-gray-900 dark:text-gray-100"
-                  v-html="n.title || n.subject || t('Notification')"
+                  v-html="safeHtml(n.title || n.subject || t('Notification'))"
                 />
                 <span
                   v-if="!n.read"
@@ -86,7 +86,7 @@
               <span
                 v-if="n.description"
                 class="mt-0.5 line-clamp-2 block text-xs text-gray-500 dark:text-gray-400"
-                v-html="n.description"
+                v-html="safeHtml(n.description)"
               />
               <span class="mt-1 block text-xs text-gray-400 dark:text-gray-500">
                 {{ formatTime(n.creation) }}
@@ -100,6 +100,7 @@
 </template>
 
 <script setup>
+import DOMPurify from 'dompurify'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { onClickOutside, onKeyStroke, useBreakpoints, breakpointsTailwind } from '@vueuse/core'
@@ -183,5 +184,12 @@ function open(n) {
     })
     notificationsState.visible = false
   }
+}
+
+// Notification text is built from record values (a patient's name, a
+// remark) that people type - shown as HTML for its bold / links, but
+// cleaned first so typed markup can never run as script for whoever reads it.
+function safeHtml(html) {
+  return DOMPurify.sanitize(String(html ?? ''), { USE_PROFILES: { html: true } })
 }
 </script>

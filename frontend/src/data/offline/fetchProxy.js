@@ -308,6 +308,54 @@ async function withUnsynced(req, res) {
   }
 }
 
+const CONNECTION_METHODS = new Set(['chw.api.get_doc_connections', 'chw.api.get_connection_records'])
+
+// Swap temporary OFFLINE-… names for real IDs anywhere in a value.
+function renameTemp(value, map) {
+  if (typeof value === 'string') return map[value] ?? value
+  if (Array.isArray(value)) return value.map((v) => renameTemp(v, map))
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, renameTemp(v, map)]))
+  return value
+}
+
+// A temporary name in any field other than the record's own name.
+function mentionsTemp(value, top = true) {
+  if (typeof value === 'string') return isTempName(value)
+  if (Array.isArray(value)) return value.some((v) => mentionsTemp(v, false))
+  if (value && typeof value === 'object') return Object.entries(value).some(([k, v]) => !(top && k === 'name') && mentionsTemp(v, false))
+  return false
+}
+
+// Online, a real record's Connections still count the records linked to it
+// that were made offline and haven't synced yet.
+async function withUnsyncedConnections(req, res) {
+  try {
+    const body = await res.clone().json()
+    let value = req.v2 ? body.data : body.message
+    const p = req.params
+    if (req.method === 'chw.api.get_doc_connections') {
+      if (!Array.isArray(value)) return res
+      let changed = false
+      for (const conn of value) {
+        if (!(await hasDoctype(conn.doctype))) continue
+        const extra = (await allRecords(conn.doctype)).filter((r) => r.__offline === 'insert' && String(r[conn.fieldname] ?? '') === String(p.name)).length
+        if (extra) {
+          conn.count = (conn.count || 0) + extra
+          changed = true
+        }
+      }
+      return changed ? respond(req, value) : res
+    }
+    if (!(await hasDoctype(p.doctype))) return res
+    const local = (await connectionRecords(p)).filter((r) => isTempName(r.name))
+    if (!local.length) return res
+    value = [...local, ...(value || [])]
+    return respond(req, value)
+  } catch {
+    return res
+  }
+}
+
 async function proxied(input, init = {}) {
   let req = describe(input, init)
   if (!req) return realFetch(input, init)
@@ -331,9 +379,23 @@ async function proxied(input, init = {}) {
   if (req.kind === 'method' && ['frappe.client.get', 'frappe.client.get_value'].includes(req.method) && isTempName(req.params.name ?? req.params.filters)) {
     return (await answerLocally(req)) || offlineError(req)
   }
+  // Connections of a record that exists only on this phone (a household
+  // saved offline -> its family members): the server has never heard of it.
+  if (req.kind === 'method' && CONNECTION_METHODS.has(req.method) && isTempName(req.params.name ?? req.params.value)) {
+    return (await answerLocally(req)) || offlineError(req)
+  }
 
   if (req.write) {
     const target = outboxTarget(req)
+    if (target) {
+      // Linked to a record made offline: once that one has synced, use its
+      // real ID; until then this one waits in the Outbox behind it (the
+      // server can't save a link to a record it doesn't have yet).
+      const map = (await idb.get('kv', 'idmap').catch(() => null)) || {}
+      if (target.doc) target.doc = renameTemp(target.doc, map)
+      if (target.values) target.values = renameTemp(target.values, map)
+      if (mentionsTemp(target.doc || target.values)) return saveLocally(req, target)
+    }
     if (looksOffline()) return target ? saveLocally(req, target) : offlineError(req)
     // A new record goes in under an id of the phone's own, so that if the
     // connection drops after the server saved it - but before the answer
@@ -399,6 +461,7 @@ async function proxied(input, init = {}) {
     if (res.ok) {
       learn(req, res.clone())
       if (req.kind === 'method' && req.method === 'chw.api.get_list_page') return withUnsynced(req, res)
+      if (req.kind === 'method' && CONNECTION_METHODS.has(req.method)) return withUnsyncedConnections(req, res)
     }
     return res
   } catch (e) {

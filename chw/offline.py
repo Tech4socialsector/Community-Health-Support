@@ -161,8 +161,19 @@ def _clean_row(row):
 
 def _already_synced(client_id):
 	return frappe.db.get_value(
-		"CHW Offline Sync", client_id, ["reference_doctype", "reference_name"], as_dict=True
+		"CHW Offline Sync", client_id, ["reference_doctype", "reference_name", "synced_by"], as_dict=True
 	)
+
+
+def _synced_doc(done):
+	"""The record a retried sync already made - only to the user whose phone
+	sent it, and only if they may still read it. Never the record the request
+	names: a replayed id must not become a way to read other records."""
+	if done.synced_by != frappe.session.user:
+		frappe.throw(_("This change was synced by another user."), frappe.PermissionError)
+	doc = frappe.get_doc(done.reference_doctype, done.reference_name)
+	doc.check_permission("read")
+	return doc
 
 
 def _log(client_id, action, doctype, name):
@@ -187,7 +198,8 @@ def push_insert(client_id, doc):
 		frappe.throw(_("Missing client id"))
 	done = _already_synced(client_id)
 	if done:
-		return {"name": done.reference_name, "doc": frappe.get_doc(done.reference_doctype, done.reference_name).as_dict()}
+		doc = _synced_doc(done)
+		return {"name": doc.name, "doc": doc.as_dict()}
 
 	doc = _clean_doc(frappe.parse_json(doc))
 	if not doc.get("doctype"):
@@ -237,7 +249,7 @@ def push_update(client_id, doctype, name, changes, base=None, base_modified=None
 		frappe.throw(_("Missing client id"))
 	done = _already_synced(client_id)
 	if done:
-		return {"status": "ok", "doc": frappe.get_doc(doctype, name).as_dict()}
+		return {"status": "ok", "doc": _synced_doc(done).as_dict()}
 
 	doc = frappe.get_doc(doctype, name)
 	doc.check_permission("write")

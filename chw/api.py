@@ -440,26 +440,39 @@ def get_dashboard_cards():
 @frappe.validate_and_sanitize_search_inputs
 def family_members_with_pregnancy_registration(doctype, txt, searchfield, start, page_len, filters):
     """Link query for Birth Registration's Family Member Id: only show family
-    members who have at least one Pregnancy Registration on record."""
-    FamilyMembers = frappe.qb.DocType('Family members')
-    PregnancyRegistration = frappe.qb.DocType('Pregnancy Registration')
+    members who have at least one Pregnancy Registration on record.
 
-    search_field = FamilyMembers[searchfield]
-    has_pregnancy_registration = ExistsCriterion(
-        frappe.qb.from_(PregnancyRegistration)
-        .select(PregnancyRegistration.name)
-        .where(PregnancyRegistration.familymember_id == FamilyMembers.name)
+    Through frappe.get_list (both lookups), so the user's own permissions and
+    User Permissions apply - a raw query here listed every pregnant family
+    member to anyone logged in. `searchfield` comes from the request, so only
+    a real field of Family members is accepted."""
+    meta = frappe.get_meta('Family members')
+    if searchfield != 'name' and not meta.has_field(searchfield):
+        searchfield = 'name'
+
+    registered = frappe.get_list(
+        'Pregnancy Registration',
+        filters={'familymember_id': ['is', 'set']},
+        pluck='familymember_id',
+        distinct=True,
+        limit_page_length=0,
     )
-    query = (
-        frappe.qb.from_(FamilyMembers)
-        .select(FamilyMembers.name, FamilyMembers.family_member)
-        .where(search_field.like(f'%{txt}%'))
-        .where(has_pregnancy_registration)
-        .orderby(FamilyMembers.family_member)
-        .limit(page_len)
-        .offset(start)
+    if not registered:
+        return []
+
+    or_filters = {searchfield: ['like', f'%{txt}%']}
+    if searchfield != 'family_member':
+        or_filters['family_member'] = ['like', f'%{txt}%']
+    return frappe.get_list(
+        'Family members',
+        filters={'name': ['in', list(set(registered))]},
+        or_filters=or_filters,
+        fields=['name', 'family_member'],
+        order_by='family_member asc',
+        limit_start=cint(start),
+        limit_page_length=cint(page_len) or 20,
+        as_list=True,
     )
-    return query.run()
 
 
 def apply_village_filter(filters, village):

@@ -161,7 +161,12 @@ page_renderer = ["chw.website.sw_renderer.ServiceWorkerRenderer"]
 # metta's Custom DocPerm fixture (CHW Coordinator) would otherwise hide
 # these doctypes' own permission rules after every migrate - see
 # chw/permissions.py.
-after_migrate = ["chw.permissions.restore_standard_perms_hidden_by_custom"]
+after_migrate = [
+	"chw.permissions.restore_standard_perms_hidden_by_custom",
+	# Fields added or relabelled in this update -> translated in the
+	# background for every language in use (see translation_tool).
+	"chw.translation_tool.translate_new_texts",
+]
 
 # Uninstallation
 # ------------
@@ -221,7 +226,12 @@ doc_events = {
 	},
 	"Birth Registration": {
 		"after_insert": "chw.api.close_anc_followup_from_birth_registration"
-	}
+	},
+	# A CHW form changed in Desk (new field, new label, Customize Form) ->
+	# its new texts are translated for the languages in use.
+	"DocType": {"on_update": "chw.translation_tool.on_form_change"},
+	"Custom Field": {"on_update": "chw.translation_tool.on_form_change"},
+	"Property Setter": {"on_update": "chw.translation_tool.on_form_change"},
 }
 
 # Scheduled Tasks
@@ -231,7 +241,9 @@ scheduler_events = {
 	"daily": [
 		"chw.tasks.refresh_child_growth_ages",
 		"chw.tasks.refresh_family_member_ages",
-		"chw.tasks.snapshot_dashboard_stats"
+		"chw.tasks.snapshot_dashboard_stats",
+		# Safety net for anything the hooks above missed.
+		"chw.translation_tool.translate_new_texts",
 	],
 }
 

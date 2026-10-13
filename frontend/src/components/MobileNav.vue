@@ -47,28 +47,13 @@
     </button>
   </nav>
 
-  <Transition name="menu-overlay">
-    <div
-      v-if="showMenu"
-      class="fixed inset-0 z-40 bg-black/40"
-      @click.self="showMenu = false"
-    >
-      <Transition name="menu-drawer" appear>
-        <div
-          v-if="showMenu"
-          class="h-full w-72 max-w-[80vw] overflow-y-auto pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
-        >
-          <AppSidebar disable-collapse embedded />
-        </div>
-      </Transition>
-    </div>
-  </Transition>
+  <MobileMenu v-model="showMenu" />
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import AppSidebar from '@/components/AppSidebar.vue'
+import MobileMenu from '@/components/MobileMenu.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { unreadCount, toggleNotifications } from '@/data/notifications'
 import { userContextResource } from '@/data/userContext'
@@ -91,30 +76,4 @@ function isActive(tab) {
   return tab.match.includes(route.name)
 }
 
-// AppSidebar's own items navigate via router.replace - close the drawer
-// whenever that happens, the same way tapping a link in a mobile drawer
-// normally dismisses it.
-watch(() => route.fullPath, () => {
-  showMenu.value = false
-})
 </script>
-
-<style scoped>
-.menu-overlay-enter-active,
-.menu-overlay-leave-active {
-  transition: opacity 0.2s ease;
-}
-.menu-overlay-enter-from,
-.menu-overlay-leave-to {
-  opacity: 0;
-}
-
-.menu-drawer-enter-active,
-.menu-drawer-leave-active {
-  transition: transform 0.2s ease;
-}
-.menu-drawer-enter-from,
-.menu-drawer-leave-to {
-  transform: translateX(-100%);
-}
-</style>

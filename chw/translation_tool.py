@@ -285,6 +285,58 @@ def run_auto_translate(language, user=None):
 	return summary
 
 
+# ---- Keeping up when forms change ----
+# A field added or relabelled later (in a DocType, Customize Form, or by an
+# app update) would otherwise stay in English until someone picked the
+# language again. Every language people actually use gets the new texts
+# translated in the background instead.
+
+
+def languages_in_use():
+	"""Non-English languages set on enabled users, plus the site default."""
+	langs = set(
+		frappe.get_all("User", filters={"enabled": 1, "language": ["not in", ["", "en"]]}, pluck="language", distinct=True)
+	)
+	default = frappe.db.get_single_value("System Settings", "language")
+	if default and default != "en":
+		langs.add(default)
+	return sorted(l for l in langs if l and frappe.db.exists("Language", l))
+
+
+def translate_new_texts():
+	"""Queue a translation run for each language in use that has untranslated
+	CHW texts. Safe to call often: a language already being translated isn't
+	queued twice, and nothing already translated is sent again."""
+	frappe.cache.delete_value("chw_app_texts")
+	for language in languages_in_use():
+		if missing_texts(language):
+			frappe.enqueue(
+				"chw.translation_tool.run_auto_translate",
+				queue="long",
+				timeout=3600,
+				job_id=f"chw-auto-translate-{frappe.local.site}-{language}",
+				deduplicate=True,
+				language=language,
+			)
+
+
+def on_form_change(doc, method=None):
+	"""doc_events hook for DocType, Custom Field and Property Setter: when a
+	CHW form's fields or labels change, translate the new texts. Runs after
+	the save is committed, in the background - saving the form isn't slowed."""
+	doctype = doc.name if doc.doctype == "DocType" else doc.get("dt") or doc.get("doc_type")
+	module = frappe.db.get_value("DocType", doctype, "module") if doctype else None
+	if not module or frappe.db.get_value("Module Def", module, "app_name") != "chw":
+		return
+	frappe.enqueue(
+		"chw.translation_tool.translate_new_texts",
+		queue="long",
+		job_id=f"chw-translate-new-texts-{frappe.local.site}",
+		deduplicate=True,
+		enqueue_after_commit=True,
+	)
+
+
 # ---- Vue app: choose a language from the Home page ----
 
 

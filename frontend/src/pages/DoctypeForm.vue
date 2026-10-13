@@ -101,7 +101,7 @@
           <ErrorMessage :message="saveError" />
         </div>
 
-        <DocConnections v-if="!isNew && name && isGenericRoute && !isTempName(name)" :doctype="doctype" :name="name" />
+        <DocConnections v-if="!isNew && name && isGenericRoute" :doctype="doctype" :name="name" />
 
         <!-- Desk's layout: one card per section (Section / Tab Break) with its
         title, collapsible ones closed until tapped, each table inside the
