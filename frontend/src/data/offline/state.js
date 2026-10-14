@@ -19,6 +19,9 @@ export const offlineState = reactive({
   storageBlocked: false,
   // Temporary offline name -> the real one, once synced (open forms follow).
   renamed: {},
+  // Names of records that exist only on this phone so far - a temporary
+  // OFFLINE-… name, or a reserved real ID (HH-00041) not yet synced.
+  local: {},
 })
 
 export function markOnline() {

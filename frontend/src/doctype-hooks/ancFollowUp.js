@@ -299,6 +299,14 @@ export default {
   // refresh only repainted row highlights, which rowClass does reactively -
   // so no onLoad / onAfterLoad here.
 
+  // Desk's set_query (anc_follow_up.js): only pregnancies registered for a
+  // family member - Pregnancy Registration itself only accepts women, so
+  // this leaves women only. Plain filters, so it works offline too.
+  getLinkQuery(fieldname) {
+    if (fieldname === 'pregnant_id') return { filters: { familymember_id: ['is', 'set'] } }
+    return null
+  },
+
   onFieldChange(fieldname, values, ctx) {
     if (fieldname === 'pregnant_id') return generateVisitSchedule(values, ctx)
     if (fieldname === 'phone_number') warnIfNotDigits(values.phone_number)

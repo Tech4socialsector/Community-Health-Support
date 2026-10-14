@@ -1,6 +1,8 @@
 # Copyright (c) 2026, tech4socialsector@azimpremjifoundation.org and contributors
 # For license information, please see license.txt
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today
 from chw.api import validate_phone_number
@@ -8,6 +10,7 @@ from chw.api import validate_phone_number
 
 class PregnancyRegistration(Document):
 	def validate(self):
+		self.validate_family_member_is_woman()
 		validate_phone_number(self.phone_number)
 		if self.lmp_date:
 			self.estimated_date_of_delivery = add_days(self.lmp_date, 281)
@@ -15,6 +18,20 @@ class PregnancyRegistration(Document):
 		self.calculate_trimester()
 		self.calculate_trimester_at_registration()
 		self.calculate_bmi()
+
+	def validate_family_member_is_woman(self):
+		# The form's dropdown only offers women, but a typed ID, an import or
+		# an offline sync bypasses the dropdown - the server checks too.
+		# Only when the member is set or changed, so older records still save.
+		if not self.familymember_id or not (self.is_new() or self.has_value_changed("familymember_id")):
+			return
+		gender = frappe.db.get_value("Family members", self.familymember_id, "gender")
+		if gender != "Female":
+			frappe.throw(
+				_("Pregnancy Registration is only for women. {0} has Gender: {1}.").format(
+					frappe.bold(self.familymember_id), _(gender) if gender else _("not set")
+				)
+			)
 
 	def calculate_pog(self):
 		if not self.lmp_date:

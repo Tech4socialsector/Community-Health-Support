@@ -11,7 +11,7 @@
     <div class="relative">
       <input
         ref="input"
-        :value="text"
+        :value="shownText"
         type="text"
         :readonly="readOnly"
         :tabindex="readOnly ? -1 : undefined"
@@ -67,7 +67,7 @@
           @mouseenter="active = i"
           @click="pick(r)"
         >
-          <span class="block font-medium text-gray-900 dark:text-gray-100">{{ r.value }}</span>
+          <span class="block font-medium text-gray-900 dark:text-gray-100">{{ isTempName(r.value) ? t('New (not synced)') : r.value }}</span>
           <span v-if="r.label && r.label !== r.value" class="block truncate text-xs text-gray-600 dark:text-gray-300">{{ r.label }}</span>
           <span v-if="r.description" class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ r.description }}</span>
         </li>
@@ -94,10 +94,11 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, ref, watch } from 'vue'
 import { call } from 'frappe-ui'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { t } from '@/data/i18n'
+import { getMeta, getRecord, isTempName } from '@/data/offline/store'
 
 // Loaded when first needed - it renders fields itself (including Links),
 // so a plain import would be circular.
@@ -133,6 +134,26 @@ const emit = defineEmits(['update:modelValue'])
 const root = ref(null)
 const input = ref(null)
 const text = ref(props.modelValue || '')
+
+// A link to a record saved offline holds its temporary name (OFFLINE-…)
+// until it syncs - meaningless to a CHW. While the box isn't being typed
+// in, it shows "New: <the record's name> (not synced)" instead; the stored
+// value stays the temporary name, which the sync swaps for the real ID.
+const focused = ref(false)
+const friendly = ref('')
+watch(
+  () => [props.field.options, props.modelValue],
+  async ([doctype, value]) => {
+    friendly.value = ''
+    if (!doctype || !isTempName(value)) return
+    const [record, meta] = await Promise.all([getRecord(doctype, value), getMeta(doctype)])
+    if (props.modelValue !== value) return
+    const title = meta?.title_field ? record?.[meta.title_field] : ''
+    friendly.value = title ? t('New: {0} (not synced)', [title]) : t('New (not synced)')
+  },
+  { immediate: true },
+)
+const shownText = computed(() => (!focused.value && friendly.value && text.value === props.modelValue ? friendly.value : text.value))
 const open = ref(false)
 const loading = ref(false)
 const results = ref([])
@@ -210,6 +231,7 @@ function place() {
 }
 
 function onFocus() {
+  focused.value = true
   if (props.readOnly) return
   place()
   open.value = true
@@ -251,6 +273,7 @@ function close(revert) {
 // Leaving the box: an emptied box clears the link; anything else that
 // wasn't picked goes back to the saved value - Desk refuses an unknown ID.
 function onBlur() {
+  focused.value = false
   setTimeout(() => {
     if (!text.value.trim()) {
       if (props.modelValue) emit('update:modelValue', null)

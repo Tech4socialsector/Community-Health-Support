@@ -170,7 +170,9 @@ export async function searchLink({ doctype, txt, filters, page_length = 20 }) {
     .sort((a, b) => compare(b.modified, a.modified))
     .slice(0, Number(page_length) || 20)
   return rows.map((r) => {
-    const extra = [...fields].filter((f) => f !== 'name').map((f) => r[f]).filter((v) => !blank(v) && v !== r.name)
+    // The title shows as the label - repeating it in the description showed
+    // every name twice ("Neha Bisht Neha Bisht").
+    const extra = [...fields].filter((f) => f !== 'name' && f !== meta?.title_field).map((f) => r[f]).filter((v) => !blank(v) && v !== r.name)
     return { value: r.name, label: meta?.title_field ? r[meta.title_field] : undefined, description: extra.join(', ') }
   })
 }
@@ -235,6 +237,44 @@ const nextSeq = () => Date.now() * 1000 + (seqCounter++ % 1000)
 
 export const TEMP_PREFIX = 'OFFLINE-'
 export const isTempName = (name) => String(name || '').startsWith(TEMP_PREFIX)
+// Not on the server yet: a temporary name, or a reserved ID still waiting
+// to sync. Requests about it are answered from the phone.
+export const isLocalName = (name) => isTempName(name) || !!offlineState.local[String(name || '')]
+
+// ---- Reserved IDs -----------------------------------------------------
+// Real IDs handed to this phone in advance (chw.offline.reserve_ids), one
+// block per form, so a record saved offline shows its ID at once.
+
+export async function reservedCounts() {
+  const pool = (await idb.get('kv', 'reserved').catch(() => null)) || {}
+  return Object.fromEntries(Object.entries(pool).map(([d, names]) => [d, names.length]))
+}
+
+// Adds the new IDs, then keeps at most `block` per form - the organization
+// may have lowered its number (App Setting). Returns the IDs given up, for
+// the server to mark Released.
+export async function addReserved(fresh, block) {
+  const pool = (await idb.get('kv', 'reserved').catch(() => null)) || {}
+  for (const [doctype, names] of Object.entries(fresh || {})) pool[doctype] = [...(pool[doctype] || []), ...names]
+  const extra = {}
+  if (Number.isInteger(block)) {
+    for (const [doctype, names] of Object.entries(pool)) {
+      if (names.length > block) {
+        extra[doctype] = names.slice(block)
+        pool[doctype] = names.slice(0, block)
+      }
+    }
+  }
+  await idb.put('kv', pool, 'reserved')
+  return extra
+}
+
+async function takeReserved(doctype) {
+  const pool = (await idb.get('kv', 'reserved').catch(() => null)) || {}
+  const name = (pool[doctype] || []).shift()
+  if (name) await idb.put('kv', pool, 'reserved')
+  return name || null
+}
 
 // "2026-10-12 14:05:09.123000" - Frappe's own format, so offline records
 // sort and show like synced ones.
@@ -292,7 +332,10 @@ export async function removeOutbox(id) {
 // instead of making a second one.
 export async function queueInsert(doc, id = randomId()) {
   const doctype = doc.doctype
-  const name = `${TEMP_PREFIX}${id.replace(/-/g, '').slice(0, 10).toUpperCase()}`
+  // A reserved real ID when the phone has one for this form, so the CHW
+  // sees the record's ID at once; else a temporary name until it syncs.
+  const name = (await takeReserved(doctype)) || `${TEMP_PREFIX}${id.replace(/-/g, '').slice(0, 10).toUpperCase()}`
+  offlineState.local = { ...offlineState.local, [name]: true }
   const stamp = nowString()
   const data = plain({ ...doc, name })
   const record = {

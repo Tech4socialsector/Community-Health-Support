@@ -19,7 +19,7 @@ import {
   getRecord,
   getValue,
   hasDoctype,
-  isTempName,
+  isLocalName,
   listPage,
   allRecords,
   matches,
@@ -320,7 +320,7 @@ function renameTemp(value, map) {
 
 // A temporary name in any field other than the record's own name.
 function mentionsTemp(value, top = true) {
-  if (typeof value === 'string') return isTempName(value)
+  if (typeof value === 'string') return isLocalName(value)
   if (Array.isArray(value)) return value.some((v) => mentionsTemp(v, false))
   if (value && typeof value === 'object') return Object.entries(value).some(([k, v]) => !(top && k === 'name') && mentionsTemp(v, false))
   return false
@@ -347,7 +347,7 @@ async function withUnsyncedConnections(req, res) {
       return changed ? respond(req, value) : res
     }
     if (!(await hasDoctype(p.doctype))) return res
-    const local = (await connectionRecords(p)).filter((r) => isTempName(r.name))
+    const local = (await connectionRecords(p)).filter((r) => isLocalName(r.name))
     if (!local.length) return res
     value = [...local, ...(value || [])]
     return respond(req, value)
@@ -362,7 +362,7 @@ async function proxied(input, init = {}) {
 
   // A form still open on a record that has since synced: talk to the
   // server about its real ID.
-  if (req.kind === 'doc' && isTempName(req.name)) {
+  if (req.kind === 'doc' && isLocalName(req.name)) {
     const realName = ((await idb.get('kv', 'idmap').catch(() => null)) || {})[req.name]
     if (realName) {
       input = String(input).replace(encodeURIComponent(req.name), encodeURIComponent(realName)).replace(req.name, realName)
@@ -371,17 +371,17 @@ async function proxied(input, init = {}) {
   }
 
   // Records made offline exist only on this phone until they sync.
-  if (req.kind === 'doc' && isTempName(req.name)) {
+  if (req.kind === 'doc' && isLocalName(req.name)) {
     if (req.http === 'GET') return (await answerLocally(req)) || offlineError(req)
     if (req.http === 'PUT') return saveLocally(req, outboxTarget(req))
     return offlineError(req, t('This record has not synced yet.'))
   }
-  if (req.kind === 'method' && ['frappe.client.get', 'frappe.client.get_value'].includes(req.method) && isTempName(req.params.name ?? req.params.filters)) {
+  if (req.kind === 'method' && ['frappe.client.get', 'frappe.client.get_value'].includes(req.method) && isLocalName(req.params.name ?? req.params.filters)) {
     return (await answerLocally(req)) || offlineError(req)
   }
   // Connections of a record that exists only on this phone (a household
   // saved offline -> its family members): the server has never heard of it.
-  if (req.kind === 'method' && CONNECTION_METHODS.has(req.method) && isTempName(req.params.name ?? req.params.value)) {
+  if (req.kind === 'method' && CONNECTION_METHODS.has(req.method) && isLocalName(req.params.name ?? req.params.value)) {
     return (await answerLocally(req)) || offlineError(req)
   }
 

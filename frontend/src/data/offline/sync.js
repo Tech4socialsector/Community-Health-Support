@@ -11,7 +11,9 @@ import {
   allRecords,
   deleteRecords,
   getRecord,
-  isTempName,
+  addReserved,
+  isLocalName,
+  reservedCounts,
   outboxEntries,
   putMetas,
   putOutbox,
@@ -100,6 +102,9 @@ async function claimFor(user) {
   offlineState.user = user
   offlineState.lastSync = (await idb.get('kv', 'lastSync').catch(() => null)) || null
   offlineState.ready = !!offlineState.lastSync
+  // Records still waiting to sync are only on this phone.
+  const entries = await idb.getAll('outbox').catch(() => [])
+  offlineState.local = Object.fromEntries(entries.filter((e) => e.action === 'insert').map((e) => [e.name, true]))
   await refreshCounts()
 }
 
@@ -155,6 +160,16 @@ async function runDownload(full) {
     await deleteRecords(doctype, gone)
   }
 
+  // Keep a block of real IDs per form for records made offline.
+  try {
+    const res = await serverCall('chw.offline.reserve_ids', { have: await reservedCounts() })
+    const extra = await addReserved(res?.ids, res?.block)
+    if (Object.keys(extra).length) await serverCall('chw.offline.release_ids', { names: extra })
+  } catch (e) {
+    if (e instanceof NetworkError) throw e
+    // A form that can't be reserved just uses temporary names offline.
+  }
+
   await idb.put('kv', data.server_time, 'lastSync')
   offlineState.lastSync = data.server_time
   offlineState.ready = true
@@ -185,7 +200,7 @@ function rename(value, map) {
 }
 
 function mentionsTemp(value) {
-  if (typeof value === 'string') return isTempName(value) ? value : null
+  if (typeof value === 'string') return isLocalName(value) ? value : null
   if (Array.isArray(value)) return value.map(mentionsTemp).find(Boolean) || null
   if (value && typeof value === 'object') return Object.entries(value).filter(([k]) => k !== 'name').map(([, v]) => mentionsTemp(v)).find(Boolean) || null
   return null
@@ -234,8 +249,13 @@ async function pushInsert(entry, map) {
   const doc = rename(entry.doc, map)
   const result = await serverCall('chw.offline.push_insert', { client_id: entry.id, doc })
   const realName = String(result.name)
-  map[entry.name] = realName
-  await idb.put('kv', map, 'idmap')
+  if (realName !== entry.name) {
+    map[entry.name] = realName
+    await idb.put('kv', map, 'idmap')
+  }
+  const local = { ...offlineState.local }
+  delete local[entry.name]
+  offlineState.local = local
 
   await deleteRecords(entry.doctype, [entry.name])
   await putRecords(entry.doctype, [result.doc])
@@ -246,7 +266,7 @@ async function pushInsert(entry, map) {
     await putRecords(doctype, changed)
   }
   await removeOutbox(entry.id)
-  offlineState.renamed = { ...offlineState.renamed, [entry.name]: realName }
+  if (realName !== entry.name) offlineState.renamed = { ...offlineState.renamed, [entry.name]: realName }
 }
 
 async function pushUpdate(entry, map, force = false) {
@@ -305,6 +325,9 @@ export async function discard(entry) {
   await removeOutbox(entry.id)
   if (entry.action === 'insert') {
     await deleteRecords(entry.doctype, [entry.name])
+    const local = { ...offlineState.local }
+    delete local[entry.name]
+    offlineState.local = local
     return
   }
   const record = await getRecord(entry.doctype, entry.name)

@@ -22,6 +22,13 @@ const NURSE_TABLE_FIELD = "anc_followup_for_nurse";
 let anc_visit_date_calc_token = 0;
 
 frappe.ui.form.on("ANC Follow-up", {
+	setup(frm) {
+		// Only pregnancies registered for a family member - Pregnancy
+		// Registration only accepts women, so this lists women only.
+		frm.set_query("pregnant_id", () => ({
+			filters: { familymember_id: ["is", "set"] },
+		}));
+	},
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
 			frappe.call({

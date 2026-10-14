@@ -66,7 +66,7 @@
             <div class="min-w-0">
               <p :class="ui.SECTION_LABEL">{{ t(formLabel(entry.doctype)) }}</p>
               <p class="mt-0.5 truncate text-sm font-semibold text-navy-900 dark:text-gray-100">
-                {{ entry.action === 'insert' ? t('New record') : entry.name }}
+                {{ isTempName(entry.name) ? t('New record') : entry.name }}
                 <span class="font-normal text-gray-500 dark:text-gray-400">· {{ titleOf(entry) }}</span>
               </p>
               <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ t('Saved on phone {0}', [when(entry.created)]) }}</p>
@@ -180,7 +180,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { offlineState as s } from '@/data/offline/state'
-import { getMeta, getRecord, outboxEntries } from '@/data/offline/store'
+import { getMeta, getRecord, isTempName, outboxEntries } from '@/data/offline/store'
 import { discard, resolveConflict, retry, syncNow } from '@/data/offline/sync'
 import { findModuleByDoctype } from '@/data/modules'
 import { formatFieldValue } from '@/data/recordFormat'

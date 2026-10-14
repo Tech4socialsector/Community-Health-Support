@@ -42,7 +42,23 @@ def get_window_policy_for_js(high_risk=None):
 
 
 class ANCFollowup(Document):
+	def validate_pregnancy_is_for_woman(self):
+		# Same rule as the form's dropdown: a pregnancy registered for a family
+		# member who is a woman. Checked on new records and when the Pregnant
+		# ID changes, so older records still save.
+		if not self.pregnant_id or not (self.is_new() or self.has_value_changed("pregnant_id")):
+			return
+		member = frappe.db.get_value("Pregnancy Registration", self.pregnant_id, "familymember_id")
+		gender = frappe.db.get_value("Family members", member, "gender") if member else None
+		if gender != "Female":
+			frappe.throw(
+				frappe._("ANC Follow-up is only for a pregnancy registered for a woman. {0} is not linked to a female family member.").format(
+					frappe.bold(self.pregnant_id)
+				)
+			)
+
 	def validate(self):
+		self.validate_pregnancy_is_for_woman()
 		validate_phone_number(self.phone_number)
 		self.sync_followup_rows_with_pregnancy()
 		self.close_on_delivery_or_abortion()

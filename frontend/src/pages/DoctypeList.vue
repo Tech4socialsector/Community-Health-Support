@@ -250,7 +250,7 @@
                     />
                   </td>
                   <td :class="ui.LIST_TD_STRONG">
-                    {{ row.__offline === 'insert' ? t('New') : row.name }}
+                    {{ isTempName(row.name) ? t('New') : row.name }}
                     <!-- Saved on this phone, not on the server yet (offline mode). -->
                     <span v-if="row.__offline" :class="[ui.PILL, ui.TONE.blue, 'ml-1.5 !px-1.5 !py-0 text-[10px]']">{{ t('Not synced') }}</span>
                   </td>
@@ -263,7 +263,7 @@
                       <span class="h-2 w-2 flex-shrink-0 rounded-full" :class="DOT[toneFor(row[col.fieldname])]" />
                       {{ t(row[col.fieldname]) }}
                     </span>
-                    <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
+                    <template v-else>{{ cellText(row, col) }}</template>
                   </td>
                   <td :class="[ui.LIST_TD, 'text-right tabular-nums']" :title="formatFieldValue(row.modified, { fieldtype: 'Datetime' })">
                     {{ shortAgo(row.modified) }}
@@ -279,7 +279,7 @@
             <button v-for="(row, index) in rows" :key="row.name" type="button" :class="ui.mobileRowClass(index)" @click="goToRow(row.name)">
               <span class="flex items-center justify-between gap-2">
                 <span class="truncate rounded-md bg-white/80 px-1.5 py-0.5 font-mono text-xs text-gray-600 ring-1 ring-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:ring-gray-700">
-                  {{ row.__offline === 'insert' ? t('New') : row.name }}
+                  {{ isTempName(row.name) ? t('New') : row.name }}
                 </span>
                 <span class="flex flex-shrink-0 items-center gap-1.5">
                   <span v-if="row.__offline" :class="[ui.PILL, ui.TONE.blue, '!px-1.5 !py-0 text-[10px]']">{{ t('Not synced') }}</span>
@@ -297,7 +297,7 @@
                   <dt class="truncate text-[11px] text-gray-500 dark:text-gray-400">{{ t(col.label) }}</dt>
                   <dd class="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
                     <span v-if="isEmptyValue(row[col.fieldname])" class="font-normal text-gray-300 dark:text-gray-600">—</span>
-                    <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
+                    <template v-else>{{ cellText(row, col) }}</template>
                   </dd>
                 </div>
               </dl>
@@ -381,6 +381,7 @@ import { findModuleByRoute } from '@/data/modules'
 import { listCrumbs } from '@/data/breadcrumbs'
 import { STANDARD_FILTER_FIELDS, operatorLabel, toServerFilter } from '@/data/listFilters'
 import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
+import { isTempName } from '@/data/offline/store'
 import { t } from '@/data/i18n'
 import * as ui from '@/data/ui'
 
@@ -745,6 +746,13 @@ const statusColumn = computed(
 const mobileColumns = computed(() =>
   columns.value.filter((c) => c !== statusColumn.value && c.fieldname !== titleField.value?.fieldname),
 )
+
+// A Link to a record saved offline holds its temporary OFFLINE-… name until
+// it syncs - shown as "New (not synced)" rather than that code.
+function cellText(row, col) {
+  const value = row[col.fieldname]
+  return isTempName(value) ? t('New (not synced)') : formatFieldValue(value, col)
+}
 
 function rowTitle(row) {
   for (const field of [titleField.value, columns.value[0]]) {

@@ -21,6 +21,7 @@ to the phone and the CHW chooses which to keep.
 
 import hashlib
 import json
+import re
 
 import frappe
 from frappe import _
@@ -204,10 +205,134 @@ def push_insert(client_id, doc):
 	doc = _clean_doc(frappe.parse_json(doc))
 	if not doc.get("doctype"):
 		frappe.throw(_("Missing doctype"))
+	# An ID reserved for this phone (see reserve_ids) is kept, so the record
+	# has the ID the CHW already saw offline. Anything else - a stale or
+	# foreign ID - is ignored and the record is numbered as usual.
+	wanted = doc.pop("name", None)
+	reservation = _reservation(doc["doctype"], wanted)
 	new = frappe.get_doc(doc)
-	new.insert()
+	if reservation:
+		new.insert(set_name=wanted)
+		frappe.db.set_value("CHW Reserved ID", reservation, "status", "Used")
+	else:
+		new.insert()
 	_log(client_id, "Insert", new.doctype, new.name)
 	return {"name": new.name, "doc": new.as_dict()}
+
+
+# ---- IDs reserved in advance --------------------------------------------
+# A phone holds a small block of real IDs per form, taken from the form's own
+# numbering series while online. A record made offline uses one at once, so
+# the CHW sees HH-00041 instead of "New". Numbers a phone never uses are
+# skipped in the series (a gap), which is the price of knowing them early.
+
+# Reserved IDs are switched off: records saved offline show "New" and get
+# their real ID when they sync, so the numbering has no gaps. Kept at 0
+# (not deleted) so phones still holding IDs from before give them back at
+# their next sync (reserve_ids -> release_ids).
+RESERVE_BLOCK = 0
+
+
+def _reserve_block():
+	return RESERVE_BLOCK
+
+
+_SERIES_ONLY_FORMAT = re.compile(r"^format:[^{}]*\{#+\}[^{}]*$")
+
+
+def _reservable(doctype):
+	"""The naming rule if IDs for `doctype` can be known before the record
+	exists: a numbering series (HH-.#####) or a format with only a counter
+	(PCID-{####}). Names made from a field's value, or by the database, can't."""
+	autoname = (frappe.get_meta(doctype).autoname or "").strip()
+	lower = autoname.lower()
+	if ".#" in autoname and not lower.startswith(("field:", "format:", "naming_series:")):
+		return autoname
+	if lower.startswith("format:") and _SERIES_ONLY_FORMAT.match(autoname):
+		return autoname
+	return None
+
+
+def _next_name(doctype, autoname):
+	from frappe.model.naming import _format_autoname, make_autoname
+
+	if autoname.lower().startswith("format:"):
+		# Frappe strips the name the same way when it saves (validate_name).
+		return _format_autoname(autoname, frappe._dict(doctype=doctype)).strip()
+	return make_autoname(autoname, doctype)
+
+
+def _reservation(doctype, name):
+	if not name or str(name).startswith(("new-", "OFFLINE-")) or frappe.db.exists(doctype, name):
+		return None
+	return frappe.db.get_value(
+		"CHW Reserved ID",
+		{"reference_doctype": doctype, "reserved_name": name, "user": frappe.session.user, "status": "Reserved"},
+	)
+
+
+@frappe.whitelist(methods=["POST"])
+def reserve_ids(have=None):
+	"""Top up the phone's blocks of reserved IDs to the organization's number
+	(App Setting). `have`: {doctype: how many the phone still holds}. Returns
+	{"block": the number, "ids": {doctype: [new IDs]}} - only for forms the
+	user may create. A phone holding more than `block` (the number was
+	lowered) gives the extra back with release_ids."""
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+	have = frappe.parse_json(have) or {}
+	block = _reserve_block()
+	record_doctypes, _all = _offline_doctypes()
+	out = {}
+	for doctype in record_doctypes:
+		autoname = _reservable(doctype)
+		held = cint(have.get(doctype))
+		# Filled back up to the organization's number at every sync, so the
+		# CHW always leaves with that many - and a raised number applies at
+		# the next sync.
+		if not autoname or held >= block or not frappe.has_permission(doctype, "create"):
+			continue
+		names = []
+		for _i in range(block - held):
+			name = _next_name(doctype, autoname)
+			# A record imported or named by hand can already hold the number
+			# the series is on - skip past it rather than hand out a clash.
+			while frappe.db.exists(doctype, name):
+				name = _next_name(doctype, autoname)
+			frappe.get_doc(
+				{
+					"doctype": "CHW Reserved ID",
+					"reference_doctype": doctype,
+					"reserved_name": name,
+					"user": frappe.session.user,
+				}
+			).insert(ignore_permissions=True)
+			names.append(name)
+		out[doctype] = names
+	return {"block": block, "ids": out}
+
+
+@frappe.whitelist(methods=["POST"])
+def release_ids(names=None):
+	"""IDs a phone no longer keeps (the organization lowered its number, or
+	turned reserved IDs off). Marked Released - only this user's own unused
+	reservations; the numbers themselves stay skipped in the series."""
+	names = frappe.parse_json(names) or {}
+	for doctype, ids in names.items():
+		if not ids:
+			continue
+		frappe.db.set_value(
+			"CHW Reserved ID",
+			{
+				"reference_doctype": doctype,
+				"reserved_name": ["in", list(ids)],
+				"user": frappe.session.user,
+				"status": "Reserved",
+			},
+			"status",
+			"Released",
+		)
+	return True
 
 
 def _plain(value):

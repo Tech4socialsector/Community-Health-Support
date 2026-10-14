@@ -168,7 +168,7 @@
           </div>
         </section>
 
-        <DocActivity v-if="!isNew && name && !isTempName(name) && offlineState.online" :doctype="doctype" :name="name" :refresh-key="activityKey" />
+        <DocActivity v-if="!isNew && name && !isLocalName(name) && offlineState.online" :doctype="doctype" :name="name" :refresh-key="activityKey" />
       </form>
     </div>
   </AppLayout>
@@ -200,7 +200,7 @@ import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
 import { currentHealthWorkerResource } from '@/data/currentHealthWorker'
 import { t } from '@/data/i18n'
 import { offlineState } from '@/data/offline/state'
-import { getRecord, isTempName } from '@/data/offline/store'
+import { getRecord, isLocalName, isTempName } from '@/data/offline/store'
 
 const { doctype, isNew, name } = defineProps({
   doctype: { type: String, required: true },
@@ -765,7 +765,7 @@ const saveErrorBox = ref(null)
 const canDelete = ref(false)
 // A record that exists only on this phone has nothing on the server to
 // delete - it's discarded from the Offline & Sync page instead.
-if (!isNew && name && !isTempName(name)) {
+if (!isNew && name && !isLocalName(name)) {
   call('frappe.client.has_permission', { doctype, docname: name, perm_type: 'delete' })
     .then((r) => (canDelete.value = !!r?.has_permission))
     .catch(() => (canDelete.value = false))
@@ -921,7 +921,7 @@ async function save() {
 // A record made offline gets its real ID when it syncs - move this form
 // to it (unless there are edits in progress, which save to it anyway).
 watch(
-  () => (isTempName(name) ? offlineState.renamed[name] : null),
+  () => (name ? offlineState.renamed[name] : null),
   (realName) => {
     if (!realName || isDirty.value) return
     skipLeaveCheck = true
