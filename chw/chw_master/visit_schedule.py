@@ -35,9 +35,9 @@ def _continue_rows_for(applies_to):
 
 
 def _specific_parent_for(applies_to):
-	"""The one Specific-type record for this program - its Risk Alert/Urgent
-	Visit Within Days are shared across every row in its own Visit Schedule
-	table, entered once rather than per visit."""
+	"""The one Specific-type record for this program - its Risk Alert Within
+	Days is shared across every row in its own Visit Schedule table,
+	entered once rather than per visit."""
 	name = frappe.db.get_value(
 		"Visit Schedule Master", {"applies_to": applies_to, "schedule_type": "Specific"}, "name"
 	)

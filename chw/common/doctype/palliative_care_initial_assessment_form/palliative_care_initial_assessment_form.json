@@ -101,7 +101,10 @@
   "digno",
   "progno",
   "patient_status",
+  "psychological_status",
   "column_break_pzps",
+  "social_status",
+  "spiritual_status",
   "support_status",
   "familycaregiver_health_concerns",
   "communication_status_at_first_visit",
@@ -495,9 +498,8 @@
   },
   {
    "fieldname": "patient_status",
-   "fieldtype": "Select",
-   "label": "Patient Status",
-   "options": "\nPsychological\nSocial\nSpiritual Status"
+   "fieldtype": "Heading",
+   "label": "<h5>Patient Status</h5>"
   },
   {
    "fieldname": "familycaregiver_health_concerns",
@@ -779,6 +781,21 @@
    "fieldname": "progno",
    "fieldtype": "Small Text",
    "label": "Prognosis"
+  },
+  {
+   "fieldname": "psychological_status",
+   "fieldtype": "Small Text",
+   "label": "Psychological Status"
+  },
+  {
+   "fieldname": "social_status",
+   "fieldtype": "Small Text",
+   "label": "Social Status"
+  },
+  {
+   "fieldname": "spiritual_status",
+   "fieldtype": "Small Text",
+   "label": "Spiritual Status"
   }
  ],
  "grid_page_length": 50,
@@ -789,7 +806,7 @@
    "link_fieldname": "pcid"
   }
  ],
- "modified": "2026-10-12 15:54:55.409700",
+ "modified": "2026-10-14 11:08:03.702091",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",
