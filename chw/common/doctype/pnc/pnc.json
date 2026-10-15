@@ -1,8 +1,7 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
- "autoname": "field:name_of_child",
+ "autoname": "PNC-.#####",
  "creation": "2026-08-10 15:25:41.737279",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -11,6 +10,8 @@
   "anc_followup_id",
   "first_name",
   "village",
+  "gram_panchayat",
+  "sub_centre",
   "father_husband_name",
   "name_of_child",
   "column_break_gvxz",
@@ -18,11 +19,17 @@
   "phone_number",
   "health_worker_name",
   "next_pnc_visit_date",
+  "pnc_visit_risk_alert",
   "next_pnc_visit_date_auto",
+  "high_risk",
   "section_break_dmfm",
   "mother",
+  "mother_folloup_nurse_notes",
+  "mother_followup_docter_notes",
   "section_break_baby",
-  "baby"
+  "baby",
+  "baby_followup_nurse_notes",
+  "baby_followup_docter_notes"
  ],
  "fields": [
   {
@@ -76,8 +83,7 @@
    "fetch_if_empty": 1,
    "fieldname": "name_of_child",
    "fieldtype": "Data",
-   "label": "Name of the child ",
-   "unique": 1
+   "label": "Name of the child "
   },
   {
    "fieldname": "column_break_gvxz",
@@ -113,7 +119,7 @@
   {
    "fieldname": "mother",
    "fieldtype": "Table",
-   "label": "Mother",
+   "label": "Mother Folloup Volunteer Notes",
    "options": "PNC Followup Child"
   },
   {
@@ -124,14 +130,15 @@
   {
    "fieldname": "baby",
    "fieldtype": "Table",
-   "label": "Baby",
+   "label": "Baby Followup Volunteer",
    "options": "Baby PNC Followup Child"
   },
   {
-   "description": "Auto-calculated from the last PNC follow-up date and the PNC Visit Interval Master. Enter a date here to override it, or clear it to let it auto-calculate again.",
+   "description": "Calculated automatically from the delivery date and the PNC Visit Interval Master's visit schedule. Not editable by hand.",
    "fieldname": "next_pnc_visit_date",
    "fieldtype": "Date",
-   "label": "Next PNC Visit date"
+   "label": "Visit due Date",
+   "read_only": 1
   },
   {
    "fieldname": "next_pnc_visit_date_auto",
@@ -139,16 +146,72 @@
    "hidden": 1,
    "label": "Next PNC Visit Date (auto-calculated, internal)",
    "read_only": 1
+  },
+  {
+   "bold": 1,
+   "description": "High Risk only: visit her early, within this window. Blank for Normal patients.",
+   "fieldname": "pnc_visit_risk_alert",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Risk Alert",
+   "read_only": 1
+  },
+  {
+   "description": "Set automatically from a Mother followup row's Patient Condition = Risk. Not manually editable - internal, drives the Risk Alert, the urgent follow-up chain, and My Work's High Risk view.",
+   "fieldname": "high_risk",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Has the mother been identified as high risk?",
+   "options": "\nYes\nNo",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mother_folloup_nurse_notes",
+   "fieldtype": "Table",
+   "label": "Mother Folloup Nurse Notes",
+   "options": "PNC Followup Mother Nurse Notes"
+  },
+  {
+   "fieldname": "baby_followup_nurse_notes",
+   "fieldtype": "Table",
+   "label": "Baby Followup Nurse Notes",
+   "options": "PNC Child Followup Nurse Notes"
+  },
+  {
+   "fieldname": "baby_followup_docter_notes",
+   "fieldtype": "Table",
+   "label": "Baby Followup Docter Notes",
+   "options": "PNC Child Followup Docter Notes"
+  },
+  {
+   "fieldname": "mother_followup_docter_notes",
+   "fieldtype": "Table",
+   "label": "Mother Followup Docter Notes",
+   "options": "PNC Followup Mother Docter Notes"
+  },
+  {
+   "fetch_from": "birth_registration_id.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "birth_registration_id.sub_centre",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-25 17:34:27.794886",
+ "modified": "2026-10-09 11:18:09.977547",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",
- "naming_rule": "By fieldname",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

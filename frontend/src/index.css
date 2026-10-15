@@ -1,3 +1,108 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Brand frappe-ui's own "strong" surfaces - solid buttons (Save, New,
+   Log in), switches, tab indicators, tooltips, the calendar's today - in
+   the logo's navy instead of near-black, so every built-in component
+   matches our own. Light mode only: dark mode keeps frappe-ui's light-on-
+   dark values, which already read as "primary" there. The selector
+   outweighs frappe-ui's own :root, so source order doesn't matter. */
+:root:not([data-theme='dark']) {
+  --surface-gray-7: theme('colors.navy.900');
+  --surface-gray-6: theme('colors.navy.800');
+  --surface-gray-5: theme('colors.navy.700');
+}
+
+/* frappe-ui's Select reserves room for its *longest option* on one
+   unbreakable line (.select-trigger-sizer, white-space: pre), so the
+   dropdown never resizes as the choice changes. Our forms have sentence-
+   long options ("Living in their own house with control over electricity
+   and water."), which forced dropdowns - and the whole page - wider than a
+   phone screen. Every Select here is full-width in its column anyway
+   ([&_[data-slot=trigger]]:w-full), so the sizer adds nothing: drop it,
+   keep the trigger inside its column, and let the chosen value truncate
+   with an ellipsis (frappe-ui's own SelectValue already does). */
+.select-trigger-sizer {
+  display: none;
+}
+[data-slot='trigger'] {
+  max-width: 100%;
+}
+
+/* The same long options in the open dropdown list: frappe-ui sizes the
+   list to its widest option and cuts every option to one line, so on a
+   phone the list ran off the right edge with the answers unreadable. Keep
+   the list inside the screen and let options wrap onto two lines (rows
+   use min-height, so they grow with the text). */
+[data-slot='content'] {
+  max-width: calc(100vw - 1rem);
+}
+[data-slot='content'] [data-slot='item'] .truncate {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
+}
+[data-slot='content'] [data-slot='item'] {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Stacking order. frappe-ui's Dialog overlay and its Popover / dropdown
+   panels carry no z-index, so on a phone the form's sticky Save header
+   (z-20), the bottom menu bar (z-30) and its sheets (z-40/50) painted on
+   top of every popup - e.g. over the child-table row editor. Popups go
+   above the app shell, and anything opened from inside a popup (Link
+   suggestions, Select lists, date pickers) above the popup. Reka sets the
+   dropdown wrapper's z-index inline, hence !important. Toasts keep their
+   own (higher) z-index. */
+.dialog-overlay {
+  z-index: 60;
+}
+[data-reka-popper-content-wrapper] {
+  z-index: 100 !important;
+}
+
+/* Calmer page canvas behind the white cards. */
+body {
+  background-color: theme('colors.gray.50');
+}
+.dark body {
+  background-color: theme('colors.gray.900');
+}
+
+/* Sidebar look (AppSidebar.vue). frappe-ui's Sidebar renders its own items
+   and section headings with no styling props, so this restyles them from
+   the outside, scoped to .chw-sidebar so nothing else in the app is touched.
+   The extra .chw-sidebar in each selector outweighs frappe-ui's own
+   !important utility classes (e.g. !bg-surface-selected on active items). */
+
+/* Active item: a filled pill in the logo's navy, with icon, label and
+   suffix in white. */
+.chw-sidebar .chw-nav-active {
+  background-color: theme('colors.navy.900') !important;
+  box-shadow: none;
+}
+.chw-sidebar .chw-nav-active,
+.chw-sidebar .chw-nav-active * {
+  color: #fff !important;
+}
+
+/* Dark mode inverts it - a light navy pill with navy text. */
+.dark .chw-sidebar .chw-nav-active {
+  background-color: theme('colors.navy.100') !important;
+}
+.dark .chw-sidebar .chw-nav-active,
+.dark .chw-sidebar .chw-nav-active * {
+  color: theme('colors.navy.900') !important;
+}
+
+/* Section headings ("My work", "Administration", module names): small
+   uppercase labels, like the item groups in Desk's own sidebar. */
+.chw-sidebar h3 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

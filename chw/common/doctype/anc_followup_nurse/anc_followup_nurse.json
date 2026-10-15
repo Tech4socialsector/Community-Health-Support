@@ -1,0 +1,602 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-09-22 17:09:58.434687",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "column_break_njms",
+  "window_start_date",
+  "date",
+  "lmp_date",
+  "pog_weeks",
+  "status",
+  "month",
+  "bp",
+  "hr",
+  "rr",
+  "temp",
+  "fh",
+  "fhr",
+  "height",
+  "weight",
+  "bmi",
+  "mch_nurse_noti_ed_of_abnormal_vital_signs",
+  "column_break_wlrk",
+  "anemia",
+  "edema",
+  "grbs",
+  "tt",
+  "hemoglobin_level",
+  "teaching",
+  "monthly_checkup",
+  "ironcal",
+  "any_other_complaitsremark",
+  "pregnancy_assessment_section",
+  "h5pregnancy_assessmenth",
+  "feeling_well",
+  "good_energy",
+  "pink_tongue",
+  "good_fetal_movement",
+  "pregnancy_danger_signs_section",
+  "h5high_riskh",
+  "vaginal_bleeding",
+  "leaking_fluid",
+  "severe_abdominal_pain",
+  "severe_headacheblurred_vision",
+  "swelling_of_handsface",
+  "fever",
+  "extreme_dizziness_or_fatigue",
+  "reduced_fetal_movement",
+  "itching_of_palms_or_soles_of_feet_especially_at_night",
+  "palpitations",
+  "patient_condition",
+  "column_break_icvq",
+  "mch_nurse_notified_of_danger_signs",
+  "problems_identified",
+  "support_care_provided",
+  "education_provided_section",
+  "h5education_providedh",
+  "folic_acid_counseling_1st_trimester",
+  "trimester_specific_care_handout",
+  "pregnancy_exercises_handout",
+  "nutrition_counseling__my_pregnancy_plate_handout",
+  "iron_and_calcium_2nd_and_3rd_trimester",
+  "plan_for_delivery_facility_delivery_encouragement",
+  "column_break_zcsd",
+  "kegel_exercises_pregnancy_and_postnatal",
+  "family_planning_teaching_and_handout",
+  "exclusive_breastfeeding",
+  "postpartum_depression_handout",
+  "docter_notes_section",
+  "subjective",
+  "objective",
+  "column_break_wulb",
+  "assessment",
+  "plan",
+  "action",
+  "refferal_needed",
+  "refferal_need",
+  "referral_clinic_type",
+  "care_plan_created",
+  "reports_or_info_sent_to_mch_nurse",
+  "column_break_tzcp",
+  "date_of_next_visit",
+  "next_visit_window",
+  "urgent_followup",
+  "place",
+  "signature_of_mch_nurse",
+  "date_reffe"
+ ],
+ "fields": [
+  {
+   "description": "The start of this visit's scheduled window - filled in automatically when the row is generated. Purely informational, alongside Visit Ending Date (the window's end / due date).",
+   "fieldname": "window_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Visit Starting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Visit Ending Date",
+   "reqd": 1
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nPending\nCompleted"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Month"
+  },
+  {
+   "description": "(< 95/60 or 140/90 +)",
+   "fieldname": "bp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "BP"
+  },
+  {
+   "description": "(< 60 or 110 +)",
+   "fieldname": "hr",
+   "fieldtype": "Int",
+   "label": "HR"
+  },
+  {
+   "description": "(< 12 or 24 +)",
+   "fieldname": "rr",
+   "fieldtype": "Int",
+   "label": "RR"
+  },
+  {
+   "description": "(38* C + )",
+   "fieldname": "temp",
+   "fieldtype": "Int",
+   "label": "Temp"
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Int",
+   "label": "Height"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Weight"
+  },
+  {
+   "fieldname": "bmi",
+   "fieldtype": "Int",
+   "label": "BMI"
+  },
+  {
+   "fieldname": "mch_nurse_noti_ed_of_abnormal_vital_signs",
+   "fieldtype": "Select",
+   "label": "MCH nurse noti ed of abnormal vital signs",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_wlrk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "anemia",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Anemia",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "edema",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Edema",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "grbs",
+   "fieldtype": "Data",
+   "label": "GRBS"
+  },
+  {
+   "fieldname": "tt",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "TT",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "hemoglobin_level",
+   "fieldtype": "Data",
+   "label": "HB"
+  },
+  {
+   "fieldname": "teaching",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Teaching"
+  },
+  {
+   "fieldname": "monthly_checkup",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Monthly Checkup",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "ironcal",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Iron/Cal",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "any_other_complaitsremark",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Any other Complaits/Remark"
+  },
+  {
+   "fieldname": "pregnancy_assessment_section",
+   "fieldtype": "Section Break",
+   "label": "Pregnancy Assessment"
+  },
+  {
+   "fieldname": "h5pregnancy_assessmenth",
+   "fieldtype": "Heading",
+   "label": "<h5>Pregnancy Assessment</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "feeling_well",
+   "fieldtype": "Check",
+   "label": "Feeling well"
+  },
+  {
+   "default": "0",
+   "fieldname": "good_energy",
+   "fieldtype": "Check",
+   "label": "Good energy"
+  },
+  {
+   "default": "0",
+   "fieldname": "pink_tongue",
+   "fieldtype": "Check",
+   "label": "Pink tongue"
+  },
+  {
+   "default": "0",
+   "description": " (5 months +)",
+   "fieldname": "good_fetal_movement",
+   "fieldtype": "Check",
+   "label": "Good fetal Movement"
+  },
+  {
+   "fieldname": "pregnancy_danger_signs_section",
+   "fieldtype": "Section Break",
+   "label": "Pregnancy Danger Signs"
+  },
+  {
+   "description": "Pregnancy Danger Signs (If noted then notify MCH nurse immediately)",
+   "fieldname": "h5high_riskh",
+   "fieldtype": "Heading",
+   "label": "<h5>High Risk</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "vaginal_bleeding",
+   "fieldtype": "Check",
+   "label": "Vaginal bleeding"
+  },
+  {
+   "default": "0",
+   "fieldname": "leaking_fluid",
+   "fieldtype": "Check",
+   "label": "Leaking Fluid"
+  },
+  {
+   "default": "0",
+   "fieldname": "severe_abdominal_pain",
+   "fieldtype": "Check",
+   "label": "Severe abdominal pain"
+  },
+  {
+   "default": "0",
+   "fieldname": "severe_headacheblurred_vision",
+   "fieldtype": "Check",
+   "label": "Severe headache/blurred vision"
+  },
+  {
+   "default": "0",
+   "fieldname": "swelling_of_handsface",
+   "fieldtype": "Check",
+   "label": "Swelling of hands/face"
+  },
+  {
+   "default": "0",
+   "fieldname": "fever",
+   "fieldtype": "Check",
+   "label": "Fever"
+  },
+  {
+   "default": "0",
+   "fieldname": "extreme_dizziness_or_fatigue",
+   "fieldtype": "Check",
+   "label": "Extreme dizziness or Fatigue"
+  },
+  {
+   "default": "0",
+   "fieldname": "reduced_fetal_movement",
+   "fieldtype": "Check",
+   "label": "Reduced fetal movement"
+  },
+  {
+   "default": "0",
+   "fieldname": "itching_of_palms_or_soles_of_feet_especially_at_night",
+   "fieldtype": "Check",
+   "label": "Itching of palms or soles of feet especially at night"
+  },
+  {
+   "default": "0",
+   "fieldname": "palpitations",
+   "fieldtype": "Check",
+   "label": "Palpitations"
+  },
+  {
+   "fieldname": "column_break_icvq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mch_nurse_notified_of_danger_signs",
+   "fieldtype": "Select",
+   "label": "MCH nurse notified of danger signs",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "problems_identified",
+   "fieldtype": "Small Text",
+   "label": "Problems Identified"
+  },
+  {
+   "fieldname": "support_care_provided",
+   "fieldtype": "Small Text",
+   "label": "Support/ Care Provided"
+  },
+  {
+   "fieldname": "education_provided_section",
+   "fieldtype": "Section Break",
+   "label": "Education Provided"
+  },
+  {
+   "fieldname": "h5education_providedh",
+   "fieldtype": "Heading",
+   "label": "<h5>Education Provided</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "folic_acid_counseling_1st_trimester",
+   "fieldtype": "Check",
+   "label": "Folic Acid counseling (1st trimester)"
+  },
+  {
+   "default": "0",
+   "fieldname": "trimester_specific_care_handout",
+   "fieldtype": "Check",
+   "label": "Trimester Specific Care (handout)"
+  },
+  {
+   "default": "0",
+   "fieldname": "pregnancy_exercises_handout",
+   "fieldtype": "Check",
+   "label": "Pregnancy Exercises (handout)"
+  },
+  {
+   "default": "0",
+   "fieldname": "nutrition_counseling__my_pregnancy_plate_handout",
+   "fieldtype": "Check",
+   "label": "Nutrition counseling  My Pregnancy Plate (handout)"
+  },
+  {
+   "default": "0",
+   "fieldname": "iron_and_calcium_2nd_and_3rd_trimester",
+   "fieldtype": "Check",
+   "label": "Iron and Calcium (2nd and 3rd Trimester)"
+  },
+  {
+   "default": "0",
+   "fieldname": "plan_for_delivery_facility_delivery_encouragement",
+   "fieldtype": "Check",
+   "label": "Plan for delivery/ Facility delivery encouragement"
+  },
+  {
+   "fieldname": "column_break_zcsd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "kegel_exercises_pregnancy_and_postnatal",
+   "fieldtype": "Check",
+   "label": "Kegel exercises (pregnancy and postnatal)"
+  },
+  {
+   "default": "0",
+   "fieldname": "family_planning_teaching_and_handout",
+   "fieldtype": "Check",
+   "label": "Family planning teaching and handout"
+  },
+  {
+   "default": "0",
+   "fieldname": "exclusive_breastfeeding",
+   "fieldtype": "Check",
+   "label": "Exclusive breastfeeding 0/6 months and complementary feeding (handout)"
+  },
+  {
+   "default": "0",
+   "fieldname": "postpartum_depression_handout",
+   "fieldtype": "Check",
+   "label": "Postpartum Depression (handout)"
+  },
+  {
+   "fieldname": "docter_notes_section",
+   "fieldtype": "Section Break",
+   "label": "Nurse Notes"
+  },
+  {
+   "fieldname": "subjective",
+   "fieldtype": "Small Text",
+   "label": "Subjective"
+  },
+  {
+   "fieldname": "objective",
+   "fieldtype": "Small Text",
+   "label": "Objective"
+  },
+  {
+   "fieldname": "column_break_wulb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assessment",
+   "fieldtype": "Small Text",
+   "label": "Assessment"
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Small Text",
+   "label": "Plan"
+  },
+  {
+   "fieldname": "action",
+   "fieldtype": "Section Break",
+   "label": "Referrals and Action Plan"
+  },
+  {
+   "fieldname": "refferal_needed",
+   "fieldtype": "Select",
+   "label": "Was a referral needed",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.refferal_needed==\"Yes\"",
+   "fieldname": "refferal_need",
+   "fieldtype": "Data",
+   "label": "where was the referral made"
+  },
+  {
+   "fieldname": "referral_clinic_type",
+   "fieldtype": "Select",
+   "label": "Referral Clinic Type",
+   "options": "\nDRC\nCHC\nOther\nNot Applicable"
+  },
+  {
+   "fieldname": "care_plan_created",
+   "fieldtype": "Select",
+   "label": "Care plan Created",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "reports_or_info_sent_to_mch_nurse",
+   "fieldtype": "Select",
+   "label": "Reports or info sent to MCH nurse",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "column_break_tzcp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Auto-filled with the same date driving Next ANC Visit Date - type over it here to override.",
+   "fieldname": "date_of_next_visit",
+   "fieldtype": "Date",
+   "label": "Date of Next Visit"
+  },
+  {
+   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
+   "fieldname": "next_visit_window",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Next Visit Window (From - To)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
+   "fieldname": "urgent_followup",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Urgent Follow-up (auto)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "label": "Place"
+  },
+  {
+   "fieldname": "signature_of_mch_nurse",
+   "fieldtype": "Signature",
+   "label": "Signature of MCH Nurse"
+  },
+  {
+   "fieldname": "date_reffe",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "description": "Set automatically from the pregnancy's LMP Date - not editable by hand.",
+   "fieldname": "lmp_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "LMP Date",
+   "read_only": 1
+  },
+  {
+   "description": "Gestational age (weeks + days) as of this visit's Date - calculated automatically from LMP Date.",
+   "fieldname": "pog_weeks",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "POG Weeks",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_condition",
+   "fieldtype": "Select",
+   "label": "Patient Condition",
+   "options": "\nNormal\nRisk"
+  },
+  {
+   "fieldname": "fh",
+   "fieldtype": "Int",
+   "label": "FH"
+  },
+  {
+   "fieldname": "fhr",
+   "fieldtype": "Int",
+   "label": "FHR"
+  },
+  {
+   "fieldname": "column_break_njms",
+   "fieldtype": "Column Break",
+   "hidden": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-07 15:53:35.389739",
+ "modified_by": "Administrator",
+ "module": "Common",
+ "name": "ANC Followup Nurse",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

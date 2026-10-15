@@ -1,202 +1,173 @@
 <template>
+  <!-- Desk's child-table grid, at every screen size: label, a bordered
+  grid (tick box, No., the in_list_view columns, an edit pencil), and Add
+  Row / Delete underneath. A row opens its full set of fields in a dialog,
+  like Desk's row form. -->
   <div>
-    <div class="mb-2 flex items-center justify-between">
-      <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ field.label }}</h3>
-      <Button variant="ghost" @click="addRow">
-        + Add Row
-      </Button>
-    </div>
+    <h3 class="mb-2 text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</h3>
 
-    <div class="overflow-x-auto rounded-lg border dark:border-gray-800">
-      <table class="w-full min-w-[28rem] border-collapse text-left text-sm">
-        <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+    <div class="overflow-x-auto rounded-md border border-gray-200 dark:border-gray-700">
+      <table class="w-full table-fixed border-collapse text-left text-sm" :style="{ minWidth: rows.length ? tableMinWidth : undefined }">
+        <thead class="bg-gray-50 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
           <tr>
-            <th class="w-10 whitespace-nowrap border-b border-r px-3 py-2 dark:border-gray-800">#</th>
-            <th
-              v-for="col in summaryColumns"
-              :key="col.fieldname"
-              class="whitespace-nowrap border-b border-r px-3 py-2 dark:border-gray-800"
-            >
-              {{ col.label }}
+            <th class="w-9 border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700">
+              <input
+                type="checkbox"
+                class="h-3.5 w-3.5 rounded border-gray-300"
+                :checked="rows.length > 0 && selectedKeys.size === rows.length"
+                :disabled="!rows.length"
+                :aria-label="t('Select all rows')"
+                @change="toggleAll($event.target.checked)"
+              />
             </th>
-            <th class="w-16 border-b dark:border-gray-800"></th>
+            <th class="w-11 border-b border-r border-gray-200 px-2 py-2 font-medium dark:border-gray-700">{{ t('No.') }}</th>
+            <th
+              v-for="col in gridColumns"
+              :key="col.fieldname"
+              class="truncate border-b border-r border-gray-200 px-2 py-2 font-medium dark:border-gray-700"
+              :title="t(col.label)"
+            >
+              {{ t(col.label) }}
+            </th>
+            <th class="w-9 border-b border-gray-200 dark:border-gray-700" />
           </tr>
         </thead>
         <tbody>
           <tr v-if="!rows.length">
-            <td :colspan="summaryColumns.length + 2" class="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
-              No rows yet.
-            </td>
+            <td :colspan="gridColumns.length + 3" class="px-3 py-6 text-center text-sm text-gray-400">{{ t('No Data') }}</td>
           </tr>
           <tr
             v-for="(row, idx) in rows"
-            :key="row.__key"
-            class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+            :key="keyOf(row)"
+            class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/60"
+            :class="[{ 'bg-gray-50 dark:bg-gray-800/60': selectedKeys.has(keyOf(row)) }, rowClass ? rowClass(row) : '']"
             @click="openRow(idx)"
           >
-            <td class="whitespace-nowrap border-b border-r px-3 py-2 text-gray-500 dark:border-gray-800 dark:text-gray-400">
-              {{ idx + 1 }}
+            <td class="border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700" @click.stop>
+              <input
+                type="checkbox"
+                class="h-3.5 w-3.5 rounded border-gray-300"
+                :checked="selectedKeys.has(keyOf(row))"
+                :aria-label="t('Select row {0}', [idx + 1])"
+                @change="toggleRow(row, $event.target.checked)"
+              />
             </td>
+            <td class="border-b border-r border-gray-200 px-2 py-2 text-gray-500 dark:border-gray-700 dark:text-gray-400">{{ idx + 1 }}</td>
             <td
-              v-for="col in summaryColumns"
+              v-for="col in gridColumns"
               :key="col.fieldname"
-              class="whitespace-nowrap border-b border-r px-3 py-2 text-gray-900 dark:border-gray-800 dark:text-gray-100"
+              class="truncate border-b border-r border-gray-200 px-2 py-2 text-gray-900 dark:border-gray-700 dark:text-gray-100"
             >
-              {{ formatValue(row[col.fieldname], col) }}
+              {{ formatFieldValue(row[col.fieldname], col) }}
             </td>
-            <td class="border-b px-3 py-2 text-right dark:border-gray-800" @click.stop>
-              <div class="flex items-center justify-end gap-1">
-                <Tooltip text="Edit row">
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                    @click="openRow(idx)"
-                  >
-                    <FeatherIcon name="edit-2" class="h-4 w-4" />
-                  </button>
-                </Tooltip>
-                <Tooltip text="Remove row">
-                  <button
-                    type="button"
-                    class="flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
-                    @click="confirmRemoveRow(idx)"
-                  >
-                    <FeatherIcon name="trash-2" class="h-4 w-4" />
-                  </button>
-                </Tooltip>
-              </div>
+            <td class="border-b border-gray-200 px-1 py-1 text-center dark:border-gray-700">
+              <button
+                type="button"
+                class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700"
+                :aria-label="t('Edit row {0}', [idx + 1])"
+                @click.stop="openRow(idx)"
+              >
+                <LucideIcon name="pencil" class="h-3.5 w-3.5" />
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <Dialog v-model="showRowEditor" :options="{ size: '2xl', title: 'row-editor' }">
-      <template #body>
-        <!-- #body-content (the default slot this used before) sits inside
-        Dialog's own fixed-padding, non-scrollable wrapper alongside the
-        header - fine for a couple of fields, but a child doctype with 15+
-        fields (ANC Followup, for one) just grew the dialog past the
-        viewport with no scroll of its own, spilling content off-screen
-        with only the page behind it able to scroll. Taking over #body
-        entirely (same pattern as SettingsDialog.vue/AiAssistant.vue) is
-        the only way to give the field list its own scroll region instead. -->
-        <div class="row-editor-panel flex flex-col">
-          <div class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800 sm:px-6">
-            <h3 class="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
-              {{ field.label }} - Row {{ (editingIdx ?? 0) + 1 }}
-            </h3>
-            <button
-              class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-              @click="showRowEditor = false"
-            >
-              <FeatherIcon name="x" class="h-4 w-4" />
-            </button>
-          </div>
+    <div class="mt-2 flex items-center gap-2">
+      <Button size="sm" @click="addRow">{{ t('Add Row') }}</Button>
+      <Button v-if="selectedKeys.size" size="sm" theme="red" @click="deleteSelected">{{ t('Delete') }}</Button>
+    </div>
 
-          <div class="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
-            <div v-if="editingRow" class="grid grid-cols-1 gap-4">
-              <DynamicField
-                v-for="col in columns"
-                :key="col.fieldname"
-                :field="col"
-                :doctype="doctype"
-                :docname="docname"
-                v-model="editingRow[col.fieldname]"
-              />
-            </div>
-          </div>
-
-          <div class="flex-shrink-0 border-t p-4 dark:border-gray-800">
-            <Button variant="solid" class="w-full" @click="showRowEditor = false">
-              Done
-            </Button>
-          </div>
+    <Dialog v-model="showRowEditor" :options="{ title: t('{0} - Row {1}', [t(field.label), (editingIdx ?? 0) + 1]), size: 'xl' }">
+      <template #body-content>
+        <div v-if="editingRow" class="grid grid-cols-1 gap-4">
+          <DynamicField
+            v-for="col in editorColumns"
+            :key="col.fieldname"
+            :field="col"
+            :doctype="doctype"
+            :docname="docname"
+            :doc="editingRow"
+            :parent-doc="parentDoc"
+            :link-query="col.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(col.fieldname, editingRow) : null"
+            v-model="editingRow[col.fieldname]"
+          />
         </div>
       </template>
+      <template #actions>
+        <Button variant="solid" class="w-full" @click="showRowEditor = false">
+          {{ t('Done') }}
+        </Button>
+      </template>
     </Dialog>
-
-    <Dialog
-      v-model="showRemoveConfirm"
-      :options="{
-        title: 'Remove row?',
-        message: 'This row will be removed once you save the form. This cannot be undone.',
-        icon: { name: 'alert-triangle', appearance: 'danger' },
-        actions: [
-          { label: 'Remove', variant: 'solid', theme: 'red', onClick: doRemoveRow },
-          { label: 'Cancel' },
-        ],
-      }"
-    />
   </div>
 </template>
 
-<style>
-/* Same data-dialog/[title] hook as SettingsDialog.vue/AiAssistant.vue -
-frappe-ui's Dialog has no size option granular enough for "scales with
-the viewport, full-screen on mobile" on its own. Sized a bit taller than
-SettingsDialog's 34rem/80vh since child-table rows here can run to 15+
-fields (ANC Followup) - the request was explicitly for a bigger popup,
-scaled to screen size rather than a fixed height regardless of viewport. */
-[data-dialog='row-editor'].dialog-overlay {
-  z-index: 50;
-}
-
-.row-editor-panel {
-  width: 100%;
-  height: 42rem;
-  max-height: 85vh;
-}
-
-@media (max-width: 639px), (max-height: 480px) {
-  [data-dialog='row-editor'].dialog-overlay > div {
-    padding: 0;
-  }
-  [data-dialog='row-editor'] .dialog-content {
-    margin: 0;
-    max-width: none;
-    width: 100vw;
-    height: 100dvh;
-    border-radius: 0;
-  }
-  .row-editor-panel {
-    height: 100dvh;
-    max-height: none;
-  }
-}
-</style>
-
 <script setup>
-import { computed, ref } from 'vue'
-import { Button, FeatherIcon, Dialog, Tooltip } from 'frappe-ui'
+import { computed, nextTick, reactive, ref } from 'vue'
+import { Button, Dialog } from 'frappe-ui'
 import DynamicField from '@/components/DynamicField.vue'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { useMeta, useFormFields } from '@/data/useMeta'
+import { formatFieldValue, isEmptyValue } from '@/data/recordFormat'
+import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
+import { applyDefaults } from '@/data/defaults'
+import { rowKey } from '@/data/rowKey'
+import { t } from '@/data/i18n'
 
-const { field, modelValue, doctype, docname } = defineProps({
+const { field, modelValue, doctype, docname, parentDoc, linkQueryFor, rowClass } = defineProps({
   field: { type: Object, required: true },
   modelValue: { type: Array, default: () => [] },
   doctype: { type: String, default: null },
   docname: { type: String, default: null },
+  // The main record - Desk conditions inside a row can test it as `parent`.
+  parentDoc: { type: Object, default: null },
+  // From the doctype's hook module: Desk set_query for a Link inside a row,
+  // and a CSS class per row (e.g. an open urgent visit tinted red).
+  linkQueryFor: { type: Function, default: null },
+  rowClass: { type: Function, default: null },
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'row-added', 'rows-removed'])
 
 const childMetaResource = useMeta(field.options)
 const columns = useFormFields(childMetaResource)
 
-// The row summary in the table only needs enough columns to identify the
-// row at a glance - matching Desk's grid, which shows a handful of
-// in_list_view fields and pushes the rest behind the row-edit dialog. Wide
-// child tables (10+ fields) are unusable as an all-columns-inline table.
-const summaryColumns = computed(() => {
+// Desk's grid shows the child doctype's in_list_view fields, as many as fit
+// its 12-unit row (each field takes its `columns` setting - Check 1, others
+// 2 by default); the rest are on the row form. Same columns on a phone,
+// where the grid scrolls sideways, as Desk's does.
+const ROW_UNITS = 12
+function fitsDeskRow(fields) {
+  const shown = []
+  let used = 0
+  for (const f of fields) {
+    const size = Number(f.columns) || (f.fieldtype === 'Check' ? 1 : 2)
+    if (used + size > ROW_UNITS) break
+    used += size
+    shown.push(f)
+  }
+  return shown.length ? shown : fields.slice(0, 1)
+}
+
+const gridColumns = computed(() => {
   const inListView = columns.value.filter((c) => c.in_list_view)
-  return (inListView.length ? inListView : columns.value).slice(0, 3)
+  return fitsDeskRow(inListView.length ? inListView : columns.value.slice(0, 4))
 })
 
-let rowKeyCounter = 0
+// Narrow screens: each column keeps a readable width and the grid scrolls
+// sideways instead of squeezing every value to a few letters. An empty grid
+// stays screen-wide, so its "No Data" isn't scrolled out of view.
+const tableMinWidth = computed(() => `${5 + 2.25 + gridColumns.value.length * 8.5}rem`)
+
 const rows = computed({
   get: () => modelValue || [],
   set: (v) => emit('update:modelValue', v),
 })
+
+// Shared with DoctypeForm, which uses the same keys to tell which row changed.
+const keyOf = rowKey
 
 function addRow() {
   // Mutate the array in place (it's the same reactive array the parent form
@@ -205,37 +176,56 @@ function addRow() {
   // reading rows.value.length right after that in the same tick can still
   // see the pre-update array, opening the row editor on the wrong (stale)
   // index.
-  const newRow = { __key: `new-${rowKeyCounter++}` }
-  rows.value.push(newRow)
-  openRow(rows.value.indexOf(newRow))
+  // Desk fills a new row's field defaults (e.g. a visit's status
+  // "Pending") as soon as it's added.
+  rows.value.push(applyDefaults(childMetaResource.data?.fields, {}))
+  const idx = rows.value.length - 1
+  // Desk's <table>_add - the form's script may fill the new row (a visit's
+  // dates from the schedule, the pregnancy's LMP ...). The live row, so its
+  // changes land in the form.
+  emit('row-added', rows.value[idx], idx)
+  openRow(idx)
 }
 
-function formatValue(value, field) {
-  if (value == null || value === '') return '-'
-  if (field.fieldtype === 'Check') return value ? 'Yes' : 'No'
-  return value
+// ---- Tick boxes + Delete, as in Desk's grid ----
+const selectedKeys = reactive(new Set())
+
+function toggleRow(row, checked) {
+  const key = keyOf(row)
+  if (checked) selectedKeys.add(key)
+  else selectedKeys.delete(key)
+}
+
+function toggleAll(checked) {
+  selectedKeys.clear()
+  if (checked) rows.value.forEach((row) => selectedKeys.add(keyOf(row)))
+}
+
+// Removed rows only leave the record when the form is saved - the form's
+// "Not saved" label shows until then, as Desk's does.
+function deleteSelected() {
+  const removed = rows.value.filter((row) => selectedKeys.has(keyOf(row)))
+  rows.value = rows.value.filter((row) => !selectedKeys.has(keyOf(row)))
+  selectedKeys.clear()
+  // Desk's <table>_remove - e.g. recalculate the next visit date.
+  if (removed.length) nextTick(() => emit('rows-removed', removed))
 }
 
 const showRowEditor = ref(false)
 const editingIdx = ref(null)
 const editingRow = computed(() => (editingIdx.value == null ? null : rows.value[editingIdx.value]))
 
+// The row form shows what Desk's row form would: fields whose depends_on
+// holds for this row (`doc`) and the main record (`parent`), with
+// mandatory_depends_on shown as required.
+const editorColumns = computed(() => {
+  if (!editingRow.value) return []
+  const visible = visibleFieldnames(childMetaResource.data?.fields, editingRow.value, parentDoc)
+  return columns.value.filter((c) => visible.has(c.fieldname)).map((c) => withLiveRequired(c, editingRow.value, parentDoc))
+})
+
 function openRow(idx) {
   editingIdx.value = idx
   showRowEditor.value = true
-}
-
-const showRemoveConfirm = ref(false)
-const pendingRemoveIdx = ref(null)
-
-function confirmRemoveRow(idx) {
-  pendingRemoveIdx.value = idx
-  showRemoveConfirm.value = true
-}
-
-function doRemoveRow(close) {
-  rows.value = rows.value.filter((_, i) => i !== pendingRemoveIdx.value)
-  pendingRemoveIdx.value = null
-  close()
 }
 </script>

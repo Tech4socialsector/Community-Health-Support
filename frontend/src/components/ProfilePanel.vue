@@ -10,42 +10,49 @@
         >
           <template #default="{ uploading, progress, openFileSelector }">
             <Button variant="outline" :loading="uploading" @click="openFileSelector">
-              {{ uploading ? `Uploading ${progress}%` : 'Change Photo' }}
+              {{ uploading ? t('Uploading {0}%', [progress]) : t('Change Photo') }}
             </Button>
           </template>
         </FileUploader>
       </div>
     </div>
 
-    <FormControl type="text" label="Full Name" v-model="fullName" />
-    <FormControl type="text" label="Email" :model-value="session.user" disabled />
+    <FormControl type="text" :label="t('Full Name')" v-model="fullName" />
+    <FormControl type="text" :label="t('Email')" :model-value="session.user" disabled />
+
+    <!-- The app's Language menu here too, so it's reachable from every
+    screen (Menu > Settings on a phone), not only from the Home banner. -->
+    <div>
+      <div class="mb-1.5 text-sm text-gray-700 dark:text-gray-300">{{ t('Language') }}</div>
+      <LanguageMenu align="left" />
+    </div>
 
     <div>
-      <div class="mb-1.5 text-sm text-gray-700 dark:text-gray-300">Password</div>
+      <div class="mb-1.5 text-sm text-gray-700 dark:text-gray-300">{{ t('Password') }}</div>
       <Button variant="outline" @click="showPasswordDialog = true">
-        Change Password
+        {{ t('Change Password') }}
       </Button>
     </div>
 
     <ErrorMessage :message="saveError" />
     <div class="flex justify-end">
       <Button variant="solid" :loading="saving" @click="save">
-        Save
+        {{ t('Save') }}
       </Button>
     </div>
 
-    <Dialog v-model="showPasswordDialog" :options="{ title: 'Change Password' }">
+    <Dialog v-model="showPasswordDialog" :options="{ title: t('Change Password') }">
       <template #body-content>
         <div class="flex flex-col gap-4">
           <FormControl
             type="password"
-            label="Current Password"
+            :label="t('Current Password')"
             v-model="oldPassword"
             autocomplete="current-password"
           />
           <FormControl
             type="password"
-            label="New Password"
+            :label="t('New Password')"
             v-model="newPassword"
             autocomplete="new-password"
           />
@@ -54,7 +61,7 @@
       </template>
       <template #actions>
         <Button variant="solid" class="w-full" :loading="changingPassword" @click="changePassword">
-          Update Password
+          {{ t('Update Password') }}
         </Button>
       </template>
     </Dialog>
@@ -65,6 +72,8 @@
 import { ref, watch } from 'vue'
 import { Avatar, FormControl, Button, FileUploader, Dialog, ErrorMessage, call, toast } from 'frappe-ui'
 import { session } from '@/data/session'
+import LanguageMenu from '@/components/LanguageMenu.vue'
+import { t } from '@/data/i18n'
 
 const fullName = ref(session.full_name || '')
 const userImage = ref(session.user_image || '')
@@ -91,9 +100,9 @@ async function onImageUpload(file) {
     })
     userImage.value = file.file_url
     session.user_image = file.file_url
-    toast.success('Photo updated')
+    toast.success(t('Photo updated'))
   } catch (e) {
-    toast.error('Could not update photo')
+    toast.error(t('Could not update photo'))
   }
 }
 
@@ -108,7 +117,7 @@ async function save() {
       value: fullName.value,
     })
     session.full_name = fullName.value
-    toast.success('Saved')
+    toast.success(t('Saved'))
   } catch (e) {
     saveError.value = e
   } finally {
@@ -130,7 +139,7 @@ async function changePassword() {
       old_password: oldPassword.value,
       new_password: newPassword.value,
     })
-    toast.success('Password updated')
+    toast.success(t('Password updated'))
     oldPassword.value = ''
     newPassword.value = ''
     showPasswordDialog.value = false

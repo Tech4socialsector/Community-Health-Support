@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe.utils import cint
 from frappe.model.document import Document
 from chw.api import validate_phone_number
 
@@ -16,7 +17,10 @@ class Householdprofile(Document):
 
 	def update_member_counts(self):
 		self.members_added = frappe.db.count("Family members", {"hhid": self.name}) if self.name else 0
-		self.pending_members = max((self.total_family_members or 0) - self.members_added, 0)
+		# cint: the value can arrive as text ("2") from an API / the Vue form;
+		# subtracting from text raised a TypeError and the save failed.
+		self.total_family_members = cint(self.total_family_members)
+		self.pending_members = max(self.total_family_members - self.members_added, 0)
 
 	def sync_lat_lng_from_geo_location(self):
 		# latitude/longitude are read-only display mirrors of geo_location (the
@@ -24,9 +28,11 @@ class Householdprofile(Document):
 		# on them without parsing GeoJSON. Derived here instead of asking users
 		# to enter coordinates twice (once on the map, once by hand).
 		coords = None
-		if self.geo_location:
+		# .get(): the LCH form (chw-lch) has no map field - plain attribute
+		# access would fail every household save there.
+		if self.get("geo_location"):
 			try:
-				geojson = json.loads(self.geo_location)
+				geojson = json.loads(self.get("geo_location"))
 				coords = geojson["features"][0]["geometry"]["coordinates"]
 			except (ValueError, KeyError, IndexError, TypeError):
 				coords = None
@@ -42,7 +48,7 @@ def refresh_member_counts(hhid):
 		return
 
 	members_added = frappe.db.count("Family members", {"hhid": hhid})
-	total_family_members = frappe.db.get_value("Household profile", hhid, "total_family_members") or 0
+	total_family_members = cint(frappe.db.get_value("Household profile", hhid, "total_family_members"))
 	pending_members = max(total_family_members - members_added, 0)
 
 	frappe.db.set_value(

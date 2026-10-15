@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "creation": "2026-10-12 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "visit_number",
+  "window_opens_day",
+  "window_closes_day",
+  "milestone_label"
+ ],
+ "fields": [
+  {
+   "description": "Which numbered visit this row configures (1st, 2nd, 3rd...). Must be unique within this program's schedule.",
+   "fieldname": "visit_number",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Visit Number",
+   "reqd": 1
+  },
+  {
+   "description": "Days after the anchor date (delivery/birth) this visit's window opens (anchor day itself = 0).",
+   "fieldname": "window_opens_day",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Window Opens (Day)",
+   "reqd": 1
+  },
+  {
+   "description": "Days after the anchor date this visit's window closes. After this, the visit counts as overdue.",
+   "fieldname": "window_closes_day",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Window Closes (Day)",
+   "reqd": 1
+  },
+  {
+   "description": "Display label only (e.g. \"6th Week\") - not used in any date calculation.",
+   "fieldname": "milestone_label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Milestone Label"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-12 00:00:00",
+ "modified_by": "Administrator",
+ "module": "CHW Master",
+ "name": "Visit Schedule Row",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

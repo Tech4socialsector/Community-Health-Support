@@ -6,7 +6,7 @@
         ref="inputRef"
         v-model="query"
         type="text"
-        placeholder="Search or type a command"
+        :placeholder="t('Search or type a command')"
         class="h-8 w-full rounded border border-gray-200 bg-gray-50 pl-8 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
         @focus="open = true"
         @keydown.esc="open = false"
@@ -22,7 +22,7 @@
     >
       <div v-if="moduleMatches.length" class="mb-1">
         <div class="px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
-          Modules
+          {{ t('Modules') }}
         </div>
         <button
           v-for="item in moduleMatches"
@@ -31,13 +31,13 @@
           @click="goToList(item)"
         >
           <FeatherIcon name="folder" class="h-4 w-4 flex-shrink-0 text-gray-400" />
-          <span class="text-sm text-gray-900 dark:text-gray-100">Go to {{ item.label || item.doctype_name }}</span>
+          <span class="text-sm text-gray-900 dark:text-gray-100">{{ t('Go to {0}', [t(item.label || item.doctype_name)]) }}</span>
         </button>
       </div>
 
       <div v-if="createMatches.length" class="mb-1">
         <div class="px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
-          Create New
+          {{ t('Create New') }}
         </div>
         <button
           v-for="item in createMatches"
@@ -46,22 +46,22 @@
           @click="goToNew(item)"
         >
           <FeatherIcon name="plus" class="h-4 w-4 flex-shrink-0 text-gray-400" />
-          <span class="text-sm text-gray-900 dark:text-gray-100">New {{ item.label || item.doctype_name }}</span>
+          <span class="text-sm text-gray-900 dark:text-gray-100">{{ t('New {0}', [t(item.label || item.doctype_name)]) }}</span>
         </button>
       </div>
 
       <div>
         <div class="px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
-          Search Results
+          {{ t('Search Results') }}
         </div>
         <div v-if="searchResource.loading" class="px-3 py-3 text-center text-sm text-gray-500">
-          Searching...
+          {{ t('Searching...') }}
         </div>
         <div
           v-else-if="!moduleMatches.length && !createMatches.length && searchRecords.length === 0"
           class="px-3 py-3 text-center text-sm text-gray-500 dark:text-gray-400"
         >
-          No results.
+          {{ t('No results.') }}
         </div>
         <button
           v-for="(item, idx) in searchRecords"
@@ -70,7 +70,7 @@
           @click="selectRecord(item)"
         >
           <span class="text-sm text-gray-900 dark:text-gray-100">{{ item.description || item.name }}</span>
-          <span class="text-xs text-gray-500 dark:text-gray-400">{{ item.doctype_name }}</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400">{{ t(item.doctype_name) }}</span>
         </button>
       </div>
     </div>

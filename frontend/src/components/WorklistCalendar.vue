@@ -23,14 +23,14 @@
           :key="day"
           class="bg-gray-50 px-2 py-1.5 text-center font-medium text-gray-500 dark:bg-gray-900 dark:text-gray-400"
         >
-          {{ day }}
+          {{ t(day) }}
         </div>
 
         <div
           v-for="cell in calendarCells"
           :key="cell.key"
           class="min-h-[6rem] bg-white p-1.5 dark:bg-gray-900"
-          :class="{ 'bg-gray-50 dark:bg-gray-950': !cell.inMonth }"
+          :class="{ 'bg-gray-50 dark:bg-gray-800/60': !cell.inMonth }"
         >
           <span
             class="mb-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px]"
@@ -48,7 +48,7 @@
             :class="todo.status === 'Open' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
             @click="$emit('open', todo)"
           >
-            {{ stripHtml(todo.description) || todo.reference_type || 'Task' }}
+            {{ stripHtml(todo.description) || t(todo.reference_type) || t('Task') }}
           </button>
         </div>
       </div>
@@ -57,6 +57,7 @@
 </template>
 
 <script setup>
+import { dateLocale } from '@/data/i18n'
 import { ref, computed } from 'vue'
 import { FeatherIcon } from 'frappe-ui'
 
@@ -75,7 +76,7 @@ function shiftMonth(delta) {
 }
 
 const monthLabel = computed(() =>
-  cursor.value.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }),
+  cursor.value.toLocaleDateString(dateLocale(), { month: 'long', year: 'numeric' }),
 )
 
 function dateKey(d) {

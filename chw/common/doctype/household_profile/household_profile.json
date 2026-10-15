@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "HH-.#####",
@@ -8,46 +7,59 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "repondent_details_section",
-  "household_head_name",
-  "phone_no",
-  "household_type",
-  "column_break_odhk",
-  "status",
-  "total_family_members",
-  "address_details_section",
-  "address_type",
-  "village",
-  "pincode",
-  "district",
-  "village_short_code",
-  "address",
+  "section_break_rmhx",
   "survay_date",
-  "health_worker_name",
+  "village",
+  "gram_panchayat",
+  "subcenter",
+  "household_head_name",
+  "total_family_members",
+  "phone_no",
+  "status",
+  "caste",
+  "others_caste",
+  "house",
   "column_break_kkvt",
-  "state",
-  "geo_location",
-  "longitude",
-  "latitude",
-  "tab_2_tab"
+  "type_of_housing",
+  "electricity",
+  "farming",
+  "drinkingwater",
+  "toilet",
+  "cattles",
+  "address",
+  "health_worker_name"
  ],
  "fields": [
   {
+   "fieldname": "section_break_rmhx",
+   "fieldtype": "Section Break",
+   "label": "Repondent Details "
+  },
+  {
    "fieldname": "household_head_name",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Head of the Family",
-   "options": "Family members",
-   "reqd": 1
+   "label": "Head of the Family "
   },
   {
    "fieldname": "total_family_members",
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Total Family Members in the Family",
-   "non_negative": 1,
-   "reqd": 1
+   "non_negative": 1
+  },
+  {
+   "fieldname": "caste",
+   "fieldtype": "Select",
+   "label": "Caste the family belongs to ",
+   "options": "\nGeneral\nSC\nST\nOBC\nNot Applicable\nOthers, specify"
+  },
+  {
+   "depends_on": "eval: doc.caste == \"Others, specify\"",
+   "fieldname": "others_caste",
+   "fieldtype": "Data",
+   "label": "Others, Please Specify"
   },
   {
    "fieldname": "village",
@@ -55,15 +67,29 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Village",
-   "options": "Village",
-   "reqd": 1
+   "options": "Village"
+  },
+  {
+   "fetch_from": "village.village_code",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "village.sub_center",
+   "fieldname": "subcenter",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Subcenter",
+   "options": "Sub Centre"
   },
   {
    "fieldname": "phone_no",
    "fieldtype": "Data",
    "label": "Phone Number",
-   "length": 10,
-   "reqd": 1
+   "length": 10
   },
   {
    "default": "Today",
@@ -71,21 +97,54 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Survay Date",
-   "read_only": 1
+   "label": "Survey Date"
+  },
+  {
+   "fieldname": "house",
+   "fieldtype": "Select",
+   "label": "House",
+   "options": "\nHut\nTiled house\nTerraced house"
+  },
+  {
+   "fieldname": "type_of_housing",
+   "fieldtype": "Select",
+   "label": "Type of Housing",
+   "options": "\nTemporary\nPermanent"
+  },
+  {
+   "fieldname": "electricity",
+   "fieldtype": "Select",
+   "label": "Electricity",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "farming",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Farming",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "drinkingwater",
+   "fieldtype": "Select",
+   "label": "Drinking Water",
+   "options": "\nWell water\nBorewell water\nPanchayat water"
+  },
+  {
+   "fieldname": "toilet",
+   "fieldtype": "Select",
+   "label": "Toilet",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "cattles",
+   "fieldtype": "Select",
+   "label": "Cattles",
+   "options": "\nNo\ncow, goat\ncow only\ngoat only"
   },
   {
    "fieldname": "column_break_kkvt",
    "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "village.village_code",
-   "fetch_if_empty": 1,
-   "fieldname": "village_short_code",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Village Code"
   },
   {
    "fieldname": "address",
@@ -93,97 +152,19 @@
    "label": "Address"
   },
   {
-   "description": "Tap the locate icon on the map to capture this household's GPS coordinates.",
-   "fieldname": "geo_location",
-   "fieldtype": "Geolocation",
-   "label": "Geo Location"
-  },
-  {
-   "fieldname": "latitude",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Latitude",
-   "read_only": 1
-  },
-  {
-   "fieldname": "longitude",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Longitude",
-   "read_only": 1
-  },
-  {
    "fieldname": "health_worker_name",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Data Collector",
-   "options": "User",
+   "options": "Health Worker",
    "read_only": 1
   },
   {
-   "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nActive\nInactive\nTemporarily Inactive\nTransferred\nDuplicate",
-   "reqd": 1
-  },
-  {
-   "fieldname": "repondent_details_section",
-   "fieldtype": "Section Break",
-   "label": "Repondent Details "
-  },
-  {
-   "fieldname": "column_break_odhk",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "tab_2_tab",
-   "fieldtype": "Tab Break"
-  },
-  {
-   "fieldname": "household_type",
-   "fieldtype": "Select",
-   "label": "Household Type",
-   "options": "\nNuclear Family\nJoint Family\nExtended Family\nSingle-Person Household\nOther",
-   "reqd": 1
-  },
-  {
-   "fieldname": "address_details_section",
-   "fieldtype": "Section Break",
-   "label": "Address Details"
-  },
-  {
-   "default": "Permanent",
-   "fieldname": "address_type",
-   "fieldtype": "Select",
-   "label": "Address Type",
-   "options": "\nPermanent\nCurrent\nTemporary"
-  },
-  {
-   "fieldname": "pincode",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Pincode",
-   "reqd": 1
-  },
-  {
-   "fieldname": "district",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "District",
-   "reqd": 1
-  },
-  {
-   "fieldname": "state",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "State",
-   "reqd": 1
+   "options": "\nI live here\nI work outside\nout of town"
   }
  ],
  "grid_page_length": 50,
@@ -194,7 +175,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-09-07 16:21:40.039041",
+ "modified": "2026-10-09 10:26:18.780727",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

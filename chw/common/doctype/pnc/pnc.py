@@ -4,18 +4,38 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, add_months, getdate
+from frappe.utils import add_days, getdate
 from chw.api import sync_next_visit_todo, validate_phone_number
+from chw.chw_master import visit_schedule
+
+# Last-resort fallback only, used if the Visit Schedule Master has no PNC
+# rows configured yet - the real policy always comes from that master's
+# Visit Schedule rows (Applies To = "PNC"). (window_opens_day,
+# window_closes_day) per visit, 1-indexed by position - visit 1 opens at
+# delivery, visit 2 is the last week of a 6-week (42-day) postnatal period.
+DEFAULT_VISIT_SCHEDULE = [(0, 7), (35, 42)]
+DEFAULT_RISK_ALERT_DAYS = 1
+
+# Safe margin past the default ~6-week (42-day) postnatal period, used only
+# by the exit-women-pnc report cutoff (chw.api.pnc_fully_completed_names) to
+# decide a record's postnatal window has fully elapsed.
+PNC_SCHEDULE_DURATION_MONTHS = 2
 
 
-PNC_SCHEDULE_DURATION_MONTHS = 6  # postnatal follow-up period, monthly visits
+@frappe.whitelist()
+def get_visit_schedule():
+	"""The shared Visit Schedule Master's rows for PNC, for pnc.js's live
+	preview - see chw.chw_master.visit_schedule."""
+	return visit_schedule.get_visit_schedule_rows("PNC")
 
 
 class PNC(Document):
 	def validate(self):
 		validate_phone_number(self.phone_number)
 		self.validate_gender()
-		self.generate_visit_schedule()
+		self.sync_patient_condition_to_high_risk()
+		self.insert_urgent_followups_for_risk_rows()
+		self.insert_urgent_followups_for_baby_risk_rows()
 		self.set_next_pnc_visit_date()
 
 	def on_update(self):
@@ -29,49 +49,194 @@ class PNC(Document):
 		if not self.birth_registration_id:
 			return
 
+		# `fmid` is the mother's Family member ID; `family_member_id` was its
+		# old, renamed column - always empty now, so this check never ran.
 		family_member_id = frappe.db.get_value(
-			"Birth Registration", self.birth_registration_id, "family_member_id"
+			"Birth Registration", self.birth_registration_id, "fmid"
 		)
 		gender = family_member_id and frappe.db.get_value("Family members", family_member_id, "gender")
 		if gender and gender != "Female":
 			frappe.throw(_("PNC can only be created for a female family member."))
 
-	def get_interval_days(self):
-		return frappe.db.get_single_value("PNC Visit Interval Master", "interval_days") or 30
+	def sync_patient_condition_to_high_risk(self):
+		# The only way high_risk ever gets set - there's no manual entry
+		# point on the main form. Either the mother's own Patient Condition
+		# OR the baby's own Baby Condition can independently push this to
+		# Yes - a household visit can find either one at risk. A later
+		# "Normal" reading on either table never downgrades it back on its
+		# own.
+		mother_risk = self._latest_condition(self.mother, "patient_condition") == "Risk"
+		baby_risk = self._latest_condition(self.baby, "baby_condition") == "Risk"
+		if mother_risk or baby_risk:
+			self.high_risk = "Yes"
 
-	def generate_visit_schedule(self):
-		"""Pre-fill the mother/baby Followup tables with a monthly postnatal visit
-		schedule, for 6 months after delivery."""
-		if self.mother or not self.date_of_delivery:
-			return
+	@staticmethod
+	def _latest_condition(table, fieldname):
+		rows_with_condition = [row for row in table if row.get(fieldname)]
+		if not rows_with_condition:
+			return None
+		return rows_with_condition[-1].get(fieldname)
 
-		interval_days = self.get_interval_days()
-		start_date = getdate(self.date_of_delivery)
-		end_date = add_months(start_date, PNC_SCHEDULE_DURATION_MONTHS)
-		visit_date = add_days(start_date, interval_days)
-		while visit_date <= end_date:
-			self.append("mother", {"date": visit_date, "status": "Pending"})
-			self.append("baby", {"date": visit_date, "status": "Pending"})
-			visit_date = add_days(visit_date, interval_days)
+	def insert_urgent_followups_for_risk_rows(self):
+		self._insert_urgent_followups("mother", "patient_condition")
+
+	def insert_urgent_followups_for_baby_risk_rows(self):
+		self._insert_urgent_followups("baby", "baby_condition")
+
+	def _insert_urgent_followups(self, table_field, condition_field):
+		# Whenever a visit is Completed with its condition field = Risk, an
+		# earlier follow-up than the normal schedule is needed - insert it
+		# right after that row (not appended at the end), dated from that
+		# visit's own actual date + *that visit's own* Urgent Visit Within
+		# Days (not a fixed number, not a chain - each schedule row sets its
+		# own duration, found by counting how many visits are completed up
+		# to and including this one). Skipped if the next row already
+		# sitting there is close enough that a separate visit wouldn't add
+		# anything, and never inserted twice for the same trigger. Mother
+		# and baby run through this independently - a risk finding on one
+		# table only ever inserts into that same table.
+		table = self.get(table_field)
+		i = 0
+		while i < len(table):
+			row = table[i]
+			if row.status == "Completed" and row.get(condition_field) == "Risk":
+				next_row = table[i + 1] if i + 1 < len(table) else None
+				already_inserted = next_row and next_row.urgent_followup
+				if not already_inserted:
+					effective_visit_number = len([r for r in table[: i + 1] if r.status == "Completed"])
+					urgent_within_days = self.get_urgent_visit_within_days(effective_visit_number)
+					urgent_date = add_days(getdate(row.date), urgent_within_days)
+					next_row_too_soon = next_row and getdate(next_row.date) <= urgent_date
+					if not next_row_too_soon:
+						new_row = self.append(table_field, {})
+						new_row.window_start_date = row.date
+						new_row.date = urgent_date
+						new_row.status = "Pending"
+						new_row.urgent_followup = 1
+						table.remove(new_row)
+						table.insert(i + 1, new_row)
+						for idx, r in enumerate(table):
+							r.idx = idx + 1
+			i += 1
+
+	@staticmethod
+	def _pending_urgent_in(table):
+		urgent_rows = [
+			(i, row) for i, row in enumerate(table)
+			if row.urgent_followup and row.status != "Completed"
+		]
+		if not urgent_rows:
+			return None
+
+		i, earliest = min(urgent_rows, key=lambda pair: getdate(pair[1].date))
+		trigger_row = table[i - 1] if i > 0 else None
+		trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
+		return frappe._dict(date=getdate(earliest.date), trigger_date=trigger_date)
+
+	@staticmethod
+	def get_urgent_visit_within_days(visit_number):
+		"""One shared Urgent Visit Within Days for all of PNC's visits - see
+		chw.chw_master.visit_schedule.get_urgent_visit_within_days.
+		visit_number is accepted (but unused) only so callers don't need to
+		change - every visit uses the same configured gap."""
+		return visit_schedule.get_urgent_visit_within_days("PNC", DEFAULT_RISK_ALERT_DAYS)
 
 	def set_next_pnc_visit_date(self):
-		dated_rows = [row for row in self.mother if row.date]
-		if not dated_rows:
+		# Mother and baby are tracked independently - each gets its own
+		# effective next-visit date (an open urgent row if either table has
+		# one, otherwise the normal schedule lookup) - but they share the
+		# exact same Visit Schedule master, since both are checked on the
+		# same household visit. The single shared "Next PNC Visit Date"
+		# field always shows whichever of the two tracks is due sooner.
+		if not self.date_of_delivery:
 			return
 
-		current = getdate(self.next_pnc_visit_date) if self.next_pnc_visit_date else None
-		last_auto = getdate(self.next_pnc_visit_date_auto) if self.next_pnc_visit_date_auto else None
-		if current and last_auto and current != last_auto:
-			# user has manually overridden the date; leave it alone
+		delivery_date = getdate(self.date_of_delivery)
+		mother_track = self._compute_track(self.mother, delivery_date)
+		baby_track = self._compute_track(self.baby, delivery_date)
+
+		self.sync_mother_row_fields(mother_track.window_start, mother_track.window_end)
+		self.sync_baby_row_fields(baby_track.window_start, baby_track.window_end)
+
+		candidates = [t for t in (mother_track, baby_track) if t.next_date]
+		if not candidates:
+			# every scheduled visit, for both mother and baby, is complete
+			self.next_pnc_visit_date = None
+			self.next_pnc_visit_date_auto = None
+			self.pnc_visit_risk_alert = ""
 			return
 
-		pending_rows = [row for row in dated_rows if row.status != "Completed"]
-		if pending_rows:
-			# next visit due is the earliest visit not yet marked Completed
-			calculated_date = min(getdate(row.date) for row in pending_rows)
+		# An open urgent row on EITHER track always outranks an ordinary due
+		# date on the other, even if that ordinary date is sooner - a freshly
+		# flagged risk should never get buried behind a merely overdue
+		# routine visit. Only once neither track has an open urgent row does
+		# "whichever is due sooner" decide it.
+		urgent_candidates = [t for t in candidates if t.is_urgent]
+		winner = min(urgent_candidates or candidates, key=lambda t: t.next_date)
+		self.next_pnc_visit_date = winner.next_date
+		self.next_pnc_visit_date_auto = winner.next_date
+		self.pnc_visit_risk_alert = winner.risk_alert
+
+	def _compute_track(self, table, delivery_date):
+		# An open Urgent-tagged row on this table always wins first - it
+		# never gets masked by the normal schedule lookup. The urgent date
+		# itself already IS the early-visit signal, so no separate alert on
+		# top of it.
+		urgent = self._pending_urgent_in(table)
+		if urgent:
+			return frappe._dict(
+				next_date=urgent.date, window_start=urgent.trigger_date, window_end=urgent.date, risk_alert="",
+				is_urgent=True,
+			)
+
+		visit_number = len([row for row in table if row.status == "Completed"]) + 1
+		window = self.get_visit_window(visit_number)
+		if window is None:
+			# every visit on this table has been completed
+			return frappe._dict(next_date=None, window_start=None, window_end=None, risk_alert="", is_urgent=False)
+
+		window_start = add_days(delivery_date, window.start_offset)
+		window_end = add_days(delivery_date, window.end_offset)
+
+		# High Risk only, shown in red - a nudge to visit early within the
+		# window (from window_start, not window_end - the point is to go
+		# sooner, not to wait until the window is about to close). Blank
+		# otherwise; the window/due date above are unaffected either way.
+		high_risk = self.high_risk or "No"
+		risk_alert = (
+			"Visit by {0}".format(frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days)))
+			if high_risk == "Yes"
+			else ""
+		)
+		return frappe._dict(
+			next_date=window_end, window_start=window_start, window_end=window_end, risk_alert=risk_alert,
+			is_urgent=False,
+		)
+
+	def sync_mother_row_fields(self, window_start, window_end):
+		self._sync_row_fields(self.mother, window_start, window_end)
+
+	def sync_baby_row_fields(self, window_start, window_end):
+		self._sync_row_fields(self.baby, window_start, window_end)
+
+	@staticmethod
+	def _sync_row_fields(table, window_start, window_end):
+		# "Date of Next Visit" is auto-filled on the latest row only.
+		# "Next Visit Window" is a plain read-only range shown on every row.
+		if window_start and window_end:
+			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
+			if table:
+				table[-1].date_of_next_visit = window_end
 		else:
-			last_date = max(getdate(row.date) for row in dated_rows)
-			calculated_date = add_days(last_date, self.get_interval_days())
+			display = ""
 
-		self.next_pnc_visit_date = calculated_date
-		self.next_pnc_visit_date_auto = calculated_date
+		for row in table:
+			row.next_visit_window = display
+
+	@staticmethod
+	def get_visit_window(visit_number):
+		"""visit_number is 1-indexed - see
+		chw.chw_master.visit_schedule.get_visit_window. Returns None once
+		visit_number has no matching row - there's no fixed cap, the
+		configured rows *are* the cap."""
+		return visit_schedule.get_visit_window("PNC", visit_number, DEFAULT_VISIT_SCHEDULE, DEFAULT_RISK_ALERT_DAYS)

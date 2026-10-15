@@ -2,12 +2,12 @@
   <AppLayout>
     <PageHeader>
       <template #title>
-        <TabButtons v-model="view" :buttons="viewButtons" />
+        <TabButtons v-model="view" :buttons="viewButtons.map((b) => ({ ...b, label: t(b.label) }))" />
       </template>
       <template #actions>
         <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
           <input type="checkbox" v-model="showClosed" class="rounded border-gray-300" />
-          Show closed
+          {{ t('Show closed') }}
         </label>
       </template>
     </PageHeader>
@@ -21,16 +21,16 @@
 
     <template v-else>
       <div v-if="rows.length === 0" class="py-10 text-center text-gray-500 dark:text-gray-400">
-        Nothing on your worklist.
+        {{ t('Nothing on your worklist.') }}
       </div>
       <div v-else class="overflow-x-auto rounded-lg border dark:border-gray-800">
         <table class="w-full min-w-[32rem] text-left text-sm">
           <thead class="border-b bg-gray-50 text-xs uppercase text-gray-500 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-400">
             <tr>
-              <th class="px-4 py-2">Description</th>
-              <th class="px-4 py-2">Reference</th>
-              <th class="px-4 py-2">Due Date</th>
-              <th class="px-4 py-2">Status</th>
+              <th class="px-4 py-2">{{ t('Description') }}</th>
+              <th class="px-4 py-2">{{ t('Reference') }}</th>
+              <th class="px-4 py-2">{{ t('Due Date') }}</th>
+              <th class="px-4 py-2">{{ t('Status') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -41,14 +41,14 @@
               @click="openTodo(row)"
             >
               <td class="px-4 py-2 text-gray-900 dark:text-gray-100">{{ stripHtml(row.description) || '-' }}</td>
-              <td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ row.reference_type || '-' }}</td>
+              <td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ t(row.reference_type) || '-' }}</td>
               <td class="px-4 py-2 text-gray-600 dark:text-gray-400">{{ row.date || '-' }}</td>
               <td class="px-4 py-2">
                 <span
                   class="rounded-full px-2 py-0.5 text-xs font-medium"
                   :class="row.status === 'Open' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'"
                 >
-                  {{ row.status }}
+                  {{ t(row.status) }}
                 </span>
               </td>
             </tr>

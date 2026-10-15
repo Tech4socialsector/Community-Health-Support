@@ -2,14 +2,14 @@
   <AppLayout>
     <PageHeader>
       <template #title>
-        <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ t('Dashboard') }}</h1>
       </template>
       <template #actions>
         <Button variant="outline" :loading="loading" @click="refresh">
           <template #prefix>
             <FeatherIcon name="refresh-cw" class="h-4 w-4" />
           </template>
-          Refresh
+          {{ t('Refresh') }}
         </Button>
       </template>
     </PageHeader>
@@ -34,8 +34,7 @@
       v-else-if="cards.length === 0"
       class="py-10 text-center text-gray-500 dark:text-gray-400"
     >
-      No dashboard cards are configured yet. Ask a coordinator to enable
-      cards in App Setting.
+      {{ t('No dashboard cards are configured yet. Ask a coordinator to enable cards in App Setting.') }}
     </div>
 
     <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -51,7 +50,7 @@
           <span class="block text-2xl font-semibold text-gray-900 dark:text-gray-100">
             {{ statValue(card.stat_key) }}
           </span>
-          <span class="block text-sm text-gray-500 dark:text-gray-400">{{ card.label }}</span>
+          <span class="block text-sm text-gray-500 dark:text-gray-400">{{ t(card.label) }}</span>
         </span>
       </div>
     </div>

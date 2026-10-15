@@ -14,7 +14,7 @@
   />
 
   <div v-else-if="controlType === 'attach'">
-    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
     <div v-if="modelValue" class="flex items-center gap-3 rounded-lg border p-2 dark:border-gray-800">
       <img
         v-if="isImageField"
@@ -30,7 +30,7 @@
       >
         {{ fileName }}
       </a>
-      <Tooltip text="Remove file">
+      <Tooltip :text="t('Remove file')">
         <button
           type="button"
           class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-red-500 dark:hover:bg-gray-800"
@@ -48,7 +48,7 @@
     >
       <template #default="{ uploading, progress, openFileSelector }">
         <Button variant="outline" :loading="uploading" @click="openFileSelector">
-          {{ uploading ? `Uploading ${progress}%` : `Attach ${isImageField ? 'Image' : 'File'}` }}
+          {{ uploading ? t('Uploading {0}%', [progress]) : isImageField ? t('Attach Image') : t('Attach File') }}
         </Button>
       </template>
     </FileUploader>
@@ -57,34 +57,42 @@
   <FormControl
     v-else-if="controlType === 'select'"
     type="select"
+    :placeholder="t('Select option')"
     class="[&_[data-slot=trigger]]:w-full"
-    :label="field.label"
+    :label="t(field.label)"
     :required="!!field.reqd"
     :options="selectOptions"
+    :description="t(field.description) || undefined"
+    :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   />
   <FormControl
     v-else-if="controlType === 'checkbox'"
     type="checkbox"
-    :label="field.label"
+    :label="t(field.label)"
+    :description="t(field.description) || undefined"
+    :disabled="readOnly"
     :model-value="!!modelValue"
     @update:model-value="$emit('update:modelValue', $event ? 1 : 0)"
   />
   <FormControl
     v-else-if="controlType === 'textarea'"
     type="textarea"
-    :label="field.label"
+    :label="t(field.label)"
     :required="!!field.reqd"
+    :description="t(field.description) || undefined"
+    :disabled="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   />
   <div v-else-if="isUserLink">
     <FormControl
       type="text"
-      :label="field.label"
+      :label="t(field.label)"
       :required="!!field.reqd"
-      :description="linkDescription"
+      :description="t(field.description) || undefined"
+      :disabled="readOnly"
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
     >
@@ -95,14 +103,31 @@
       </template>
     </FormControl>
   </div>
+  <SignatureField
+    v-else-if="controlType === 'signature'"
+    :field="field"
+    :model-value="modelValue"
+    :read-only="readOnly"
+    @update:model-value="$emit('update:modelValue', $event)"
+  />
+  <LinkField
+    v-else-if="controlType === 'link'"
+    :field="field"
+    :model-value="modelValue"
+    :read-only="readOnly"
+    :link-query="linkQuery"
+    :reference-doctype="doctype"
+    @update:model-value="$emit('update:modelValue', $event)"
+  />
   <FormControl
     v-else
     :type="controlType"
-    :label="field.label"
+    :label="t(field.label)"
     :required="!!field.reqd"
-    :description="linkDescription"
+    :description="t(field.description) || undefined"
+    :disabled="readOnly"
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="$emit('update:modelValue', toFieldValue($event))"
   />
 </template>
 
@@ -112,14 +137,42 @@ import { FormControl, FileUploader, Button, FeatherIcon, Tooltip } from 'frappe-
 import UserLinkHoverCard from '@/components/UserLinkHoverCard.vue'
 import GeoLocationField from '@/components/GeoLocationField.vue'
 import TableMultiSelectField from '@/components/TableMultiSelectField.vue'
+import LinkField from '@/components/LinkField.vue'
+import SignatureField from '@/components/SignatureField.vue'
+import { evaluateDependsOn } from '@/data/dependsOn'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   field: { type: Object, required: true },
   modelValue: { default: null },
   doctype: { type: String, default: null },
   docname: { type: String, default: null },
+  // Desk's set_query for a Link field: { filters } and/or { query }.
+  linkQuery: { type: Object, default: null },
+  // Desk conditions on the form (parent doc and, in a child row, the row).
+  doc: { type: Object, default: null },
+  parentDoc: { type: Object, default: null },
 })
 defineEmits(['update:modelValue'])
+
+// A number box gives text ("2"); Desk sends a real number, and server code
+// doing arithmetic with it (e.g. Household's pending members = total -
+// added) failed on text with a TypeError. Empty stays empty.
+function toFieldValue(value) {
+  if (controlType.value !== 'number') return value
+  if (value === '' || value == null) return null
+  const n = props.field.fieldtype === 'Int' ? parseInt(value, 10) : parseFloat(value)
+  return Number.isNaN(n) ? null : n
+}
+
+// Desk's read_only / read_only_depends_on: shown, but not editable - e.g.
+// Age, Village and other values the form or server fills in. Read-only
+// fields used to be ordinary editable boxes here.
+const readOnly = computed(
+  () =>
+    !!props.field.read_only ||
+    (!!props.field.read_only_depends_on && evaluateDependsOn(props.field.read_only_depends_on, props.doc || {}, props.parentDoc || props.doc)),
+)
 
 const controlType = computed(() => {
   switch (props.field.fieldtype) {
@@ -142,6 +195,12 @@ const controlType = computed(() => {
       return 'date'
     case 'Datetime':
       return 'datetime-local'
+    case 'Time':
+      return 'time'
+    case 'Signature':
+      return 'signature'
+    case 'Link':
+      return props.field.options === 'User' ? 'text' : 'link'
     case 'Password':
       return 'password'
     case 'Attach':
@@ -174,22 +233,8 @@ const selectOptions = computed(() => {
     .split('\n')
     .map((v) => v.trim())
     .filter(Boolean)
-    .map((v) => ({ label: v, value: v }))
+    // Shown in the user's language; the English option is what's stored.
+    .map((v) => ({ label: t(v), value: v }))
 })
 
-// Link fields don't have a dedicated autocomplete widget in this build - a
-// plain text input, with a "Links to ..." hint in the description, is the
-// fallback so the generic form still works for every fieldtype without
-// hardcoding per-doctype pickers. Named after the field's own label (e.g.
-// "Data Collector"), not field.options (the raw linked doctype name, e.g.
-// "Health Worker") - a field's label is what a user actually sees it
-// called elsewhere on the same form, and health_worker_name in particular
-// was renamed to "Data Collector" precisely so "Health Worker" wouldn't
-// surface anywhere in this app's UI.
-const linkDescription = computed(() => {
-  if (props.field.fieldtype === 'Link' && props.field.options) {
-    return `Links to ${props.field.label || props.field.options}`
-  }
-  return props.field.description || undefined
-})
 </script>
