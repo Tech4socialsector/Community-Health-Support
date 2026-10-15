@@ -21,13 +21,33 @@
   "house",
   "column_break_kkvt",
   "type_of_housing",
-  "electricity",
-  "farming",
   "drinkingwater",
   "toilet",
-  "cattles",
   "address",
-  "health_worker_name"
+  "health_worker_name",
+  "cancer_survey_section",
+  "present_house",
+  "door_no",
+  "street_name",
+  "town_area",
+  "state",
+  "pin_code",
+  "landmark_if_any",
+  "alternate_mobile_number",
+  "familys_total_income",
+  "cancer_survey_column_break",
+  "cancer_survey_done",
+  "survey_not_done_reason",
+  "cancer_screening_eligible",
+  "not_eligible_reason",
+  "mismatch_age_yrs",
+  "not_eligible_other_reason",
+  "id_details_section",
+  "aadhar_card",
+  "voter_id",
+  "id_details_column_break",
+  "ration_card",
+  "religion"
  ],
  "fields": [
   {
@@ -112,19 +132,6 @@
    "options": "\nTemporary\nPermanent"
   },
   {
-   "fieldname": "electricity",
-   "fieldtype": "Select",
-   "label": "Electricity",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "farming",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Farming",
-   "options": "\nYes\nNo"
-  },
-  {
    "fieldname": "drinkingwater",
    "fieldtype": "Select",
    "label": "Drinking Water",
@@ -135,12 +142,6 @@
    "fieldtype": "Select",
    "label": "Toilet",
    "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "cattles",
-   "fieldtype": "Select",
-   "label": "Cattles",
-   "options": "\nNo\ncow, goat\ncow only\ngoat only"
   },
   {
    "fieldname": "column_break_kkvt",
@@ -165,6 +166,130 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nI live here\nI work outside\nout of town"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "cancer_survey_section",
+   "fieldtype": "Section Break",
+   "label": "Cancer Survey"
+  },
+  {
+   "fieldname": "present_house",
+   "fieldtype": "Select",
+   "label": "Present House",
+   "options": "\nRental\nOwn"
+  },
+  {
+   "fieldname": "door_no",
+   "fieldtype": "Data",
+   "label": "Door No"
+  },
+  {
+   "fieldname": "street_name",
+   "fieldtype": "Data",
+   "label": "Street Name"
+  },
+  {
+   "fieldname": "town_area",
+   "fieldtype": "Data",
+   "label": "Town / Area"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "fieldname": "pin_code",
+   "fieldtype": "Int",
+   "label": "Pin Code"
+  },
+  {
+   "fieldname": "landmark_if_any",
+   "fieldtype": "Data",
+   "label": "Landmark if Any"
+  },
+  {
+   "fieldname": "alternate_mobile_number",
+   "fieldtype": "Phone",
+   "label": "Alternate Mobile Number"
+  },
+  {
+   "fieldname": "familys_total_income",
+   "fieldtype": "Int",
+   "label": "Family's Total Income"
+  },
+  {
+   "fieldname": "cancer_survey_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cancer_survey_done",
+   "fieldtype": "Select",
+   "label": "Survey Done",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.cancer_survey_done==\"No\"",
+   "fieldname": "survey_not_done_reason",
+   "fieldtype": "Select",
+   "label": "If No Reasons",
+   "options": "\nRefused\nDoor Locked\nWork - Out of Station\nOut of Station - Short Visit\nAlready Screened\nSettled Outstation\nMedical Reasons"
+  },
+  {
+   "fieldname": "cancer_screening_eligible",
+   "fieldtype": "Select",
+   "label": "Eligible",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.cancer_screening_eligible==\"No\"",
+   "fieldname": "not_eligible_reason",
+   "fieldtype": "Select",
+   "label": "If No",
+   "options": "\nAge Mismatch\nKnown Cancer Patient\nOthers"
+  },
+  {
+   "depends_on": "eval:doc.not_eligible_reason==\"Age Mismatch\"",
+   "fieldname": "mismatch_age_yrs",
+   "fieldtype": "Data",
+   "label": "Mismatch Age Yrs"
+  },
+  {
+   "depends_on": "eval:doc.not_eligible_reason==\"Others\"",
+   "fieldname": "not_eligible_other_reason",
+   "fieldtype": "Data",
+   "label": "If Others"
+  },
+  {
+   "fieldname": "id_details_section",
+   "fieldtype": "Section Break",
+   "label": "ID Details"
+  },
+  {
+   "fieldname": "aadhar_card",
+   "fieldtype": "Data",
+   "label": "Aadhar Card"
+  },
+  {
+   "fieldname": "voter_id",
+   "fieldtype": "Data",
+   "label": "Voter ID"
+  },
+  {
+   "fieldname": "id_details_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ration_card",
+   "fieldtype": "Data",
+   "label": "Ration Card"
+  },
+  {
+   "fieldname": "religion",
+   "fieldtype": "Select",
+   "label": "Religion",
+   "options": "\nHindu\nMuslim\nChristian\nOthers"
   }
  ],
  "grid_page_length": 50,
@@ -175,7 +300,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-09 10:26:18.780727",
+ "modified": "2026-10-15 17:08:09.655846",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

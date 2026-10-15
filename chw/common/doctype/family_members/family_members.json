@@ -60,7 +60,13 @@
   "charity_mch_assessment",
   "charity_column_break",
   "charity_assessment_score",
-  "suggested_charity_percentage"
+  "suggested_charity_percentage",
+  "cancer_tab",
+  "spouse_father_name",
+  "monthly_income",
+  "cancer_column_break",
+  "tobacco_user",
+  "cancer_screening_eligible"
  ],
  "fields": [
   {
@@ -417,6 +423,37 @@
    "fieldtype": "Int",
    "label": "Overall Score",
    "read_only": 1
+  },
+  {
+   "fieldname": "cancer_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cancer"
+  },
+  {
+   "fieldname": "spouse_father_name",
+   "fieldtype": "Data",
+   "label": "Father's / Spouse's Name"
+  },
+  {
+   "fieldname": "monthly_income",
+   "fieldtype": "Int",
+   "label": "Monthly Income"
+  },
+  {
+   "fieldname": "cancer_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tobacco_user",
+   "fieldtype": "Select",
+   "label": "Tobacco User",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "cancer_screening_eligible",
+   "fieldtype": "Select",
+   "label": "Eligible for Cancer Screening",
+   "options": "\nYes\nNo"
   }
  ],
  "grid_page_length": 50,
@@ -447,7 +484,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-10-09 15:29:20.615754",
+ "modified": "2026-10-15 16:50:02.842511",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

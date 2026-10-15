@@ -1,0 +1,813 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:CE-{#####}",
+ "creation": "2026-10-14 18:30:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "patient_details_tab",
+  "main_screening_form",
+  "patient_name",
+  "gender",
+  "date_of_birth",
+  "age",
+  "patient_column_break",
+  "mobile_number",
+  "village",
+  "date_of_evaluation",
+  "oral_tab",
+  "oral_clinical_evaluation",
+  "oral_details_section",
+  "oral_uhid",
+  "oral_column_break_ids",
+  "oral_scr_opd_number",
+  "oral_tests_section",
+  "oral_tobacco_counselling",
+  "oral_tcc_outcome",
+  "oral_tcc_report_date",
+  "oral_head_neck_opd",
+  "oral_head_neck_outcome",
+  "oral_head_neck_report_date",
+  "oral_column_break_tests",
+  "oral_cytology",
+  "oral_cytology_report",
+  "oral_cytology_report_date",
+  "oral_biopsy",
+  "oral_biopsy_report",
+  "oral_biopsy_report_date",
+  "oral_comments_section",
+  "oral_additional_comments",
+  "oral_outcome_section",
+  "oral_final_diagnosis",
+  "oral_treatment",
+  "oral_column_break_outcome",
+  "oral_treatment_comments",
+  "oral_followup_advice",
+  "breast_tab",
+  "breast_clinical_evaluation",
+  "breast_details_section",
+  "breast_uhid",
+  "breast_column_break_ids",
+  "breast_scr_opd_number",
+  "breast_mammogram_section",
+  "breast_mammogram",
+  "breast_mammogram_right",
+  "breast_column_break_mammogram",
+  "breast_mammogram_left",
+  "breast_mammogram_report_date",
+  "breast_ultrasound_section",
+  "breast_ultrasound",
+  "breast_ultrasound_right",
+  "breast_column_break_ultrasound",
+  "breast_ultrasound_left",
+  "breast_ultrasound_report_date",
+  "breast_cytology_section",
+  "breast_cytology",
+  "breast_cytology_result",
+  "breast_cytology_report_date",
+  "breast_column_break_cytology",
+  "breast_cytology_other_findings",
+  "breast_biopsy_section",
+  "breast_biopsy",
+  "breast_biopsy_report",
+  "breast_biopsy_report_date",
+  "breast_comments_section",
+  "breast_additional_comments",
+  "breast_outcome_section",
+  "breast_final_diagnosis",
+  "breast_treatment",
+  "breast_column_break_outcome",
+  "breast_treatment_comments",
+  "breast_followup_advice",
+  "cervical_tab",
+  "cervical_clinical_evaluation",
+  "cervical_details_section",
+  "cervical_uhid",
+  "cervical_column_break_ids",
+  "cervical_scr_opd_number",
+  "cervical_colposcopy_section",
+  "cervical_colposcopy",
+  "cervical_colposcopy_result",
+  "cervical_column_break_colposcopy",
+  "cervical_colposcopy_findings",
+  "cervical_colposcopy_report_date",
+  "cervical_biopsy_section",
+  "cervical_colpo_guided_biopsy",
+  "cervical_colpo_biopsy_result",
+  "cervical_colpo_biopsy_report_date",
+  "cervical_comments_section",
+  "cervical_additional_comments",
+  "cervical_treatment_plan_section",
+  "cervical_plan_observation",
+  "cervical_plan_cone_biopsy",
+  "cervical_plan_hysterectomy",
+  "cervical_plan_cryotherapy",
+  "cervical_column_break_plan",
+  "cervical_plan_leep",
+  "cervical_plan_cancer_management",
+  "cervical_plan_thermocoagulation",
+  "cervical_plan_others",
+  "cervical_outcome_section",
+  "cervical_treatment",
+  "cervical_treatment_comments",
+  "cervical_column_break_outcome",
+  "cervical_followup_advice",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Patient Details"
+  },
+  {
+   "description": "Optional. Pick the patient's screening record to fill these details automatically.",
+   "fieldname": "main_screening_form",
+   "fieldtype": "Link",
+   "label": "Main Screening Form",
+   "options": "Main Screening Form"
+  },
+  {
+   "fetch_from": "main_screening_form.name1",
+   "fetch_if_empty": 1,
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "main_screening_form.gender",
+   "fetch_if_empty": 1,
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Gender",
+   "options": "\nMale\nFemale\nOther",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "main_screening_form.date_of_birth",
+   "fetch_if_empty": 1,
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of Birth"
+  },
+  {
+   "fetch_from": "main_screening_form.age",
+   "fetch_if_empty": 1,
+   "fieldname": "age",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Age"
+  },
+  {
+   "fieldname": "patient_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "main_screening_form.mobile_number",
+   "fetch_if_empty": 1,
+   "fieldname": "mobile_number",
+   "fieldtype": "Phone",
+   "label": "Mobile Number"
+  },
+  {
+   "fetch_from": "main_screening_form.village",
+   "fetch_if_empty": 1,
+   "fieldname": "village",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Village"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date_of_evaluation",
+   "fieldtype": "Date",
+   "label": "Date of Evaluation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "oral_tab",
+   "fieldtype": "Tab Break",
+   "label": "Oral"
+  },
+  {
+   "fieldname": "oral_clinical_evaluation",
+   "fieldtype": "Select",
+   "label": "Oral Clinical Evaluation",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "fieldname": "oral_details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "oral_uhid",
+   "fieldtype": "Data",
+   "label": "UHID"
+  },
+  {
+   "fieldname": "oral_column_break_ids",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "oral_scr_opd_number",
+   "fieldtype": "Data",
+   "label": "SCR OPD Number"
+  },
+  {
+   "depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "fieldname": "oral_tests_section",
+   "fieldtype": "Section Break",
+   "label": "Tests"
+  },
+  {
+   "fieldname": "oral_tobacco_counselling",
+   "fieldtype": "Select",
+   "label": "Tobacco Counselling",
+   "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.oral_tobacco_counselling=='Yes'",
+   "fieldname": "oral_tcc_outcome",
+   "fieldtype": "Small Text",
+   "label": "Outcome of Visit: TCC"
+  },
+  {
+   "depends_on": "eval:doc.oral_tobacco_counselling=='Yes'",
+   "fieldname": "oral_tcc_report_date",
+   "fieldtype": "Date",
+   "label": "TCC Report Date"
+  },
+  {
+   "fieldname": "oral_head_neck_opd",
+   "fieldtype": "Select",
+   "label": "Head & Neck OPD",
+   "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.oral_head_neck_opd=='Yes'",
+   "fieldname": "oral_head_neck_outcome",
+   "fieldtype": "Small Text",
+   "label": "Outcome of Visit: Head & Neck OPD"
+  },
+  {
+   "depends_on": "eval:doc.oral_head_neck_opd=='Yes'",
+   "fieldname": "oral_head_neck_report_date",
+   "fieldtype": "Date",
+   "label": "Head & Neck OPD Report Date"
+  },
+  {
+   "fieldname": "oral_column_break_tests",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "oral_cytology",
+   "fieldtype": "Select",
+   "label": "Oral Cytology",
+   "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.oral_cytology=='Yes'",
+   "fieldname": "oral_cytology_report",
+   "fieldtype": "Small Text",
+   "label": "Oral Cytology Report"
+  },
+  {
+   "depends_on": "eval:doc.oral_cytology=='Yes'",
+   "fieldname": "oral_cytology_report_date",
+   "fieldtype": "Date",
+   "label": "Oral Cytology Report Date"
+  },
+  {
+   "fieldname": "oral_biopsy",
+   "fieldtype": "Select",
+   "label": "Biopsy",
+   "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.oral_biopsy=='Yes'",
+   "fieldname": "oral_biopsy_report",
+   "fieldtype": "Small Text",
+   "label": "Biopsy Report"
+  },
+  {
+   "depends_on": "eval:doc.oral_biopsy=='Yes'",
+   "fieldname": "oral_biopsy_report_date",
+   "fieldtype": "Date",
+   "label": "Biopsy Report Date"
+  },
+  {
+   "depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "fieldname": "oral_comments_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "oral_additional_comments",
+   "fieldtype": "Small Text",
+   "label": "Additional Comments"
+  },
+  {
+   "depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "fieldname": "oral_outcome_section",
+   "fieldtype": "Section Break",
+   "label": "Diagnosis & Treatment"
+  },
+  {
+   "fieldname": "oral_final_diagnosis",
+   "fieldtype": "Select",
+   "label": "Final Diagnosis",
+   "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "options": "\nBenign\nMalignant\nOthers"
+  },
+  {
+   "fieldname": "oral_treatment",
+   "fieldtype": "Select",
+   "label": "Treatment",
+   "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "options": "\nCompleted\nPartially done\nPreferred other center"
+  },
+  {
+   "fieldname": "oral_column_break_outcome",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "oral_treatment_comments",
+   "fieldtype": "Small Text",
+   "label": "Additional Comments"
+  },
+  {
+   "fieldname": "oral_followup_advice",
+   "fieldtype": "Select",
+   "label": "Followup Advice",
+   "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
+   "options": "\nNil\n3 months\n6 months\n12 months"
+  },
+  {
+   "fieldname": "breast_tab",
+   "fieldtype": "Tab Break",
+   "label": "Breast"
+  },
+  {
+   "fieldname": "breast_clinical_evaluation",
+   "fieldtype": "Select",
+   "label": "Breast Clinical Evaluation",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "fieldname": "breast_details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "breast_uhid",
+   "fieldtype": "Data",
+   "label": "UHID"
+  },
+  {
+   "fieldname": "breast_column_break_ids",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "breast_scr_opd_number",
+   "fieldtype": "Data",
+   "label": "SCR OPD Number"
+  },
+  {
+   "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "fieldname": "breast_mammogram_section",
+   "fieldtype": "Section Break",
+   "label": "Mammogram"
+  },
+  {
+   "fieldname": "breast_mammogram",
+   "fieldtype": "Select",
+   "label": "Mammogram",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "breast_column_break_mammogram",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.breast_mammogram=='Yes'",
+   "fieldname": "breast_mammogram_right",
+   "fieldtype": "Small Text",
+   "label": "Mammogram – Right Breast",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_mammogram=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.breast_mammogram=='Yes'",
+   "fieldname": "breast_mammogram_left",
+   "fieldtype": "Small Text",
+   "label": "Mammogram – Left Breast",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_mammogram=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.breast_mammogram=='Yes'",
+   "fieldname": "breast_mammogram_report_date",
+   "fieldtype": "Date",
+   "label": "Mammogram Report Date",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_mammogram=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "fieldname": "breast_ultrasound_section",
+   "fieldtype": "Section Break",
+   "label": "Ultrasound"
+  },
+  {
+   "fieldname": "breast_ultrasound",
+   "fieldtype": "Select",
+   "label": "Ultrasound Breast",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "breast_column_break_ultrasound",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.breast_ultrasound=='Yes'",
+   "fieldname": "breast_ultrasound_right",
+   "fieldtype": "Small Text",
+   "label": "Ultrasound – Right Breast",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_ultrasound=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.breast_ultrasound=='Yes'",
+   "fieldname": "breast_ultrasound_left",
+   "fieldtype": "Small Text",
+   "label": "Ultrasound – Left Breast",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_ultrasound=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.breast_ultrasound=='Yes'",
+   "fieldname": "breast_ultrasound_report_date",
+   "fieldtype": "Date",
+   "label": "Ultrasound Report Date",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_ultrasound=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "fieldname": "breast_cytology_section",
+   "fieldtype": "Section Break",
+   "label": "Cytology"
+  },
+  {
+   "fieldname": "breast_cytology",
+   "fieldtype": "Select",
+   "label": "Cytology",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "breast_column_break_cytology",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.breast_cytology=='Yes'",
+   "fieldname": "breast_cytology_result",
+   "fieldtype": "Select",
+   "label": "Cytology Result",
+   "options": "\nPositive for Atypical cells\nNegative for Atypical cells\nOthers"
+  },
+  {
+   "depends_on": "eval:doc.breast_cytology=='Yes'",
+   "fieldname": "breast_cytology_report_date",
+   "fieldtype": "Date",
+   "label": "Cytology Report Date"
+  },
+  {
+   "depends_on": "eval:doc.breast_cytology=='Yes'",
+   "fieldname": "breast_cytology_other_findings",
+   "fieldtype": "Small Text",
+   "label": "Other Findings"
+  },
+  {
+   "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "fieldname": "breast_biopsy_section",
+   "fieldtype": "Section Break",
+   "label": "Biopsy"
+  },
+  {
+   "fieldname": "breast_biopsy",
+   "fieldtype": "Select",
+   "label": "Biopsy",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo\nNot now"
+  },
+  {
+   "depends_on": "eval:doc.breast_biopsy=='Yes'",
+   "fieldname": "breast_biopsy_report",
+   "fieldtype": "Small Text",
+   "label": "Biopsy Report"
+  },
+  {
+   "depends_on": "eval:doc.breast_biopsy=='Yes'",
+   "fieldname": "breast_biopsy_report_date",
+   "fieldtype": "Date",
+   "label": "Biopsy Report Date"
+  },
+  {
+   "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "fieldname": "breast_comments_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "breast_additional_comments",
+   "fieldtype": "Small Text",
+   "label": "Additional Comments"
+  },
+  {
+   "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "fieldname": "breast_outcome_section",
+   "fieldtype": "Section Break",
+   "label": "Diagnosis & Treatment"
+  },
+  {
+   "fieldname": "breast_final_diagnosis",
+   "fieldtype": "Select",
+   "label": "Final Diagnosis",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "options": "\nBenign\nMalignant\nOthers"
+  },
+  {
+   "fieldname": "breast_treatment",
+   "fieldtype": "Select",
+   "label": "Treatment",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "options": "\nCompleted\nPartially done\nPreferred other center"
+  },
+  {
+   "fieldname": "breast_column_break_outcome",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "breast_treatment_comments",
+   "fieldtype": "Small Text",
+   "label": "Additional Comments"
+  },
+  {
+   "fieldname": "breast_followup_advice",
+   "fieldtype": "Select",
+   "label": "Followup Advice",
+   "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
+   "options": "\nAnnual review\nOnce in 2 years\n3 months\n6 months\nOthers"
+  },
+  {
+   "fieldname": "cervical_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cervical"
+  },
+  {
+   "fieldname": "cervical_clinical_evaluation",
+   "fieldtype": "Select",
+   "label": "Cervical Clinical Evaluation",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "fieldname": "cervical_details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cervical_uhid",
+   "fieldtype": "Data",
+   "label": "UHID"
+  },
+  {
+   "fieldname": "cervical_column_break_ids",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cervical_scr_opd_number",
+   "fieldtype": "Data",
+   "label": "SCR OPD Number"
+  },
+  {
+   "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "fieldname": "cervical_colposcopy_section",
+   "fieldtype": "Section Break",
+   "label": "Colposcopy"
+  },
+  {
+   "fieldname": "cervical_colposcopy",
+   "fieldtype": "Select",
+   "label": "Colposcopy",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "cervical_column_break_colposcopy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.cervical_colposcopy=='Yes'",
+   "fieldname": "cervical_colposcopy_result",
+   "fieldtype": "Select",
+   "label": "Colposcopy Result",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes' && doc.cervical_colposcopy=='Yes'",
+   "options": "\nSatisfactory\nUnsatisfactory"
+  },
+  {
+   "depends_on": "eval:doc.cervical_colposcopy=='Yes' && doc.cervical_colposcopy_result=='Satisfactory'",
+   "fieldname": "cervical_colposcopy_findings",
+   "fieldtype": "Select",
+   "label": "Colposcopy Findings",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes' && doc.cervical_colposcopy=='Yes' && doc.cervical_colposcopy_result=='Satisfactory'",
+   "options": "\nNormal / Squamous metaplasia / Inflammatory\nCIN I\nCIN II\nCIN III / Ca in situ\nInvasive cancer\nOthers"
+  },
+  {
+   "depends_on": "eval:doc.cervical_colposcopy=='Yes'",
+   "fieldname": "cervical_colposcopy_report_date",
+   "fieldtype": "Date",
+   "label": "Colposcopy Report Date",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes' && doc.cervical_colposcopy=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "fieldname": "cervical_biopsy_section",
+   "fieldtype": "Section Break",
+   "label": "Colpo Guided Biopsy"
+  },
+  {
+   "fieldname": "cervical_colpo_guided_biopsy",
+   "fieldtype": "Select",
+   "label": "Colpo Guided Biopsy",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.cervical_colpo_guided_biopsy=='Yes'",
+   "fieldname": "cervical_colpo_biopsy_result",
+   "fieldtype": "Select",
+   "label": "Colpo Guided Biopsy Result",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes' && doc.cervical_colpo_guided_biopsy=='Yes'",
+   "options": "\nNormal / Squamous metaplasia / Inflammatory\nCIN I\nCIN II\nCIN III / Ca in situ\nGlandular dysplasia\nSquamous cell carcinoma\nAdenocarcinoma\nInconclusive"
+  },
+  {
+   "depends_on": "eval:doc.cervical_colpo_guided_biopsy=='Yes'",
+   "fieldname": "cervical_colpo_biopsy_report_date",
+   "fieldtype": "Date",
+   "label": "Colpo Guided Biopsy Report Date",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes' && doc.cervical_colpo_guided_biopsy=='Yes'"
+  },
+  {
+   "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "fieldname": "cervical_comments_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cervical_additional_comments",
+   "fieldtype": "Small Text",
+   "label": "Additional Comments"
+  },
+  {
+   "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "description": "Select one or more",
+   "fieldname": "cervical_treatment_plan_section",
+   "fieldtype": "Section Break",
+   "label": "Treatment Plan"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_observation",
+   "fieldtype": "Check",
+   "label": "Observation & Follow up"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_cone_biopsy",
+   "fieldtype": "Check",
+   "label": "Cone Biopsy"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_hysterectomy",
+   "fieldtype": "Check",
+   "label": "Hysterectomy"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_cryotherapy",
+   "fieldtype": "Check",
+   "label": "Cryotherapy"
+  },
+  {
+   "fieldname": "cervical_column_break_plan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_leep",
+   "fieldtype": "Check",
+   "label": "LEEP"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_cancer_management",
+   "fieldtype": "Check",
+   "label": "Cancer management"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_thermocoagulation",
+   "fieldtype": "Check",
+   "label": "Thermocoagulation"
+  },
+  {
+   "default": "0",
+   "fieldname": "cervical_plan_others",
+   "fieldtype": "Check",
+   "label": "Others"
+  },
+  {
+   "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "fieldname": "cervical_outcome_section",
+   "fieldtype": "Section Break",
+   "label": "Treatment & Follow-up"
+  },
+  {
+   "fieldname": "cervical_treatment",
+   "fieldtype": "Select",
+   "label": "Treatment",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "options": "\nCompleted\nPartially done\nPreferred other center"
+  },
+  {
+   "fieldname": "cervical_column_break_outcome",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cervical_treatment_comments",
+   "fieldtype": "Small Text",
+   "label": "Additional Comments"
+  },
+  {
+   "fieldname": "cervical_followup_advice",
+   "fieldtype": "Select",
+   "label": "Followup Advice",
+   "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
+   "options": "\n4 weeks\n6 weeks\n12 weeks\n6 months\n12 months\nOnce in 3 years\nOthers"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Clinical Evaluation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-10-15 16:50:02.842511",
+ "modified_by": "Administrator",
+ "module": "Cancer",
+ "name": "Clinical Evaluation",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "search_fields": "patient_name,mobile_number",
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "patient_name"
+}
