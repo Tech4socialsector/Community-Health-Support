@@ -8,7 +8,11 @@
 // driven by the Nurse table alone. Volunteer and Doctor are open-ended,
 // manual logs: Add Row any time, current date/LMP/POG auto-fill, but no
 // calculated cadence and no My Work connection of their own.
-const FOLLOWUP_TABLE_FIELDS = ["anc_followup", "anc_followup_for_nurse", "anc_followup_for_docter"];
+const FOLLOWUP_TABLE_FIELDS = [
+	"anc_followup",
+	"anc_followup_for_nurse",
+	"anc_followup_for_docter",
+];
 const NURSE_TABLE_FIELD = "anc_followup_for_nurse";
 
 // calculate_next_anc_visit_date is triggered from several places (a Nurse
@@ -31,13 +35,15 @@ frappe.ui.form.on("ANC Follow-up", {
 	},
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
-			frappe.call({
-				method: "chw.api.get_current_health_worker",
-			}).then((r) => {
-				if (r.message) {
-					frm.set_value("health_worker_name", r.message);
-				}
-			});
+			frappe
+				.call({
+					method: "chw.api.get_current_health_worker",
+				})
+				.then((r) => {
+					if (r.message) {
+						frm.set_value("health_worker_name", r.message);
+					}
+				});
 		}
 	},
 	refresh(frm) {
@@ -171,7 +177,9 @@ function highlight_risk_rows(frm) {
 }
 
 function get_pregnancy_info(pregnant_id) {
-	return frappe.db.get_value("Pregnancy Registration", pregnant_id, ["lmp_date", "high_risk"]).then((r) => r.message || {});
+	return frappe.db
+		.get_value("Pregnancy Registration", pregnant_id, ["lmp_date", "high_risk"])
+		.then((r) => r.message || {});
 }
 
 function get_window_policy(high_risk) {
@@ -254,7 +262,10 @@ function generate_visit_schedule(frm) {
 			// count) gets none of these; she starts straight in the manual
 			// phase instead.
 			for (let idx = starting_window; idx <= automatic_window_count; idx++) {
-				const window_start = frappe.datetime.add_days(info.lmp_date, (idx - 1) * window_days);
+				const window_start = frappe.datetime.add_days(
+					info.lmp_date,
+					(idx - 1) * window_days
+				);
 				const window_end = frappe.datetime.add_days(window_start, window_days);
 				frm.add_child(NURSE_TABLE_FIELD, {
 					window_start_date: window_start,
@@ -293,7 +304,9 @@ function sync_child_row_fields(frm, window_start, window_end) {
 	// fields (where present) are left purely to manual entry.
 	let display = "";
 	if (window_start && window_end) {
-		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(window_end)}`;
+		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(
+			window_end
+		)}`;
 	}
 
 	const rows = frm.doc[NURSE_TABLE_FIELD] || [];
@@ -319,7 +332,8 @@ function get_pending_urgent(frm) {
 	if (!pending_urgent) return null;
 
 	const trigger_row_index = rows.indexOf(pending_urgent) - 1;
-	const trigger_date = trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
+	const trigger_date =
+		trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
 	return { date: pending_urgent.date, trigger_date };
 }
 
@@ -350,68 +364,81 @@ function calculate_next_anc_visit_date(frm) {
 	get_pregnancy_info(frm.doc.pregnant_id).then((info) => {
 		if (!info.lmp_date) return;
 
-		get_window_policy(info.high_risk).then(({ window_days, alert_within_days, automatic_window_count }) => {
-			// A newer call to this function has started since this chain
-			// began - let that one's result stand instead of overwriting it
-			// with this now-stale one.
-			if (my_token !== anc_visit_date_calc_token) return;
+		get_window_policy(info.high_risk).then(
+			({ window_days, alert_within_days, automatic_window_count }) => {
+				// A newer call to this function has started since this chain
+				// began - let that one's result stand instead of overwriting it
+				// with this now-stale one.
+				if (my_token !== anc_visit_date_calc_token) return;
 
-			const completed_count = (frm.doc[NURSE_TABLE_FIELD] || []).filter((row) => row.status === "Completed").length;
-			const starting_window = get_window_index(
-				frm.doc.creation || frappe.datetime.get_today(),
-				info.lmp_date,
-				window_days
-			);
-			const current_window = get_current_window(starting_window, completed_count);
-			const window_start = frappe.datetime.add_days(info.lmp_date, (current_window - 1) * window_days);
-			const window_end = frappe.datetime.add_days(window_start, window_days);
+				const completed_count = (frm.doc[NURSE_TABLE_FIELD] || []).filter(
+					(row) => row.status === "Completed"
+				).length;
+				const starting_window = get_window_index(
+					frm.doc.creation || frappe.datetime.get_today(),
+					info.lmp_date,
+					window_days
+				);
+				const current_window = get_current_window(starting_window, completed_count);
+				const window_start = frappe.datetime.add_days(
+					info.lmp_date,
+					(current_window - 1) * window_days
+				);
+				const window_end = frappe.datetime.add_days(window_start, window_days);
 
-			// High Risk only, shown in red - a nudge to visit early within
-			// the window. Blank for Normal patients; the window/due date
-			// above are unaffected either way.
-			const risk_alert =
-				info.high_risk === "Yes"
-					? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, alert_within_days))}`
-					: "";
+				// High Risk only, shown in red - a nudge to visit early within
+				// the window. Blank for Normal patients; the window/due date
+				// above are unaffected either way.
+				const risk_alert =
+					info.high_risk === "Yes"
+						? `Visit by ${frappe.datetime.str_to_user(
+								frappe.datetime.add_days(window_start, alert_within_days)
+						  )}`
+						: "";
 
-			if (current_window <= automatic_window_count) {
-				frm.set_value("next_anc_visit_date", window_end);
-				frm.set_value("next_anc_visit_date_auto", window_end);
-				set_risk_alert(frm, risk_alert);
-				sync_child_row_fields(frm, window_start, window_end);
-				return;
-			}
+				if (current_window <= automatic_window_count) {
+					frm.set_value("next_anc_visit_date", window_end);
+					frm.set_value("next_anc_visit_date_auto", window_end);
+					set_risk_alert(frm, risk_alert);
+					sync_child_row_fields(frm, window_start, window_end);
+					return;
+				}
 
-			// Manual phase - whichever Nurse row has the most recently
-			// visited date's "Date of Next Visit" wins. Until she has
-			// actually recorded one, never leave this blank - show her
-			// current month's window (from LMP) as a starting suggestion.
-			const current = frm.doc.next_anc_visit_date;
-			const last_auto = frm.doc.next_anc_visit_date_auto;
-			if (current && last_auto && current !== last_auto) {
-				// user has manually overridden the date; leave it alone - it's
-				// no longer a calculated window, so there's no range or alert
-				// to show.
+				// Manual phase - whichever Nurse row has the most recently
+				// visited date's "Date of Next Visit" wins. Until she has
+				// actually recorded one, never leave this blank - show her
+				// current month's window (from LMP) as a starting suggestion.
+				const current = frm.doc.next_anc_visit_date;
+				const last_auto = frm.doc.next_anc_visit_date_auto;
+				if (current && last_auto && current !== last_auto) {
+					// user has manually overridden the date; leave it alone - it's
+					// no longer a calculated window, so there's no range or alert
+					// to show.
+					set_risk_alert(frm, "");
+					sync_child_row_fields(frm, null, null);
+					return;
+				}
+
+				const manual_rows = (frm.doc[NURSE_TABLE_FIELD] || []).filter(
+					(row) => row.date_of_next_visit
+				);
+				if (!manual_rows.length) {
+					frm.set_value("next_anc_visit_date", window_end);
+					frm.set_value("next_anc_visit_date_auto", window_end);
+					set_risk_alert(frm, risk_alert);
+					sync_child_row_fields(frm, window_start, window_end);
+					return;
+				}
+
+				const latest_row = manual_rows.sort((a, b) => (a.date > b.date ? 1 : -1))[
+					manual_rows.length - 1
+				];
+				frm.set_value("next_anc_visit_date", latest_row.date_of_next_visit);
+				frm.set_value("next_anc_visit_date_auto", latest_row.date_of_next_visit);
+				// A manually typed date isn't a calculated window either.
 				set_risk_alert(frm, "");
 				sync_child_row_fields(frm, null, null);
-				return;
 			}
-
-			const manual_rows = (frm.doc[NURSE_TABLE_FIELD] || []).filter((row) => row.date_of_next_visit);
-			if (!manual_rows.length) {
-				frm.set_value("next_anc_visit_date", window_end);
-				frm.set_value("next_anc_visit_date_auto", window_end);
-				set_risk_alert(frm, risk_alert);
-				sync_child_row_fields(frm, window_start, window_end);
-				return;
-			}
-
-			const latest_row = manual_rows.sort((a, b) => (a.date > b.date ? 1 : -1))[manual_rows.length - 1];
-			frm.set_value("next_anc_visit_date", latest_row.date_of_next_visit);
-			frm.set_value("next_anc_visit_date_auto", latest_row.date_of_next_visit);
-			// A manually typed date isn't a calculated window either.
-			set_risk_alert(frm, "");
-			sync_child_row_fields(frm, null, null);
-		});
+		);
 	});
 }

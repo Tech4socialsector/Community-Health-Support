@@ -23,13 +23,11 @@ def execute():
 		frappe.rename_doc("DocType", old_name, new_name, force=True, show_alert=False)
 
 	Singles = frappe.qb.DocType("Singles")
-	orphaned = frappe.qb.from_(Singles).select(Singles.field).where(Singles.doctype == old_name).limit(1).run()
+	orphaned = (
+		frappe.qb.from_(Singles).select(Singles.field).where(Singles.doctype == old_name).limit(1).run()
+	)
 	if orphaned:
-		(
-			frappe.qb.update(Singles)
-			.set(Singles.doctype, new_name)
-			.where(Singles.doctype == old_name)
-		).run()
+		(frappe.qb.update(Singles).set(Singles.doctype, new_name).where(Singles.doctype == old_name)).run()
 		(
 			frappe.qb.update(Singles)
 			.set(Singles.value, new_name)

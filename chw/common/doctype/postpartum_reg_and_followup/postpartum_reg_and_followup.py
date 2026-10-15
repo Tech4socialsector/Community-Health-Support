@@ -77,8 +77,7 @@ class PostpartumRegandFollowup(Document):
 	def get_pending_urgent_followup(self):
 		table = self.followup_visits
 		urgent_rows = [
-			(i, row) for i, row in enumerate(table)
-			if row.urgent_followup and row.status != "Completed"
+			(i, row) for i, row in enumerate(table) if row.urgent_followup and row.status != "Completed"
 		]
 		if not urgent_rows:
 			return None
@@ -94,7 +93,9 @@ class PostpartumRegandFollowup(Document):
 		- see chw.chw_master.visit_schedule.get_urgent_visit_within_days.
 		visit_number is accepted (but unused) only so callers don't need to
 		change - every visit uses the same configured gap."""
-		return visit_schedule.get_urgent_visit_within_days("Postpartum Reg and Followup", DEFAULT_RISK_ALERT_DAYS)
+		return visit_schedule.get_urgent_visit_within_days(
+			"Postpartum Reg and Followup", DEFAULT_RISK_ALERT_DAYS
+		)
 
 	def currently_high_risk(self):
 		# Live, not sticky - reflects only the most recently COMPLETED
@@ -152,7 +153,9 @@ class PostpartumRegandFollowup(Document):
 		# sooner, not to wait until the window is about to close). Blank
 		# otherwise; the window/due date above are unaffected either way.
 		self.postpartum_risk_alert = (
-			"Visit by {0}".format(frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days)))
+			"Visit by {0}".format(
+				frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days))
+			)
 			if high_risk
 			else ""
 		)
@@ -163,7 +166,9 @@ class PostpartumRegandFollowup(Document):
 		# "Date of Next Visit" is auto-filled on the latest row only.
 		# "Next Visit Window" is a plain read-only range shown on every row.
 		if window_start and window_end:
-			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
+			display = "{0} to {1}".format(
+				frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end)
+			)
 			if self.followup_visits:
 				self.followup_visits[-1].date_of_next_visit = window_end
 		else:

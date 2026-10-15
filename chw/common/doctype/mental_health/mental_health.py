@@ -12,10 +12,13 @@ class MentalHealth(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from chw.common.doctype.medicine_and_frequency.medicine_and_frequency import Medicineandfrequency
-		from chw.common.doctype.mental_health_followup_child.mental_health_followup_child import MentalHealthFollowupChild
-		from chw.common.doctype.mental_health_symptom.mental_health_symptom import MentalHealthSymptom
 		from frappe.types import DF
+
+		from chw.common.doctype.medicine_and_frequency.medicine_and_frequency import Medicineandfrequency
+		from chw.common.doctype.mental_health_followup_child.mental_health_followup_child import (
+			MentalHealthFollowupChild,
+		)
+		from chw.common.doctype.mental_health_symptom.mental_health_symptom import MentalHealthSymptom
 
 		age: DF.Int
 		assigned_health_worker: DF.Link | None

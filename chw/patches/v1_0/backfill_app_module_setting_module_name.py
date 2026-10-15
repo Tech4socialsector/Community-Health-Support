@@ -19,10 +19,7 @@ def execute():
 		slug = frappe.scrub(row.label or row.name)
 		module_name = slug
 		suffix = 1
-		while (
-			module_name.lower() != row.name.lower()
-			and frappe.db.exists("App Module Setting", module_name)
-		):
+		while module_name.lower() != row.name.lower() and frappe.db.exists("App Module Setting", module_name):
 			suffix += 1
 			module_name = f"{slug}_{suffix}"
 

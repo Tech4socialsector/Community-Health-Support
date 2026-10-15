@@ -9,13 +9,15 @@ frappe.ui.form.on("Birth Registration", {
 	},
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
-			frappe.call({
-				method: "chw.api.get_current_health_worker",
-			}).then((r) => {
-				if (r.message) {
-					frm.set_value("health_worker_name", r.message);
-				}
-			});
+			frappe
+				.call({
+					method: "chw.api.get_current_health_worker",
+				})
+				.then((r) => {
+					if (r.message) {
+						frm.set_value("health_worker_name", r.message);
+					}
+				});
 		}
 	},
 	phone_number(frm) {

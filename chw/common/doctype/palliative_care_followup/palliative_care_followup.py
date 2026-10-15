@@ -24,7 +24,11 @@ class Palliativecarefollowup(Document):
 			if row.visit_date and getdate(row.visit_date) < today:
 				frappe.throw(_("Row #{0}: Visit Date cannot be in the past.").format(row.idx))
 			if row.next_visit_date and getdate(row.next_visit_date) <= today:
-				frappe.throw(_("Row #{0}: Date of Next Visit must be a future date, not today or earlier.").format(row.idx))
+				frappe.throw(
+					_("Row #{0}: Date of Next Visit must be a future date, not today or earlier.").format(
+						row.idx
+					)
+				)
 
 	def on_update(self):
 		sync_next_visit_todo(

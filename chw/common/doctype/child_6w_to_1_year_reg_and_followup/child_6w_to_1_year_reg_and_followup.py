@@ -106,8 +106,7 @@ class Child6wto1YearRegandFollowup(Document):
 	def get_pending_urgent_followup(self):
 		table = self.followup_visits
 		urgent_rows = [
-			(i, row) for i, row in enumerate(table)
-			if row.urgent_followup and row.status != "Completed"
+			(i, row) for i, row in enumerate(table) if row.urgent_followup and row.status != "Completed"
 		]
 		if not urgent_rows:
 			return None
@@ -134,7 +133,10 @@ class Child6wto1YearRegandFollowup(Document):
 		visit_number has no matching row - there's no fixed cap, the
 		configured rows *are* the cap."""
 		return visit_schedule.get_visit_window(
-			"Child 6w to 1 Year Reg and Followup", visit_number, DEFAULT_VISIT_SCHEDULE, DEFAULT_RISK_ALERT_DAYS
+			"Child 6w to 1 Year Reg and Followup",
+			visit_number,
+			DEFAULT_VISIT_SCHEDULE,
+			DEFAULT_RISK_ALERT_DAYS,
 		)
 
 	def currently_high_risk(self):
@@ -195,7 +197,9 @@ class Child6wto1YearRegandFollowup(Document):
 		# window (from window_start, not window_end).
 		high_risk = self.currently_high_risk()
 		self.child_risk_alert = (
-			"Visit by {0}".format(frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days)))
+			"Visit by {0}".format(
+				frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days))
+			)
 			if high_risk
 			else ""
 		)
@@ -206,7 +210,9 @@ class Child6wto1YearRegandFollowup(Document):
 		# "Date of Next Visit" is auto-filled on the latest row only.
 		# "Next Visit Window" is a plain read-only range shown on every row.
 		if window_start and window_end:
-			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
+			display = "{0} to {1}".format(
+				frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end)
+			)
 			if self.followup_visits:
 				self.followup_visits[-1].date_of_next_visit = window_end
 		else:

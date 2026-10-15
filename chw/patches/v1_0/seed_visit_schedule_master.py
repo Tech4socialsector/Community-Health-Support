@@ -36,7 +36,10 @@ def _seed_programs():
 	# record here - no code change - once its own doctype is also wired to
 	# call chw.chw_master.visit_schedule.
 	for doctype in (
-		"ANC Follow-up", "PNC", "Postpartum Reg and Followup", "Child 6w to 1 Year Reg and Followup",
+		"ANC Follow-up",
+		"PNC",
+		"Postpartum Reg and Followup",
+		"Child 6w to 1 Year Reg and Followup",
 	):
 		if not frappe.db.exists("Visit Schedule Program", doctype):
 			frappe.get_doc({"doctype": "Visit Schedule Program", "target_doctype": doctype}).insert(
@@ -52,14 +55,16 @@ def _seed_anc():
 	if not frappe.db.exists("DocType", "ANC Visit Interval Master"):
 		return
 	anc = frappe.get_single("ANC Visit Interval Master")
-	frappe.get_doc({
-		"doctype": "Visit Schedule Master",
-		"applies_to": "ANC Follow-up",
-		"schedule_type": "Continue",
-		"window_opens_day": anc.interval_days or 30,
-		"risk_alert_within_days": anc.risk_alert_within_days or 7,
-		"automatic_window_count": anc.automatic_window_count or 6,
-	}).insert(ignore_permissions=True)
+	frappe.get_doc(
+		{
+			"doctype": "Visit Schedule Master",
+			"applies_to": "ANC Follow-up",
+			"schedule_type": "Continue",
+			"window_opens_day": anc.interval_days or 30,
+			"risk_alert_within_days": anc.risk_alert_within_days or 7,
+			"automatic_window_count": anc.automatic_window_count or 6,
+		}
+	).insert(ignore_permissions=True)
 
 
 def _seed_specific(applies_to, old_master_doctype, risk_alert_within_days=None):
@@ -77,19 +82,26 @@ def _seed_specific(applies_to, old_master_doctype, risk_alert_within_days=None):
 		return
 
 	first_row = old_master.visit_schedule[0]
-	doc = frappe.get_doc({
-		"doctype": "Visit Schedule Master",
-		"applies_to": applies_to,
-		"schedule_type": "Specific",
-		"risk_alert_within_days": (
-			risk_alert_within_days if risk_alert_within_days is not None else first_row.risk_alert_within_days
-		),
-	})
+	doc = frappe.get_doc(
+		{
+			"doctype": "Visit Schedule Master",
+			"applies_to": applies_to,
+			"schedule_type": "Specific",
+			"risk_alert_within_days": (
+				risk_alert_within_days
+				if risk_alert_within_days is not None
+				else first_row.risk_alert_within_days
+			),
+		}
+	)
 	for i, row in enumerate(old_master.visit_schedule, start=1):
-		doc.append("visit_rows", {
-			"visit_number": i,
-			"window_opens_day": row.window_opens_day,
-			"window_closes_day": row.window_closes_day,
-			"milestone_label": row.get("milestone_label"),
-		})
+		doc.append(
+			"visit_rows",
+			{
+				"visit_number": i,
+				"window_opens_day": row.window_opens_day,
+				"window_closes_day": row.window_closes_day,
+				"milestone_label": row.get("milestone_label"),
+			},
+		)
 	doc.insert(ignore_permissions=True)

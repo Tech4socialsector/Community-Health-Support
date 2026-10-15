@@ -4,13 +4,15 @@
 frappe.ui.form.on("PNC", {
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
-			frappe.call({
-				method: "chw.api.get_current_health_worker",
-			}).then((r) => {
-				if (r.message) {
-					frm.set_value("health_worker_name", r.message);
-				}
-			});
+			frappe
+				.call({
+					method: "chw.api.get_current_health_worker",
+				})
+				.then((r) => {
+					if (r.message) {
+						frm.set_value("health_worker_name", r.message);
+					}
+				});
 		}
 	},
 	refresh(frm) {
@@ -101,17 +103,15 @@ function get_full_schedule() {
 	// own, so it can't reliably be listed directly from the client - fetched
 	// through a whitelisted method on the parent doc instead, which goes
 	// through the master's own, already-granted permissions.
-	return frappe
-		.call({ method: "chw.common.doctype.pnc.pnc.get_visit_schedule" })
-		.then((r) => {
-			const rows = r && r.message;
-			if (rows && rows.length) return rows;
-			return DEFAULT_VISIT_SCHEDULE.map(([opens, closes]) => ({
-				window_opens_day: opens,
-				window_closes_day: closes,
-				risk_alert_within_days: DEFAULT_RISK_ALERT_DAYS,
-			}));
-		});
+	return frappe.call({ method: "chw.common.doctype.pnc.pnc.get_visit_schedule" }).then((r) => {
+		const rows = r && r.message;
+		if (rows && rows.length) return rows;
+		return DEFAULT_VISIT_SCHEDULE.map(([opens, closes]) => ({
+			window_opens_day: opens,
+			window_closes_day: closes,
+			risk_alert_within_days: DEFAULT_RISK_ALERT_DAYS,
+		}));
+	});
 }
 
 function get_visit_window(visit_number, schedule_rows) {
@@ -156,17 +156,35 @@ function generate_visit_schedule(frm) {
 	// household visit. Only runs once - if either table already has rows
 	// (auto-generated earlier, or added by hand), leave both alone and
 	// just recalculate the summary fields.
-	if (!frm.doc.date_of_delivery || (frm.doc.mother || []).length || (frm.doc.baby || []).length) {
+	if (
+		!frm.doc.date_of_delivery ||
+		(frm.doc.mother || []).length ||
+		(frm.doc.baby || []).length
+	) {
 		calculate_next_pnc_visit_date(frm);
 		return;
 	}
 
 	get_full_schedule().then((schedule_rows) => {
 		schedule_rows.forEach((row) => {
-			const window_start = frappe.datetime.add_days(frm.doc.date_of_delivery, row.window_opens_day);
-			const window_end = frappe.datetime.add_days(frm.doc.date_of_delivery, row.window_closes_day);
-			frm.add_child("mother", { window_start_date: window_start, date: window_end, status: "Pending" });
-			frm.add_child("baby", { window_start_date: window_start, date: window_end, status: "Pending" });
+			const window_start = frappe.datetime.add_days(
+				frm.doc.date_of_delivery,
+				row.window_opens_day
+			);
+			const window_end = frappe.datetime.add_days(
+				frm.doc.date_of_delivery,
+				row.window_closes_day
+			);
+			frm.add_child("mother", {
+				window_start_date: window_start,
+				date: window_end,
+				status: "Pending",
+			});
+			frm.add_child("baby", {
+				window_start_date: window_start,
+				date: window_end,
+				status: "Pending",
+			});
 		});
 		frm.refresh_field("mother");
 		frm.refresh_field("baby");
@@ -233,10 +251,17 @@ function sync_row_fields(frm, table_field, window_start, window_end) {
 	const rows = frm.doc[table_field] || [];
 	let display = "";
 	if (window_start && window_end) {
-		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(window_end)}`;
+		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(
+			window_end
+		)}`;
 		if (rows.length) {
 			const last_row = rows[rows.length - 1];
-			frappe.model.set_value(last_row.doctype, last_row.name, "date_of_next_visit", window_end);
+			frappe.model.set_value(
+				last_row.doctype,
+				last_row.name,
+				"date_of_next_visit",
+				window_end
+			);
 		}
 	}
 	rows.forEach((row) => {
@@ -255,7 +280,8 @@ function compute_track(frm, rows, schedule_rows) {
 		.sort((a, b) => (a.date > b.date ? 1 : -1))[0];
 	if (pending_urgent) {
 		const trigger_row_index = rows.indexOf(pending_urgent) - 1;
-		const trigger_date = trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
+		const trigger_date =
+			trigger_row_index >= 0 ? rows[trigger_row_index].date : pending_urgent.date;
 		return {
 			next_date: pending_urgent.date,
 			window_start: trigger_date,
@@ -271,7 +297,13 @@ function compute_track(frm, rows, schedule_rows) {
 	const window = get_visit_window(completed_count + 1, schedule_rows);
 	if (!window) {
 		// every visit on this table has been completed
-		return { next_date: null, window_start: null, window_end: null, risk_alert: "", is_urgent: false };
+		return {
+			next_date: null,
+			window_start: null,
+			window_end: null,
+			risk_alert: "",
+			is_urgent: false,
+		};
 	}
 
 	const window_start = frappe.datetime.add_days(frm.doc.date_of_delivery, window.start_offset);
@@ -282,7 +314,9 @@ function compute_track(frm, rows, schedule_rows) {
 	// window/due date above are unaffected either way.
 	const risk_alert =
 		frm.doc.high_risk === "Yes"
-			? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, window.risk_alert_within_days))}`
+			? `Visit by ${frappe.datetime.str_to_user(
+					frappe.datetime.add_days(window_start, window.risk_alert_within_days)
+			  )}`
 			: "";
 	return { next_date: window_end, window_start, window_end, risk_alert, is_urgent: false };
 }
@@ -320,7 +354,9 @@ function calculate_next_pnc_visit_date(frm) {
 		// once neither track has an open urgent row does "whichever is due
 		// sooner" decide it.
 		const urgent_candidates = candidates.filter((t) => t.is_urgent);
-		const winner = (urgent_candidates.length ? urgent_candidates : candidates).sort((a, b) => (a.next_date > b.next_date ? 1 : -1))[0];
+		const winner = (urgent_candidates.length ? urgent_candidates : candidates).sort((a, b) =>
+			a.next_date > b.next_date ? 1 : -1
+		)[0];
 		frm.set_value("next_pnc_visit_date", winner.next_date);
 		frm.set_value("next_pnc_visit_date_auto", winner.next_date);
 		set_risk_alert(frm, winner.risk_alert);

@@ -25,7 +25,9 @@ const CHARITY_CRITERIA_APPLICABLE = {
 };
 
 function applicable_charity_fields(frm) {
-	return CHARITY_CRITERIA_FIELDS.filter((f) => (CHARITY_CRITERIA_APPLICABLE[f] || (() => true))(frm));
+	return CHARITY_CRITERIA_FIELDS.filter((f) =>
+		(CHARITY_CRITERIA_APPLICABLE[f] || (() => true))(frm)
+	);
 }
 
 function charity_percentage_band(score) {
@@ -60,13 +62,15 @@ function preview_charity_score(frm) {
 frappe.ui.form.on("Family members", {
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
-			frappe.call({
-				method: "chw.api.get_current_health_worker",
-			}).then((r) => {
-				if (r.message) {
-					frm.set_value("health_worker_name", r.message);
-				}
-			});
+			frappe
+				.call({
+					method: "chw.api.get_current_health_worker",
+				})
+				.then((r) => {
+					if (r.message) {
+						frm.set_value("health_worker_name", r.message);
+					}
+				});
 		}
 	},
 	date_of_birth(frm) {
@@ -117,7 +121,12 @@ function age_parts(dob, now) {
 	if (add_months_clamped(dob, months) > now) months -= 1;
 	let anchor = add_months_clamped(dob, months);
 	let days = Math.round((now - anchor) / 86400000);
-	return { years: Math.floor(months / 12), months: months % 12, total_months: months, days: days };
+	return {
+		years: Math.floor(months / 12),
+		months: months % 12,
+		total_months: months,
+		days: days,
+	};
 }
 
 function add_months_clamped(date, count) {
@@ -169,6 +178,9 @@ function calculate_age(frm) {
 	let age = age_parts(dob, now);
 	frm.set_value("age", String(age.years));
 	frm.set_value("age_in_months", age.total_months);
-	frm.set_value("age_in_days", frappe.datetime.get_diff(frappe.datetime.now_date(), frm.doc.date_of_birth));
+	frm.set_value(
+		"age_in_days",
+		frappe.datetime.get_diff(frappe.datetime.now_date(), frm.doc.date_of_birth)
+	);
 	frm.set_value("age_detail", format_age_detail(age.years, age.months, age.days));
 }

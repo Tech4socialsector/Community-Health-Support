@@ -15,7 +15,11 @@
 import frappe
 
 CONTINUE_FIELDS = [
-	"name", "high_risk", "window_opens_day", "risk_alert_within_days", "automatic_window_count",
+	"name",
+	"high_risk",
+	"window_opens_day",
+	"risk_alert_within_days",
+	"automatic_window_count",
 ]
 
 
@@ -115,7 +119,9 @@ def get_visit_window(applies_to, visit_number, default_schedule, default_risk_al
 		label = None
 		start_offset, end_offset = entry
 	return frappe._dict(
-		milestone_label=label, start_offset=start_offset, end_offset=end_offset,
+		milestone_label=label,
+		start_offset=start_offset,
+		end_offset=end_offset,
 		risk_alert_within_days=default_risk_alert_days,
 	)
 
@@ -156,7 +162,9 @@ def get_visit_schedule_rows(applies_to):
 
 
 @frappe.whitelist()
-def get_continue_policy_for_js(applies_to, high_risk=None, window_days=30, alert_within_days=7, automatic_window_count=6):
+def get_continue_policy_for_js(
+	applies_to, high_risk=None, window_days=30, alert_within_days=7, automatic_window_count=6
+):
 	return get_continue_policy(
 		applies_to,
 		high_risk,

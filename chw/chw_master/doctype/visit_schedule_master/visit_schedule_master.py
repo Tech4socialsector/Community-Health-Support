@@ -26,9 +26,9 @@ class VisitScheduleMaster(Document):
 		types_in_use = {row.schedule_type for row in siblings} | {self.schedule_type}
 		if len(types_in_use) > 1:
 			frappe.throw(
-				_("{0}: records have different Schedule Types ({1}). Every record for the same program must use the same Schedule Type.").format(
-					self.applies_to, ", ".join(sorted(types_in_use))
-				)
+				_(
+					"{0}: records have different Schedule Types ({1}). Every record for the same program must use the same Schedule Type."
+				).format(self.applies_to, ", ".join(sorted(types_in_use)))
 			)
 
 		if self.schedule_type == "Continue":
@@ -46,9 +46,9 @@ class VisitScheduleMaster(Document):
 			# (which one does the app read from?).
 			if siblings:
 				frappe.throw(
-					_("{0} already has a Specific schedule ({1}). Add more visits to its own Visit Schedule table instead of creating another record.").format(
-						self.applies_to, siblings[0].name
-					)
+					_(
+						"{0} already has a Specific schedule ({1}). Add more visits to its own Visit Schedule table instead of creating another record."
+					).format(self.applies_to, siblings[0].name)
 				)
 
 	def validate_visit_rows(self):
@@ -57,5 +57,9 @@ class VisitScheduleMaster(Document):
 			if not row.visit_number:
 				frappe.throw(_("Row {0}: Visit Number is required.").format(row.idx))
 			if row.visit_number in seen:
-				frappe.throw(_("Row {0}: Visit Number {1} is already used by another row.").format(row.idx, row.visit_number))
+				frappe.throw(
+					_("Row {0}: Visit Number {1} is already used by another row.").format(
+						row.idx, row.visit_number
+					)
+				)
 			seen.add(row.visit_number)

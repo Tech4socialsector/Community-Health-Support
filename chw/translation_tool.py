@@ -71,7 +71,11 @@ def collect_chw_texts():
 		for row in frappe.get_all("App Module Setting", fields=["module_name", "label"]):
 			texts.update(filter(None, (row.module_name, row.label)))
 	texts.update(ui_strings())
-	return {t for t in texts if t and len(t) <= 500 and not _SKIP.match(t) and _braces_ok(t) and not t.startswith("eval:")}
+	return {
+		t
+		for t in texts
+		if t and len(t) <= 500 and not _SKIP.match(t) and _braces_ok(t) and not t.startswith("eval:")
+	}
 
 
 _PLACEHOLDER = re.compile(r"\{\d+\}")
@@ -168,16 +172,32 @@ def _check_language(language):
 # in its own script (தமிழ், हिन्दी), so an admin searching "Tamil" found
 # nothing. Indian languages first, then everything else by code.
 ENGLISH_NAMES = {
-	"hi": "Hindi", "mr": "Marathi", "ta": "Tamil", "te": "Telugu", "kn": "Kannada",
-	"ml": "Malayalam", "bn": "Bengali", "gu": "Gujarati", "pa": "Punjabi", "or": "Odia",
-	"as": "Assamese", "ur": "Urdu", "ne": "Nepali", "sa": "Sanskrit", "si": "Sinhala",
+	"hi": "Hindi",
+	"mr": "Marathi",
+	"ta": "Tamil",
+	"te": "Telugu",
+	"kn": "Kannada",
+	"ml": "Malayalam",
+	"bn": "Bengali",
+	"gu": "Gujarati",
+	"pa": "Punjabi",
+	"or": "Odia",
+	"as": "Assamese",
+	"ur": "Urdu",
+	"ne": "Nepali",
+	"sa": "Sanskrit",
+	"si": "Sinhala",
 }
 
 # Frappe ships no Language record for these, so they were left out of the
 # app's Language menu although Google translates them. The record is made
 # the first time someone picks one (see _ensure_language).
 NATIVE_NAMES = {
-	"pa": "ਪੰਜਾਬੀ", "or": "ଓଡ଼ିଆ", "as": "অসমীয়া", "ne": "नेपाली", "sa": "संस्कृतम्",
+	"pa": "ਪੰਜਾਬੀ",
+	"or": "ଓଡ଼ିଆ",
+	"as": "অসমীয়া",
+	"ne": "नेपाली",
+	"sa": "संस्कृतम्",
 }
 
 
@@ -186,12 +206,14 @@ def _ensure_language(language):
 	# empty translation run.
 	if frappe.db.exists("Language", language) or language not in NATIVE_NAMES:
 		return
-	frappe.get_doc({
-		"doctype": "Language",
-		"language_code": language,
-		"language_name": NATIVE_NAMES[language],
-		"enabled": 1,
-	}).insert(ignore_permissions=True)
+	frappe.get_doc(
+		{
+			"doctype": "Language",
+			"language_code": language,
+			"language_name": NATIVE_NAMES[language],
+			"enabled": 1,
+		}
+	).insert(ignore_permissions=True)
 
 
 @frappe.whitelist()
@@ -199,11 +221,15 @@ def get_language_options():
 	"""[{value, label}] for the Auto-translate dialog: "Tamil - தமிழ் (ta)"."""
 	_check_permission()
 	rows = frappe.get_all("Language", fields=["name", "language_name"], filters={"name": ["!=", "en"]})
+
 	def label(r):
 		english = ENGLISH_NAMES.get(r.name)
 		native = r.language_name or r.name
 		return f"{english} - {native} ({r.name})" if english else f"{native} ({r.name})"
-	rows.sort(key=lambda r: (r.name not in ENGLISH_NAMES, ENGLISH_NAMES.get(r.name, r.language_name or r.name)))
+
+	rows.sort(
+		key=lambda r: (r.name not in ENGLISH_NAMES, ENGLISH_NAMES.get(r.name, r.language_name or r.name))
+	)
 	return [{"value": r.name, "label": label(r)} for r in rows]
 
 
@@ -211,7 +237,11 @@ def get_language_options():
 def get_auto_translate_status(language):
 	_check_permission()
 	_check_language(language)
-	return {"missing": len(missing_texts(language)), "total": len(collect_chw_texts()), "engine": _engine()[0]}
+	return {
+		"missing": len(missing_texts(language)),
+		"total": len(collect_chw_texts()),
+		"engine": _engine()[0],
+	}
 
 
 @frappe.whitelist()
@@ -253,7 +283,7 @@ def run_auto_translate(language, user=None):
 			frappe.log_error(frappe.get_traceback(), f"CHW auto-translate ({language}) failed")
 			failed += len(chunk)
 			continue
-		for source, target in zip(chunk, translated):
+		for source, target in zip(chunk, translated, strict=False):
 			target = (target or "").strip()
 			# A translation that lost or changed a {0} would show a broken
 			# sentence - leave that text in English instead.
@@ -295,7 +325,12 @@ def run_auto_translate(language, user=None):
 def languages_in_use():
 	"""Non-English languages set on enabled users, plus the site default."""
 	langs = set(
-		frappe.get_all("User", filters={"enabled": 1, "language": ["not in", ["", "en"]]}, pluck="language", distinct=True)
+		frappe.get_all(
+			"User",
+			filters={"enabled": 1, "language": ["not in", ["", "en"]]},
+			pluck="language",
+			distinct=True,
+		)
 	)
 	default = frappe.db.get_single_value("System Settings", "language")
 	if default and default != "en":
@@ -345,11 +380,12 @@ def get_app_language_options():
 	"""Languages offered in the app's Language menu: English, the Indian
 	languages, and any other language this site already has translations
 	for - each as "Tamil - தமிழ்"."""
-	native = {**NATIVE_NAMES, **dict(frappe.get_all("Language", fields=["name", "language_name"], as_list=True))}
+	native = {
+		**NATIVE_NAMES,
+		**dict(frappe.get_all("Language", fields=["name", "language_name"], as_list=True)),
+	}
 	codes = ["en", *ENGLISH_NAMES.keys()]
-	codes += sorted(
-		set(frappe.get_all("Translation", distinct=True, pluck="language")) - set(codes)
-	)
+	codes += sorted(set(frappe.get_all("Translation", distinct=True, pluck="language")) - set(codes))
 	options = []
 	for code in codes:
 		if code not in native and code != "en":

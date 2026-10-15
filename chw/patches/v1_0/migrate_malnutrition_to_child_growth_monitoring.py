@@ -20,7 +20,13 @@ def execute():
 
 	malnutrition_records = frappe.get_all(
 		"Malnutrition",
-		fields=["name", "familymember_id", "health_worker_name", "next_followup_date", "next_followup_date_auto"],
+		fields=[
+			"name",
+			"familymember_id",
+			"health_worker_name",
+			"next_followup_date",
+			"next_followup_date_auto",
+		],
 	)
 
 	for m in malnutrition_records:
@@ -55,8 +61,15 @@ def execute():
 			"Malnutrition Followup Child",
 			filters={"parent": m.name},
 			fields=[
-				"date", "status", "weight", "height", "muac", "edema",
-				"classification", "referred_to_nrc", "remarks",
+				"date",
+				"status",
+				"weight",
+				"height",
+				"muac",
+				"edema",
+				"classification",
+				"referred_to_nrc",
+				"remarks",
 			],
 			order_by="date asc",
 		)
@@ -64,18 +77,21 @@ def execute():
 		for f in followups:
 			if f.date and getdate(f.date) in existing_dates:
 				continue
-			cgm.append("growth_followup", {
-				"date": f.date,
-				"stage": get_stage_for_date(family_member.date_of_birth, f.date) if f.date else "",
-				"status": f.status,
-				"weight": f.weight,
-				"height": f.height,
-				"muac": f.muac,
-				"edema": f.edema,
-				"classification": f.classification,
-				"referred_to_nrc": f.referred_to_nrc,
-				"remarks": f.remarks,
-			})
+			cgm.append(
+				"growth_followup",
+				{
+					"date": f.date,
+					"stage": get_stage_for_date(family_member.date_of_birth, f.date) if f.date else "",
+					"status": f.status,
+					"weight": f.weight,
+					"height": f.height,
+					"muac": f.muac,
+					"edema": f.edema,
+					"classification": f.classification,
+					"referred_to_nrc": f.referred_to_nrc,
+					"remarks": f.remarks,
+				},
+			)
 
 		if m.next_followup_date and not cgm_name:
 			cgm.next_followup_date = m.next_followup_date
@@ -89,8 +105,12 @@ def execute():
 	# (never exported to a file) - repoint it so the workspace tile keeps working
 	# once the Malnutrition doctype itself is gone.
 	if frappe.db.exists("Number Card", "Malnutrition"):
-		frappe.db.set_value("Number Card", "Malnutrition", {
-			"label": "Child Growth Monitoring",
-			"document_type": "Child Growth Monitoring",
-		})
+		frappe.db.set_value(
+			"Number Card",
+			"Malnutrition",
+			{
+				"label": "Child Growth Monitoring",
+				"document_type": "Child Growth Monitoring",
+			},
+		)
 		frappe.db.commit()

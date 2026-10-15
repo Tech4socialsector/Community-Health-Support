@@ -10,11 +10,15 @@ const chw_previous_onload = frappe.listview_settings["Translation"].onload;
 frappe.listview_settings["Translation"].onload = function (listview) {
 	if (chw_previous_onload) chw_previous_onload(listview);
 	if (!frappe.model.can_create("Translation")) return;
-	listview.page.add_inner_button(__("Auto-translate CHW"), () => chw_open_auto_translate(listview));
+	listview.page.add_inner_button(__("Auto-translate CHW"), () =>
+		chw_open_auto_translate(listview)
+	);
 };
 
 function chw_open_auto_translate(listview) {
-	frappe.call("chw.translation_tool.get_language_options").then((r) => chw_build_dialog(listview, r.message || []));
+	frappe
+		.call("chw.translation_tool.get_language_options")
+		.then((r) => chw_build_dialog(listview, r.message || []));
 }
 
 function chw_build_dialog(listview, languages) {
@@ -36,19 +40,23 @@ function chw_build_dialog(listview, languages) {
 		],
 		primary_action_label: __("Translate all"),
 		primary_action(values) {
-			frappe.call({
-				method: "chw.translation_tool.start_auto_translate",
-				args: { language: values.language },
-				freeze: true,
-			}).then((r) => {
-				const queued = r.message?.queued || 0;
-				dialog.hide();
-				if (!queued) {
-					frappe.msgprint(__("Every CHW text already has a {0} translation.", [values.language]));
-					return;
-				}
-				chw_follow_progress(values.language, queued, listview);
-			});
+			frappe
+				.call({
+					method: "chw.translation_tool.start_auto_translate",
+					args: { language: values.language },
+					freeze: true,
+				})
+				.then((r) => {
+					const queued = r.message?.queued || 0;
+					dialog.hide();
+					if (!queued) {
+						frappe.msgprint(
+							__("Every CHW text already has a {0} translation.", [values.language])
+						);
+						return;
+					}
+					chw_follow_progress(values.language, queued, listview);
+				});
 		},
 	});
 	dialog.show();
@@ -65,24 +73,33 @@ function chw_show_status(dialog) {
 	if (dialog.chw_status_for === language) return;
 	dialog.chw_status_for = language;
 	$status.html(`<p class="text-muted">${__("Checking…")}</p>`);
-	frappe.call({
-		method: "chw.translation_tool.get_auto_translate_status",
-		args: { language },
-	}).then((r) => {
-		const s = r.message || {};
-		$status.html(`
+	frappe
+		.call({
+			method: "chw.translation_tool.get_auto_translate_status",
+			args: { language },
+		})
+		.then((r) => {
+			const s = r.message || {};
+			$status.html(`
 			<p>${__("{0} of {1} CHW texts have no {2} translation yet.", [s.missing, s.total, language])}</p>
-			<p class="text-muted small">${__("They are added as Translation records with status Pending - review and correct medical terms, then set them to Verified. Existing translations and your corrections are never overwritten.")}</p>
+			<p class="text-muted small">${__(
+				"They are added as Translation records with status Pending - review and correct medical terms, then set them to Verified. Existing translations and your corrections are never overwritten."
+			)}</p>
 			<p class="text-muted small">${__("Engine")}: ${frappe.utils.escape_html(s.engine || "")}</p>
 		`);
-	});
+		});
 }
 
 function chw_follow_progress(language, total, listview) {
 	frappe.show_progress(__("Translating to {0}", [language]), 0, total, __("Starting…"));
 	const on_progress = (data) => {
 		if (data.language !== language) return;
-		frappe.show_progress(__("Translating to {0}", [language]), data.done, data.total, `${data.done} / ${data.total}`);
+		frappe.show_progress(
+			__("Translating to {0}", [language]),
+			data.done,
+			data.total,
+			`${data.done} / ${data.total}`
+		);
 	};
 	const on_done = (data) => {
 		if (data.language !== language) return;

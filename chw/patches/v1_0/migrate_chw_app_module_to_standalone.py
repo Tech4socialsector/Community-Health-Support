@@ -21,16 +21,18 @@ def execute():
 	for idx, row in enumerate(old_rows):
 		if not row.doctype_name or frappe.db.exists("CHW Module Settings", row.doctype_name):
 			continue
-		frappe.get_doc({
-			"doctype": "CHW Module Settings",
-			"doctype_name": row.doctype_name,
-			"label": row.label,
-			"icon": row.icon,
-			"route": row.route,
-			"enabled": row.enabled,
-			"restrict_by_role": row.get("restrict_by_role"),
-			"roles": row.get("roles"),
-			"sort_order": idx,
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "CHW Module Settings",
+				"doctype_name": row.doctype_name,
+				"label": row.label,
+				"icon": row.icon,
+				"route": row.route,
+				"enabled": row.enabled,
+				"restrict_by_role": row.get("restrict_by_role"),
+				"roles": row.get("roles"),
+				"sort_order": idx,
+			}
+		).insert(ignore_permissions=True)
 
 	frappe.db.commit()

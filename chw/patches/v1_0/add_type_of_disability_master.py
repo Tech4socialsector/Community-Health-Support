@@ -28,7 +28,9 @@ def execute():
 	frappe.reload_doc("chw_master", "doctype", "type_of_disability")
 	for disability_type in TYPES_OF_DISABILITY:
 		if not frappe.db.exists("Type Of Disability", disability_type):
-			frappe.get_doc({
-				"doctype": "Type Of Disability",
-				"name": disability_type,
-			}).insert(ignore_permissions=True)
+			frappe.get_doc(
+				{
+					"doctype": "Type Of Disability",
+					"name": disability_type,
+				}
+			).insert(ignore_permissions=True)

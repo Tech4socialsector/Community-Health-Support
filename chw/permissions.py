@@ -6,7 +6,18 @@ import frappe
 LAYERED_ROLES = {"CHW Coordinator"}
 
 # DocPerm bookkeeping that mustn't be copied onto a new Custom DocPerm row.
-SKIP_FIELDS = {"name", "owner", "creation", "modified", "modified_by", "idx", "parent", "parentfield", "parenttype", "doctype"}
+SKIP_FIELDS = {
+	"name",
+	"owner",
+	"creation",
+	"modified",
+	"modified_by",
+	"idx",
+	"parent",
+	"parentfield",
+	"parenttype",
+	"doctype",
+}
 
 
 def restore_standard_perms_hidden_by_custom():
@@ -43,7 +54,12 @@ def restore_standard_perms_hidden_by_custom():
 				continue
 			exists = frappe.db.exists(
 				"Custom DocPerm",
-				{"parent": doctype, "role": perm.role, "permlevel": perm.permlevel, "if_owner": perm.if_owner},
+				{
+					"parent": doctype,
+					"role": perm.role,
+					"permlevel": perm.permlevel,
+					"if_owner": perm.if_owner,
+				},
 			)
 			if exists:
 				continue

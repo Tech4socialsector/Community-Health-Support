@@ -1,13 +1,13 @@
-import ancFollowUp from './ancFollowUp'
-import child6wTo1Year from './child6wTo1Year'
-import childGrowthMonitoring from './childGrowthMonitoring'
-import familyMembers from './familyMembers'
-import householdProfile from './householdProfile'
-import ncd from './ncd'
-import pnc from './pnc'
-import postpartum from './postpartum'
-import preconception from './preconception'
-import pregnancyRegistration from './pregnancyRegistration'
+import ancFollowUp from "./ancFollowUp";
+import child6wTo1Year from "./child6wTo1Year";
+import childGrowthMonitoring from "./childGrowthMonitoring";
+import familyMembers from "./familyMembers";
+import householdProfile from "./householdProfile";
+import ncd from "./ncd";
+import pnc from "./pnc";
+import postpartum from "./postpartum";
+import preconception from "./preconception";
+import pregnancyRegistration from "./pregnancyRegistration";
 
 // Registry mapping doctype name -> hook module. Each module re-implements
 // the doctype's Desk form script (frappe.ui.form.on(...)), which doesn't
@@ -36,18 +36,18 @@ import pregnancyRegistration from './pregnancyRegistration'
 // { isNew, call, toast, meta, getField(fieldname) }. Hooks may be async;
 // values set after an await are picked up like any other change.
 const HOOKS = {
-  'ANC Follow-up': ancFollowUp,
-  'Child 6w to 1 Year Reg and Followup': child6wTo1Year,
-  'Child Growth Monitoring': childGrowthMonitoring,
-  'Family members': familyMembers,
-  'Household profile': householdProfile,
-  NCD: ncd,
-  PNC: pnc,
-  'Postpartum Reg and Followup': postpartum,
-  'Preconception Reg and Followup': preconception,
-  'Pregnancy Registration': pregnancyRegistration,
-}
+	"ANC Follow-up": ancFollowUp,
+	"Child 6w to 1 Year Reg and Followup": child6wTo1Year,
+	"Child Growth Monitoring": childGrowthMonitoring,
+	"Family members": familyMembers,
+	"Household profile": householdProfile,
+	NCD: ncd,
+	PNC: pnc,
+	"Postpartum Reg and Followup": postpartum,
+	"Preconception Reg and Followup": preconception,
+	"Pregnancy Registration": pregnancyRegistration,
+};
 
 export function getDoctypeHooks(doctype) {
-  return HOOKS[doctype] || null
+	return HOOKS[doctype] || null;
 }

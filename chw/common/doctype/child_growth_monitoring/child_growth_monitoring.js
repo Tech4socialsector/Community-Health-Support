@@ -4,13 +4,15 @@
 frappe.ui.form.on("Child Growth Monitoring", {
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
-			frappe.call({
-				method: "chw.api.get_current_health_worker",
-			}).then((r) => {
-				if (r.message) {
-					frm.set_value("health_worker_name", r.message);
-				}
-			});
+			frappe
+				.call({
+					method: "chw.api.get_current_health_worker",
+				})
+				.then((r) => {
+					if (r.message) {
+						frm.set_value("health_worker_name", r.message);
+					}
+				});
 		}
 
 		frm.set_query("familymember_id", () => {
@@ -26,12 +28,14 @@ frappe.ui.form.on("Child Growth Monitoring", {
 			return;
 		}
 
-		frappe.db.get_value("Family members", frm.doc.familymember_id, "date_of_birth").then((r) => {
-			const date_of_birth = r.message && r.message.date_of_birth;
-			if (date_of_birth) {
-				frm.set_value("date_of_birth", date_of_birth);
-			}
-		});
+		frappe.db
+			.get_value("Family members", frm.doc.familymember_id, "date_of_birth")
+			.then((r) => {
+				const date_of_birth = r.message && r.message.date_of_birth;
+				if (date_of_birth) {
+					frm.set_value("date_of_birth", date_of_birth);
+				}
+			});
 	},
 	date_of_birth(frm) {
 		calculate_age(frm);
@@ -164,12 +168,18 @@ function calculate_next_followup_date(frm) {
 
 	if (pending_rows.length) {
 		// next visit due is the earliest visit not yet marked Completed
-		const next_date = pending_rows.reduce((earliest, row) => (row.date < earliest ? row.date : earliest), pending_rows[0].date);
+		const next_date = pending_rows.reduce(
+			(earliest, row) => (row.date < earliest ? row.date : earliest),
+			pending_rows[0].date
+		);
 		set_next_date(next_date);
 		return;
 	}
 
-	const last_row = dated_rows.reduce((latest, row) => (row.date > latest.date ? row : latest), dated_rows[0]);
+	const last_row = dated_rows.reduce(
+		(latest, row) => (row.date > latest.date ? row : latest),
+		dated_rows[0]
+	);
 
 	if (last_row.stage === "5 Years to 11 Years") {
 		set_next_date(frappe.datetime.add_months(last_row.date, 12));
@@ -177,9 +187,16 @@ function calculate_next_followup_date(frm) {
 	}
 
 	if (last_row.classification) {
-		frappe.db.get_value("Malnutrition Category Master", last_row.classification, "interval_days").then((r) => {
-			set_next_date(frappe.datetime.add_days(last_row.date, (r.message && r.message.interval_days) || 30));
-		});
+		frappe.db
+			.get_value("Malnutrition Category Master", last_row.classification, "interval_days")
+			.then((r) => {
+				set_next_date(
+					frappe.datetime.add_days(
+						last_row.date,
+						(r.message && r.message.interval_days) || 30
+					)
+				);
+			});
 	} else {
 		set_next_date(frappe.datetime.add_days(last_row.date, 30));
 	}

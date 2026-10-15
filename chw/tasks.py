@@ -39,11 +39,7 @@ def refresh_child_growth_ages():
 		age_in_months = delta.years * 12 + delta.months
 		care_stage = get_care_stage(age_in_months)
 
-		if (
-			age == record.age
-			and age_in_months == record.age_in_months
-			and care_stage == record.care_stage
-		):
+		if age == record.age and age_in_months == record.age_in_months and care_stage == record.care_stage:
 			continue
 
 		frappe.db.set_value(
@@ -100,10 +96,12 @@ def snapshot_dashboard_stats():
 	if existing_name:
 		frappe.db.set_value("CHW Dashboard Snapshot", existing_name, values, update_modified=False)
 	else:
-		frappe.get_doc({
-			"doctype": "CHW Dashboard Snapshot",
-			"snapshot_date": today_date,
-			**values,
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "CHW Dashboard Snapshot",
+				"snapshot_date": today_date,
+				**values,
+			}
+		).insert(ignore_permissions=True)
 
 	frappe.db.commit()

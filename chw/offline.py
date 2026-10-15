@@ -33,9 +33,20 @@ RECORD_LIMIT = 5000
 
 # Fields Frappe sets itself - never taken from a phone.
 SYSTEM_FIELDS = {
-	"owner", "creation", "modified", "modified_by", "docstatus", "idx",
-	"parent", "parentfield", "parenttype", "_user_tags", "_comments",
-	"_assign", "_liked_by", "_seen",
+	"owner",
+	"creation",
+	"modified",
+	"modified_by",
+	"docstatus",
+	"idx",
+	"parent",
+	"parentfield",
+	"parenttype",
+	"_user_tags",
+	"_comments",
+	"_assign",
+	"_liked_by",
+	"_seen",
 }
 
 
@@ -144,7 +155,11 @@ def get_offline_data(since=None, metas_hash=None):
 def _clean_doc(doc):
 	"""A phone's record, without what only the server may set and without
 	the phone's temporary names - a new child row has no name yet."""
-	doc = {k: v for k, v in doc.items() if k not in SYSTEM_FIELDS and not (k.startswith("__") and k != "__newname")}
+	doc = {
+		k: v
+		for k, v in doc.items()
+		if k not in SYSTEM_FIELDS and not (k.startswith("__") and k != "__newname")
+	}
 	if str(doc.get("name") or "").startswith(("new-", "OFFLINE-")):
 		doc.pop("name", None)
 	for key, value in list(doc.items()):
@@ -267,7 +282,12 @@ def _reservation(doctype, name):
 		return None
 	return frappe.db.get_value(
 		"CHW Reserved ID",
-		{"reference_doctype": doctype, "reserved_name": name, "user": frappe.session.user, "status": "Reserved"},
+		{
+			"reference_doctype": doctype,
+			"reserved_name": name,
+			"user": frappe.session.user,
+			"status": "Reserved",
+		},
 	)
 
 
@@ -340,8 +360,11 @@ def _plain(value):
 	empty, numbers as numbers, dates as text, child rows without bookkeeping."""
 	if isinstance(value, list):
 		return [
-			{k: _plain(v) for k, v in (row.as_dict() if hasattr(row, "as_dict") else row).items()
-			 if k not in SYSTEM_FIELDS and k != "name" and not k.startswith("__") and k != "doctype"}
+			{
+				k: _plain(v)
+				for k, v in (row.as_dict() if hasattr(row, "as_dict") else row).items()
+				if k not in SYSTEM_FIELDS and k != "name" and not k.startswith("__") and k != "doctype"
+			}
 			for row in value
 		]
 	if value is None or value == "":
@@ -358,7 +381,10 @@ def _plain(value):
 def _same(a, b):
 	a, b = _plain(a), _plain(b)
 	if isinstance(a, list) or isinstance(b, list):
-		norm = lambda rows: json.dumps([{k: v for k, v in r.items() if v != ""} for r in (rows or [])], sort_keys=True)
+
+		def norm(rows):
+			return json.dumps([{k: v for k, v in r.items() if v != ""} for r in (rows or [])], sort_keys=True)
+
 		return norm(a if isinstance(a, list) else []) == norm(b if isinstance(b, list) else [])
 	return a == b
 
@@ -383,7 +409,8 @@ def push_update(client_id, doctype, name, changes, base=None, base_modified=None
 
 	if not cint(force) and base_modified and str(doc.modified) != str(base_modified):
 		conflicts = [
-			field for field, mine in changes.items()
+			field
+			for field, mine in changes.items()
 			if not _same(doc.get(field), base.get(field)) and not _same(doc.get(field), mine)
 		]
 		if conflicts:

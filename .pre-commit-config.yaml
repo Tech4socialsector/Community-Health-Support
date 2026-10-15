@@ -1,4 +1,7 @@
-exclude: 'node_modules|.git'
+# chw/public/frontend and chw/www/chw.html are the Vue app's build output
+# (`npm run build`, minified bundles) - generated, never edited by hand, so
+# formatting them only produces failures that no source change can fix.
+exclude: 'node_modules|\.git/|^chw/public/frontend/|^chw/www/chw\.html$'
 default_stages: [pre-commit]
 fail_fast: false
 

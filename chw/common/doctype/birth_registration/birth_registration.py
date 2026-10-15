@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+
 from chw.api import validate_phone_number
 
 # Baby's Family member field <- this Birth Registration's field. Only the
@@ -41,10 +42,12 @@ class BirthRegistration(Document):
 			return
 
 		if not frappe.db.exists("Pregnancy Registration", {"familymember_id": self.fmid}):
-			frappe.throw(_(
-				"Birth Registration can only be created for a family member who has a "
-				"Pregnancy Registration on record."
-			))
+			frappe.throw(
+				_(
+					"Birth Registration can only be created for a family member who has a "
+					"Pregnancy Registration on record."
+				)
+			)
 
 	@property
 	def baby_date_of_birth(self):
@@ -99,24 +102,28 @@ class BirthRegistration(Document):
 			# Without a household the member would be orphaned (no village,
 			# no household count) - say so rather than create it half-linked.
 			frappe.msgprint(
-				_("The baby could not be added to Family members because no household was found for the mother. Please add the baby from the household."),
+				_(
+					"The baby could not be added to Family members because no household was found for the mother. Please add the baby from the household."
+				),
 				indicator="orange",
 				alert=True,
 			)
 			return
 
-		member = frappe.get_doc({
-			"doctype": "Family members",
-			"hhid": household,
-			"family_member": self.baby_name,
-			"gender": self.gender,
-			"date_of_birth": self.baby_date_of_birth,
-			"relationship": self.baby_relationship(),
-			"phone_number": self.phone_number,
-			"health_worker_name": self.health_worker_name,
-			"status": "Active",
-			"is_the_patient_a_child_0_to_1": "Yes",
-		})
+		member = frappe.get_doc(
+			{
+				"doctype": "Family members",
+				"hhid": household,
+				"family_member": self.baby_name,
+				"gender": self.gender,
+				"date_of_birth": self.baby_date_of_birth,
+				"relationship": self.baby_relationship(),
+				"phone_number": self.phone_number,
+				"health_worker_name": self.health_worker_name,
+				"status": "Active",
+				"is_the_patient_a_child_0_to_1": "Yes",
+			}
+		)
 		try:
 			# A system step on behalf of whoever saved the birth - they may
 			# not hold create rights on Family members themselves.
@@ -124,9 +131,13 @@ class BirthRegistration(Document):
 		except Exception:
 			# The birth record itself is fine and must still save; the
 			# baby can be added by hand, and the reason is in the Error Log.
-			frappe.log_error(frappe.get_traceback(), "Failed to create baby Family member from Birth Registration")
+			frappe.log_error(
+				frappe.get_traceback(), "Failed to create baby Family member from Birth Registration"
+			)
 			frappe.msgprint(
-				_("Birth Registration saved, but the baby could not be added to Family members automatically. Please add the baby from the household."),
+				_(
+					"Birth Registration saved, but the baby could not be added to Family members automatically. Please add the baby from the household."
+				),
 				indicator="orange",
 				alert=True,
 			)
