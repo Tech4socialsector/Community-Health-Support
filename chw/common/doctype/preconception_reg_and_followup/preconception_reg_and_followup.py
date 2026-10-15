@@ -26,7 +26,7 @@ class PreconceptionRegandFollowup(Document):
 				try:
 					height_m = flt(row.height) / 100
 					weight_kg = flt(row.weight)
-					row.bmi = str(round(weight_kg / (height_m**2), 1)) if height_m else ""
+					row.bmi = str(round(weight_kg / (height_m ** 2), 1)) if height_m else ""
 				except (ValueError, ZeroDivisionError):
 					row.bmi = ""
 			else:
@@ -43,11 +43,7 @@ class PreconceptionRegandFollowup(Document):
 			if row.date_of_visit and getdate(row.date_of_visit) < today:
 				frappe.throw(_("Row #{0}: Date of Visit cannot be in the past.").format(row.idx))
 			if row.date_of_next_visit and getdate(row.date_of_next_visit) <= today:
-				frappe.throw(
-					_("Row #{0}: Date of Next Visit must be a future date, not today or earlier.").format(
-						row.idx
-					)
-				)
+				frappe.throw(_("Row #{0}: Date of Next Visit must be a future date, not today or earlier.").format(row.idx))
 
 	def on_update(self):
 		sync_next_visit_todo(

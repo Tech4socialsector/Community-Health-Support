@@ -4,7 +4,6 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
-
 from chw.api import sync_next_visit_todo, validate_phone_number
 from chw.chw_master import visit_schedule
 
@@ -53,9 +52,9 @@ class ANCFollowup(Document):
 		gender = frappe.db.get_value("Family members", member, "gender") if member else None
 		if gender != "Female":
 			frappe.throw(
-				frappe._(
-					"ANC Follow-up is only for a pregnancy registered for a woman. {0} is not linked to a female family member."
-				).format(frappe.bold(self.pregnant_id))
+				frappe._("ANC Follow-up is only for a pregnancy registered for a woman. {0} is not linked to a female family member.").format(
+					frappe.bold(self.pregnant_id)
+				)
 			)
 
 	def validate(self):
@@ -129,6 +128,7 @@ class ANCFollowup(Document):
 		frappe.db.set_value("Pregnancy Registration", self.pregnant_id, {"pog": pog, "trimester": trimester})
 
 	def sync_patient_condition_to_pregnancy(self):
+		
 		any_risk = any(
 			row.patient_condition == "Risk"
 			for table_field in FOLLOWUP_TABLE_FIELDS
@@ -139,9 +139,7 @@ class ANCFollowup(Document):
 
 	def insert_urgent_followups_for_risk_rows(self):
 		high_risk = (
-			frappe.db.get_value("Pregnancy Registration", self.pregnant_id, "high_risk")
-			if self.pregnant_id
-			else None
+			frappe.db.get_value("Pregnancy Registration", self.pregnant_id, "high_risk") if self.pregnant_id else None
 		)
 		_, alert_within_days, _ = self.get_window_policy(high_risk)
 		self._insert_urgent_followups(NURSE_TABLE_FIELD, alert_within_days)
@@ -164,9 +162,7 @@ class ANCFollowup(Document):
 						new_row.status = "Pending"
 						new_row.urgent_followup = 1
 						new_row.lmp_date = row.lmp_date
-						new_row.pog_weeks = (
-							self.calculate_pog(row.lmp_date, urgent_date) if row.lmp_date else ""
-						)
+						new_row.pog_weeks = self.calculate_pog(row.lmp_date, urgent_date) if row.lmp_date else ""
 						table.remove(new_row)
 						table.insert(i + 1, new_row)
 						for idx, r in enumerate(table):
@@ -182,6 +178,7 @@ class ANCFollowup(Document):
 		return f"{weeks} weeks {days} days"
 
 	def set_next_anc_visit_date(self):
+		
 		if not self.pregnant_id:
 			return
 
@@ -260,9 +257,7 @@ class ANCFollowup(Document):
 		# Visit" fields (where present) are left purely to manual entry,
 		# never overwritten by this calculation.
 		if window_start and window_end:
-			display = "{0} to {1}".format(
-				frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end)
-			)
+			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
 		else:
 			display = ""
 
@@ -278,7 +273,8 @@ class ANCFollowup(Document):
 	@staticmethod
 	def _pending_urgent_in(table):
 		urgent_rows = [
-			(i, row) for i, row in enumerate(table) if row.urgent_followup and row.status != "Completed"
+			(i, row) for i, row in enumerate(table)
+			if row.urgent_followup and row.status != "Completed"
 		]
 		if not urgent_rows:
 			return None

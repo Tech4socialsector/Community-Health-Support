@@ -23,7 +23,8 @@ def clear_invalid_location_links(dry_run=0):
 		"DocType", filters={"module": ["in", list(modules)], "istable": 0, "issingle": 0}, pluck="name"
 	)
 	village_masters = {
-		v.name: v for v in frappe.get_all("Village", fields=["name", "village_code", "sub_center"])
+		v.name: v
+		for v in frappe.get_all("Village", fields=["name", "village_code", "sub_center"])
 	}
 	exists = {dt: set(frappe.get_all(dt, pluck="name")) for dt in LOCATION_MASTERS}
 
@@ -31,22 +32,14 @@ def clear_invalid_location_links(dry_run=0):
 	for dt in doctypes:
 		meta = frappe.get_meta(dt)
 		fields = [
-			df
-			for df in meta.fields
-			if df.fieldtype == "Link"
-			and df.options in LOCATION_MASTERS
-			and frappe.db.has_column(dt, df.fieldname)
+			df for df in meta.fields
+			if df.fieldtype == "Link" and df.options in LOCATION_MASTERS and frappe.db.has_column(dt, df.fieldname)
 		]
 		if not fields:
 			continue
 		village_field = next((df.fieldname for df in fields if df.options == "Village"), None)
 		for df in fields:
-			rows = frappe.get_all(
-				dt,
-				filters={df.fieldname: ["is", "set"]},
-				fields=["name", df.fieldname]
-				+ ([village_field] if village_field and village_field != df.fieldname else []),
-			)
+			rows = frappe.get_all(dt, filters={df.fieldname: ["is", "set"]}, fields=["name", df.fieldname] + ([village_field] if village_field and village_field != df.fieldname else []))
 			for row in rows:
 				value = row.get(df.fieldname)
 				if value in exists[df.options]:
@@ -54,13 +47,7 @@ def clear_invalid_location_links(dry_run=0):
 				replacement = None
 				village = village_masters.get(row.get(village_field)) if village_field else None
 				if village:
-					candidate = (
-						village.village_code
-						if df.options == "Gram Panchayat"
-						else village.sub_center
-						if df.options == "Sub Centre"
-						else None
-					)
+					candidate = village.village_code if df.options == "Gram Panchayat" else village.sub_center if df.options == "Sub Centre" else None
 					if candidate in exists.get(df.options, ()):
 						replacement = candidate
 				print(f"{dt} {row.name}: {df.fieldname} {value!r} -> {replacement!r}")

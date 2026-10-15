@@ -4,15 +4,13 @@
 frappe.ui.form.on("NCD", {
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
-			frappe
-				.call({
-					method: "chw.api.get_current_health_worker",
-				})
-				.then((r) => {
-					if (r.message) {
-						frm.set_value("health_worker_name", r.message);
-					}
-				});
+			frappe.call({
+				method: "chw.api.get_current_health_worker",
+			}).then((r) => {
+				if (r.message) {
+					frm.set_value("health_worker_name", r.message);
+				}
+			});
 		}
 
 		frm.set_query("familymember_id", () => {
@@ -114,18 +112,12 @@ function calculate_next_ncd_visit_date(frm) {
 
 	if (pending_rows.length) {
 		// next visit due is the earliest visit not yet marked Completed
-		const next_date = pending_rows.reduce(
-			(earliest, row) => (row.date < earliest ? row.date : earliest),
-			pending_rows[0].date
-		);
+		const next_date = pending_rows.reduce((earliest, row) => (row.date < earliest ? row.date : earliest), pending_rows[0].date);
 		set_next_date(next_date);
 		return;
 	}
 
-	const last_date = dated_rows.reduce(
-		(latest, row) => (row.date > latest ? row.date : latest),
-		dated_rows[0].date
-	);
+	const last_date = dated_rows.reduce((latest, row) => (row.date > latest ? row.date : latest), dated_rows[0].date);
 	get_interval_days(frm).then((interval_days) => {
 		set_next_date(frappe.datetime.add_days(last_date, interval_days));
 	});

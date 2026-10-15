@@ -72,9 +72,7 @@ function get_full_schedule() {
 	// fetched through a whitelisted method on the parent doc instead, which
 	// goes through the master's own, already-granted permissions.
 	return frappe
-		.call({
-			method: "chw.common.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule",
-		})
+		.call({ method: "chw.common.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule" })
 		.then((r) => {
 			const rows = r && r.message;
 			if (rows && rows.length) return rows;
@@ -111,19 +109,9 @@ function generate_visit_schedule(frm) {
 
 	get_full_schedule().then((schedule_rows) => {
 		schedule_rows.forEach((row) => {
-			const window_start = frappe.datetime.add_days(
-				frm.doc.delivery_date,
-				row.window_opens_day
-			);
-			const window_end = frappe.datetime.add_days(
-				frm.doc.delivery_date,
-				row.window_closes_day
-			);
-			frm.add_child("followup_visits", {
-				window_start_date: window_start,
-				date_of_visit: window_end,
-				status: "Pending",
-			});
+			const window_start = frappe.datetime.add_days(frm.doc.delivery_date, row.window_opens_day);
+			const window_end = frappe.datetime.add_days(frm.doc.delivery_date, row.window_closes_day);
+			frm.add_child("followup_visits", { window_start_date: window_start, date_of_visit: window_end, status: "Pending" });
 		});
 		frm.refresh_field("followup_visits");
 		calculate_next_visit_date(frm);
@@ -186,17 +174,10 @@ function sync_row_fields(frm, window_start, window_end) {
 	const rows = frm.doc.followup_visits || [];
 	let display = "";
 	if (window_start && window_end) {
-		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(
-			window_end
-		)}`;
+		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(window_end)}`;
 		if (rows.length) {
 			const last_row = rows[rows.length - 1];
-			frappe.model.set_value(
-				last_row.doctype,
-				last_row.name,
-				"date_of_next_visit",
-				window_end
-			);
+			frappe.model.set_value(last_row.doctype, last_row.name, "date_of_next_visit", window_end);
 		}
 	}
 	rows.forEach((row) => {
@@ -210,9 +191,7 @@ function currently_high_risk(rows) {
 	// own condition, mirroring the server-side calculation exactly.
 	const completed = rows.filter((row) => row.status === "Completed");
 	if (!completed.length) return false;
-	const latest = completed.sort((a, b) => (a.date_of_visit > b.date_of_visit ? 1 : -1))[
-		completed.length - 1
-	];
+	const latest = completed.sort((a, b) => (a.date_of_visit > b.date_of_visit ? 1 : -1))[completed.length - 1];
 	return latest.mother_condition === "Risk" || latest.baby_condition === "Risk";
 }
 
@@ -229,10 +208,7 @@ function calculate_next_visit_date(frm) {
 		.sort((a, b) => (a.date_of_visit > b.date_of_visit ? 1 : -1))[0];
 	if (pending_urgent) {
 		const trigger_row_index = rows.indexOf(pending_urgent) - 1;
-		const trigger_date =
-			trigger_row_index >= 0
-				? rows[trigger_row_index].date_of_visit
-				: pending_urgent.date_of_visit;
+		const trigger_date = trigger_row_index >= 0 ? rows[trigger_row_index].date_of_visit : pending_urgent.date_of_visit;
 		frm.set_value("next_visit_date", pending_urgent.date_of_visit);
 		frm.set_value("next_visit_date_auto", pending_urgent.date_of_visit);
 		// The urgent date itself already IS the early-visit signal - no
@@ -271,9 +247,7 @@ function calculate_next_visit_date(frm) {
 		// window (from window_start, not window_end). Blank otherwise; the
 		// window/due date above are unaffected either way.
 		const risk_alert = high_risk
-			? `Visit by ${frappe.datetime.str_to_user(
-					frappe.datetime.add_days(window_start, window.risk_alert_within_days)
-			  )}`
+			? `Visit by ${frappe.datetime.str_to_user(frappe.datetime.add_days(window_start, window.risk_alert_within_days))}`
 			: "";
 		set_risk_alert(frm, risk_alert);
 		sync_row_fields(frm, window_start, window_end);

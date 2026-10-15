@@ -1,5 +1,6 @@
 import frappe
 
+
 LABEL_OVERRIDES = {
 	"NCD": "Non-Communicable Disease",
 	"ANC Follow-up": "Antenatal Care",

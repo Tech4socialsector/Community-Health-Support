@@ -6,7 +6,6 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, add_months, getdate, today
-
 from chw.api import sync_next_visit_todo, validate_phone_number
 
 STAGE_0_TO_6M = "0-6 Months"
@@ -93,26 +92,20 @@ class ChildGrowthMonitoring(Document):
 		end_date_0_5y = add_months(dob, AGE_MONTHS_5Y)
 		visit_date = add_days(dob, interval_days)
 		while visit_date <= end_date_0_5y:
-			self.append(
-				"growth_followup",
-				{
-					"date": visit_date,
-					"stage": get_stage_for_date(dob, visit_date),
-					"status": "Pending",
-				},
-			)
+			self.append("growth_followup", {
+				"date": visit_date,
+				"stage": get_stage_for_date(dob, visit_date),
+				"status": "Pending",
+			})
 			visit_date = add_days(visit_date, interval_days)
 
 		months = 72
 		while months <= AGE_MONTHS_11Y:
-			self.append(
-				"growth_followup",
-				{
-					"date": add_months(dob, months),
-					"stage": STAGE_5Y_TO_11Y,
-					"status": "Pending",
-				},
-			)
+			self.append("growth_followup", {
+				"date": add_months(dob, months),
+				"stage": STAGE_5Y_TO_11Y,
+				"status": "Pending",
+			})
 			months += 12
 
 	def set_next_followup_date(self):

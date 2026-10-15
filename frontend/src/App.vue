@@ -1,7 +1,7 @@
 <template>
-	<FrappeUIProvider>
-		<router-view v-slot="{ Component, route }">
-			<!-- DoctypeList/DoctypeForm/EmailAccountForm reuse the same component
+  <FrappeUIProvider>
+    <router-view v-slot="{ Component, route }">
+      <!-- DoctypeList/DoctypeForm/EmailAccountForm reuse the same component
       instance when only a route param changes (different doctypeRoute or
       name, same route record) - Vue Router's default behavior. Their data
       loading (useMeta/useDoc/useNewDoc) runs once at setup and isn't wired
@@ -11,22 +11,22 @@
       forced a real remount. Keying only these routes (not every route)
       keeps Home/Dashboard/Worklist - which have no such params - from
       remounting their shell on every navigation for no reason. -->
-			<component
-				:is="Component"
-				:key="route.meta.remountOnParamChange ? route.fullPath : route.name"
-			/>
-		</router-view>
-		<PwaUpdatePrompt />
-	</FrappeUIProvider>
+      <component
+        :is="Component"
+        :key="route.meta.remountOnParamChange ? route.fullPath : route.name"
+      />
+    </router-view>
+    <PwaUpdatePrompt />
+  </FrappeUIProvider>
 </template>
 
 <script setup>
-import { watch } from "vue";
-import { FrappeUIProvider } from "frappe-ui";
-import "@/data/session";
-import "@/data/theme";
-import { brandingResource } from "@/data/branding";
-import PwaUpdatePrompt from "@/components/PwaUpdatePrompt.vue";
+import { watch } from 'vue'
+import { FrappeUIProvider } from 'frappe-ui'
+import '@/data/session'
+import '@/data/theme'
+import { brandingResource } from '@/data/branding'
+import PwaUpdatePrompt from '@/components/PwaUpdatePrompt.vue'
 
 // The browser tab icon should match whatever logo is actually configured
 // in App Settings (app_logo, editable by an admin at any time) rather than
@@ -34,14 +34,14 @@ import PwaUpdatePrompt from "@/components/PwaUpdatePrompt.vue";
 // favicon.png as a fallback for the moment before this resolves (and for
 // sites that haven't set a logo at all).
 watch(
-	() => brandingResource.data?.app_logo,
-	(logo) => {
-		if (!logo) return;
-		const link = document.getElementById("app-favicon");
-		if (link) link.href = logo;
-	},
-	{ immediate: true }
-);
+  () => brandingResource.data?.app_logo,
+  (logo) => {
+    if (!logo) return
+    const link = document.getElementById('app-favicon')
+    if (link) link.href = logo
+  },
+  { immediate: true },
+)
 
 // Same reasoning as the favicon above, for the PWA install icon: the
 // manifest vite-plugin-pwa injects at build time (<link rel="manifest">,
@@ -51,8 +51,8 @@ watch(
 // here (rather than templating chw.html server-side) matches how the
 // favicon itself is handled, and works from the very first load since it
 // doesn't depend on any other resource resolving first.
-const manifestLink = document.querySelector('link[rel="manifest"]');
+const manifestLink = document.querySelector('link[rel="manifest"]')
 if (manifestLink) {
-	manifestLink.href = "/api/method/chw.api.get_pwa_manifest";
+  manifestLink.href = '/api/method/chw.api.get_pwa_manifest'
 }
 </script>

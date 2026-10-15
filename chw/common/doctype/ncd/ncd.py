@@ -5,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
-
 from chw.api import sync_next_visit_todo, validate_phone_number
 
 HIGH_RISK_INTERVAL_DAYS = 30
@@ -45,10 +44,7 @@ class NCD(Document):
 			return HIGH_RISK_INTERVAL_DAYS
 
 		if self.disease:
-			return (
-				frappe.db.get_value("NCD Disease", self.disease, "interval_days")
-				or NORMAL_RISK_DEFAULT_INTERVAL_DAYS
-			)
+			return frappe.db.get_value("NCD Disease", self.disease, "interval_days") or NORMAL_RISK_DEFAULT_INTERVAL_DAYS
 
 		return NORMAL_RISK_DEFAULT_INTERVAL_DAYS
 

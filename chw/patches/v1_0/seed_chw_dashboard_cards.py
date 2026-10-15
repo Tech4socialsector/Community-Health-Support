@@ -15,18 +15,8 @@ def execute():
 
 	defaults = [
 		{"stat_key": "scheduled_count", "label": "Pending Visits", "icon": "clock", "color": "blue"},
-		{
-			"stat_key": "backlog_count",
-			"label": "Missed / Backlog Visits",
-			"icon": "alert-triangle",
-			"color": "red",
-		},
-		{
-			"stat_key": "recent_registrations",
-			"label": "Recent Registrations",
-			"icon": "user-plus",
-			"color": "purple",
-		},
+		{"stat_key": "backlog_count", "label": "Missed / Backlog Visits", "icon": "alert-triangle", "color": "red"},
+		{"stat_key": "recent_registrations", "label": "Recent Registrations", "icon": "user-plus", "color": "purple"},
 		{"stat_key": "total_registrations", "label": "Total Registrations", "icon": "users", "color": "gray"},
 		{"stat_key": "normal_children", "label": "Normal Growth", "icon": "smile", "color": "green"},
 		{"stat_key": "mam_children", "label": "MAM (Moderate)", "icon": "alert-circle", "color": "orange"},

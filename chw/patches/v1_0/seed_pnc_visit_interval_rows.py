@@ -15,10 +15,6 @@ def execute():
 	if master.visit_schedule:
 		return
 
-	master.append(
-		"visit_schedule", {"window_opens_day": 0, "window_closes_day": 7, "risk_alert_within_days": 1}
-	)
-	master.append(
-		"visit_schedule", {"window_opens_day": 35, "window_closes_day": 42, "risk_alert_within_days": 1}
-	)
+	master.append("visit_schedule", {"window_opens_day": 0, "window_closes_day": 7, "risk_alert_within_days": 1})
+	master.append("visit_schedule", {"window_opens_day": 35, "window_closes_day": 42, "risk_alert_within_days": 1})
 	master.save()

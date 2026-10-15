@@ -3,10 +3,10 @@
 // and DoctypeForm.vue.
 // Desk's geo_location handler is not ported: the doctype has no such field.
 
-import { warnIfNotDigits } from "./utils";
+import { warnIfNotDigits } from './utils'
 
 export default {
-	onFieldChange(fieldname, values) {
-		if (fieldname === "phone_no") warnIfNotDigits(values.phone_no);
-	},
-};
+  onFieldChange(fieldname, values) {
+    if (fieldname === 'phone_no') warnIfNotDigits(values.phone_no)
+  },
+}

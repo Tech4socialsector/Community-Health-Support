@@ -1,5 +1,5 @@
-import { h } from "vue";
-import LucideIcon from "@/components/LucideIcon.vue";
+import { h } from 'vue'
+import LucideIcon from '@/components/LucideIcon.vue'
 
 /**
  * Sidebar/SidebarHeader render `icon` via <component :is="icon" class="..." />
@@ -12,9 +12,9 @@ import LucideIcon from "@/components/LucideIcon.vue";
  * on its own - passing it through explicitly here too just duplicated it.
  */
 export default function moduleIcon(name) {
-	return {
-		render() {
-			return h(LucideIcon, { name });
-		},
-	};
+  return {
+    render() {
+      return h(LucideIcon, { name })
+    },
+  }
 }

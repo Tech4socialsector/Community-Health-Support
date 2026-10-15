@@ -1,142 +1,105 @@
 <template>
-	<Dialog v-model="show" :options="{ size: '5xl', title: 'settings-dialog' }">
-		<template #body>
-			<div class="settings-dialog-panel flex flex-col">
-				<div
-					class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800"
-				>
-					<h1 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-						{{ t("Settings") }}
-					</h1>
-					<button
-						class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-						@click="show = false"
-					>
-						<FeatherIcon name="x" class="h-4 w-4" />
-					</button>
-				</div>
+  <Dialog v-model="show" :options="{ size: '5xl', title: 'settings-dialog' }">
+    <template #body>
+      <div class="settings-dialog-panel flex flex-col">
+        <div class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800">
+          <h1 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ t('Settings') }}</h1>
+          <button
+            class="flex h-7 w-7 items-center justify-center rounded text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            @click="show = false"
+          >
+            <FeatherIcon name="x" class="h-4 w-4" />
+          </button>
+        </div>
 
-				<!-- Below sm: the side-by-side nav+content layout squeezes the
+        <!-- Below sm: the side-by-side nav+content layout squeezes the
         content column down to almost nothing on a phone-width screen
         (192px of fixed nav width alone leaves barely 100-150px left,
         truncating every field/button in the panels below to a few
         characters). A horizontal, scrollable tab strip above the content
         instead of a left rail solves that the same way MobileNav's own
         drawer avoids fixed side columns. -->
-				<nav
-					class="flex flex-shrink-0 gap-1 overflow-x-auto border-b px-3 py-2 dark:border-gray-800 sm:hidden"
-				>
-					<button
-						v-for="tab in flatTabs"
-						:key="tab.key"
-						class="flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-1.5 text-sm"
-						:class="
-							activeTab === tab.key
-								? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-								: 'text-gray-600 dark:text-gray-400'
-						"
-						@click="activeTab = tab.key"
-					>
-						<component :is="tab.icon" class="h-4 w-4 flex-shrink-0" />
-						{{ t(tab.label) }}
-					</button>
-				</nav>
+        <nav
+          class="flex flex-shrink-0 gap-1 overflow-x-auto border-b px-3 py-2 dark:border-gray-800 sm:hidden"
+        >
+          <button
+            v-for="tab in flatTabs"
+            :key="tab.key"
+            class="flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded px-2.5 py-1.5 text-sm"
+            :class="activeTab === tab.key
+              ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'text-gray-600 dark:text-gray-400'"
+            @click="activeTab = tab.key"
+          >
+            <component :is="tab.icon" class="h-4 w-4 flex-shrink-0" />
+            {{ t(tab.label) }}
+          </button>
+        </nav>
 
-				<div class="flex min-h-0 flex-1">
-					<nav
-						class="hidden w-48 flex-shrink-0 overflow-y-auto border-r px-3 py-4 dark:border-gray-800 sm:block sm:w-56"
-					>
-						<div v-for="group in groupedTabs" :key="group.label" class="mb-4">
-							<div
-								class="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500"
-							>
-								{{ t(group.label) }}
-							</div>
-							<button
-								v-for="tab in group.tabs"
-								:key="tab.key"
-								class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm"
-								:class="
-									activeTab === tab.key
-										? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-										: 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
-								"
-								@click="activeTab = tab.key"
-							>
-								<component :is="tab.icon" class="h-4 w-4 flex-shrink-0" />
-								{{ t(tab.label) }}
-							</button>
-						</div>
-					</nav>
+        <div class="flex min-h-0 flex-1">
+          <nav class="hidden w-48 flex-shrink-0 overflow-y-auto border-r px-3 py-4 dark:border-gray-800 sm:block sm:w-56">
+            <div v-for="group in groupedTabs" :key="group.label" class="mb-4">
+              <div class="mb-1 px-2 text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                {{ t(group.label) }}
+              </div>
+              <button
+                v-for="tab in group.tabs"
+                :key="tab.key"
+                class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm"
+                :class="activeTab === tab.key
+                  ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+                  : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'"
+                @click="activeTab = tab.key"
+              >
+                <component :is="tab.icon" class="h-4 w-4 flex-shrink-0" />
+                {{ t(tab.label) }}
+              </button>
+            </div>
+          </nav>
 
-					<div class="min-w-0 flex-1 overflow-y-auto">
-						<div class="px-4 py-4 sm:px-8 sm:py-6">
-							<ProfilePanel v-if="activeTab === 'profile'" />
-							<NotificationSettingsPanel v-else-if="activeTab === 'notifications'" />
+          <div class="min-w-0 flex-1 overflow-y-auto">
+            <div class="px-4 py-4 sm:px-8 sm:py-6">
+              <ProfilePanel v-if="activeTab === 'profile'" />
+              <NotificationSettingsPanel v-else-if="activeTab === 'notifications'" />
 
-							<div v-else-if="activeTab === 'appearance'">
-								<div
-									class="mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300"
-								>
-									{{ t("Appearance") }}
-								</div>
-								<TabButtons
-									v-model="theme"
-									:buttons="
-										themeButtons.map((b) => ({ ...b, label: t(b.label) }))
-									"
-								/>
-							</div>
+              <div v-else-if="activeTab === 'appearance'">
+                <div class="mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('Appearance') }}</div>
+                <TabButtons v-model="theme" :buttons="themeButtons.map((b) => ({ ...b, label: t(b.label) }))" />
+              </div>
 
-							<div v-else-if="activeTab === 'language'">
-								<!-- The same language system as the Home page's Language
+              <div v-else-if="activeTab === 'language'">
+                <!-- The same language system as the Home page's Language
                 menu: the app's screens switch at once, Desk and emails follow
                 the user's language, and missing translations fill in. -->
-								<p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-									{{ t("Choose the language for the app, Desk and emails.") }}
-								</p>
-								<div v-if="!languageOptions.length" class="space-y-1">
-									<Skeleton v-for="i in 6" :key="i" height="2.25rem" />
-								</div>
-								<div v-else class="flex flex-col gap-1">
-									<button
-										v-for="opt in languageOptions"
-										:key="opt.value"
-										class="flex items-center justify-between rounded px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-										:class="{
-											'bg-gray-100 dark:bg-gray-800':
-												i18n.lang === opt.value,
-										}"
-										@click="selectLanguage(opt.value)"
-									>
-										<span>{{ opt.label }}</span>
-										<FeatherIcon
-											v-if="i18n.lang === opt.value"
-											name="check"
-											class="h-4 w-4"
-										/>
-									</button>
-								</div>
-							</div>
+                <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                  {{ t('Choose the language for the app, Desk and emails.') }}
+                </p>
+                <div v-if="!languageOptions.length" class="space-y-1">
+                  <Skeleton v-for="i in 6" :key="i" height="2.25rem" />
+                </div>
+                <div v-else class="flex flex-col gap-1">
+                  <button
+                    v-for="opt in languageOptions"
+                    :key="opt.value"
+                    class="flex items-center justify-between rounded px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                    :class="{ 'bg-gray-100 dark:bg-gray-800': i18n.lang === opt.value }"
+                    @click="selectLanguage(opt.value)"
+                  >
+                    <span>{{ opt.label }}</span>
+                    <FeatherIcon v-if="i18n.lang === opt.value" name="check" class="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
-							<SettingsDoctypePanel
-								v-else-if="activeTab === 'app-setting'"
-								doctype="App Setting"
-							/>
-							<SettingsDoctypePanel
-								v-else-if="activeTab === 'pnc-interval'"
-								doctype="PNC Visit Interval Master"
-							/>
-							<EmailSettingsPanel
-								v-else-if="activeTab === 'email-settings'"
-								@close="show = false"
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
-		</template>
-	</Dialog>
+              <SettingsDoctypePanel v-else-if="activeTab === 'app-setting'" doctype="App Setting" />
+              <SettingsDoctypePanel v-else-if="activeTab === 'pnc-interval'" doctype="PNC Visit Interval Master" />
+              <EmailSettingsPanel v-else-if="activeTab === 'email-settings'" @close="show = false" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <style>
@@ -144,121 +107,119 @@
 frappe-ui's Dialog has no size granular enough for "full-screen on mobile,
 centered card on larger screens", and .dialog-overlay/data-dialog (set
 from options.title) is the one hook it exposes for a per-dialog override. */
-[data-dialog="settings-dialog"].dialog-overlay {
-	z-index: 50;
+[data-dialog='settings-dialog'].dialog-overlay {
+  z-index: 50;
 }
 
 .settings-dialog-panel {
-	width: 100%;
-	height: 34rem;
-	max-height: 80vh;
+  width: 100%;
+  height: 34rem;
+  max-height: 80vh;
 }
 
 @media (max-width: 639px), (max-height: 480px) {
-	[data-dialog="settings-dialog"].dialog-overlay > div {
-		padding: 0;
-	}
-	[data-dialog="settings-dialog"] .dialog-content {
-		margin: 0;
-		max-width: none;
-		width: 100vw;
-		height: 100dvh;
-		border-radius: 0;
-	}
-	.settings-dialog-panel {
-		height: 100dvh;
-		max-height: none;
-	}
+  [data-dialog='settings-dialog'].dialog-overlay > div {
+    padding: 0;
+  }
+  [data-dialog='settings-dialog'] .dialog-content {
+    margin: 0;
+    max-width: none;
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .settings-dialog-panel {
+    height: 100dvh;
+    max-height: none;
+  }
 }
 </style>
 
 <script setup>
-import { computed, ref, watch } from "vue";
-import { Dialog, FeatherIcon, TabButtons, toast } from "frappe-ui";
-import SettingsDoctypePanel from "@/components/SettingsDoctypePanel.vue";
-import ProfilePanel from "@/components/ProfilePanel.vue";
-import NotificationSettingsPanel from "@/components/NotificationSettingsPanel.vue";
-import EmailSettingsPanel from "@/components/EmailSettingsPanel.vue";
-import Skeleton from "@/components/Skeleton.vue";
-import moduleIcon from "@/components/moduleIcon";
-import { session } from "@/data/session";
-import { i18n, languageOptions, loadLanguageOptions, switchLanguage, t } from "@/data/i18n";
-import { currentTheme } from "@/data/theme";
-import { userContextResource } from "@/data/userContext";
+import { computed, ref, watch } from 'vue'
+import { Dialog, FeatherIcon, TabButtons, toast } from 'frappe-ui'
+import SettingsDoctypePanel from '@/components/SettingsDoctypePanel.vue'
+import ProfilePanel from '@/components/ProfilePanel.vue'
+import NotificationSettingsPanel from '@/components/NotificationSettingsPanel.vue'
+import EmailSettingsPanel from '@/components/EmailSettingsPanel.vue'
+import Skeleton from '@/components/Skeleton.vue'
+import moduleIcon from '@/components/moduleIcon'
+import { session } from '@/data/session'
+import { i18n, languageOptions, loadLanguageOptions, switchLanguage, t } from '@/data/i18n'
+import { currentTheme } from '@/data/theme'
+import { userContextResource } from '@/data/userContext'
 
 const props = defineProps({
-	modelValue: { type: Boolean, default: false },
-});
-const emit = defineEmits(["update:modelValue"]);
+  modelValue: { type: Boolean, default: false },
+})
+const emit = defineEmits(['update:modelValue'])
 
 const show = computed({
-	get: () => props.modelValue,
-	set: (v) => emit("update:modelValue", v),
-});
+  get: () => props.modelValue,
+  set: (v) => emit('update:modelValue', v),
+})
 
-const isPrivileged = computed(() => !!userContextResource.data?.is_privileged);
-const isSystemAdmin = computed(() => !!userContextResource.data?.is_system_admin);
+const isPrivileged = computed(() => !!userContextResource.data?.is_privileged)
+const isSystemAdmin = computed(() => !!userContextResource.data?.is_system_admin)
 
-const activeTab = ref("profile");
+const activeTab = ref('profile')
 
 // Reset to the first tab each time the panel is reopened, so a privileged
 // user who last viewed an admin-only tab doesn't leave a non-privileged
 // session on a blank pane if their role context changes between opens.
 watch(show, (visible) => {
-	if (visible) activeTab.value = "profile";
-});
+  if (visible) activeTab.value = 'profile'
+})
 
 const groupedTabs = computed(() => {
-	const groups = [
-		{
-			label: "Account",
-			tabs: [
-				{ key: "profile", label: "Profile", icon: moduleIcon("user") },
-				{ key: "notifications", label: "Notifications", icon: moduleIcon("bell") },
-				{ key: "appearance", label: "Appearance", icon: moduleIcon("sun") },
-				{ key: "language", label: "Language", icon: moduleIcon("globe") },
-			],
-		},
-	];
-	if (isPrivileged.value) {
-		groups.push({
-			label: "App Settings",
-			tabs: [
-				{ key: "app-setting", label: "App Settings", icon: moduleIcon("sliders") },
-				{ key: "pnc-interval", label: "PNC Visit Interval", icon: moduleIcon("calendar") },
-			],
-		});
-	}
-	if (isSystemAdmin.value) {
-		groups.push({
-			label: "Email Settings",
-			tabs: [{ key: "email-settings", label: "Email Settings", icon: moduleIcon("mail") }],
-		});
-	}
-	return groups;
-});
+  const groups = [
+    {
+      label: 'Account',
+      tabs: [
+        { key: 'profile', label: 'Profile', icon: moduleIcon('user') },
+        { key: 'notifications', label: 'Notifications', icon: moduleIcon('bell') },
+        { key: 'appearance', label: 'Appearance', icon: moduleIcon('sun') },
+        { key: 'language', label: 'Language', icon: moduleIcon('globe') },
+      ],
+    },
+  ]
+  if (isPrivileged.value) {
+    groups.push({
+      label: 'App Settings',
+      tabs: [
+        { key: 'app-setting', label: 'App Settings', icon: moduleIcon('sliders') },
+        { key: 'pnc-interval', label: 'PNC Visit Interval', icon: moduleIcon('calendar') },
+      ],
+    })
+  }
+  if (isSystemAdmin.value) {
+    groups.push({
+      label: 'Email Settings',
+      tabs: [{ key: 'email-settings', label: 'Email Settings', icon: moduleIcon('mail') }],
+    })
+  }
+  return groups
+})
 
 // Same tabs as groupedTabs, without the group headers - the mobile strip
 // scrolls horizontally instead of grouping vertically, so the grouping
 // itself has nowhere to render.
-const flatTabs = computed(() => groupedTabs.value.flatMap((group) => group.tabs));
+const flatTabs = computed(() => groupedTabs.value.flatMap((group) => group.tabs))
 
 const themeButtons = [
-	{ label: "Light", value: "light" },
-	{ label: "Dark", value: "dark" },
-];
+  { label: 'Light', value: 'light' },
+  { label: 'Dark', value: 'dark' },
+]
 
 const theme = computed({
-	get: () => currentTheme.value,
-	set: (v) => (currentTheme.value = v),
-});
+  get: () => currentTheme.value,
+  set: (v) => (currentTheme.value = v),
+})
 
-loadLanguageOptions();
+loadLanguageOptions()
 
 function selectLanguage(value) {
-	if (value === i18n.lang) return;
-	switchLanguage(value).catch((e) =>
-		toast.error(e?.messages?.[0] || e?.message || t("Could not change the language."))
-	);
+  if (value === i18n.lang) return
+  switchLanguage(value).catch((e) => toast.error(e?.messages?.[0] || e?.message || t('Could not change the language.')))
 }
 </script>

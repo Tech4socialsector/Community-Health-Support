@@ -4,15 +4,13 @@
 frappe.ui.form.on("Household profile", {
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
-			frappe
-				.call({
-					method: "chw.api.get_current_health_worker",
-				})
-				.then((r) => {
-					if (r.message) {
-						frm.set_value("health_worker_name", r.message);
-					}
-				});
+			frappe.call({
+				method: "chw.api.get_current_health_worker",
+			}).then((r) => {
+				if (r.message) {
+					frm.set_value("health_worker_name", r.message);
+				}
+			});
 		}
 	},
 	phone_no(frm) {
@@ -38,9 +36,7 @@ frappe.ui.form.on("Household profile", {
 			return;
 		}
 
-		const point = (geojson.features || []).find(
-			(f) => f.geometry && f.geometry.type === "Point"
-		);
+		const point = (geojson.features || []).find((f) => f.geometry && f.geometry.type === "Point");
 		if (point) {
 			const [lng, lat] = point.geometry.coordinates;
 			frm.set_value("latitude", lat);

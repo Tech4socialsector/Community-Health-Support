@@ -20,10 +20,8 @@ def execute():
 		if frappe.db.exists("NCD Disease", disease):
 			frappe.db.set_value("NCD Disease", disease, "interval_days", interval_days)
 		else:
-			frappe.get_doc(
-				{
-					"doctype": "NCD Disease",
-					"name": disease,
-					"interval_days": interval_days,
-				}
-			).insert(ignore_permissions=True)
+			frappe.get_doc({
+				"doctype": "NCD Disease",
+				"name": disease,
+				"interval_days": interval_days,
+			}).insert(ignore_permissions=True)

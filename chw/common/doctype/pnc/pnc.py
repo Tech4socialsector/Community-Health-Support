@@ -5,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
-
 from chw.api import sync_next_visit_todo, validate_phone_number
 from chw.chw_master import visit_schedule
 
@@ -52,7 +51,9 @@ class PNC(Document):
 
 		# `fmid` is the mother's Family member ID; `family_member_id` was its
 		# old, renamed column - always empty now, so this check never ran.
-		family_member_id = frappe.db.get_value("Birth Registration", self.birth_registration_id, "fmid")
+		family_member_id = frappe.db.get_value(
+			"Birth Registration", self.birth_registration_id, "fmid"
+		)
 		gender = family_member_id and frappe.db.get_value("Family members", family_member_id, "gender")
 		if gender and gender != "Female":
 			frappe.throw(_("PNC can only be created for a female family member."))
@@ -121,7 +122,8 @@ class PNC(Document):
 	@staticmethod
 	def _pending_urgent_in(table):
 		urgent_rows = [
-			(i, row) for i, row in enumerate(table) if row.urgent_followup and row.status != "Completed"
+			(i, row) for i, row in enumerate(table)
+			if row.urgent_followup and row.status != "Completed"
 		]
 		if not urgent_rows:
 			return None
@@ -183,10 +185,7 @@ class PNC(Document):
 		urgent = self._pending_urgent_in(table)
 		if urgent:
 			return frappe._dict(
-				next_date=urgent.date,
-				window_start=urgent.trigger_date,
-				window_end=urgent.date,
-				risk_alert="",
+				next_date=urgent.date, window_start=urgent.trigger_date, window_end=urgent.date, risk_alert="",
 				is_urgent=True,
 			)
 
@@ -194,9 +193,7 @@ class PNC(Document):
 		window = self.get_visit_window(visit_number)
 		if window is None:
 			# every visit on this table has been completed
-			return frappe._dict(
-				next_date=None, window_start=None, window_end=None, risk_alert="", is_urgent=False
-			)
+			return frappe._dict(next_date=None, window_start=None, window_end=None, risk_alert="", is_urgent=False)
 
 		window_start = add_days(delivery_date, window.start_offset)
 		window_end = add_days(delivery_date, window.end_offset)
@@ -207,17 +204,12 @@ class PNC(Document):
 		# otherwise; the window/due date above are unaffected either way.
 		high_risk = self.high_risk or "No"
 		risk_alert = (
-			"Visit by {0}".format(
-				frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days))
-			)
+			"Visit by {0}".format(frappe.utils.formatdate(add_days(window_start, window.risk_alert_within_days)))
 			if high_risk == "Yes"
 			else ""
 		)
 		return frappe._dict(
-			next_date=window_end,
-			window_start=window_start,
-			window_end=window_end,
-			risk_alert=risk_alert,
+			next_date=window_end, window_start=window_start, window_end=window_end, risk_alert=risk_alert,
 			is_urgent=False,
 		)
 
@@ -232,9 +224,7 @@ class PNC(Document):
 		# "Date of Next Visit" is auto-filled on the latest row only.
 		# "Next Visit Window" is a plain read-only range shown on every row.
 		if window_start and window_end:
-			display = "{0} to {1}".format(
-				frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end)
-			)
+			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
 			if table:
 				table[-1].date_of_next_visit = window_end
 		else:
@@ -249,6 +239,4 @@ class PNC(Document):
 		chw.chw_master.visit_schedule.get_visit_window. Returns None once
 		visit_number has no matching row - there's no fixed cap, the
 		configured rows *are* the cap."""
-		return visit_schedule.get_visit_window(
-			"PNC", visit_number, DEFAULT_VISIT_SCHEDULE, DEFAULT_RISK_ALERT_DAYS
-		)
+		return visit_schedule.get_visit_window("PNC", visit_number, DEFAULT_VISIT_SCHEDULE, DEFAULT_RISK_ALERT_DAYS)

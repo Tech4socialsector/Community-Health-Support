@@ -6,7 +6,6 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, today
-
 from chw.api import validate_phone_number
 from chw.common.doctype.household_profile.household_profile import refresh_member_counts
 

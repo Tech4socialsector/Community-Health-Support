@@ -224,7 +224,9 @@ doc_events = {
 	"*": {
 		"validate": "chw.api.validate_phone_fields",
 	},
-	"Birth Registration": {"after_insert": "chw.api.close_anc_followup_from_birth_registration"},
+	"Birth Registration": {
+		"after_insert": "chw.api.close_anc_followup_from_birth_registration"
+	},
 	# A CHW form changed in Desk (new field, new label, Customize Form) ->
 	# its new texts are translated for the languages in use.
 	"DocType": {"on_update": "chw.translation_tool.on_form_change"},
@@ -333,3 +335,4 @@ scheduler_events = {
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
+
