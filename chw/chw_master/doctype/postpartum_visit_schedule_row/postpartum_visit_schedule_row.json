@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "creation": "2026-09-29 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "window_opens_day",
+  "window_closes_day",
+  "risk_alert_within_days",
+  "urgent_visit_within_days"
+ ],
+ "fields": [
+  {
+   "description": "Days after the delivery date this visit's window opens (delivery day itself = 0).",
+   "fieldname": "window_opens_day",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Window Opens (Day)",
+   "reqd": 1
+  },
+  {
+   "description": "Days after the delivery date this visit's window closes. After this, the visit counts as overdue.",
+   "fieldname": "window_closes_day",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Window Closes (Day)",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "High Risk only: how many days into THIS window (from Window Opens) the CHW should be nudged to visit early. Only affects the red alert shown during a normal window - unrelated to the urgent visit below.",
+   "fieldname": "risk_alert_within_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Risk Alert Within (Days)"
+  },
+  {
+   "default": "1",
+   "description": "If THIS visit is completed with either Mother's Condition or Baby's Condition = Risk, an extra urgent follow-up is scheduled this many days after the visit's own date. Independent of Risk Alert Within Days above - each visit row sets its own urgent timing.",
+   "fieldname": "urgent_visit_within_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Urgent Visit Within (Days)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-09-29 00:00:00",
+ "modified_by": "Administrator",
+ "module": "CHW Master",
+ "name": "Postpartum Visit Schedule Row",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "autoname": "field:client_id",
+ "creation": "2026-10-12 12:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "client_id",
+  "action",
+  "reference_doctype",
+  "reference_name",
+  "synced_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client ID",
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "action",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Action",
+   "options": "Insert\nUpdate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Reference DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Name",
+   "options": "reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "synced_by",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Synced By",
+   "options": "User",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-12 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "CHW Master",
+ "name": "CHW Offline Sync",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

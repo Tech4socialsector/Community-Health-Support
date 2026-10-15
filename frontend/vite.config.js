@@ -45,13 +45,18 @@ export default defineConfig({
         scope: '/chw/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#111827',
+        // The logo's navy (tailwind navy-900) - colours the installed app's
+        // title bar / Android status bar.
+        theme_color: '#031530',
+        // ?v=: Chrome keeps the icon it saved at install time and only
+        // refreshes it when the icon address changes - bump this when the
+        // logo changes, so installed copies pick up the new one.
         icons: [
-          { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-64x64.png?v=2', sizes: '64x64', type: 'image/png' },
+          { src: 'pwa-192x192.png?v=2', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png?v=2', sizes: '512x512', type: 'image/png' },
           {
-            src: 'maskable-icon-512x512.png',
+            src: 'maskable-icon-512x512.png?v=2',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -80,6 +85,10 @@ export default defineConfig({
         // false fails validation even though the SW template's own check
         // would have treated it the same as null.)
         navigateFallback: null,
+        // A first-time install takes over the open page at once (an update
+        // still waits for "Refresh") - so the screens opened in this first
+        // visit are already stored for offline use.
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: ({ url, request }) =>
@@ -89,6 +98,23 @@ export default defineConfig({
               cacheName: 'chw-app-shell',
               networkTimeoutSeconds: 5,
               expiration: { maxEntries: 5 },
+              // Every /chw/... page is the same app page (the router picks
+              // the screen), so all are stored under one key - offline,
+              // any address opens, not only the ones visited online.
+              plugins: [{ cacheKeyWillBeUsed: async () => '/chw' }],
+            },
+          },
+          // The app's own files (screens load on demand). Names change with
+          // every build, so a stored copy never goes stale. Needed besides
+          // the precache: after an update the page is the new build while
+          // the old service worker (waiting for "Update" to be tapped) only
+          // holds the old files - offline, the new screens wouldn't load.
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/assets/chw/frontend/'),
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'chw-app-files',
+              expiration: { maxEntries: 400 },
             },
           },
         ],

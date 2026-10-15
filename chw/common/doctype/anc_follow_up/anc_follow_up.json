@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "allow_rename": 1,
  "autoname": "field:first_name",
  "creation": "2026-08-10 13:16:35.612015",
@@ -11,7 +10,11 @@
   "first_name",
   "hh_id",
   "village",
+  "gram__panchayat",
+  "sub_centre",
   "age",
+  "gestational_age_by_ultrasound",
+  "vitamins",
   "column_break_hbdc",
   "phone_number",
   "date",
@@ -19,9 +22,17 @@
   "gravida",
   "status",
   "next_anc_visit_date",
+  "next_anc_visit_risk_alert",
   "next_anc_visit_date_auto",
+  "section_break_lxnr",
+  "current_status_column",
+  "delivery_status",
+  "aboration_status",
+  "iud_stauts",
   "section_break_vzey",
-  "anc_followup"
+  "anc_followup_for_nurse",
+  "anc_followup",
+  "anc_followup_for_docter"
  ],
  "fields": [
   {
@@ -101,7 +112,6 @@
    "label": "Gravida"
   },
   {
-   "description": "Automatically set to Closed when this mother's Birth Registration is recorded (she has delivered) - her remaining ANC visits are no longer due.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -117,14 +127,20 @@
   {
    "fieldname": "anc_followup",
    "fieldtype": "Table",
-   "label": "ANC Followup",
+   "label": "ANC Followup for Volunteer",
    "options": "ANC Followup Child"
   },
   {
-   "description": "Auto-calculated from the last follow-up date and the ANC Visit Interval Master. Enter a date here to override it, or clear it to let it auto-calculate again.",
    "fieldname": "next_anc_visit_date",
    "fieldtype": "Date",
-   "label": "Next ANC Visit Date"
+   "label": "Visit Due data"
+  },
+  {
+   "bold": 1,
+   "fieldname": "next_anc_visit_risk_alert",
+   "fieldtype": "Data",
+   "label": "Risk Visit Date ",
+   "read_only": 1
   },
   {
    "fieldname": "next_anc_visit_date_auto",
@@ -132,12 +148,79 @@
    "hidden": 1,
    "label": "Next ANC Visit Date (auto-calculated, internal)",
    "read_only": 1
+  },
+  {
+   "fieldname": "anc_followup_for_nurse",
+   "fieldtype": "Table",
+   "label": "ANC Followup for Nurse",
+   "options": "ANC Followup Nurse"
+  },
+  {
+   "fieldname": "anc_followup_for_docter",
+   "fieldtype": "Table",
+   "label": "ANC Followup for Docter",
+   "options": "ANC Followup Docter"
+  },
+  {
+   "fieldname": "section_break_lxnr",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "current_status_column",
+   "fieldtype": "Column Break",
+   "label": "Current Status"
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "label": "Delivery Status",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "aboration_status",
+   "fieldtype": "Select",
+   "label": "Aboration Status",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "iud_stauts",
+   "fieldtype": "Select",
+   "label": "IUD Stauts",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gestational_age_by_ultrasound",
+   "fieldtype": "Small Text",
+   "label": "Gestational Age by Ultrasound"
+  },
+  {
+   "fieldname": "vitamins",
+   "fieldtype": "Select",
+   "label": "Vitamins",
+   "options": "\nFolic Acid\nIron/calcium daily\nIron twice daily/ calcium daily"
+  },
+  {
+   "fetch_from": "pregnant_id.gram_panchayat",
+   "fieldname": "gram__panchayat",
+   "fieldtype": "Link",
+   "label": "Gram  Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "pregnant_id.sub_centre",
+   "fieldname": "sub_centre",
+   "fieldtype": "Link",
+   "label": "Sub Centre",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-10 15:07:07.540864",
+ "modified": "2026-10-09 10:58:22.330542",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

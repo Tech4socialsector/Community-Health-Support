@@ -6,26 +6,26 @@
     <template v-else>
       <Switch
         v-model="settings.thread_notify"
-        label="Email Threads"
-        description="Send notifications for email threads on documents you're involved in."
+        :label="t('Email Threads')"
+        :description="t('Send notifications for email threads on documents you\'re involved in.')"
         @update:model-value="save('thread_notify', $event)"
       />
       <Switch
         v-model="settings.document_follow_notify"
-        label="Followed Documents"
-        description="Send notifications for documents you follow."
+        :label="t('Followed Documents')"
+        :description="t('Send notifications for documents you follow.')"
         @update:model-value="save('document_follow_notify', $event)"
       />
       <Switch
         v-model="settings.send_me_a_copy"
-        label="Copy of Outgoing Emails"
-        description="Send me a copy of emails I send out."
+        :label="t('Copy of Outgoing Emails')"
+        :description="t('Send me a copy of emails I send out.')"
         @update:model-value="save('send_me_a_copy', $event)"
       />
       <Switch
         v-model="settings.mute_sounds"
-        label="Mute Sounds"
-        description="Mute notification sounds in the app."
+        :label="t('Mute Sounds')"
+        :description="t('Mute notification sounds in the app.')"
         @update:model-value="save('mute_sounds', $event)"
       />
     </template>
@@ -37,6 +37,7 @@ import { reactive, ref } from 'vue'
 import { Switch, call, toast } from 'frappe-ui'
 import Skeleton from '@/components/Skeleton.vue'
 import { session } from '@/data/session'
+import { t } from '@/data/i18n'
 
 const FIELDS = ['thread_notify', 'document_follow_notify', 'send_me_a_copy', 'mute_sounds']
 
@@ -71,7 +72,7 @@ async function save(fieldname, value) {
       value: value ? 1 : 0,
     })
   } catch (e) {
-    toast.error('Could not save')
+    toast.error(t('Could not save'))
     settings[fieldname] = !value
   }
 }

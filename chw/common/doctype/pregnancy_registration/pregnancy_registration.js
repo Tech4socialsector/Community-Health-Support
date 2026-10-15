@@ -21,6 +21,19 @@ frappe.ui.form.on("Pregnancy Registration", {
 	lmp_date(frm) {
 		if (frm.doc.lmp_date) {
 			frm.set_value("estimated_date_of_delivery", frappe.datetime.add_days(frm.doc.lmp_date, 281));
+
+			const days_pregnant = frappe.datetime.get_diff(frappe.datetime.get_today(), frm.doc.lmp_date);
+			const weeks = Math.floor(days_pregnant / 7);
+			const days = days_pregnant % 7;
+			frm.set_value("pog", `${weeks} weeks ${days} days`);
+
+			// Automatic only, no manual selection - same weeks-based ranges
+			// the server recalculates on save.
+			let trimester;
+			if (weeks <= 13) trimester = "First trimester";
+			else if (weeks <= 27) trimester = "Second trimester";
+			else trimester = "Third trimester";
+			frm.set_value("trimester", trimester);
 		}
 	},
 	phone_number(frm) {
@@ -32,4 +45,21 @@ frappe.ui.form.on("Pregnancy Registration", {
 			});
 		}
 	},
+	height(frm) {
+		calculate_bmi(frm);
+	},
+	weight(frm) {
+		calculate_bmi(frm);
+	},
 });
+
+function calculate_bmi(frm) {
+	const weight_kg = parseFloat(frm.doc.weight);
+	if (!frm.doc.height || isNaN(weight_kg)) {
+		frm.set_value("bmi_calculation", null);
+		return;
+	}
+
+	const height_m = frm.doc.height / 100;
+	frm.set_value("bmi_calculation", flt(weight_kg / (height_m * height_m), 1));
+}

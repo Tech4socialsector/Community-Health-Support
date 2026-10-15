@@ -27,7 +27,7 @@
       <ErrorMessage class="mt-4" :message="saveError" />
       <div class="mt-6 flex justify-end">
         <Button variant="solid" :loading="saving" @click="save">
-          Save
+          {{ t('Save') }}
         </Button>
       </div>
     </form>
@@ -40,6 +40,7 @@ import { useDoc, Button, ErrorMessage, toast } from 'frappe-ui'
 import DynamicField from '@/components/DynamicField.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import { useMeta, useFormFields } from '@/data/useMeta'
+import { t } from '@/data/i18n'
 
 const props = defineProps({
   doctype: { type: String, required: true },
@@ -70,7 +71,7 @@ async function save() {
   saveError.value = null
   try {
     await doc.setValue.submit(values)
-    toast.success('Saved')
+    toast.success(t('Saved'))
   } catch (e) {
     saveError.value = e
   } finally {

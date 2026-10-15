@@ -1,15 +1,15 @@
 <template>
   <AppLayout>
-    <PageHeader description="Manage your email accounts and configure incoming and outgoing settings.">
+    <PageHeader :description="t('Manage your email accounts and configure incoming and outgoing settings.')">
       <template #title>
-        <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Email Accounts</h1>
+        <h1 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ t('Email Accounts') }}</h1>
       </template>
       <template #actions>
         <Button variant="solid" @click="router.push({ name: 'EmailAccountNew' })">
           <template #prefix>
             <FeatherIcon name="plus" class="h-4 w-4" />
           </template>
-          New
+          {{ t('New') }}
         </Button>
       </template>
     </PageHeader>
@@ -22,7 +22,7 @@
       v-else-if="!rows.data || rows.data.length === 0"
       class="py-10 text-center text-gray-500 dark:text-gray-400"
     >
-      No email accounts yet.
+      {{ t('No email accounts yet.') }}
     </div>
 
     <div v-else class="divide-y rounded-lg border dark:divide-gray-800 dark:border-gray-800">
@@ -46,15 +46,15 @@
         <div class="flex flex-shrink-0 items-center gap-1.5">
           <span
             v-if="row.default_outgoing"
-            class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-950 dark:text-blue-400"
+            class="rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
           >
-            Default Sending
+            {{ t('Default Sending') }}
           </span>
           <span
             v-if="row.default_incoming"
-            class="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600 dark:bg-green-950 dark:text-green-400"
+            class="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600 dark:bg-green-900/40 dark:text-green-400"
           >
-            Default Incoming
+            {{ t('Default Incoming') }}
           </span>
         </div>
       </div>
@@ -62,25 +62,28 @@
 
     <div class="mt-4 flex justify-end gap-2">
       <Button :disabled="!rows.hasPreviousPage" @click="rows.previous()">
-        Previous
+        {{ t('Previous') }}
       </Button>
       <Button :disabled="!rows.hasNextPage" @click="rows.next()">
-        Next
+        {{ t('Next') }}
       </Button>
     </div>
   </AppLayout>
 </template>
 
 <script setup>
+import { watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { useList, Button, ErrorMessage, FeatherIcon } from 'frappe-ui'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import { setPageTitle } from '@/data/pageTitle'
+import { t } from '@/data/i18n'
 
 const router = useRouter()
-setPageTitle('Email Accounts')
+// In a watchEffect so the title follows a language switch.
+watchEffect(() => setPageTitle(t('Email Accounts')))
 
 const rows = useList({
   doctype: 'Email Account',
