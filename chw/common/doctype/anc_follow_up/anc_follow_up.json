@@ -157,7 +157,7 @@
   {
    "fieldname": "anc_followup_for_docter",
    "fieldtype": "Table",
-   "label": "ANC Followup for Docter",
+   "label": "ANC  Doctor Followup",
    "options": "ANC Followup Docter"
   },
   {
@@ -212,7 +212,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-19 14:17:27.031617",
+ "modified": "2026-10-20 13:04:49.709972",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

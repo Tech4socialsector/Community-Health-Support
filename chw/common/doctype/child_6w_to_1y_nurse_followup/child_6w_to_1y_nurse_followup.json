@@ -8,13 +8,11 @@
  "field_order": [
   "child_6w_to_1y_followup_docter_notes_section",
   "visit_date",
-  "bp",
   "hr",
   "rr",
   "temp",
   "height",
   "weight",
-  "o2sat",
   "immunization_upto_date",
   "column_break_qfdv",
   "objective",
@@ -44,12 +42,6 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Visit Date"
-  },
-  {
-   "fieldname": "bp",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "BP"
   },
   {
    "fieldname": "hr",
@@ -85,14 +77,6 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Weight"
-  },
-  {
-   "fieldname": "o2sat",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "O2Sat"
   },
   {
    "fieldname": "column_break_qfdv",
@@ -211,7 +195,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-19 12:49:35.995316",
+ "modified": "2026-10-20 15:35:07.256553",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1y Nurse Followup",

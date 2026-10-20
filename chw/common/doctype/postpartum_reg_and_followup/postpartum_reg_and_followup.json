@@ -67,7 +67,9 @@
   "comp_vacuum_assist_delivery",
   "comp_other",
   "followup_section",
-  "followup_visits"
+  "followup_visits",
+  "table_awlm",
+  "postpartum_docter_followup"
  ],
  "fields": [
   {
@@ -188,7 +190,7 @@
   {
    "fieldname": "history_section",
    "fieldtype": "Section Break",
-   "label": "Mother History (preconception, pregnancy and postnatal)"
+   "label": "Mother's History"
   },
   {
    "fieldname": "pmh_diabetes",
@@ -312,7 +314,8 @@
   },
   {
    "fieldname": "birth_details_section2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Birth Details"
   },
   {
    "fieldname": "gender",
@@ -395,6 +398,7 @@
   {
    "fieldname": "followup_visits",
    "fieldtype": "Table",
+   "label": "Volunteer Followup Form",
    "options": "Postpartum Followup"
   },
   {
@@ -426,12 +430,24 @@
    "fieldname": "type_of_surgery",
    "fieldtype": "Data",
    "label": "Type of Surgery"
+  },
+  {
+   "fieldname": "postpartum_docter_followup",
+   "fieldtype": "Table",
+   "label": "Postpartum Docter Followup",
+   "options": "Postpartum Docter Notes"
+  },
+  {
+   "fieldname": "table_awlm",
+   "fieldtype": "Table",
+   "label": "Postpartum Nurse Followup",
+   "options": "Postpartum Nurse Notes"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-19 12:55:04.064652",
+ "modified": "2026-10-20 14:24:42.673127",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",

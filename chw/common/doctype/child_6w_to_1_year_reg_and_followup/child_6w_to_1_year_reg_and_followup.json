@@ -24,6 +24,7 @@
   "child_risk_alert",
   "next_visit_date_auto",
   "husband_section",
+  "mothers_name",
   "husbands_name",
   "husbands_occupation",
   "column_break_hs1",
@@ -184,12 +185,12 @@
   {
    "fieldname": "husbands_name",
    "fieldtype": "Data",
-   "label": "Husband's Name"
+   "label": "Father's Name"
   },
   {
    "fieldname": "husbands_occupation",
    "fieldtype": "Data",
-   "label": "Husband's Occupation"
+   "label": "Father's Occupation"
   },
   {
    "fieldname": "column_break_hs1",
@@ -198,7 +199,7 @@
   {
    "fieldname": "husbands_phone_number",
    "fieldtype": "Data",
-   "label": "Husband's Phone Number",
+   "label": "Father's Phone Number",
    "length": 10
   },
   {
@@ -453,12 +454,17 @@
    "fieldtype": "Link",
    "label": "Sub Cemtre",
    "options": "Sub Centre"
+  },
+  {
+   "fieldname": "mothers_name",
+   "fieldtype": "Data",
+   "label": "Mother's Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-19 12:44:31.746331",
+ "modified": "2026-10-20 15:34:28.539023",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Reg and Followup",

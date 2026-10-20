@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "PNC-.#####",
- "creation": "2026-08-10 15:25:41.737279",
+ "creation": "2026-10-12 16:54:23.026462",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -180,7 +180,7 @@
   {
    "fieldname": "baby_followup_docter_notes",
    "fieldtype": "Table",
-   "label": "Baby Followup Docter Notes",
+   "label": "Baby Followup Doctor Notes",
    "options": "PNC Child Followup Docter Notes"
   },
   {
@@ -207,7 +207,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-09 11:18:09.977547",
+ "modified": "2026-10-20 14:27:08.436959",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",

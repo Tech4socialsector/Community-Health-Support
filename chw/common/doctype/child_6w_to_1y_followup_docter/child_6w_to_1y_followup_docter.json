@@ -8,13 +8,12 @@
  "field_order": [
   "child_6w_to_1y_followup_docter_notes_section",
   "visit_date",
-  "bp",
   "hr",
   "rr",
   "temp",
   "height",
   "weight",
-  "o2sat",
+  "immunization_upto_date",
   "column_break_qfdv",
   "objective",
   "subjective",
@@ -38,11 +37,6 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Visit Date"
-  },
-  {
-   "fieldname": "bp",
-   "fieldtype": "Int",
-   "label": "BP"
   },
   {
    "fieldname": "hr",
@@ -70,7 +64,7 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Height"
+   "label": "Length"
   },
   {
    "fieldname": "weight",
@@ -78,13 +72,6 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Weight"
-  },
-  {
-   "fieldname": "o2sat",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "O2Sat"
   },
   {
    "fieldname": "column_break_qfdv",
@@ -196,13 +183,19 @@
    "fieldname": "child_6w_to_1y_followup_docter_notes_section",
    "fieldtype": "Section Break",
    "label": "Child 6w to 1y Followup Docter Notes"
+  },
+  {
+   "fieldname": "immunization_upto_date",
+   "fieldtype": "Select",
+   "label": " Immunization upto date ",
+   "options": "\nYes\nNo"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-08 09:32:27.415766",
+ "modified": "2026-10-20 15:36:19.827676",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1y Followup Docter",

@@ -10,26 +10,20 @@
   "lmp_date",
   "pog_weeks",
   "status",
-  "month",
   "bp",
   "hr",
   "rr",
   "temp",
   "fh",
   "fhr",
-  "weight",
   "height",
+  "weight",
+  "bmi",
   "column_break_wlrk",
   "anemia",
   "edema",
   "grbs",
-  "bmi",
-  "tt",
   "hemoglobin_level",
-  "teaching",
-  "monthly_checkup",
-  "ironcal",
-  "any_other_complaitsremark",
   "mch_nurse_noti_ed_of_abnormal_vital_signs",
   "pregnancy_assessment_section",
   "h5pregnancy_assessmenth",
@@ -44,16 +38,13 @@
   "severe_abdominal_pain",
   "severe_headacheblurred_vision",
   "swelling_of_handsface",
+  "column_break_icvq",
   "fever",
   "extreme_dizziness_or_fatigue",
   "reduced_fetal_movement",
   "itching_of_palms_or_soles_of_feet_especially_at_night",
-  "palpitations",
   "patient_condition",
-  "column_break_icvq",
-  "mch_nurse_notified_of_danger_signs",
-  "problems_identified",
-  "support_care_provided",
+  "palpitations",
   "education_provided_section",
   "h5education_providedh",
   "folic_acid_counseling_1st_trimester",
@@ -78,7 +69,6 @@
   "refferal_need",
   "referral_clinic_type",
   "care_plan_created",
-  "reports_or_info_sent_to_mch_nurse",
   "column_break_tzcp",
   "date_of_next_visit",
   "next_visit_window",
@@ -106,13 +96,6 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "\nPending\nCompleted"
-  },
-  {
-   "fieldname": "month",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Month"
   },
   {
    "description": "(< 95/60 or 140/90 +)",
@@ -173,7 +156,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Anemia",
+   "label": "Gestational Age by Ultrasound ",
    "options": "\nYes\nNo"
   },
   {
@@ -181,7 +164,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Edema",
+   "label": "Current Weight",
    "options": "\nYes\nNo"
   },
   {
@@ -190,46 +173,9 @@
    "label": "GRBS"
   },
   {
-   "fieldname": "tt",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "TT",
-   "options": "\nYes\nNo"
-  },
-  {
    "fieldname": "hemoglobin_level",
    "fieldtype": "Data",
    "label": "HB"
-  },
-  {
-   "fieldname": "teaching",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Teaching"
-  },
-  {
-   "fieldname": "monthly_checkup",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Monthly Checkup",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "ironcal",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Iron/Cal",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "any_other_complaitsremark",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Any other Complaits/Remark"
   },
   {
    "fieldname": "pregnancy_assessment_section",
@@ -342,25 +288,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "mch_nurse_notified_of_danger_signs",
-   "fieldtype": "Select",
-   "label": "MCH nurse notified of danger signs",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "problems_identified",
-   "fieldtype": "Small Text",
-   "label": "Problems Identified"
-  },
-  {
-   "fieldname": "support_care_provided",
-   "fieldtype": "Small Text",
-   "label": "Support/ Care Provided"
-  },
-  {
    "fieldname": "education_provided_section",
    "fieldtype": "Section Break",
-   "label": "Education Provided"
+   "label": "Patient Teaching"
   },
   {
    "fieldname": "h5education_providedh",
@@ -458,12 +388,6 @@
    "fieldname": "care_plan_created",
    "fieldtype": "Select",
    "label": "Care plan Created",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "reports_or_info_sent_to_mch_nurse",
-   "fieldtype": "Select",
-   "label": "Reports or info sent to MCH nurse",
    "options": "\nYes\nNo"
   },
   {
@@ -576,7 +500,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-08 16:23:14.418314",
+ "modified": "2026-10-20 13:04:39.109833",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Docter",

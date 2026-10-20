@@ -21,7 +21,6 @@
   "rr",
   "hr",
   "temperature",
-  "height",
   "weight",
   "bmi",
   "mch_nurse_notified_of_abnormal_vital_signs",
@@ -30,16 +29,12 @@
   "wound",
   "wound_if_yes",
   "wound_infection",
-  "if_wound_infection_yes",
   "h5hbh",
-  "date_hb",
   "result",
   "h5bsh",
   "bs_date",
   "type",
   "result_bs",
-  "anemia",
-  "edema",
   "breast",
   "ifabnormalbreast",
   "bleeding",
@@ -115,28 +110,12 @@
    "label": "BP"
   },
   {
-   "fieldname": "edema",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Edema",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "anemia",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Anemia",
-   "options": "\nYes\nNo"
-  },
-  {
    "fieldname": "wound_infection",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Wound Assessment",
-   "options": "\nNormal\nSigns of infection"
+   "options": "\nNormal\nSigns of infection (Redness, swelling, edema)"
   },
   {
    "fieldname": "breast",
@@ -213,13 +192,6 @@
    "label": "Temperature"
   },
   {
-   "fieldname": "height",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Height"
-  },
-  {
    "fieldname": "weight",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -245,21 +217,9 @@
    "options": "\nYes\nNo"
   },
   {
-   "depends_on": "eval:doc.wound_infection==\"Signs of infection\"",
-   "fieldname": "if_wound_infection_yes",
-   "fieldtype": "Select",
-   "label": "If Wound Infection Yes",
-   "options": "\nSwelling\nRedness\nEdema"
-  },
-  {
    "fieldname": "h5hbh",
    "fieldtype": "Heading",
    "label": "<h5>HB</h5>"
-  },
-  {
-   "fieldname": "date_hb",
-   "fieldtype": "Date",
-   "label": "Date"
   },
   {
    "fieldname": "result",
@@ -423,7 +383,7 @@
   {
    "fieldname": "danger_signs_mother_section",
    "fieldtype": "Section Break",
-   "label": "Danger Signs Mother"
+   "label": "Danger Signs"
   },
   {
    "default": "0",
@@ -583,7 +543,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-19 14:12:11.812903",
+ "modified": "2026-10-20 14:08:32.487022",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC Followup Child",
