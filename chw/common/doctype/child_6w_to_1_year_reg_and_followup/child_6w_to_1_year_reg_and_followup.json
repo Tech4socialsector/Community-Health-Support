@@ -204,7 +204,7 @@
   {
    "fieldname": "history_section",
    "fieldtype": "Section Break",
-   "label": "History (preconception, pregnancy and postnatal)"
+   "label": "Mother's History"
   },
   {
    "fieldname": "pmh_diabetes",
@@ -266,7 +266,7 @@
   {
    "fieldname": "personal_history_section",
    "fieldtype": "Section Break",
-   "label": "Personal History"
+   "label": "Mother's Personal History"
   },
   {
    "fieldname": "personal_history_smoking",
@@ -458,7 +458,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-09 12:03:53.299403",
+ "modified": "2026-10-19 12:44:31.746331",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Reg and Followup",

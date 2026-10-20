@@ -326,10 +326,17 @@ export default {
   },
 
   // Desk registered these on the parent doctype, where Frappe never fires
-  // them; ported as intended. Nurse rows are added with no date (no
-  // default), so there's nothing to fill there.
+  // them; ported as intended.
   onChildRowAdd(tableField, row, idx, values) {
     if (tableField === 'anc_followup' || tableField === 'anc_followup_for_docter') {
+      return fillNewRowPregnancyInfo(row, values)
+    }
+    if (tableField === NURSE_TABLE_FIELD) {
+      // Only reached in the manual phase (bulk auto-generation already
+      // fills every automatic-phase row itself) - Window Start is read-only
+      // and has no default, so unlike Volunteer/Doctor it would otherwise
+      // stay blank forever on a hand-added row.
+      row.window_start_date = today()
       return fillNewRowPregnancyInfo(row, values)
     }
   },

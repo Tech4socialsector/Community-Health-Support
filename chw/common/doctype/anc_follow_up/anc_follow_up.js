@@ -69,7 +69,15 @@ frappe.ui.form.on("ANC Follow-up", {
 	anc_followup_for_nurse_remove(frm) {
 		calculate_next_anc_visit_date(frm);
 	},
-	anc_followup_for_nurse_add(frm) {
+	anc_followup_for_nurse_add(frm, cdt, cdn) {
+		// Only reached in the manual phase (bulk auto-generation already
+		// fills every automatic-phase row itself) - Window Start is read-only
+		// and has no DB default, so unlike Volunteer/Doctor it would
+		// otherwise stay blank forever on a hand-added row.
+		const row = locals[cdt][cdn];
+		row.window_start_date = frappe.datetime.get_today();
+		frm.refresh_field(NURSE_TABLE_FIELD);
+		fill_new_row_pregnancy_info(frm, cdt, cdn, NURSE_TABLE_FIELD);
 		highlight_risk_rows(frm);
 	},
 	anc_followup_for_docter_remove(frm) {

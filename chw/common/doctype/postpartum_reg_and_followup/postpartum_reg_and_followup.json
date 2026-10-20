@@ -35,6 +35,8 @@
   "column_break_hist1",
   "psh_cesarean",
   "psh_other_surgeries",
+  "date_of_surgery",
+  "type_of_surgery",
   "pmh_rh_neg",
   "psh_date_of_surgery",
   "personal_history_section",
@@ -412,12 +414,24 @@
    "fieldtype": "Link",
    "label": "Sub Centre",
    "options": "Sub Centre"
+  },
+  {
+   "depends_on": "eval:doc.psh_other_surgeries==\"Yes\"",
+   "fieldname": "date_of_surgery",
+   "fieldtype": "Date",
+   "label": "Date of Surgery"
+  },
+  {
+   "depends_on": "eval:doc.psh_other_surgeries==\"Yes\"",
+   "fieldname": "type_of_surgery",
+   "fieldtype": "Data",
+   "label": "Type of Surgery"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-09 12:02:35.604993",
+ "modified": "2026-10-19 12:55:04.064652",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",

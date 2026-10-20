@@ -96,6 +96,7 @@
   {
    "fieldname": "immunization",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Immunization",
@@ -241,7 +242,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-08 16:42:01.280443",
+ "modified": "2026-10-19 13:02:50.519478",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Baby PNC Followup Child",

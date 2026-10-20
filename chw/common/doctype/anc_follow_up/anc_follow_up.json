@@ -28,7 +28,6 @@
   "current_status_column",
   "delivery_status",
   "aboration_status",
-  "iud_stauts",
   "section_break_vzey",
   "anc_followup_for_nurse",
   "anc_followup",
@@ -185,13 +184,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "iud_stauts",
-   "fieldtype": "Select",
-   "label": "IUD Stauts",
-   "options": "\nYes\nNo",
-   "reqd": 1
-  },
-  {
    "fieldname": "gestational_age_by_ultrasound",
    "fieldtype": "Small Text",
    "label": "Gestational Age by Ultrasound"
@@ -220,7 +212,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-09 10:58:22.330542",
+ "modified": "2026-10-19 14:17:27.031617",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

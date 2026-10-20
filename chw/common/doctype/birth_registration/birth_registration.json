@@ -167,6 +167,7 @@
   {
    "fieldname": "mother_weight",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Mother's Weight After Delivery"
   },
   {
@@ -183,9 +184,9 @@
    "fieldname": "baby_family_member",
    "fieldtype": "Link",
    "label": "Baby's Family Member ID",
+   "no_copy": 1,
    "options": "Family members",
-   "read_only": 1,
-   "no_copy": 1
+   "read_only": 1
   },
   {
    "fieldname": "gender",
@@ -261,6 +262,7 @@
   {
    "fieldname": "which_child_is_it",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": " Which child is it?",
    "options": "\n1\n2\n3\n4\n5\n6\n7 and Above"
   },
@@ -337,7 +339,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-10-09 12:26:12.073683",
+ "modified": "2026-10-19 14:16:09.560439",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",
