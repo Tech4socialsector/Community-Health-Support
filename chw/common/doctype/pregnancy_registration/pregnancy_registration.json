@@ -57,8 +57,6 @@
   "section_break_dyhz",
   "labs_and_tests_column",
   "h5td_scanh",
-  "td",
-  "us_dating_result",
   "date_of_scan",
   "ga_us",
   "ga_at_scan",
@@ -68,10 +66,6 @@
   "ga",
   "normal_or_abnormal",
   "if_abnormal",
-  "h5tsh_scanh5",
-  "date",
-  "ga12",
-  "result",
   "h5anatomy_scanh",
   "date_of_scan_copy",
   "ga_copy",
@@ -325,19 +319,6 @@
    "label": "<h5>Dating Ultrasounds</h5>"
   },
   {
-   "fieldname": "td",
-   "fieldtype": "Select",
-   "label": "Ultrasound",
-   "options": "\n1\n2\nBooster"
-  },
-  {
-   "fieldname": "us_dating_result",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Ultrasound dating Result",
-   "options": "\nYes\nNo"
-  },
-  {
    "fieldname": "date_of_scan",
    "fieldtype": "Date",
    "label": "Date of Scan"
@@ -350,7 +331,6 @@
   {
    "fieldname": "edd_by_us",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "EDD by US"
   },
   {
@@ -588,26 +568,6 @@
    "options": "\nDelivered\nNot Delivered"
   },
   {
-   "fieldname": "h5tsh_scanh5",
-   "fieldtype": "Heading",
-   "label": "<h5>TSH Scan</h5>"
-  },
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "label": "Date"
-  },
-  {
-   "fieldname": "ga12",
-   "fieldtype": "Data",
-   "label": "GA"
-  },
-  {
-   "fieldname": "result",
-   "fieldtype": "Data",
-   "label": "Result"
-  },
-  {
    "fieldname": "h5_blood_sugarh",
    "fieldtype": "Heading",
    "label": "<h5> Blood Sugar</h5>"
@@ -763,7 +723,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-20 12:06:45.010003",
+ "modified": "2026-10-20 15:57:25.264164",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",
