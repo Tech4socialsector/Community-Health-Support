@@ -119,8 +119,6 @@ function calculateAge(values) {
     // Cleared DOB: same as Desk - empty the derived fields so a stale age
     // isn't left behind; Age can then be typed by hand if DOB is unknown.
     values.age = ''
-    values.age_in_months = 0
-    values.age_in_days = 0
     values.age_detail = ''
     return
   }
@@ -130,16 +128,12 @@ function calculateAge(values) {
     toast.warning(t('Date of Birth cannot be in the future.'))
     values.date_of_birth = ''
     values.age = ''
-    values.age_in_months = 0
-    values.age_in_days = 0
     values.age_detail = ''
     return
   }
 
   const age = ageParts(dob, now)
   values.age = String(age.years)
-  values.age_in_months = age.totalMonths
-  values.age_in_days = age.totalDays
   values.age_detail = formatAgeDetail(age.years, age.months, age.days)
 }
 

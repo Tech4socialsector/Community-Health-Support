@@ -143,8 +143,6 @@ function format_age_detail(years, months, days) {
 function calculate_age(frm) {
 	if (!frm.doc.date_of_birth) {
 		frm.set_value("age", "");
-		frm.set_value("age_in_months", 0);
-		frm.set_value("age_in_days", 0);
 		frm.set_value("age_detail", "");
 		return;
 	}
@@ -160,15 +158,11 @@ function calculate_age(frm) {
 		});
 		frm.set_value("date_of_birth", "");
 		frm.set_value("age", "");
-		frm.set_value("age_in_months", 0);
-		frm.set_value("age_in_days", 0);
 		frm.set_value("age_detail", "");
 		return;
 	}
 
 	let age = age_parts(dob, now);
 	frm.set_value("age", String(age.years));
-	frm.set_value("age_in_months", age.total_months);
-	frm.set_value("age_in_days", frappe.datetime.get_diff(frappe.datetime.now_date(), frm.doc.date_of_birth));
 	frm.set_value("age_detail", format_age_detail(age.years, age.months, age.days));
 }

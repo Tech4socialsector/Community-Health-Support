@@ -35,8 +35,13 @@ onMounted(async () => {
     wb.messageSkipWaiting()
     if (updateToastShown) return
     updateToastShown = true
+    // toast.info's `duration` is seconds, not ms (despite looking like a
+    // millisecond value) - this previously read 10000, which is ~2.8 hours,
+    // not the 10 seconds it looks like. A new version staying unnoticed is
+    // worse than it staying too long, so this is a deliberately generous
+    // 2 minutes, not a "correction" down to a literal 10s.
     toast.info(t('The app has been updated. Reload when convenient to use the new version.'), {
-      duration: 10000,
+      duration: 120,
       action: {
         label: t('Reload'),
         onClick: () => window.location.reload(),

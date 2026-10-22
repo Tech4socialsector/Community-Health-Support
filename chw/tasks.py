@@ -65,7 +65,7 @@ def refresh_family_member_ages():
 	from chw.common.doctype.family_members.family_members import get_age_values
 
 	today_date = getdate(today())
-	fields = ["age", "age_in_months", "age_in_days", "age_detail"]
+	fields = ["age", "age_detail"]
 	records = frappe.get_all(
 		"Family members",
 		filters={"date_of_birth": ["is", "set"]},

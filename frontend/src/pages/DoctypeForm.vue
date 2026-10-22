@@ -39,6 +39,19 @@
             </span>
           </div>
         </div>
+        <!-- Shared across Volunteer, Nurse and Doctor: a live glance at
+        whether each Lab/Scan Investigation panel is done, without needing
+        to open rows that Volunteer can't even see. -->
+        <button
+          v-if="showInvestigationStatusButton"
+          type="button"
+          :class="[ui.BTN_SECONDARY, 'flex-shrink-0 !px-2.5']"
+          :aria-label="t('Investigation Status')"
+          @click="openInvestigationStatus"
+        >
+          <LucideIcon name="flask-conical" class="h-4 w-4" />
+        </button>
+
         <!-- Desk's "..." menu: Delete lives here, not as a button beside
         Save, so it can't be tapped by mistake. Only shown to people whose
         role may delete this record. -->
@@ -83,6 +96,51 @@
         </template>
       </Dialog>
 
+      <Dialog v-model="investigationStatusDialog" :options="{ title: t('Investigation Status'), size: '2xl' }">
+        <template #body-content>
+          <Skeleton v-if="investigationStatusLoading" height="4rem" />
+          <div v-else class="space-y-5">
+            <div v-for="section in investigationStatusSections" :key="section.key">
+              <p :class="[ui.SECTION_LABEL, 'mb-1']">{{ t(section.title) }}</p>
+              <p v-if="!section.rows.length" class="py-2 text-sm text-gray-400 dark:text-gray-500">{{ t('Nothing recorded yet.') }}</p>
+              <ul v-else class="divide-y divide-gray-100 text-sm dark:divide-gray-800">
+                <li v-for="row in section.rows" :key="row.key || row.label" class="py-2">
+                  <button
+                    type="button"
+                    class="flex w-full items-start justify-between gap-3 text-left"
+                    :class="{ 'cursor-default': !canExpandInvestigationRow(row) }"
+                    @click="canExpandInvestigationRow(row) && toggleInvestigationRow(section.key, row.key || row.label)"
+                  >
+                    <span class="inline-flex items-center gap-1 font-medium text-navy-900 dark:text-gray-100">
+                      {{ t(row.label) }}
+                      <LucideIcon
+                        v-if="canExpandInvestigationRow(row)"
+                        :name="expandedInvestigationRows.has(`${section.key}:${row.key || row.label}`) ? 'chevron-up' : 'chevron-down'"
+                        class="h-3.5 w-3.5 text-gray-400"
+                      />
+                    </span>
+                    <span v-if="row.status === 'Completed'" class="text-right text-forest-700 dark:text-forest-300">
+                      {{ t('Completed by {0}', [row.filled_by]) }}
+                    </span>
+                    <span v-else-if="row.status === 'Not Yet Due'" class="text-right text-gray-400 dark:text-gray-500">{{ t('Not yet due') }}</span>
+                    <span v-else class="text-right text-amber-700 dark:text-amber-400">{{ t('Pending') }}</span>
+                  </button>
+                  <div
+                    v-if="canExpandInvestigationRow(row) && expandedInvestigationRows.has(`${section.key}:${row.key || row.label}`)"
+                    class="mt-1.5 space-y-1 pl-1 text-xs text-gray-600 dark:text-gray-400"
+                  >
+                    <div v-for="v in row.values" :key="v.label" class="flex justify-between gap-3">
+                      <span>{{ t(v.label) }}</span>
+                      <span class="font-medium text-navy-900 dark:text-gray-100">{{ v.value }}</span>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </template>
+      </Dialog>
+
       <div
         v-if="(metaResource.loading && !metaResource.data) || (!isNew && existingDoc.loading && !existingDoc.doc)"
         :class="[ui.CARD, 'grid grid-cols-1 gap-x-6 gap-y-5 p-4 sm:grid-cols-2 sm:p-6']"
@@ -107,9 +165,10 @@
         title, collapsible ones closed until tapped, each table inside the
         section it belongs to and Heading fields as sub-headings. Sections
         whose fields are all hidden by conditions disappear, as in Desk.
-        Inside a card: two independent columns (CSS multi-column, not a
-        grid) so fields of different heights never push the columns out of
-        line; spacing is each field's own bottom margin. -->
+        Inside a card: Desk's own Column Break positions become real grid
+        columns (not an auto-flowing CSS column layout, which filled columns
+        by vertical space and scrambled which fields Desk actually grouped
+        together) - on a phone every block still stacks to one column. -->
         <section v-for="sec in formSections" :key="sec.key" :class="[ui.CARD, 'p-4 sm:p-6']">
           <button
             v-if="sec.label && sec.collapsible"
@@ -123,46 +182,70 @@
           </button>
           <h2 v-else-if="sec.label" class="mb-4 text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h2>
 
-          <div v-show="!sec.collapsible || openSections.has(sec.key)" class="sm:columns-2 sm:gap-x-8" :class="{ 'mt-4': sec.label && sec.collapsible }">
-            <template v-for="item in sec.items" :key="item.key">
-              <h3
-                v-if="item.kind === 'heading'"
-                class="mb-3 break-inside-avoid text-xs font-semibold uppercase tracking-wide text-gray-500 sm:[column-span:all] dark:text-gray-400"
-              >
-                {{ t(item.label) }}
-              </h3>
-              <div
-                v-else-if="item.kind === 'html'"
-                class="mb-5 break-inside-avoid rounded-lg bg-gray-50 p-4 text-sm leading-relaxed text-gray-800 sm:[column-span:all] dark:bg-gray-800/60 dark:text-gray-200 [&_hr]:my-3 [&_hr]:border-gray-200 [&_p+p]:mt-3 [&_strong]:font-semibold"
-                :data-fieldname="item.key"
-                v-html="item.html"
-              />
-              <div v-else-if="item.kind === 'table'" class="mb-5 min-w-0 break-inside-avoid sm:[column-span:all]" :data-fieldname="item.key">
+          <div v-show="!sec.collapsible || openSections.has(sec.key)" class="space-y-5" :class="{ 'mt-4': sec.label && sec.collapsible }">
+            <template v-for="block in sec.blocks" :key="block.key || block">
+              <div v-if="block.kind === 'table'" class="min-w-0" :data-fieldname="block.key">
                 <ChildTable
-                  :field="item.field"
+                  :field="block.field"
                   :parent-doc="values"
                   :doctype="doctype"
-                  :link-query-for="(fieldname, row) => linkQueryFor(fieldname, row, item.field.fieldname)"
-                  :row-class="(row) => rowClassFor(item.field.fieldname, row)"
-                  v-model="values[item.field.fieldname]"
-                  @row-added="(row, idx) => onRowAdded(item.field.fieldname, row, idx)"
-                  @rows-removed="(rows) => onRowsRemoved(item.field.fieldname, rows)"
+                  :link-query-for="(fieldname, row) => linkQueryFor(fieldname, row, block.field.fieldname)"
+                  :row-class="(row) => rowClassFor(block.field.fieldname, row)"
+                  v-model="values[block.field.fieldname]"
+                  @row-added="(row, idx) => onRowAdded(block.field.fieldname, row, idx)"
+                  @rows-removed="(rows) => onRowsRemoved(block.field.fieldname, rows)"
                 />
               </div>
+              <!-- A columns block: Desk's own column split, preserved as
+              real grid columns, each filled top-to-bottom like Desk's - a
+              Heading or HTML item just sits in its own column's stack,
+              same as a further-down heading (e.g. "NT Scan" under "Dating
+              Ultrasounds") staying paired with whatever's alongside it. -->
               <div
                 v-else
-                :data-fieldname="item.key"
-                class="mb-5 min-w-0 break-inside-avoid"
-                :class="[{ 'sm:[column-span:all]': isWideField(item.field) }, fieldClassFor(item.field.fieldname)]"
+                class="grid grid-cols-1 gap-x-6 gap-y-5 sm:[grid-template-columns:repeat(var(--form-cols),minmax(0,1fr))]"
+                :style="{ '--form-cols': block.columns.length }"
               >
-                <DynamicField
-                  :field="item.field"
-                  :doctype="doctype"
-                  :docname="isNew ? null : name"
-                  :doc="values"
-                  :link-query="item.field.fieldtype === 'Link' ? linkQueryFor(item.field.fieldname) : null"
-                  v-model="values[item.field.fieldname]"
-                />
+                <div v-for="(col, ci) in block.columns" :key="ci" class="min-w-0 space-y-5">
+                  <template v-for="item in col" :key="item.key">
+                    <h3
+                      v-if="item.kind === 'heading'"
+                      class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                    >
+                      {{ t(item.label) }}
+                    </h3>
+                    <div
+                      v-else-if="item.kind === 'html'"
+                      class="rounded-lg bg-gray-50 p-4 text-sm leading-relaxed text-gray-800 dark:bg-gray-800/60 dark:text-gray-200 [&_hr]:my-3 [&_hr]:border-gray-200 [&_p+p]:mt-3 [&_strong]:font-semibold"
+                      :data-fieldname="item.key"
+                      v-html="item.html"
+                    />
+                    <!-- A run of Check fields Desk packs onto the same rows
+                    (e.g. "Pregnancy Assessment") - a compact 2-up grid
+                    instead of each claiming its own full-width stacked row. -->
+                    <div v-else-if="item.kind === 'checkboxGroup'" class="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <div v-for="sub in item.items" :key="sub.key" :data-fieldname="sub.key" :class="fieldClassFor(sub.field.fieldname)">
+                        <DynamicField
+                          :field="sub.field"
+                          :doctype="doctype"
+                          :docname="isNew ? null : name"
+                          :doc="values"
+                          v-model="values[sub.field.fieldname]"
+                        />
+                      </div>
+                    </div>
+                    <div v-else :data-fieldname="item.key" :class="fieldClassFor(item.field.fieldname)">
+                      <DynamicField
+                        :field="item.field"
+                        :doctype="doctype"
+                        :docname="isNew ? null : name"
+                        :doc="values"
+                        :link-query="item.field.fieldtype === 'Link' ? linkQueryFor(item.field.fieldname) : null"
+                        v-model="values[item.field.fieldname]"
+                      />
+                    </div>
+                  </template>
+                </div>
               </div>
             </template>
           </div>
@@ -192,6 +275,7 @@ import { findModuleByRoute } from '@/data/modules'
 import * as ui from '@/data/ui'
 import { useMeta, useFormFields, useTableFields } from '@/data/useMeta'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
+import { buildFormSections, sectionHasField } from '@/data/formSections'
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
 import { isPhoneField, warnIfNotDigits } from '@/doctype-hooks/utils'
@@ -252,20 +336,6 @@ const fields = useFormFields(metaResource)
 const tableFields = useTableFields(metaResource)
 const hooks = getDoctypeHooks(doctype)
 
-const WIDE_FIELDTYPES = new Set([
-  'Small Text',
-  'Long Text',
-  'Text Editor',
-  'Code',
-  'Geolocation',
-  'Table MultiSelect',
-  'Attach',
-  'Attach Image',
-])
-function isWideField(field) {
-  return WIDE_FIELDTYPES.has(field.fieldtype)
-}
-
 watchEffect(() => {
   setPageTitle(isNew ? t('New {0}', [t(metaResource.data?.name || doctype)]) : name)
 })
@@ -294,36 +364,13 @@ const visibleTableFields = computed(() =>
 )
 
 // The form as Desk lays it out: sections in meta order, each with the
-// visible fields, tables and headings that follow its Section / Tab Break.
+// visible fields, tables and headings that follow its Section / Tab Break,
+// and Desk's own Column Break positions preserved as real column groups
+// (see data/formSections.js, shared with ChildTable.vue's row dialog).
 const formSections = computed(() => {
   const formByName = new Map(visibleFormFields.value.map((f) => [f.fieldname, f]))
   const tableByName = new Map(visibleTableFields.value.map((f) => [f.fieldname, f]))
-  const sections = []
-  let current = { key: '__top', label: '', collapsible: false, items: [] }
-  const close = () => {
-    if (current.items.some((i) => i.kind !== 'heading')) sections.push(current)
-  }
-  for (const f of metaResource.data?.fields || []) {
-    if (f.fieldtype === 'Section Break' || f.fieldtype === 'Tab Break') {
-      close()
-      current = { key: f.fieldname, label: f.label || '', collapsible: !!f.collapsible, items: [] }
-    } else if (f.fieldtype === 'Heading') {
-      // Labels like "<h5>Cardiovascular</h5>" - Desk renders the tag; here
-      // the heading style does that job, so only the text is kept.
-      const label = (f.label || '').replace(/<[^>]*>/g, '').trim()
-      if (label && !f.hidden && visibleNames.value.has(f.fieldname)) current.items.push({ kind: 'heading', key: f.fieldname, label })
-    } else if (f.fieldtype === 'HTML') {
-      // Fixed text from the form's design (e.g. the Palliative consent
-      // wording, English + Hindi) - Desk shows it as written.
-      if (f.options && !f.hidden && visibleNames.value.has(f.fieldname)) current.items.push({ kind: 'html', key: f.fieldname, html: f.options })
-    } else if (tableByName.has(f.fieldname)) {
-      current.items.push({ kind: 'table', key: f.fieldname, field: tableByName.get(f.fieldname) })
-    } else if (formByName.has(f.fieldname)) {
-      current.items.push({ kind: 'field', key: f.fieldname, field: formByName.get(f.fieldname) })
-    }
-  }
-  close()
-  return sections
+  return buildFormSections(metaResource.data?.fields, { formByName, tableByName, visibleNames: visibleNames.value })
 })
 
 // Collapsible sections start closed, as in Desk.
@@ -774,6 +821,48 @@ if (!isNew && name && !isLocalName(name)) {
 const confirmDelete = ref(false)
 const deleting = ref(false)
 
+// --- ANC Follow-up: Investigation Status --------------------------------
+// One shared button for Volunteer, Nurse and Doctor alike - a live
+// snapshot of every Lab Investigation (trimester-gated) and Scan
+// Investigation (open at any time) panel, computed fresh from Nurse's and
+// Doctor's rows every click (chw.common.doctype.anc_follow_up.
+// anc_follow_up.get_investigation_summary). Nothing is stored just for
+// this button; it's the same Status/Filled By/value fields already
+// mirrored onto every Nurse/Doctor row, just read back in one place for
+// whoever can't see those rows themselves (Volunteer) - a Completed row
+// expands to its actual values on tap.
+const showInvestigationStatusButton = computed(() => doctype === 'ANC Follow-up' && !isNew && !isLocalName(name))
+const investigationStatusDialog = ref(false)
+const investigationStatusLoading = ref(false)
+const investigationSummary = ref({ trimester: [], scan: [] })
+const expandedInvestigationRows = ref(new Set())
+
+const investigationStatusSections = computed(() => [
+  { key: 'trimester', title: 'Lab Investigations', rows: investigationSummary.value.trimester || [] },
+  { key: 'scan', title: 'Scan Investigations', rows: investigationSummary.value.scan || [] },
+])
+
+function canExpandInvestigationRow(row) {
+  return row.status === 'Completed' && (row.values || []).length > 0
+}
+function toggleInvestigationRow(sectionKey, label) {
+  const key = `${sectionKey}:${label}`
+  const next = new Set(expandedInvestigationRows.value)
+  if (next.has(key)) next.delete(key)
+  else next.add(key)
+  expandedInvestigationRows.value = next
+}
+
+function openInvestigationStatus() {
+  investigationStatusDialog.value = true
+  investigationStatusLoading.value = true
+  expandedInvestigationRows.value = new Set()
+  call('chw.common.doctype.anc_follow_up.anc_follow_up.get_investigation_summary', { name })
+    .then((r) => (investigationSummary.value = r || { trimester: [], scan: [] }))
+    .catch(() => (investigationSummary.value = { trimester: [], scan: [] }))
+    .finally(() => (investigationStatusLoading.value = false))
+}
+
 async function deleteRecord() {
   deleting.value = true
   try {
@@ -851,7 +940,7 @@ async function missingMandatory() {
 // Brings the first empty required field into view (opening its section if
 // it is a collapsed one).
 async function showField(fieldname) {
-  const sec = formSections.value.find((s) => s.items.some((i) => i.key === fieldname))
+  const sec = formSections.value.find((s) => sectionHasField(s, fieldname))
   if (sec?.collapsible) openSections.add(sec.key)
   await nextTick()
   const el = document.querySelector(`[data-fieldname="${CSS.escape(fieldname)}"]`)

@@ -2518,10 +2518,10 @@ CHW_WORK_ORDER_TYPES = [
         'date_field': 'next_anc_visit_date',
         # From-date, High Risk and Alert-date aren't stored fields for ANC -
         # they're computed live, on read, straight from LMP + the Master +
-        # the Nurse followup rows (see _enrich_anc_records_live). live_risk_enrich
+        # the Volunteer followup rows (see _enrich_anc_records_live). live_risk_enrich
         # marks this type for that treatment; every other type still reads
-        # plain stored fields (None below, same as before). Only the Nurse
-        # follow-up table connects to the Work Order List at all - Volunteer
+        # plain stored fields (None below, same as before). Only the
+        # Volunteer follow-up table connects to My Work at all - Nurse
         # and Doctor are open-ended manual logs with no schedule, so they
         # never feed due dates, High Risk, or completed-visit counts here.
         'from_date_field': None,
@@ -2540,8 +2540,8 @@ CHW_WORK_ORDER_TYPES = [
         'has_date': True,
         'has_village': True,
         'has_health_worker': True,
-        'followup_doctype': 'ANC Followup Nurse',
-        'followup_table_field': 'anc_followup_for_nurse',
+        'followup_doctype': 'ANC Followup Child',
+        'followup_table_field': 'anc_followup',
         'followup_date_field': 'date',
     },
     {
@@ -2701,19 +2701,19 @@ def _work_order_matching_parent_names(wtype, village, health_worker):
 
 
 def _anc_currently_risk_names(anc_names):
-    """ANC Follow-up names whose most recently COMPLETED Nurse followup row
-    has Patient Condition = Risk. This is what "currently High Risk" means
-    for the Work Order List: always the latest Nurse visit, never a stored
+    """ANC Follow-up names whose most recently COMPLETED Volunteer followup
+    row has Patient Condition = Risk. This is what "currently High Risk"
+    means for My Work: always the latest Volunteer visit, never a stored
     flag that can go stale once that visit's risk is later resolved.
-    Volunteer and Doctor are open-ended manual logs with no Work Order List
-    connection, so their rows are never consulted here - only Nurse drives
-    this. Separate from Pregnancy Registration's own High Risk field, which
-    stays a one-time registration record and drives the window/quota policy
-    and on-form Risk Alert, not this."""
+    Nurse and Doctor are open-ended manual logs with no My Work connection,
+    so their rows are never consulted here - only Volunteer drives this.
+    Separate from Pregnancy Registration's own High Risk field, which stays
+    a one-time registration record and drives the window/quota policy and
+    on-form Risk Alert, not this."""
     if not anc_names:
         return []
     rows = frappe.get_all(
-        'ANC Followup Nurse',
+        'ANC Followup Child',
         filters=[['parent', 'in', anc_names], ['status', '=', 'Completed']],
         fields=['parent', 'date', 'patient_condition'],
     )
@@ -2917,12 +2917,12 @@ def _enrich_pnc_records_live(records):
 
 def _enrich_anc_records_live(records):
     """From-date / Alert-date / High-Risk for ANC records, computed live from
-    LMP date + the Visit Schedule Master + the Nurse follow-up rows only
+    LMP date + the Visit Schedule Master + the Volunteer follow-up rows only
     - reusing the exact same calculation the ANC Follow-up form itself runs
     (chw.common.doctype.anc_follow_up.anc_follow_up.ANCFollowup), instead of
-    reading fields that were pre-calculated and stored on save. Volunteer and
-    Doctor are open-ended manual logs with no schedule and no Work Order
-    List connection, so their rows never factor in here. Batches its reads
+    reading fields that were pre-calculated and stored on save. Nurse and
+    Doctor are open-ended manual logs with no schedule and no My Work
+    connection, so their rows never factor in here. Batches its reads
     into a fixed number of queries regardless of how many records are passed
     in, rather than querying per patient. Mutates and returns the same list;
     non-ANC records pass through untouched."""
@@ -2942,7 +2942,7 @@ def _enrich_anc_records_live(records):
 
     anc_names = [r['name'] for r in anc_records]
     followup_rows = frappe.get_all(
-        'ANC Followup Nurse',
+        'ANC Followup Child',
         filters=[['parent', 'in', anc_names]],
         fields=['parent', 'status', 'urgent_followup', 'date', 'idx', 'patient_condition'],
         order_by='parent asc, idx asc',
@@ -2961,9 +2961,9 @@ def _enrich_anc_records_live(records):
 
         # high_risk (from Pregnancy Registration, sticky) still drives the
         # window/quota policy and the on-form Risk Alert below - unchanged.
-        # The badge shown in the Work Order List is a separate, live signal:
-        # the most recently COMPLETED Nurse followup row's own condition -
-        # never a stored flag that can go stale once that visit's risk is
+        # The badge shown in My Work is a separate, live signal: the most
+        # recently COMPLETED Volunteer followup row's own condition - never
+        # a stored flag that can go stale once that visit's risk is
         # resolved.
         high_risk = pregnancy.high_risk or 'No'
         rows = rows_by_parent.get(r['name'], [])

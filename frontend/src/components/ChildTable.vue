@@ -80,20 +80,75 @@
       <Button v-if="selectedKeys.size" size="sm" theme="red" @click="deleteSelected">{{ t('Delete') }}</Button>
     </div>
 
-    <Dialog v-model="showRowEditor" :options="{ title: t('{0} - Row {1}', [t(field.label), (editingIdx ?? 0) + 1]), size: 'xl' }">
+    <Dialog v-model="showRowEditor" :options="{ title: t('{0} - Row {1}', [t(field.label), (editingIdx ?? 0) + 1]), size: '3xl' }">
       <template #body-content>
-        <div v-if="editingRow" class="grid grid-cols-1 gap-4">
-          <DynamicField
-            v-for="col in editorColumns"
-            :key="col.fieldname"
-            :field="col"
-            :doctype="doctype"
-            :docname="docname"
-            :doc="editingRow"
-            :parent-doc="parentDoc"
-            :link-query="col.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(col.fieldname, editingRow) : null"
-            v-model="editingRow[col.fieldname]"
-          />
+        <div v-if="editingRow" class="space-y-5">
+          <div v-for="sec in editorSections" :key="sec.key">
+            <button
+              v-if="sec.label && sec.collapsible"
+              type="button"
+              class="mb-2 flex w-full items-center justify-between gap-2 text-left"
+              :aria-expanded="openEditorSections.has(sec.key)"
+              @click="toggleEditorSection(sec.key)"
+            >
+              <h3 class="text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h3>
+              <LucideIcon :name="openEditorSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" class="h-3.5 w-3.5 text-gray-400" />
+            </button>
+            <h3 v-else-if="sec.label" class="mb-2 text-sm font-semibold text-navy-900 dark:text-gray-100">
+              {{ t(sec.label) }}
+            </h3>
+
+            <div v-show="!sec.collapsible || openEditorSections.has(sec.key)" class="space-y-4">
+              <template v-for="block in sec.blocks" :key="block.key || block">
+                <!-- A Heading or HTML item just sits in its own column's
+                stack, same as a further-down heading (e.g. "NT Scan" under
+                "Dating Ultrasounds") staying paired with whatever's
+                alongside it in the next column. -->
+                <div
+                  class="grid grid-cols-1 gap-x-4 gap-y-4 sm:[grid-template-columns:repeat(var(--row-cols),minmax(0,1fr))]"
+                  :style="{ '--row-cols': block.columns.length }"
+                >
+                  <div v-for="(col, ci) in block.columns" :key="ci" class="min-w-0 space-y-4">
+                    <template v-for="item in col" :key="item.key">
+                      <h4
+                        v-if="item.kind === 'heading'"
+                        class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                      >
+                        {{ t(item.label) }}
+                      </h4>
+                      <div
+                        v-else-if="item.kind === 'html'"
+                        class="rounded-lg bg-gray-50 p-4 text-sm leading-relaxed text-gray-800 dark:bg-gray-800/60 dark:text-gray-200"
+                        v-html="item.html"
+                      />
+                      <div v-else-if="item.kind === 'checkboxGroup'" class="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <DynamicField
+                          v-for="sub in item.items"
+                          :key="sub.key"
+                          :field="sub.field"
+                          :doctype="doctype"
+                          :docname="docname"
+                          :doc="editingRow"
+                          :parent-doc="parentDoc"
+                          v-model="editingRow[sub.field.fieldname]"
+                        />
+                      </div>
+                      <DynamicField
+                        v-else
+                        :field="item.field"
+                        :doctype="doctype"
+                        :docname="docname"
+                        :doc="editingRow"
+                        :parent-doc="parentDoc"
+                        :link-query="item.field.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(item.field.fieldname, editingRow) : null"
+                        v-model="editingRow[item.field.fieldname]"
+                      />
+                    </template>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
         </div>
       </template>
       <template #actions>
@@ -113,6 +168,7 @@ import LucideIcon from '@/components/LucideIcon.vue'
 import { useMeta, useFormFields } from '@/data/useMeta'
 import { formatFieldValue, isEmptyValue } from '@/data/recordFormat'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
+import { buildFormSections } from '@/data/formSections'
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
 import { t } from '@/data/i18n'
@@ -217,15 +273,27 @@ const editingRow = computed(() => (editingIdx.value == null ? null : rows.value[
 
 // The row form shows what Desk's row form would: fields whose depends_on
 // holds for this row (`doc`) and the main record (`parent`), with
-// mandatory_depends_on shown as required.
-const editorColumns = computed(() => {
+// mandatory_depends_on shown as required, grouped into sections and
+// columns exactly like Desk's own Section/Column Break layout - see
+// data/formSections.js, shared with DoctypeForm.vue's main-form layout.
+const editorSections = computed(() => {
   if (!editingRow.value) return []
   const visible = visibleFieldnames(childMetaResource.data?.fields, editingRow.value, parentDoc)
-  return columns.value.filter((c) => visible.has(c.fieldname)).map((c) => withLiveRequired(c, editingRow.value, parentDoc))
+  const formByName = new Map(
+    columns.value.map((f) => [f.fieldname, withLiveRequired(f, editingRow.value, parentDoc)]),
+  )
+  return buildFormSections(childMetaResource.data?.fields, { formByName, visibleNames: visible })
 })
+
+const openEditorSections = reactive(new Set())
+function toggleEditorSection(key) {
+  if (openEditorSections.has(key)) openEditorSections.delete(key)
+  else openEditorSections.add(key)
+}
 
 function openRow(idx) {
   editingIdx.value = idx
   showRowEditor.value = true
+  openEditorSections.clear()
 }
 </script>

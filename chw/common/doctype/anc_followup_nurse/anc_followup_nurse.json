@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "column_break_njms",
-  "window_start_date",
   "date",
   "lmp_date",
   "pog_weeks",
@@ -16,12 +15,12 @@
   "hr",
   "rr",
   "temp",
+  "column_break_wlrk",
   "fh",
   "fhr",
   "height",
   "weight",
   "bmi",
-  "column_break_wlrk",
   "anemia",
   "edema",
   "grbs",
@@ -59,6 +58,66 @@
   "family_planning_teaching_and_handout",
   "exclusive_breastfeeding",
   "postpartum_depression_handout",
+  "current_trimester_no",
+  "lab_investigations_section",
+  "h51st_trimesterh",
+  "hb",
+  "blood_group",
+  "platelet_count",
+  "hiv",
+  "hbsag",
+  "hcv",
+  "vdrl",
+  "hba1c__grbs",
+  "tsh",
+  "urine_r__e",
+  "lab_1st_trimester_status",
+  "lab_1st_trimester_filled_by",
+  "column_break_zygx",
+  "h52nd_trimesterh5",
+  "hb_2nd",
+  "bs",
+  "urine",
+  "lab_2nd_trimester_status",
+  "lab_2nd_trimester_filled_by",
+  "h53rd_trimesterh5",
+  "hb_3rd",
+  "bs_3rd",
+  "grbs_3rd",
+  "lab_3rd_trimester_status",
+  "lab_3rd_trimester_filled_by",
+  "scan_investigations_section",
+  "h5dating_ultrasoundsh5",
+  "date_of_scan",
+  "ga_us",
+  "ga_at_scan",
+  "edd_by_us",
+  "scan_dating_status",
+  "scan_dating_filled_by",
+  "h5nt_scanh",
+  "d_o_s",
+  "ga",
+  "normal_or_abnormal",
+  "if_abnormal",
+  "scan_nt_status",
+  "scan_nt_filled_by",
+  "column_break_vblc",
+  "h5anatomy_scanh",
+  "date_of_scan_copy",
+  "ga_copy",
+  "normal_or_abnormal_copy",
+  "if_abnormal_copy",
+  "scan_anatomy_status",
+  "scan_anatomy_filled_by",
+  "h5growth_scanh",
+  "date_of_scan_copy_copy",
+  "ga_copy_copy",
+  "position",
+  "cephalic",
+  "growth",
+  "if_abnormal_copy_copy",
+  "scan_growth_status",
+  "scan_growth_filled_by",
   "docter_notes_section",
   "subjective",
   "objective",
@@ -71,28 +130,18 @@
   "referral_clinic_type",
   "care_plan_created",
   "column_break_tzcp",
-  "date_of_next_visit",
-  "next_visit_window",
-  "urgent_followup",
   "place",
   "signature_of_mch_nurse",
   "date_reffe"
  ],
  "fields": [
   {
-   "description": "The start of this visit's scheduled window - filled in automatically when the row is generated. Purely informational, alongside Visit Ending Date (the window's end / due date).",
-   "fieldname": "window_start_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Visit Starting Date",
-   "read_only": 1
-  },
-  {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Visit Ending Date",
+   "label": "Date",
    "reqd": 1
   },
   {
@@ -424,29 +473,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Auto-filled with the same date driving Next ANC Visit Date - type over it here to override.",
-   "fieldname": "date_of_next_visit",
-   "fieldtype": "Date",
-   "label": "Date of Next Visit"
-  },
-  {
-   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
-   "fieldname": "next_visit_window",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Next Visit Window (From - To)",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
-   "fieldname": "urgent_followup",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Urgent Follow-up (auto)",
-   "read_only": 1
-  },
-  {
    "fieldname": "place",
    "fieldtype": "Data",
    "label": "Place"
@@ -499,13 +525,377 @@
    "fieldname": "column_break_njms",
    "fieldtype": "Column Break",
    "hidden": 1
+  },
+  {
+   "fieldname": "lab_investigations_section",
+   "fieldtype": "Section Break",
+   "label": "Lab Investigations"
+  },
+  {
+   "fieldname": "hb",
+   "fieldtype": "Data",
+   "label": "HB",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "h51st_trimesterh",
+   "fieldtype": "Heading",
+   "label": "<h5>1st Trimester</h5>"
+  },
+  {
+   "fieldname": "blood_group",
+   "fieldtype": "Data",
+   "label": "Blood Group",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "platelet_count",
+   "fieldtype": "Data",
+   "label": "Platelet Count",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "hiv",
+   "fieldtype": "Data",
+   "label": "HIV",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "hbsag",
+   "fieldtype": "Data",
+   "label": "HbsAg",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "hcv",
+   "fieldtype": "Data",
+   "label": "HCV",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "vdrl",
+   "fieldtype": "Data",
+   "label": "VDRL",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "hba1c__grbs",
+   "fieldtype": "Data",
+   "label": "HbA1c / grbs",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "tsh",
+   "fieldtype": "Data",
+   "label": "TSH",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "fieldname": "urine_r__e",
+   "fieldtype": "Data",
+   "label": "Urine R / E",
+   "read_only_depends_on": "eval:doc.lab_1st_trimester_status=='Completed'"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "lab_1st_trimester_status",
+   "fieldtype": "Select",
+   "label": "1st Trimester Lab Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lab_1st_trimester_filled_by",
+   "fieldtype": "Data",
+   "label": "1st Trimester Filled By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_zygx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=2",
+   "fieldname": "h52nd_trimesterh5",
+   "fieldtype": "Heading",
+   "label": "<h5>2nd Trimester</h5> "
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=2",
+   "fieldname": "hb_2nd",
+   "fieldtype": "Data",
+   "label": "HB",
+   "read_only_depends_on": "eval:doc.lab_2nd_trimester_status=='Completed'"
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=2",
+   "fieldname": "bs",
+   "fieldtype": "Data",
+   "label": "BS",
+   "read_only_depends_on": "eval:doc.lab_2nd_trimester_status=='Completed'"
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=2",
+   "fieldname": "urine",
+   "fieldtype": "Data",
+   "label": "Urine R / E",
+   "read_only_depends_on": "eval:doc.lab_2nd_trimester_status=='Completed'"
+  },
+  {
+   "default": "Pending",
+   "depends_on": "eval:doc.current_trimester_no>=2",
+   "fieldname": "lab_2nd_trimester_status",
+   "fieldtype": "Select",
+   "label": "2nd Trimester Lab Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=2",
+   "fieldname": "lab_2nd_trimester_filled_by",
+   "fieldtype": "Data",
+   "label": "2nd Trimester Filled By",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=3",
+   "fieldname": "h53rd_trimesterh5",
+   "fieldtype": "Heading",
+   "label": "<h5>3rd Trimester</h5> "
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=3",
+   "fieldname": "hb_3rd",
+   "fieldtype": "Data",
+   "label": "HB",
+   "read_only_depends_on": "eval:doc.lab_3rd_trimester_status=='Completed'"
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=3",
+   "fieldname": "bs_3rd",
+   "fieldtype": "Date",
+   "label": "BS",
+   "read_only_depends_on": "eval:doc.lab_3rd_trimester_status=='Completed'"
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=3",
+   "fieldname": "grbs_3rd",
+   "fieldtype": "Data",
+   "label": "Grbs",
+   "read_only_depends_on": "eval:doc.lab_3rd_trimester_status=='Completed'"
+  },
+  {
+   "default": "Pending",
+   "depends_on": "eval:doc.current_trimester_no>=3",
+   "fieldname": "lab_3rd_trimester_status",
+   "fieldtype": "Select",
+   "label": "3rd Trimester Lab Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.current_trimester_no>=3",
+   "fieldname": "lab_3rd_trimester_filled_by",
+   "fieldtype": "Data",
+   "label": "3rd Trimester Filled By",
+   "read_only": 1
+  },
+  {
+   "description": "Set automatically from the pregnancy's LMP Date - which trimester the pregnancy has reached as of today (1, 2 or 3), not this visit's own date. Drives which Lab Investigation panels are unlocked.",
+   "fieldname": "current_trimester_no",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Current Trimester",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_investigations_section",
+   "fieldtype": "Section Break",
+   "label": "Scan Investigations"
+  },
+  {
+   "fieldname": "h5dating_ultrasoundsh5",
+   "fieldtype": "Heading",
+   "label": "<h5>Dating Ultrasounds</h5>"
+  },
+  {
+   "fieldname": "date_of_scan",
+   "fieldtype": "Date",
+   "label": "Date of Scan"
+  },
+  {
+   "fieldname": "ga_us",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "ga_at_scan",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "fieldname": "edd_by_us",
+   "fieldtype": "Data",
+   "label": "EDD by US"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "scan_dating_status",
+   "fieldtype": "Select",
+   "label": "Dating Ultrasounds Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_dating_filled_by",
+   "fieldtype": "Data",
+   "label": "Dating Ultrasounds Filled By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "h5nt_scanh",
+   "fieldtype": "Heading",
+   "label": "<h5>NT Scan</h5>"
+  },
+  {
+   "fieldname": "d_o_s",
+   "fieldtype": "Date",
+   "label": "Date of Scan"
+  },
+  {
+   "fieldname": "ga",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "normal_or_abnormal",
+   "fieldtype": "Select",
+   "label": "Result",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.normal_or_abnormal==\"Abnormal\"",
+   "fieldname": "if_abnormal",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "scan_nt_status",
+   "fieldtype": "Select",
+   "label": "NT Scan Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_nt_filled_by",
+   "fieldtype": "Data",
+   "label": "NT Scan Filled By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "h5anatomy_scanh",
+   "fieldtype": "Heading",
+   "label": "<h5>Anatomy Scan</h5>"
+  },
+  {
+   "fieldname": "date_of_scan_copy",
+   "fieldtype": "Date",
+   "label": "Date of Scan"
+  },
+  {
+   "fieldname": "ga_copy",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "normal_or_abnormal_copy",
+   "fieldtype": "Select",
+   "label": "Result",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.normal_or_abnormal_copy==\"Abnormal\"",
+   "fieldname": "if_abnormal_copy",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "scan_anatomy_status",
+   "fieldtype": "Select",
+   "label": "Anatomy Scan Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_anatomy_filled_by",
+   "fieldtype": "Data",
+   "label": "Anatomy Scan Filled By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "h5growth_scanh",
+   "fieldtype": "Heading",
+   "label": "<h5>Growth Scan</h5>"
+  },
+  {
+   "fieldname": "date_of_scan_copy_copy",
+   "fieldtype": "Date",
+   "label": "Date of Growth Scan"
+  },
+  {
+   "fieldname": "ga_copy_copy",
+   "fieldtype": "Data",
+   "label": "GA"
+  },
+  {
+   "fieldname": "position",
+   "fieldtype": "Data",
+   "label": "Position"
+  },
+  {
+   "fieldname": "cephalic",
+   "fieldtype": "Select",
+   "label": "Cephalic",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "growth",
+   "fieldtype": "Select",
+   "label": "Growth",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.growth==\"Abnormal\"",
+   "fieldname": "if_abnormal_copy_copy",
+   "fieldtype": "Data",
+   "label": "If Abnormal"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "scan_growth_status",
+   "fieldtype": "Select",
+   "label": "Growth Scan Status",
+   "options": "\nPending\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_growth_filled_by",
+   "fieldtype": "Data",
+   "label": "Growth Scan Filled By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_vblc",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-20 13:07:52.828996",
+ "modified": "2026-10-22 17:01:27.461260",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Nurse",

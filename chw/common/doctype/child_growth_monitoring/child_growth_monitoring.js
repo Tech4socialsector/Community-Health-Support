@@ -14,9 +14,12 @@ frappe.ui.form.on("Child Growth Monitoring", {
 		}
 
 		frm.set_query("familymember_id", () => {
+			// Family members 11 years (132 months) or younger - computed from
+			// Date of Birth directly, since Family members itself only keeps
+			// Age in whole years, not months.
 			return {
 				filters: {
-					age_in_months: ["<=", 132],
+					date_of_birth: [">=", frappe.datetime.add_months(frappe.datetime.now_date(), -132)],
 				},
 			};
 		});

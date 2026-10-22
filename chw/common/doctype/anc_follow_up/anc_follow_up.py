@@ -14,14 +14,127 @@ DEFAULT_RISK_ALERT_DAYS = 7
 DEFAULT_AUTOMATIC_WINDOW_COUNT = 6
 
 # The three follow-up tables all describe the same patient, just recorded by
-# a different staff type. Some organizations only use one or two of these
-# (e.g. Nurse + Doctor, no Volunteer) - LMP/POG sync and the shared risk flag
-# still apply across all three. The continuous monthly-window SCHEDULE,
-# however, is driven by the Nurse table alone - Volunteer and Doctor are
-# open-ended, manual logs with no calculated cadence, no urgent chain, and no
-# Work Order List connection of their own (see NURSE_TABLE_FIELD below).
+# a different staff type. Some organizations only use one or two of these -
+# LMP/POG sync and the shared risk flag still apply across all three. The
+# continuous monthly-window SCHEDULE, however, is driven by the Volunteer
+# table alone - Nurse and Doctor are open-ended, manual logs with no
+# calculated cadence, no urgent chain, and no My Work connection of their
+# own (see VOLUNTEER_TABLE_FIELD below).
 FOLLOWUP_TABLE_FIELDS = ["anc_followup", "anc_followup_for_nurse", "anc_followup_for_docter"]
-NURSE_TABLE_FIELD = "anc_followup_for_nurse"
+VOLUNTEER_TABLE_FIELD = "anc_followup"
+
+# Lab Investigations lives only on Nurse's and Doctor's rows (never
+# Volunteer's) - filled once per trimester, by whichever of the two gets
+# there first, then mirrored onto every row of both tables so it reads the
+# same everywhere and is locked from further edits for the rest of that
+# trimester. Each group's own fields + its Status/Filled By fields are
+# identical, field-for-field, across both row doctypes.
+LAB_INVESTIGATION_TABLE_FIELDS = ["anc_followup_for_nurse", "anc_followup_for_docter"]
+LAB_INVESTIGATION_GROUPS = [
+	{
+		"trimester": 1,
+		"label": "1st Trimester",
+		"fields": ["hb", "blood_group", "platelet_count", "hiv", "hbsag", "hcv", "vdrl", "hba1c__grbs", "tsh", "urine_r__e"],
+		"status_field": "lab_1st_trimester_status",
+		"filled_by_field": "lab_1st_trimester_filled_by",
+	},
+	{
+		"trimester": 2,
+		"label": "2nd Trimester",
+		"fields": ["hb_2nd", "bs", "urine"],
+		"status_field": "lab_2nd_trimester_status",
+		"filled_by_field": "lab_2nd_trimester_filled_by",
+	},
+	{
+		"trimester": 3,
+		"label": "3rd Trimester",
+		"fields": ["hb_3rd", "bs_3rd", "grbs_3rd"],
+		"status_field": "lab_3rd_trimester_status",
+		"filled_by_field": "lab_3rd_trimester_filled_by",
+	},
+]
+
+# Scan Investigations - unlike Lab Investigations, this is per-VISIT, not
+# shared/locked across the whole pregnancy: each Nurse/Doctor row has its
+# own independent set of scan results, never mirrored onto any other row,
+# never locked, and a freshly added row always starts empty. Status/Filled
+# By still exist, but are set from that same row's own fields only - purely
+# a per-row "is this visit's panel filled in, and by whom" indicator, not a
+# cross-row lock. Lives only on Nurse's and Doctor's rows, same as Lab
+# Investigations - never Volunteer's.
+SCAN_INVESTIGATION_GROUPS = [
+	{
+		"label": "Dating Ultrasounds",
+		"fields": ["date_of_scan", "ga_us", "ga_at_scan", "edd_by_us"],
+		"status_field": "scan_dating_status",
+		"filled_by_field": "scan_dating_filled_by",
+	},
+	{
+		"label": "NT Scan",
+		"fields": ["d_o_s", "ga", "normal_or_abnormal", "if_abnormal"],
+		"status_field": "scan_nt_status",
+		"filled_by_field": "scan_nt_filled_by",
+	},
+	{
+		"label": "Anatomy Scan",
+		"fields": ["date_of_scan_copy", "ga_copy", "normal_or_abnormal_copy", "if_abnormal_copy"],
+		"status_field": "scan_anatomy_status",
+		"filled_by_field": "scan_anatomy_filled_by",
+	},
+	{
+		"label": "Growth Scan",
+		"fields": ["date_of_scan_copy_copy", "ga_copy_copy", "position", "cephalic", "growth", "if_abnormal_copy_copy"],
+		"status_field": "scan_growth_status",
+		"filled_by_field": "scan_growth_filled_by",
+	},
+]
+
+
+def _sync_investigation_groups(rows_by_table, groups):
+	"""Shared by sync_lab_investigations and sync_scan_investigations: for
+	each group, find the first row (by idx, Nurse before Doctor on a tie)
+	with any of its fields filled, and mirror its values + status +
+	filled-by onto every row of every table. Already-filled groups just
+	keep re-confirming the same answer, which also means every newly added
+	row immediately picks up whatever's already been filled."""
+	full_name = None
+	for group in groups:
+		candidates = [
+			row
+			for rows in rows_by_table.values()
+			for row in rows
+			if any(row.get(f) for f in group["fields"])
+		]
+		if not candidates:
+			continue
+
+		source_row = min(candidates, key=lambda row: (row.idx or 0))
+		values = {f: source_row.get(f) for f in group["fields"]}
+		existing_filled_by = source_row.get(group["filled_by_field"])
+		if not existing_filled_by and full_name is None:
+			full_name = frappe.utils.get_fullname(frappe.session.user)
+		filled_by = existing_filled_by or full_name
+
+		for rows in rows_by_table.values():
+			for row in rows:
+				for fieldname, value in values.items():
+					row.set(fieldname, value)
+				row.set(group["status_field"], "Completed")
+				row.set(group["filled_by_field"], filled_by)
+
+
+def _trimester_number(lmp_date, as_of_date=None):
+	# Same thresholds as refresh_pregnancy_pog_and_trimester's own First/
+	# Second/Third trimester split, just expressed as 1/2/3 for Nurse's and
+	# Doctor's current_trimester_no (which drives their Lab Investigation
+	# depends_on/read_only_depends_on conditions client-side).
+	days_pregnant = (getdate(as_of_date or getdate()) - getdate(lmp_date)).days
+	weeks = max(days_pregnant, 0) // 7
+	if weeks <= 13:
+		return 1
+	if weeks <= 27:
+		return 2
+	return 3
 
 
 @frappe.whitelist()
@@ -39,6 +152,84 @@ def get_window_policy_for_js(high_risk=None):
 			"automatic_window_count": DEFAULT_AUTOMATIC_WINDOW_COUNT,
 		},
 	)
+
+
+def _summarize_investigation_group(group, rows, field_labels):
+	filled_row = next((row for row in rows if row.get(group["status_field"]) == "Completed"), None)
+	values = []
+	if filled_row:
+		for fieldname in group["fields"]:
+			value = filled_row.get(fieldname)
+			if value:
+				values.append({"label": field_labels.get(fieldname, fieldname), "value": value})
+	return {
+		"label": group["label"],
+		"status": "Completed" if filled_row else "Pending",
+		"filled_by": filled_row.get(group["filled_by_field"]) if filled_row else None,
+		"values": values,
+	}
+
+
+@frappe.whitelist()
+def get_investigation_summary(name):
+	"""The one button Volunteer, Nurse and Doctor all share: a live, read-
+	only snapshot of every Lab Investigation (trimester-gated) and Scan
+	Investigation (open at any time) panel - status, who filled it, and
+	(once Completed) the actual values, so Volunteer in particular never
+	needs to go find Nurse's or Doctor's own rows just to see a result.
+	Computed fresh from Nurse's and Doctor's rows every time it's clicked,
+	nothing pre-stored to go stale."""
+	doc = frappe.get_doc("ANC Follow-up", name)
+	reg = (
+		frappe.db.get_value("Pregnancy Registration", doc.pregnant_id, "lmp_date")
+		if doc.pregnant_id
+		else None
+	)
+	current_trimester_no = _trimester_number(reg) if reg else 0
+
+	rows = [row for table_field in LAB_INVESTIGATION_TABLE_FIELDS for row in doc.get(table_field)]
+	field_labels = {
+		f.fieldname: f.label for f in frappe.get_meta("ANC Followup Nurse").fields
+	}
+
+	trimester_summary = []
+	for group in LAB_INVESTIGATION_GROUPS:
+		if group["trimester"] > current_trimester_no:
+			trimester_summary.append({"label": group["label"], "status": "Not Yet Due", "filled_by": None, "values": []})
+			continue
+		trimester_summary.append(_summarize_investigation_group(group, rows, field_labels))
+
+	# Scan Investigations is per-visit, not shared across rows - one summary
+	# entry per visit where a scan was actually filled in, not one entry
+	# per scan type. A visit with nothing filled in just doesn't appear.
+	scan_table_labels = {"anc_followup_for_nurse": "Nurse", "anc_followup_for_docter": "Doctor"}
+	scan_summary = []
+	for table_field in LAB_INVESTIGATION_TABLE_FIELDS:
+		for row in doc.get(table_field):
+			for group in SCAN_INVESTIGATION_GROUPS:
+				if row.get(group["status_field"]) != "Completed":
+					continue
+				values = []
+				for fieldname in group["fields"]:
+					value = row.get(fieldname)
+					if value:
+						values.append({"label": field_labels.get(fieldname, fieldname), "value": value})
+				visit_date = frappe.utils.formatdate(row.date) if row.date else None
+				scan_summary.append({
+					"key": f"{table_field}-{row.name}-{group['status_field']}",
+					"label": "{0} - {1} visit{2}".format(
+						group["label"],
+						scan_table_labels.get(table_field, ""),
+						f" ({visit_date})" if visit_date else "",
+					),
+					"status": "Completed",
+					"filled_by": row.get(group["filled_by_field"]),
+					"values": values,
+					"sort_date": row.date or "",
+				})
+	scan_summary.sort(key=lambda r: r.pop("sort_date"), reverse=True)
+
+	return {"trimester": trimester_summary, "scan": scan_summary}
 
 
 class ANCFollowup(Document):
@@ -110,7 +301,43 @@ class ANCFollowup(Document):
 
 		self.sync_patient_condition_to_pregnancy()
 		self.refresh_pregnancy_pog_and_trimester(lmp_date)
+		self.sync_lab_investigations(lmp_date)
+		self.sync_scan_investigations()
 		self.insert_urgent_followups_for_risk_rows()
+
+	def sync_lab_investigations(self, lmp_date):
+		current_trimester_no = _trimester_number(lmp_date)
+		rows_by_table = {
+			table_field: self.get(table_field) for table_field in LAB_INVESTIGATION_TABLE_FIELDS
+		}
+
+		for rows in rows_by_table.values():
+			for row in rows:
+				row.current_trimester_no = current_trimester_no
+
+		due_groups = [g for g in LAB_INVESTIGATION_GROUPS if g["trimester"] <= current_trimester_no]
+		_sync_investigation_groups(rows_by_table, due_groups)
+
+	def sync_scan_investigations(self):
+		# Per-visit, not shared across rows: each row's own Status/Filled By
+		# reflect only that same row's own fields - no scanning other rows,
+		# no mirroring, no locking. A freshly added row has nothing in it,
+		# so it's simply Pending until that visit's own fields get filled.
+		full_name = None
+		for table_field in LAB_INVESTIGATION_TABLE_FIELDS:
+			for row in self.get(table_field):
+				for group in SCAN_INVESTIGATION_GROUPS:
+					is_filled = any(row.get(f) for f in group["fields"])
+					if not is_filled:
+						row.set(group["status_field"], "Pending")
+						row.set(group["filled_by_field"], None)
+						continue
+					if row.get(group["status_field"]) != "Completed":
+						if not row.get(group["filled_by_field"]):
+							if full_name is None:
+								full_name = frappe.utils.get_fullname(frappe.session.user)
+							row.set(group["filled_by_field"], full_name)
+						row.set(group["status_field"], "Completed")
 
 	def refresh_pregnancy_pog_and_trimester(self, lmp_date):
 		today = getdate()
@@ -142,7 +369,7 @@ class ANCFollowup(Document):
 			frappe.db.get_value("Pregnancy Registration", self.pregnant_id, "high_risk") if self.pregnant_id else None
 		)
 		_, alert_within_days, _ = self.get_window_policy(high_risk)
-		self._insert_urgent_followups(NURSE_TABLE_FIELD, alert_within_days)
+		self._insert_urgent_followups(VOLUNTEER_TABLE_FIELD, alert_within_days)
 
 	def _insert_urgent_followups(self, table_field, alert_within_days):
 		table = self.get(table_field)
@@ -197,7 +424,7 @@ class ANCFollowup(Document):
 
 		high_risk = reg.high_risk or "No"
 		window_days, alert_within_days, automatic_window_count = self.get_window_policy(high_risk)
-		completed_count = len([row for row in self.get(NURSE_TABLE_FIELD) if row.status == "Completed"])
+		completed_count = len([row for row in self.get(VOLUNTEER_TABLE_FIELD) if row.status == "Completed"])
 		starting_window = self.get_window_index(self.creation or getdate(), reg.lmp_date, window_days)
 		current_window = self.get_current_window(starting_window, completed_count)
 
@@ -221,12 +448,12 @@ class ANCFollowup(Document):
 			self.sync_child_row_fields(window_start, window_end)
 			return
 
-		# Manual phase from here on - whichever Nurse row carries the most
+		# Manual phase from here on - whichever Volunteer row carries the most
 		# recently visited date's "Date of Next Visit" is the real answer.
 		# Until she has actually recorded one, never leave this blank - show
 		# her current month's window (from LMP) as a starting suggestion
 		# instead.
-		manual_rows = [row for row in self.get(NURSE_TABLE_FIELD) if row.get("date_of_next_visit")]
+		manual_rows = [row for row in self.get(VOLUNTEER_TABLE_FIELD) if row.get("date_of_next_visit")]
 		if not manual_rows:
 			self.next_anc_visit_date = window_end
 			self.next_anc_visit_date_auto = window_end
@@ -253,7 +480,7 @@ class ANCFollowup(Document):
 
 	def sync_child_row_fields(self, window_start, window_end):
 		# "Date of Next Visit" and "Next Visit Window" are auto-filled on the
-		# Nurse table only - Volunteer's and Doctor's own "Date of Next
+		# Volunteer table only - Nurse's and Doctor's own "Date of Next
 		# Visit" fields (where present) are left purely to manual entry,
 		# never overwritten by this calculation.
 		if window_start and window_end:
@@ -261,14 +488,14 @@ class ANCFollowup(Document):
 		else:
 			display = ""
 
-		table = self.get(NURSE_TABLE_FIELD)
+		table = self.get(VOLUNTEER_TABLE_FIELD)
 		if window_start and window_end and table:
 			table[-1].date_of_next_visit = window_end
 		for row in table:
 			row.next_visit_window = display
 
 	def get_pending_urgent_followup(self):
-		return self._pending_urgent_in(self.get(NURSE_TABLE_FIELD))
+		return self._pending_urgent_in(self.get(VOLUNTEER_TABLE_FIELD))
 
 	@staticmethod
 	def _pending_urgent_in(table):

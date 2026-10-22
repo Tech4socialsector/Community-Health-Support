@@ -177,9 +177,13 @@ export default {
     stateFor(values, ctx).dob = values.date_of_birth || null
   },
 
-  // Desk's set_query: only children up to 11 years can be picked.
+  // Desk's set_query: only children up to 11 years (132 months) can be
+  // picked - computed from Date of Birth directly, since Family members
+  // itself only keeps Age in whole years, not months.
   getLinkQuery(fieldname) {
-    if (fieldname === 'familymember_id') return { filters: { age_in_months: ['<=', 132] } }
+    if (fieldname === 'familymember_id') {
+      return { filters: { date_of_birth: ['>=', addMonths(today(), -132)] } }
+    }
     return null
   },
 

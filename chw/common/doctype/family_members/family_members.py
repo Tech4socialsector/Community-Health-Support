@@ -100,10 +100,6 @@ class Familymembers(Document):
 			# Birth Registration, NCD, ANC, Palliative Care, Preconception,
 			# Postpartum, Child 6w-1y) fetches it straight from this same
 			# field - so it must be left exactly as entered, not wiped.
-			# Age in Months/Days can't be derived without a real DOB though,
-			# so those always reset regardless.
-			self.age_in_months = 0
-			self.age_in_days = 0
 			self.age_detail = ""
 			return
 
@@ -127,8 +123,6 @@ def get_age_values(dob, on_date):
 	delta = relativedelta(on_date, dob)
 	return {
 		"age": str(delta.years),
-		"age_in_months": delta.years * 12 + delta.months,
-		"age_in_days": (on_date - dob).days,
 		"age_detail": format_age_detail(delta.years, delta.months, delta.days),
 	}
 

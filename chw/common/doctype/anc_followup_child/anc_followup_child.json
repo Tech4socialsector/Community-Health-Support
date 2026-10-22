@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "window_start_date",
   "date",
   "lmp_date",
   "pog_weeks",
@@ -18,7 +19,6 @@
   "height",
   "weight",
   "bmi",
-  "mch_nurse_noti_ed_of_abnormal_vital_signs",
   "column_break_wlrk",
   "anemia",
   "edema",
@@ -29,6 +29,7 @@
   "ironcal",
   "vitamins",
   "any_other_complaitsremark",
+  "mch_nurse_noti_ed_of_abnormal_vital_signs",
   "pregnancy_assessment_section",
   "h5pregnancy_assessmenth",
   "anemia__11gm",
@@ -73,6 +74,7 @@
   "care_plan_created",
   "reports_or_info_sent_to_mch_nurse",
   "column_break_tzcp",
+  "date_of_next_visit",
   "next_visit_window",
   "urgent_followup",
   "place",
@@ -81,12 +83,18 @@
  ],
  "fields": [
   {
-   "default": "Today",
+   "fieldname": "window_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Visit Starting Date",
+   "read_only": 1
+  },
+  {
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date",
+   "label": "Visit Ending Date",
    "reqd": 1
   },
   {
@@ -458,10 +466,17 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Auto-filled with the same date driving Next ANC Visit Date - type over it here to override.",
+   "fieldname": "date_of_next_visit",
+   "fieldtype": "Date",
+   "label": "Date of Next Visit"
+  },
+  {
+   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
    "fieldname": "next_visit_window",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Next Visit Date",
+   "label": "Next Visit Window (From - To)",
    "read_only": 1
   },
   {
@@ -480,7 +495,6 @@
    "label": "Date"
   },
   {
-   "description": "Set automatically from the pregnancy's LMP Date - not editable by hand.",
    "fieldname": "lmp_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -489,7 +503,6 @@
    "read_only": 1
   },
   {
-   "description": "Gestational age (weeks + days) as of this visit's Date - calculated automatically from LMP Date.",
    "fieldname": "pog_weeks",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -528,7 +541,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-06 17:17:19.035886",
+ "modified": "2026-10-22 17:40:30.173517",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Child",

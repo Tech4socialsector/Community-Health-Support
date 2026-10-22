@@ -14,8 +14,8 @@
   "sub_centre",
   "age",
   "gestational_age_by_ultrasound",
-  "vitamins",
   "column_break_hbdc",
+  "vitamins",
   "phone_number",
   "date",
   "health_worker_name",
@@ -29,8 +29,8 @@
   "delivery_status",
   "aboration_status",
   "section_break_vzey",
-  "anc_followup_for_nurse",
   "anc_followup",
+  "anc_followup_for_nurse",
   "anc_followup_for_docter"
  ],
  "fields": [
@@ -212,7 +212,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-20 13:04:49.709972",
+ "modified": "2026-10-22 17:37:38.994643",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

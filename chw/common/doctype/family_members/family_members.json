@@ -19,8 +19,6 @@
   "date_of_birth",
   "age",
   "age_detail",
-  "age_in_months",
-  "age_in_days",
   "column_break_zdna",
   "phone_number",
   "marital_status",
@@ -149,18 +147,6 @@
    "options": "\nYes\nNo"
   },
   {
-   "fieldname": "age_in_months",
-   "fieldtype": "Int",
-   "label": "Age in Months",
-   "read_only": 1
-  },
-  {
-   "fieldname": "age_in_days",
-   "fieldtype": "Int",
-   "label": "Age in Days",
-   "read_only": 1
-  },
-  {
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -218,7 +204,6 @@
    "read_only": 1
   },
   {
-   "description": "LCH Palliative Care Charity Criteria: 20-24 = >80%, 17-19 = 60-80%, 12-16 = 40-60%, 7-11 = 20-40%, below 7 = 0-20%.",
    "fieldname": "suggested_charity_percentage",
    "fieldtype": "Data",
    "label": "Suggested Charity %",
@@ -412,7 +397,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Sum of the 6 criteria above (each scored 1-4, highest need = 4). Range 6-24.",
    "fieldname": "charity_assessment_score",
    "fieldtype": "Int",
    "label": "Overall Score",
@@ -447,7 +431,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-10-09 15:29:20.615754",
+ "modified": "2026-10-22 17:17:22.110488",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",
