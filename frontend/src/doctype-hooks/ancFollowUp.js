@@ -29,6 +29,29 @@ import {
 const FOLLOWUP_TABLE_FIELDS = ['anc_followup', 'anc_followup_for_nurse', 'anc_followup_for_docter']
 const VOLUNTEER_TABLE_FIELD = 'anc_followup'
 
+// Every Volunteer row field except the ones this module (or the schedule
+// generator) fills in itself - once any one of these actually holds
+// something, the visit has been recorded, so Status flips to Completed on
+// its own instead of also asking the volunteer to flip the dropdown by
+// hand. Clearing a field back to blank doesn't walk Completed back - that's
+// an edit to a recorded visit, not an undone one. Mirrors
+// VOLUNTEER_VISIT_CONTENT_FIELDS in anc_follow_up.py and anc_follow_up.js.
+const VOLUNTEER_VISIT_CONTENT_FIELDS = [
+  'month', 'bp', 'weight', 'anemia', 'edema', 'grbs', 'tt', 'hemoglobin_level', 'monthly_checkup', 'ironcal',
+  'any_other_complaitsremark', 'hr', 'rr', 'temp', 'height', 'bmi', 'mch_nurse_noti_ed_of_abnormal_vital_signs',
+  'feeling_well', 'good_energy', 'pink_tongue', 'good_fetal_movement', 'vaginal_bleeding', 'leaking_fluid',
+  'severe_abdominal_pain', 'severe_headacheblurred_vision', 'swelling_of_handsface', 'fever',
+  'extreme_dizziness_or_fatigue', 'reduced_fetal_movement', 'itching_of_palms_or_soles_of_feet_especially_at_night',
+  'palpitations', 'mch_nurse_notified_of_danger_signs', 'problems_identified', 'support_care_provided',
+  'folic_acid_counseling_1st_trimester', 'trimester_specific_care_handout', 'pregnancy_exercises_handout',
+  'nutrition_counseling__my_pregnancy_plate_handout', 'iron_and_calcium_2nd_and_3rd_trimester',
+  'plan_for_delivery_facility_delivery_encouragement', 'kegel_exercises_pregnancy_and_postnatal',
+  'family_planning_teaching_and_handout', 'exclusive_breastfeeding', 'postpartum_depression_handout',
+  'refferal_needed', 'refferal_need', 'referral_clinic_type', 'care_plan_created',
+  'reports_or_info_sent_to_mch_nurse', 'place', 'signature_of_mch_nurse', 'date_reffe', 'patient_condition',
+  'vitamins', 'anemia__11gm',
+]
+
 // Lab Investigations lives only on Nurse's and Doctor's rows (never
 // Volunteer's) - filled once per trimester, by whichever of the two gets
 // there first, then mirrored onto every row of both tables so it reads the
@@ -166,6 +189,16 @@ function getCurrentWindow(startingWindow, completedCount) {
 // doesn't mark the form dirty or wake the change watchers again.
 function setIfChanged(obj, field, value) {
   if ((obj[field] ?? null) !== (value ?? null)) obj[field] = value
+}
+
+// Flips a Volunteer row to Completed the moment it actually has a visit
+// recorded in it. Returns whether it did, so the caller can re-run whatever
+// a manual Status change would have (the schedule recalculation).
+function autoCompleteVolunteerRow(row) {
+  if (row.status === 'Completed') return false
+  if (!VOLUNTEER_VISIT_CONTENT_FIELDS.some((f) => row[f])) return false
+  setIfChanged(row, 'status', 'Completed')
+  return true
 }
 
 // "Date of Next Visit" (last row only) and "Next Visit Window" (every row)
@@ -502,6 +535,10 @@ export default {
       if (drivesSchedule) return calculateNextAncVisitDate(values)
     }
     if (fieldname === 'status' && drivesSchedule) return calculateNextAncVisitDate(values)
+
+    if (drivesSchedule && VOLUNTEER_VISIT_CONTENT_FIELDS.includes(fieldname) && autoCompleteVolunteerRow(row)) {
+      return calculateNextAncVisitDate(values)
+    }
 
     if (LAB_INVESTIGATION_TABLE_FIELDS.includes(tableField)) {
       if (LAB_INVESTIGATION_GROUPS.some((g) => g.fields.includes(fieldname))) return syncLabInvestigations(values)

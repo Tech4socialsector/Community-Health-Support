@@ -45,6 +45,36 @@ const SCAN_INVESTIGATION_GROUPS = [
 	},
 ];
 
+// Every Volunteer row field except the ones this module (or the schedule
+// generator) fills in itself - once any one of these actually holds
+// something, the visit has been recorded, so Status flips to Completed on
+// its own instead of also asking the volunteer to flip the dropdown by
+// hand. Clearing a field back to blank doesn't walk Completed back - that's
+// an edit to a recorded visit, not an undone one.
+const VOLUNTEER_VISIT_CONTENT_FIELDS = [
+	"month", "bp", "weight", "anemia", "edema", "grbs", "tt", "hemoglobin_level", "monthly_checkup", "ironcal",
+	"any_other_complaitsremark", "hr", "rr", "temp", "height", "bmi", "mch_nurse_noti_ed_of_abnormal_vital_signs",
+	"feeling_well", "good_energy", "pink_tongue", "good_fetal_movement", "vaginal_bleeding", "leaking_fluid",
+	"severe_abdominal_pain", "severe_headacheblurred_vision", "swelling_of_handsface", "fever",
+	"extreme_dizziness_or_fatigue", "reduced_fetal_movement", "itching_of_palms_or_soles_of_feet_especially_at_night",
+	"palpitations", "mch_nurse_notified_of_danger_signs", "problems_identified", "support_care_provided",
+	"folic_acid_counseling_1st_trimester", "trimester_specific_care_handout", "pregnancy_exercises_handout",
+	"nutrition_counseling__my_pregnancy_plate_handout", "iron_and_calcium_2nd_and_3rd_trimester",
+	"plan_for_delivery_facility_delivery_encouragement", "kegel_exercises_pregnancy_and_postnatal",
+	"family_planning_teaching_and_handout", "exclusive_breastfeeding", "postpartum_depression_handout",
+	"refferal_needed", "refferal_need", "referral_clinic_type", "care_plan_created",
+	"reports_or_info_sent_to_mch_nurse", "place", "signature_of_mch_nurse", "date_reffe", "patient_condition",
+	"vitamins", "anemia__11gm",
+];
+
+function auto_complete_volunteer_row(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	if (row.status === "Completed") return;
+	if (VOLUNTEER_VISIT_CONTENT_FIELDS.some((f) => row[f])) {
+		set_row_value_if_changed(row, "status", "Completed");
+	}
+}
+
 // calculate_next_anc_visit_date is triggered from several places (a
 // Volunteer row's date/status changing, pregnant_id changing) and each run
 // kicks off
@@ -182,6 +212,15 @@ function register_followup_table_events(child_doctype, drives_schedule) {
 			highlight_risk_rows(frm);
 		},
 	};
+	if (drives_schedule) {
+		VOLUNTEER_VISIT_CONTENT_FIELDS.forEach((fieldname) => {
+			const existing = handlers[fieldname];
+			handlers[fieldname] = (frm, cdt, cdn) => {
+				if (existing) existing(frm, cdt, cdn);
+				auto_complete_volunteer_row(frm, cdt, cdn);
+			};
+		});
+	}
 	// Live preview of the Lab/Scan Investigation lock/mirror, same as the
 	// Vue app's hook - Nurse and Doctor only, never Volunteer.
 	if (LAB_INVESTIGATION_TABLE_FIELDS.includes(table_field)) {

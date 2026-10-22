@@ -15,11 +15,11 @@
   "head_of_the_family_member",
   "family_member",
   "relationship",
-  "gender",
   "date_of_birth",
+  "column_break_zdna",
+  "gender",
   "age",
   "age_detail",
-  "column_break_zdna",
   "phone_number",
   "marital_status",
   "yellow_card",
@@ -39,8 +39,8 @@
   "folic_acid",
   "does_the_person_have_any_mental_health_condition",
   "is_the_person_currently_pregnant",
-  "column_break_imal",
   "type_of_mental_health",
+  "column_break_imal",
   "past_treatment",
   "referal_for_the_mental_health",
   "does_the_person_require_palliative_care",
@@ -54,9 +54,9 @@
   "charity_dependent_ratio",
   "charity_health_condition",
   "charity_living_conditions",
+  "charity_column_break",
   "charity_disability_severity",
   "charity_mch_assessment",
-  "charity_column_break",
   "charity_assessment_score",
   "suggested_charity_percentage"
  ],
@@ -411,10 +411,6 @@
    "link_fieldname": "familymember_id"
   },
   {
-   "link_doctype": "Birth Registration",
-   "link_fieldname": "fmid"
-  },
-  {
    "link_doctype": "Palliative Care Initial Assessment Form",
    "link_fieldname": "fmid"
   },
@@ -431,7 +427,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-10-22 17:17:22.110488",
+ "modified": "2026-10-22 18:29:03.456977",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

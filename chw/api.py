@@ -362,18 +362,44 @@ def get_module_record_counts():
     return counts
 
 
+# Family members' Connections panel only makes sense for the person's
+# *current* situation - each of these downstream forms has its own "Is/Does
+# the person ..." flag right there on the form, so the card is shown only
+# while that flag currently reads "Yes" (re-checked live, not "was ever
+# Yes" - flipping the flag back hides the card again).
+FAMILY_MEMBER_CONNECTION_GATE_FIELDS = {
+    'Pregnancy Registration': 'is_the_person_currently_pregnant',
+    'Palliative Care Initial Assessment Form': 'does_the_person_require_palliative_care',
+    'Preconception Reg and Followup': 'does_the_person_needs_an_preconception',
+    'Postpartum Reg and Followup': 'is_the_patient_postpartum',
+    'Child 6w to 1 Year Reg and Followup': 'is_the_patient_a_child_0_to_1',
+}
+
+
 @frappe.whitelist()
 def get_doc_connections(doctype, name):
     """Record counts for one document's Desk connections - the Vue form's
     Connections panel (the same cards Desk shows above a form). Each count
     respects the user's own read permissions on the connected DocType (see
     _permitted_count); DocTypes the user can't read are left out entirely
-    rather than shown as 0."""
+    rather than shown as 0. On Family members, a connection in
+    FAMILY_MEMBER_CONNECTION_GATE_FIELDS is left out too unless its gate
+    field currently reads "Yes"."""
     if not frappe.has_permission(doctype, 'read', doc=name):
         frappe.throw(_('Not permitted'), frappe.PermissionError)
 
+    gate_fields = FAMILY_MEMBER_CONNECTION_GATE_FIELDS if doctype == 'Family members' else {}
+    gate_values = (
+        frappe.db.get_value(doctype, name, list(set(gate_fields.values())), as_dict=True) or {}
+        if gate_fields
+        else {}
+    )
+
     connections = []
     for link in _doctype_connection_links(doctype):
+        gate_field = gate_fields.get(link['doctype'])
+        if gate_field and gate_values.get(gate_field) != 'Yes':
+            continue
         if not frappe.has_permission(link['doctype'], 'read'):
             continue
         try:

@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { call, useCall } from 'frappe-ui'
 import Skeleton from '@/components/Skeleton.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
@@ -102,6 +102,9 @@ import { t, dateLocale } from '@/data/i18n'
 const props = defineProps({
   doctype: { type: String, required: true },
   name: { type: String, required: true },
+  // Bumped by the form after a save, so a field that now gates a
+  // connection (e.g. a flag flipped to "Yes") shows up without a reload.
+  refreshKey: { type: Number, default: 0 },
 })
 
 // How many linked records an expanded card lists before "View all".
@@ -114,6 +117,11 @@ const connectionsResource = useCall({
   method: 'GET',
   params: { doctype: props.doctype, name: props.name },
 })
+
+watch(
+  () => props.refreshKey,
+  () => connectionsResource.reload(),
+)
 
 const loading = computed(() => connectionsResource.loading)
 

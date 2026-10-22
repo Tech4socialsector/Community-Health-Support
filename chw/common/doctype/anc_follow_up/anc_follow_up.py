@@ -23,6 +23,29 @@ DEFAULT_AUTOMATIC_WINDOW_COUNT = 6
 FOLLOWUP_TABLE_FIELDS = ["anc_followup", "anc_followup_for_nurse", "anc_followup_for_docter"]
 VOLUNTEER_TABLE_FIELD = "anc_followup"
 
+# Every Volunteer row field except the ones this module (or the schedule
+# generator) fills in itself - once any one of these actually holds
+# something, the visit has been recorded, so Status flips to Completed on
+# its own instead of also asking the volunteer to flip the dropdown by hand.
+# Clearing a field back to blank doesn't walk Completed back - that's an
+# edit to a recorded visit, not an undone one. Mirrored in anc_follow_up.js
+# (Desk) and the Vue app's ancFollowUp.js hook, so all three stay in step.
+VOLUNTEER_VISIT_CONTENT_FIELDS = [
+	"month", "bp", "weight", "anemia", "edema", "grbs", "tt", "hemoglobin_level", "monthly_checkup", "ironcal",
+	"any_other_complaitsremark", "hr", "rr", "temp", "height", "bmi", "mch_nurse_noti_ed_of_abnormal_vital_signs",
+	"feeling_well", "good_energy", "pink_tongue", "good_fetal_movement", "vaginal_bleeding", "leaking_fluid",
+	"severe_abdominal_pain", "severe_headacheblurred_vision", "swelling_of_handsface", "fever",
+	"extreme_dizziness_or_fatigue", "reduced_fetal_movement", "itching_of_palms_or_soles_of_feet_especially_at_night",
+	"palpitations", "mch_nurse_notified_of_danger_signs", "problems_identified", "support_care_provided",
+	"folic_acid_counseling_1st_trimester", "trimester_specific_care_handout", "pregnancy_exercises_handout",
+	"nutrition_counseling__my_pregnancy_plate_handout", "iron_and_calcium_2nd_and_3rd_trimester",
+	"plan_for_delivery_facility_delivery_encouragement", "kegel_exercises_pregnancy_and_postnatal",
+	"family_planning_teaching_and_handout", "exclusive_breastfeeding", "postpartum_depression_handout",
+	"refferal_needed", "refferal_need", "referral_clinic_type", "care_plan_created",
+	"reports_or_info_sent_to_mch_nurse", "place", "signature_of_mch_nurse", "date_reffe", "patient_condition",
+	"vitamins", "anemia__11gm",
+]
+
 # Lab Investigations lives only on Nurse's and Doctor's rows (never
 # Volunteer's) - filled once per trimester, by whichever of the two gets
 # there first, then mirrored onto every row of both tables so it reads the
@@ -299,11 +322,19 @@ class ANCFollowup(Document):
 				row.lmp_date = lmp_date
 				row.pog_weeks = self.calculate_pog(lmp_date, row.date) if row.date else ""
 
+		self.auto_complete_volunteer_rows()
 		self.sync_patient_condition_to_pregnancy()
 		self.refresh_pregnancy_pog_and_trimester(lmp_date)
 		self.sync_lab_investigations(lmp_date)
 		self.sync_scan_investigations()
 		self.insert_urgent_followups_for_risk_rows()
+
+	def auto_complete_volunteer_rows(self):
+		for row in self.get(VOLUNTEER_TABLE_FIELD):
+			if row.status == "Completed":
+				continue
+			if any(row.get(f) for f in VOLUNTEER_VISIT_CONTENT_FIELDS):
+				row.status = "Completed"
 
 	def sync_lab_investigations(self, lmp_date):
 		current_trimester_no = _trimester_number(lmp_date)
