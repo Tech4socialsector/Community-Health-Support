@@ -25,26 +25,14 @@
   "edema",
   "grbs",
   "hemoglobin_level",
+  "tt_status",
+  "tt_status_filled_by",
   "pregnancy_assessment_section",
   "h5pregnancy_assessmenth",
   "feeling_well",
   "good_energy",
   "pink_tongue",
   "good_fetal_movement",
-  "pregnancy_danger_signs_section",
-  "h5high_riskh",
-  "vaginal_bleeding",
-  "leaking_fluid",
-  "severe_abdominal_pain",
-  "severe_headacheblurred_vision",
-  "fever",
-  "column_break_icvq",
-  "swelling_of_handsface",
-  "extreme_dizziness_or_fatigue",
-  "reduced_fetal_movement",
-  "itching_of_palms_or_soles_of_feet_especially_at_night",
-  "palpitations",
-  "patient_condition",
   "education_provided_section",
   "h5education_providedh",
   "folic_acid_counseling_1st_trimester",
@@ -129,10 +117,13 @@
   "refferal_need",
   "referral_clinic_type",
   "care_plan_created",
-  "column_break_tzcp",
   "place",
+  "date_reffe",
+  "column_break_tzcp",
   "signature_of_mch_nurse",
-  "date_reffe"
+  "patient_condition",
+  "if_patient_condition_is_risk",
+  "risk_filled_by"
  ],
  "fields": [
   {
@@ -260,81 +251,6 @@
    "fieldname": "good_fetal_movement",
    "fieldtype": "Check",
    "label": "Good fetal Movement"
-  },
-  {
-   "fieldname": "pregnancy_danger_signs_section",
-   "fieldtype": "Section Break",
-   "label": "Pregnancy Danger Signs"
-  },
-  {
-   "description": "Pregnancy Danger Signs (If noted then notify MCH nurse immediately)",
-   "fieldname": "h5high_riskh",
-   "fieldtype": "Heading",
-   "label": "<h5>High Risk</h5>"
-  },
-  {
-   "default": "0",
-   "fieldname": "vaginal_bleeding",
-   "fieldtype": "Check",
-   "label": "Vaginal bleeding"
-  },
-  {
-   "default": "0",
-   "fieldname": "leaking_fluid",
-   "fieldtype": "Check",
-   "label": "Leaking Fluid"
-  },
-  {
-   "default": "0",
-   "fieldname": "severe_abdominal_pain",
-   "fieldtype": "Check",
-   "label": "Severe abdominal pain"
-  },
-  {
-   "default": "0",
-   "fieldname": "severe_headacheblurred_vision",
-   "fieldtype": "Check",
-   "label": "Severe headache/blurred vision"
-  },
-  {
-   "default": "0",
-   "fieldname": "swelling_of_handsface",
-   "fieldtype": "Check",
-   "label": "Swelling of hands/face"
-  },
-  {
-   "default": "0",
-   "fieldname": "fever",
-   "fieldtype": "Check",
-   "label": "Fever"
-  },
-  {
-   "default": "0",
-   "fieldname": "extreme_dizziness_or_fatigue",
-   "fieldtype": "Check",
-   "label": "Extreme dizziness or Fatigue"
-  },
-  {
-   "default": "0",
-   "fieldname": "reduced_fetal_movement",
-   "fieldtype": "Check",
-   "label": "Reduced fetal movement"
-  },
-  {
-   "default": "0",
-   "fieldname": "itching_of_palms_or_soles_of_feet_especially_at_night",
-   "fieldtype": "Check",
-   "label": "Itching of palms or soles of feet especially at night"
-  },
-  {
-   "default": "0",
-   "fieldname": "palpitations",
-   "fieldtype": "Check",
-   "label": "Palpitations"
-  },
-  {
-   "fieldname": "column_break_icvq",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "education_provided_section",
@@ -889,13 +805,37 @@
   {
    "fieldname": "column_break_vblc",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tt_status",
+   "fieldtype": "Select",
+   "label": "TT Status",
+   "options": "\nOne\nTwo\nBooster"
+  },
+  {
+   "fieldname": "tt_status_filled_by",
+   "fieldtype": "Data",
+   "label": "TT Status Filled By",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.patient_condition==\"Risk\"",
+   "fieldname": "if_patient_condition_is_risk",
+   "fieldtype": "Small Text",
+   "label": "If Patient Condition is Risk"
+  },
+  {
+   "fieldname": "risk_filled_by",
+   "fieldtype": "Data",
+   "label": "Risk Filled By",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-22 17:01:27.461260",
+ "modified": "2026-10-22 21:31:00.740598",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Nurse",

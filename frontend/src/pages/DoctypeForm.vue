@@ -96,12 +96,47 @@
         </template>
       </Dialog>
 
-      <Dialog v-model="investigationStatusDialog" :options="{ title: t('Investigation Status'), size: '2xl' }">
+      <Dialog v-model="investigationStatusDialog" :options="{ title: t('Investigation Status'), size: '5xl' }">
+        <template #body-header>
+          <div
+            class="-mx-4 -mt-5 mb-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-t-xl bg-gradient-to-r from-navy-50 via-white to-forest-50 px-4 py-4 sm:-mx-6 sm:px-6 dark:from-navy-900/40 dark:via-gray-900 dark:to-forest-900/30"
+          >
+            <span class="hidden sm:block" />
+            <h3 class="justify-self-center text-center text-2xl font-bold tracking-tight text-navy-900 dark:text-gray-100">
+              {{ t('Investigation Status') }}
+            </h3>
+            <div class="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                :class="[ui.BTN_PRIMARY, '!h-8 !px-2 sm:!px-3']"
+                :disabled="investigationStatusLoading"
+                :aria-label="t('Export')"
+                :title="t('Export')"
+                @click="exportInvestigationStatus"
+              >
+                <LucideIcon name="download" class="h-4 w-4" />
+                <span class="hidden sm:inline">{{ t('Export') }}</span>
+              </button>
+              <button
+                type="button"
+                :class="[ui.BTN_SECONDARY, '!h-8 !w-8 !px-0']"
+                :aria-label="t('Close')"
+                @click="investigationStatusDialog = false"
+              >
+                <LucideIcon name="x" class="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </template>
         <template #body-content>
           <Skeleton v-if="investigationStatusLoading" height="4rem" />
-          <div v-else class="space-y-5">
-            <div v-for="section in investigationStatusSections" :key="section.key">
-              <p :class="[ui.SECTION_LABEL, 'mb-1']">{{ t(section.title) }}</p>
+          <div v-else class="grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
+            <div
+              v-for="section in investigationStatusSections"
+              :key="section.key"
+              class="rounded-lg bg-gray-50/60 px-3 py-2.5 dark:bg-gray-800/30"
+            >
+              <p class="mb-1 text-sm font-bold uppercase tracking-wide" :class="investigationSectionClass(section)">{{ t(section.title) }}</p>
               <p v-if="!section.rows.length" class="py-2 text-sm text-gray-400 dark:text-gray-500">{{ t('Nothing recorded yet.') }}</p>
               <ul v-else class="divide-y divide-gray-100 text-sm dark:divide-gray-800">
                 <li v-for="row in section.rows" :key="row.key || row.label" class="py-2">
@@ -834,13 +869,28 @@ const deleting = ref(false)
 const showInvestigationStatusButton = computed(() => doctype === 'ANC Follow-up' && !isNew && !isLocalName(name))
 const investigationStatusDialog = ref(false)
 const investigationStatusLoading = ref(false)
-const investigationSummary = ref({ trimester: [], scan: [] })
+const investigationSummary = ref({ trimester: [], scan: [], tt_status: [], risk: [] })
 const expandedInvestigationRows = ref(new Set())
 
+// Each section gets its own accent color - Risk in warning amber since it's
+// the one that actually needs to stand out, the rest alternating the
+// brand's two colors so the page reads as organized groups, not a wall of
+// identical gray labels.
 const investigationStatusSections = computed(() => [
-  { key: 'trimester', title: 'Lab Investigations', rows: investigationSummary.value.trimester || [] },
-  { key: 'scan', title: 'Scan Investigations', rows: investigationSummary.value.scan || [] },
+  { key: 'trimester', title: 'Lab Investigations', rows: investigationSummary.value.trimester || [], color: 'navy' },
+  { key: 'scan', title: 'Scan Investigations', rows: investigationSummary.value.scan || [], color: 'forest' },
+  { key: 'tt_status', title: 'TT Status', rows: investigationSummary.value.tt_status || [], color: 'navy' },
+  { key: 'risk', title: 'Risk', rows: investigationSummary.value.risk || [], color: 'amber' },
 ])
+
+const INVESTIGATION_SECTION_COLOR_CLASSES = {
+  navy: 'text-navy-800 dark:text-navy-200',
+  forest: 'text-forest-800 dark:text-forest-200',
+  amber: 'text-amber-800 dark:text-amber-300',
+}
+function investigationSectionClass(section) {
+  return INVESTIGATION_SECTION_COLOR_CLASSES[section.color] || INVESTIGATION_SECTION_COLOR_CLASSES.navy
+}
 
 function canExpandInvestigationRow(row) {
   return row.status === 'Completed' && (row.values || []).length > 0
@@ -853,13 +903,82 @@ function toggleInvestigationRow(sectionKey, label) {
   expandedInvestigationRows.value = next
 }
 
+// A plain, printable copy of the summary in its own tab - the browser's own
+// print dialog (Save as PDF works the same way) is what actually gets
+// handed to or shown to the doctor, so there's no server round trip and it
+// works offline too.
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+}
+
+function investigationStatusRowLine(row) {
+  const statusText =
+    row.status === 'Completed'
+      ? t('Completed by {0}', [row.filled_by])
+      : row.status === 'Not Yet Due'
+        ? t('Not yet due')
+        : t('Pending')
+  const valuesHtml = (row.values || [])
+    .map((v) => `<div class="value-row"><span>${escapeHtml(v.label)}</span><b>${escapeHtml(v.value)}</b></div>`)
+    .join('')
+  return `
+    <div class="row">
+      <div class="row-head"><span>${escapeHtml(row.label)}</span><span>${escapeHtml(statusText)}</span></div>
+      ${valuesHtml}
+    </div>
+  `
+}
+
+function exportInvestigationStatus() {
+  const win = window.open('', '_blank')
+  if (!win) return
+  const sectionsHtml = investigationStatusSections.value
+    .map(
+      (section) => `
+        <section>
+          <h2>${escapeHtml(t(section.title))}</h2>
+          ${section.rows.length ? section.rows.map(investigationStatusRowLine).join('') : `<p class="empty">${escapeHtml(t('Nothing recorded yet.'))}</p>`}
+        </section>
+      `,
+    )
+    .join('')
+
+  win.document.write(`
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>${escapeHtml(t('Investigation Status'))} - ${escapeHtml(name)}</title>
+        <style>
+          body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: #111; padding: 24px; max-width: 800px; margin: 0 auto; }
+          h1 { font-size: 20px; margin: 0 0 4px; }
+          h2 { font-size: 15px; margin: 24px 0 8px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+          .row { padding: 6px 0; border-bottom: 1px solid #eee; }
+          .row-head { display: flex; justify-content: space-between; gap: 12px; font-weight: 600; }
+          .value-row { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0 2px 14px; font-size: 13px; color: #444; }
+          .empty { color: #888; font-size: 13px; padding: 6px 0; }
+          @media print { body { padding: 0; } }
+        </style>
+      </head>
+      <body>
+        <h1>${escapeHtml(t('Investigation Status'))}</h1>
+        <div>${escapeHtml(name)}</div>
+        ${sectionsHtml}
+      </body>
+    </html>
+  `)
+  win.document.close()
+  win.focus()
+  win.print()
+}
+
 function openInvestigationStatus() {
   investigationStatusDialog.value = true
   investigationStatusLoading.value = true
   expandedInvestigationRows.value = new Set()
   call('chw.common.doctype.anc_follow_up.anc_follow_up.get_investigation_summary', { name })
-    .then((r) => (investigationSummary.value = r || { trimester: [], scan: [] }))
-    .catch(() => (investigationSummary.value = { trimester: [], scan: [] }))
+    .then((r) => (investigationSummary.value = r || { trimester: [], scan: [], tt_status: [], risk: [] }))
+    .catch(() => (investigationSummary.value = { trimester: [], scan: [], tt_status: [], risk: [] }))
     .finally(() => (investigationStatusLoading.value = false))
 }
 

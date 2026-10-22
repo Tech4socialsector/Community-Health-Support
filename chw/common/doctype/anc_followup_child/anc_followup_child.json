@@ -50,6 +50,7 @@
   "itching_of_palms_or_soles_of_feet_especially_at_night",
   "palpitations",
   "patient_condition",
+  "risk_filled_by",
   "column_break_icvq",
   "mch_nurse_notified_of_danger_signs",
   "problems_identified",
@@ -515,6 +516,12 @@
    "fieldtype": "Select",
    "label": "Patient Condition",
    "options": "\nNormal\nRisk"
+  },
+  {
+   "fieldname": "risk_filled_by",
+   "fieldtype": "Data",
+   "label": "Risk Filled By",
+   "read_only": 1
   },
   {
    "default": "0",

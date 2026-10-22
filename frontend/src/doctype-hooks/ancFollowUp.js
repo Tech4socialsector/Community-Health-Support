@@ -484,6 +484,42 @@ async function syncScanInvestigations(values) {
   }
 }
 
+// Per-visit, like Scan Investigations - Nurse's and Doctor's rows only, no
+// mirroring, no locking.
+async function syncTtStatus(values) {
+  let fullNamePromise = null
+  for (const tableField of LAB_INVESTIGATION_TABLE_FIELDS) {
+    for (const row of values[tableField] || []) {
+      if (!row.tt_status) {
+        setIfChanged(row, 'tt_status_filled_by', null)
+        continue
+      }
+      if (!row.tt_status_filled_by) {
+        fullNamePromise = fullNamePromise || getCurrentUserFullName()
+        setIfChanged(row, 'tt_status_filled_by', await fullNamePromise)
+      }
+    }
+  }
+}
+
+// Per-visit, across all three tables - Volunteer, Nurse and Doctor can each
+// independently flag a visit as Risk.
+async function syncRiskFilledBy(values) {
+  let fullNamePromise = null
+  for (const tableField of FOLLOWUP_TABLE_FIELDS) {
+    for (const row of values[tableField] || []) {
+      if (row.patient_condition !== 'Risk') {
+        setIfChanged(row, 'risk_filled_by', null)
+        continue
+      }
+      if (!row.risk_filled_by) {
+        fullNamePromise = fullNamePromise || getCurrentUserFullName()
+        setIfChanged(row, 'risk_filled_by', await fullNamePromise)
+      }
+    }
+  }
+}
+
 export default {
   // health_worker_name is defaulted generically for every doctype (see
   // applyCurrentHealthWorkerDefault in DoctypeForm.vue), and Desk's
@@ -495,6 +531,8 @@ export default {
   onAfterLoad(values, ctx) {
     syncLabInvestigations(values)
     syncScanInvestigations(values)
+    syncTtStatus(values)
+    syncRiskFilledBy(values)
     // A new record opened with Pregnant ID already filled in via the URL
     // (e.g. from Pregnancy Registration's own "New ANC Follow-up" link)
     // never fires onFieldChange('pregnant_id') below, so without this the
@@ -540,9 +578,12 @@ export default {
       return calculateNextAncVisitDate(values)
     }
 
+    if (fieldname === 'patient_condition') return syncRiskFilledBy(values)
+
     if (LAB_INVESTIGATION_TABLE_FIELDS.includes(tableField)) {
       if (LAB_INVESTIGATION_GROUPS.some((g) => g.fields.includes(fieldname))) return syncLabInvestigations(values)
       if (SCAN_INVESTIGATION_GROUPS.some((g) => g.fields.includes(fieldname))) return syncScanInvestigations(values)
+      if (fieldname === 'tt_status') return syncTtStatus(values)
     }
   },
 

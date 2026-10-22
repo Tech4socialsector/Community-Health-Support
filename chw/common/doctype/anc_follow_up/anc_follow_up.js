@@ -210,6 +210,7 @@ function register_followup_table_events(child_doctype, drives_schedule) {
 		},
 		patient_condition(frm) {
 			highlight_risk_rows(frm);
+			sync_risk_filled_by(frm);
 		},
 	};
 	if (drives_schedule) {
@@ -234,6 +235,7 @@ function register_followup_table_events(child_doctype, drives_schedule) {
 				handlers[fieldname] = (frm) => sync_scan_investigations(frm);
 			});
 		});
+		handlers.tt_status = (frm) => sync_tt_status(frm);
 	}
 	frappe.ui.form.on(child_doctype, handlers);
 }
@@ -340,6 +342,10 @@ function show_investigation_status(frm) {
 			${render_investigation_rows(summary.trimester || [], "t")}
 			<div style="margin: 14px 0 6px; font-weight: 600;">${__("Scan Investigations")}</div>
 			${render_investigation_rows(summary.scan || [], "s")}
+			<div style="margin: 14px 0 6px; font-weight: 600;">${__("TT Status")}</div>
+			${render_investigation_rows(summary.tt_status || [], "tt")}
+			<div style="margin: 14px 0 6px; font-weight: 600;">${__("Risk")}</div>
+			${render_investigation_rows(summary.risk || [], "r")}
 		`;
 
 		const dialog = new frappe.ui.Dialog({
@@ -474,6 +480,43 @@ function sync_scan_investigations(frm) {
 		});
 	});
 	LAB_INVESTIGATION_TABLE_FIELDS.forEach((table_field) => frm.refresh_field(table_field));
+}
+
+function sync_tt_status(frm) {
+	// Per-visit, like Scan Investigations - no mirroring, no locking.
+	let full_name_promise = null;
+	LAB_INVESTIGATION_TABLE_FIELDS.forEach((table_field) => {
+		(frm.doc[table_field] || []).forEach((row) => {
+			if (!row.tt_status) {
+				set_row_value_if_changed(row, "tt_status_filled_by", null);
+				return;
+			}
+			if (!row.tt_status_filled_by) {
+				full_name_promise = full_name_promise || get_current_user_full_name();
+				full_name_promise.then((full_name) => set_row_value_if_changed(row, "tt_status_filled_by", full_name));
+			}
+		});
+	});
+	LAB_INVESTIGATION_TABLE_FIELDS.forEach((table_field) => frm.refresh_field(table_field));
+}
+
+function sync_risk_filled_by(frm) {
+	// Per-visit, across all three tables - Volunteer, Nurse and Doctor can
+	// each independently flag a visit as Risk.
+	let full_name_promise = null;
+	FOLLOWUP_TABLE_FIELDS.forEach((table_field) => {
+		(frm.doc[table_field] || []).forEach((row) => {
+			if (row.patient_condition !== "Risk") {
+				set_row_value_if_changed(row, "risk_filled_by", null);
+				return;
+			}
+			if (!row.risk_filled_by) {
+				full_name_promise = full_name_promise || get_current_user_full_name();
+				full_name_promise.then((full_name) => set_row_value_if_changed(row, "risk_filled_by", full_name));
+			}
+		});
+	});
+	FOLLOWUP_TABLE_FIELDS.forEach((table_field) => frm.refresh_field(table_field));
 }
 
 function get_pregnancy_info(pregnant_id) {

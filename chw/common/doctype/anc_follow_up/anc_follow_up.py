@@ -252,7 +252,57 @@ def get_investigation_summary(name):
 				})
 	scan_summary.sort(key=lambda r: r.pop("sort_date"), reverse=True)
 
-	return {"trimester": trimester_summary, "scan": scan_summary}
+	# TT Status is per-visit too, Nurse's and Doctor's rows only - one entry
+	# per visit where it was actually filled in, newest first.
+	tt_summary = []
+	for table_field in LAB_INVESTIGATION_TABLE_FIELDS:
+		for row in doc.get(table_field):
+			if not row.tt_status:
+				continue
+			visit_date = frappe.utils.formatdate(row.date) if row.date else None
+			tt_summary.append({
+				"key": f"{table_field}-{row.name}-tt_status",
+				"label": "TT Status - {0} visit{1}".format(
+					scan_table_labels.get(table_field, ""), f" ({visit_date})" if visit_date else ""
+				),
+				"status": "Completed",
+				"filled_by": row.tt_status_filled_by,
+				"values": [{"label": "TT Status", "value": row.tt_status}],
+				"sort_date": row.date or "",
+			})
+	tt_summary.sort(key=lambda r: r.pop("sort_date"), reverse=True)
+
+	# Risk is per-visit, across all three tables - Volunteer, Nurse and
+	# Doctor can each independently flag a visit as Risk.
+	risk_table_labels = {"anc_followup": "Volunteer", **scan_table_labels}
+	risk_summary = []
+	for table_field in FOLLOWUP_TABLE_FIELDS:
+		for row in doc.get(table_field):
+			if row.patient_condition != "Risk":
+				continue
+			values = [{"label": "Patient Condition", "value": "Risk"}]
+			detail = row.get("if_patient_condition_is_risk")
+			if detail:
+				values.append({"label": "If Patient Condition is Risk", "value": detail})
+			visit_date = frappe.utils.formatdate(row.date) if row.date else None
+			risk_summary.append({
+				"key": f"{table_field}-{row.name}-risk",
+				"label": "Risk - {0} visit{1}".format(
+					risk_table_labels.get(table_field, ""), f" ({visit_date})" if visit_date else ""
+				),
+				"status": "Completed",
+				"filled_by": row.risk_filled_by,
+				"values": values,
+				"sort_date": row.date or "",
+			})
+	risk_summary.sort(key=lambda r: r.pop("sort_date"), reverse=True)
+
+	return {
+		"trimester": trimester_summary,
+		"scan": scan_summary,
+		"tt_status": tt_summary,
+		"risk": risk_summary,
+	}
 
 
 class ANCFollowup(Document):
@@ -327,6 +377,8 @@ class ANCFollowup(Document):
 		self.refresh_pregnancy_pog_and_trimester(lmp_date)
 		self.sync_lab_investigations(lmp_date)
 		self.sync_scan_investigations()
+		self.sync_tt_status()
+		self.sync_risk_filled_by()
 		self.insert_urgent_followups_for_risk_rows()
 
 	def auto_complete_volunteer_rows(self):
@@ -369,6 +421,37 @@ class ANCFollowup(Document):
 								full_name = frappe.utils.get_fullname(frappe.session.user)
 							row.set(group["filled_by_field"], full_name)
 						row.set(group["status_field"], "Completed")
+
+	def sync_tt_status(self):
+		# Per-visit, like Scan Investigations - Nurse's and Doctor's rows each
+		# stand on their own, no mirroring, no locking. Whoever first types a
+		# value into that row's own TT Status is stamped there; clearing it
+		# back out clears the stamp too, so it never shows someone's name
+		# against a value they didn't actually enter.
+		full_name = None
+		for table_field in LAB_INVESTIGATION_TABLE_FIELDS:
+			for row in self.get(table_field):
+				if not row.tt_status:
+					row.tt_status_filled_by = None
+					continue
+				if not row.tt_status_filled_by:
+					if full_name is None:
+						full_name = frappe.utils.get_fullname(frappe.session.user)
+					row.tt_status_filled_by = full_name
+
+	def sync_risk_filled_by(self):
+		# Same per-visit treatment, across all three tables - Volunteer,
+		# Nurse and Doctor can each independently flag a visit as Risk.
+		full_name = None
+		for table_field in FOLLOWUP_TABLE_FIELDS:
+			for row in self.get(table_field):
+				if row.patient_condition != "Risk":
+					row.risk_filled_by = None
+					continue
+				if not row.risk_filled_by:
+					if full_name is None:
+						full_name = frappe.utils.get_fullname(frappe.session.user)
+					row.risk_filled_by = full_name
 
 	def refresh_pregnancy_pog_and_trimester(self, lmp_date):
 		today = getdate()
