@@ -5,67 +5,67 @@
   "doctypes": [
    {
     "doctype_name": "Household profile",
-    "icon": null,
+    "icon": "house",
     "label": "Household profile",
     "route": null
    },
    {
     "doctype_name": "Family members",
-    "icon": null,
+    "icon": "users",
     "label": "Family members",
     "route": null
    },
    {
     "doctype_name": "Pregnancy Registration",
-    "icon": null,
+    "icon": "pregnant-woman",
     "label": "Pregnancy Registration",
     "route": null
    },
    {
     "doctype_name": "ANC Follow-up",
-    "icon": null,
+    "icon": "stethoscope",
     "label": "ANC Follow-up",
     "route": null
    },
    {
     "doctype_name": "Birth Registration",
-    "icon": null,
+    "icon": "clipboard-check",
     "label": "Birth Registration",
     "route": null
    },
    {
     "doctype_name": "PNC",
-    "icon": null,
+    "icon": "heart-pulse",
     "label": "PNC",
     "route": null
    },
    {
     "doctype_name": "Palliative Care Initial Assessment Form",
-    "icon": null,
+    "icon": "hand-heart",
     "label": "Palliative Care Initial Assessment Form",
     "route": null
    },
    {
     "doctype_name": "Palliative care followup",
-    "icon": null,
+    "icon": "heart-handshake",
     "label": "Palliative care followup",
     "route": null
    },
    {
     "doctype_name": "Postpartum Reg and Followup",
-    "icon": null,
+    "icon": "activity",
     "label": "Postpartum Reg and Followup",
     "route": null
    },
    {
     "doctype_name": "Preconception Reg and Followup",
-    "icon": null,
+    "icon": "calendar-check",
     "label": "Preconception Reg and Followup",
     "route": null
    },
    {
     "doctype_name": "Child 6w to 1 Year Reg and Followup",
-    "icon": null,
+    "icon": "baby",
     "label": "Child 6w to 1 Year Reg and Followup",
     "route": null
    }
@@ -73,7 +73,7 @@
   "enabled": 1,
   "icon": "box",
   "label": "CHW",
-  "modified": "2026-10-06 12:08:04.063849",
+  "modified": "2026-10-23 14:25:47.110878",
   "module_name": "CHW",
   "name": "CHW",
   "restrict_by_role": 0,
