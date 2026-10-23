@@ -23,7 +23,7 @@
         :class="
           readOnly
             ? 'cursor-default border-gray-100 bg-gray-50 text-gray-700 dark:border-gray-800 dark:bg-gray-800/60'
-            : 'border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 hover:border-gray-300 focus:ring-2 focus:ring-forest-400 dark:border-gray-700 dark:bg-gray-900'
+            : 'border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 hover:border-gray-300 hover:bg-forest-50 focus:bg-white focus:ring-2 focus:ring-forest-400 dark:border-gray-700 dark:bg-gray-900 dark:hover:bg-forest-900/20'
         "
         role="combobox"
         :aria-expanded="open"

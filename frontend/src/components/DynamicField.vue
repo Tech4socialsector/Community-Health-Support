@@ -59,7 +59,7 @@
     type="select"
     variant="outline"
     :placeholder="t('Select option')"
-    class="[&_[data-slot=trigger]]:w-full"
+    :class="['[&_[data-slot=trigger]]:w-full', FIELD_HOVER_CLASS]"
     :label="t(field.label)"
     :required="!!field.reqd"
     :options="selectOptions"
@@ -81,6 +81,7 @@
     v-else-if="controlType === 'textarea'"
     type="textarea"
     variant="outline"
+    :class="FIELD_HOVER_CLASS"
     :label="t(field.label)"
     :required="!!field.reqd"
     :description="t(field.description) || undefined"
@@ -92,6 +93,7 @@
     <FormControl
       type="text"
       variant="outline"
+      :class="FIELD_HOVER_CLASS"
       :label="t(field.label)"
       :required="!!field.reqd"
       :description="t(field.description) || undefined"
@@ -126,6 +128,7 @@
     v-else
     :type="controlType"
     variant="outline"
+    :class="FIELD_HOVER_CLASS"
     :label="t(field.label)"
     :required="!!field.reqd"
     :description="t(field.description) || undefined"
@@ -218,6 +221,14 @@ const controlType = computed(() => {
       return 'text'
   }
 })
+
+// A light tint on hover, since the "outline" variant is plain white at
+// rest and gave no visual feedback at all on hover besides the border -
+// targets the control's own rendered element (input/textarea/select
+// trigger) from outside, the same arbitrary-selector trick already used
+// for the select trigger's width.
+const FIELD_HOVER_CLASS =
+  '[&_input]:hover:!bg-forest-50 [&_textarea]:hover:!bg-forest-50 [&_[data-slot=trigger]]:hover:!bg-forest-50 dark:[&_input]:hover:!bg-forest-900/20 dark:[&_textarea]:hover:!bg-forest-900/20 dark:[&_[data-slot=trigger]]:hover:!bg-forest-900/20'
 
 const isImageField = computed(() => props.field.fieldtype === 'Attach Image')
 const isUserLink = computed(() => props.field.fieldtype === 'Link' && props.field.options === 'User')
