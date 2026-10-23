@@ -10,6 +10,29 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      // InterVar (self-hosted, see index.css) in front of Tailwind's own
+      // default sans stack, which stays as the fallback for any character
+      // Inter doesn't cover (emoji especially) and for the instant it takes
+      // the font file to load.
+      fontFamily: {
+        sans: [
+          'InterVar',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          '"Noto Sans"',
+          'sans-serif',
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+          '"Noto Color Emoji"',
+        ],
+      },
       // Brand colours, sampled from the app logo (public/logo-full.png):
       // navy-900 is the cross outline, forest-700 the green hills. The
       // other steps are lighter/darker shades of those two for tints,

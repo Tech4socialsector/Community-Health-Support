@@ -57,6 +57,7 @@
   <FormControl
     v-else-if="controlType === 'select'"
     type="select"
+    variant="outline"
     :placeholder="t('Select option')"
     class="[&_[data-slot=trigger]]:w-full"
     :label="t(field.label)"
@@ -79,6 +80,7 @@
   <FormControl
     v-else-if="controlType === 'textarea'"
     type="textarea"
+    variant="outline"
     :label="t(field.label)"
     :required="!!field.reqd"
     :description="t(field.description) || undefined"
@@ -89,6 +91,7 @@
   <div v-else-if="isUserLink">
     <FormControl
       type="text"
+      variant="outline"
       :label="t(field.label)"
       :required="!!field.reqd"
       :description="t(field.description) || undefined"
@@ -122,6 +125,7 @@
   <FormControl
     v-else
     :type="controlType"
+    variant="outline"
     :label="t(field.label)"
     :required="!!field.reqd"
     :description="t(field.description) || undefined"

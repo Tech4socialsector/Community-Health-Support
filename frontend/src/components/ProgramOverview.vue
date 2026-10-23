@@ -57,7 +57,7 @@
       </div>
       <div :class="ui.STAT_GRID_4">
         <template v-if="cardsLoading && !cards.length">
-          <div v-for="i in 8" :key="i" :class="ui.STAT_CARD">
+          <div v-for="i in 8" :key="i" :class="[ui.STAT_CARD, ui.STAT_CARD_BASIS_4]">
             <span class="flex w-full items-start justify-between gap-3">
               <Skeleton width="60%" height="0.875rem" />
               <Skeleton width="2.25rem" height="2.25rem" />
@@ -71,7 +71,12 @@
             v-for="(card, index) in cards"
             :key="card.key"
             type="button"
-            :class="[ui.statCardAt(index), { 'opacity-60': cardsLoading }]"
+            :class="[
+              ui.statCardAt(index),
+              ui.STAT_CARD_BASIS_4,
+              'hover:!bg-forest-100 dark:hover:!bg-forest-800/40',
+              { 'opacity-60': cardsLoading },
+            ]"
             @click="openDrilldown(card)"
           >
             <span class="flex w-full items-start justify-between gap-2">

@@ -40,21 +40,26 @@
           <span class="truncate font-medium text-navy-900 dark:text-gray-100">{{ doc.name }}</span>
         </nav>
 
-        <!-- Header: what this record is and who it's about, plus actions. -->
-        <header class="flex flex-wrap items-center justify-between gap-4">
+        <!-- Header: what this record is and who it's about, plus actions - a
+        soft brand-tinted card instead of bare text, so this read-only page
+        opens with the same "designed" feel as the Home hero rather than
+        looking like a plainer cousin of the edit form. -->
+        <header
+          class="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-br from-navy-50 via-white to-forest-50 p-5 shadow-sm ring-1 ring-gray-200 dark:from-navy-900/30 dark:via-gray-900 dark:to-forest-900/20 dark:ring-gray-800 sm:p-6"
+        >
           <div class="flex min-w-0 items-center gap-4">
-            <span class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-forest-50 text-forest-700 ring-4 ring-forest-100/70 dark:bg-forest-900/40 dark:text-forest-200 dark:ring-forest-900">
-              <LucideIcon :name="appItem?.icon || 'file-text'" class="h-6 w-6" />
+            <span class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-forest-700 text-white shadow-md ring-4 ring-white dark:ring-gray-900">
+              <LucideIcon :name="appItem?.icon || 'file-text'" class="h-7 w-7" />
             </span>
             <div class="min-w-0">
-              <h1 class="truncate text-xl font-bold text-navy-900 dark:text-gray-100 sm:text-2xl">{{ t(formLabel) }}</h1>
-              <div class="mt-0.5 flex flex-wrap items-center gap-2">
+              <h1 class="truncate text-xl font-extrabold tracking-tight text-navy-900 dark:text-gray-100 sm:text-2xl">{{ t(formLabel) }}</h1>
+              <div class="mt-1 flex flex-wrap items-center gap-2">
                 <span class="truncate text-base font-medium text-gray-700 dark:text-gray-300">{{ title }}</span>
                 <span v-if="doc.status" :class="[ui.PILL, TONE_CLASSES[toneFor(doc.status)]]">{{ t(doc.status) }}</span>
               </div>
             </div>
           </div>
-          <div class="flex w-full flex-shrink-0 items-center gap-2 sm:w-auto">
+          <div class="relative flex w-full flex-shrink-0 items-center gap-2 sm:w-auto">
             <button v-if="appItem" type="button" :class="[ui.BTN_PRIMARY, 'flex-1 sm:flex-none']" @click="editRecord">
               <LucideIcon name="pencil" class="h-4 w-4" />
               {{ t('Edit') }}
@@ -69,7 +74,7 @@
         <!-- Facts strip: the record's ID and headline details at a glance,
         each with its own icon, and when it was last updated. Side by side
         from sm up; two per row on a phone. -->
-        <section :class="[ui.CARD, 'overflow-hidden']">
+        <section :class="[ui.CARD, 'overflow-hidden shadow-md']">
           <div class="grid grid-cols-2 sm:flex">
             <div
               v-for="fact in facts"
@@ -86,11 +91,11 @@
             </div>
             <div
               v-if="doc.modified"
-              class="col-span-2 flex items-center gap-3 bg-navy-50/80 p-3 dark:bg-navy-900/30 sm:col-span-1 sm:flex-none sm:px-5"
+              class="col-span-2 flex items-center gap-3 bg-navy-100/80 p-3 dark:bg-navy-900/40 sm:col-span-1 sm:flex-none sm:px-5"
             >
-              <LucideIcon name="clock" class="h-5 w-5 flex-shrink-0 text-navy-600 dark:text-navy-300" />
+              <LucideIcon name="clock" class="h-5 w-5 flex-shrink-0 text-navy-700 dark:text-navy-300" />
               <span class="min-w-0">
-                <span class="block text-xs font-medium text-navy-600 dark:text-navy-300">{{ t('Last Updated') }}</span>
+                <span class="block text-xs font-medium text-navy-700 dark:text-navy-300">{{ t('Last Updated') }}</span>
                 <span class="block whitespace-nowrap text-sm font-semibold text-navy-900 dark:text-gray-100">
                   {{ formatFieldValue(doc.modified, { fieldtype: 'Datetime' }) }}
                 </span>
@@ -106,7 +111,7 @@
         <section
           v-for="(section, sectionIndex) in visibleSections"
           :key="section.key"
-          :class="[ui.CARD, 'overflow-hidden']"
+          :class="[ui.CARD, 'overflow-hidden shadow-md']"
         >
           <h2 class="flex items-center gap-3 px-4 py-3 sm:px-6" :class="ui.sectionHeadAt(sectionIndex).bar">
             <span class="h-4 w-1 flex-shrink-0 rounded-full" :class="ui.sectionHeadAt(sectionIndex).stripe" />

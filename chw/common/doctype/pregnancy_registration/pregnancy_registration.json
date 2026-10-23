@@ -24,9 +24,8 @@
   "pog",
   "edd_ultrasonography",
   "ultrasound_pog",
-  "column_break_tczd",
-  "tt_status",
   "any_pre_existing_diseases",
+  "column_break_tczd",
   "height",
   "weight",
   "bmi_calculation",
@@ -149,13 +148,6 @@
    "label": "Trimester at Registration",
    "options": "\nFirst trimester\nSecond trimester\nThird trimester",
    "read_only": 1
-  },
-  {
-   "fieldname": "tt_status",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "TT Status",
-   "options": "\nOne\nTwo\nBooster"
   },
   {
    "fieldname": "column_break_tczd",
@@ -394,7 +386,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-10-22 21:19:36.582197",
+ "modified": "2026-10-23 10:55:05.172179",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

@@ -25,6 +25,7 @@
   "diagnosis",
   "symptoms",
   "past_medical_history",
+  "present_medications",
   "column_break_nobp",
   "h5personal_historyh",
   "smoking",
@@ -34,7 +35,6 @@
   "relevant_investigations_date",
   "relevant_investigations_with_date",
   "relevant_investigations_description",
-  "present_medications",
   "concerns_section",
   "primary_concerns",
   "concerns_column_break",
@@ -112,8 +112,8 @@
   "section_break_kxpw",
   "assesment_summary",
   "does_the_patient_need",
-  "column_break_cuoj",
   "please_explain_why",
+  "column_break_cuoj",
   "anticipated_frequency_of_visit",
   "select_followup",
   "assessor_information_section",
@@ -754,7 +754,7 @@
   {
    "fieldname": "consent_text",
    "fieldtype": "HTML",
-   "options": "<div style=\"line-height:1.5;\"><p><strong>I give consent</strong> for Palliative Care Landour Community Hospital (LCH), Mussoorie, to provide medical, therapeutic and psychosocial support services to my relative / myself from this day forward. I understand that if I have any questions regarding services, LCH or my relative that I am allowed and encouraged to ask them. I understand that I am able to withdraw consent at any time without any penalties.</p><p>I agree to have my image taken by the photographer/videographer who represents Palliative Care LCH. I understand that Palliative Care LCH might use my image in electronic or print format to help the project in different ways including: to promote organization activities; to illustrate reports about the training I am participating in; to publicise future training programmes (on printed materials like books, reports and leaflets, and videos or internet).</p><hr><p lang=\"hi\">मैं इस दिन से अपने रिश्तेदार/स्वयं को चिकित्सा, उपचारात्मक और मनोवैज्ञानिक सहायता सेवाएं प्रदान करने के लिए पैलिएटिव केयर लंढौर सामुदायिक अस्पताल (LCH), मसूरी को सहमति देता हूं। मैं समझता हूं कि यदि मेरे पास सेवाओं, LCH या मेरे रिश्तेदार के बारे में कोई प्रश्न है तो मुझे उनसे पूछने की अनुमति है और प्रोत्साहित किया जाता है। मैं समझता हूं कि मैं बिना किसी दंड के किसी भी समय सहमति वापस लेने में सक्षम हूं।</p><p lang=\"hi\">मैं अपनी छवि को फोटोग्राफर/वीडियोग्राफर द्वारा लेने के लिए सहमत हूं जो पैलिएटिव केयर LCH का प्रतिनिधित्व करता है। मैं समझता हूं कि पैलिएटिव केयर LCH परियोजना में विभिन्न तरीकों से मदद करने के लिए इलेक्ट्रॉनिक या प्रिंट प्रारूप में मेरी छवि का उपयोग कर सकता है, जिसमें शामिल है: संगठन की गतिविधियों को बढ़ावा देना; जिस प्रशिक्षण में मैं भाग ले रहा हूं उसके बारे में रिपोर्ट को चित्रित करना; भविष्य के प्रशिक्षण कार्यक्रमों (किताबों, रिपोर्टों और पत्रक, और वीडियो या इंटरनेट जैसी मुद्रित सामग्री पर) का प्रचार करना।</p></div>"
+   "options": "<div style=\"line-height:1.5;\"><p><strong>I give consent</strong> for Palliative Care Landour Community Hospital (LCH), Mussoorie, to provide medical, therapeutic and psychosocial support services to my relative / myself from this day forward. I understand that if I have any questions regarding services, LCH or my relative that I am allowed and encouraged to ask them. I understand that I am able to withdraw consent at any time without any penalties.</p><p>I agree to have my image taken by the photographer/videographer who represents Palliative Care LCH. I understand that Palliative Care LCH might use my image in electronic or print format to help the project in different ways including: to promote organization activities; to illustrate reports about the training I am participating in; to publicise future training programmes (on printed materials like books, reports and leaflets, and videos or internet).</p><hr><p lang=\"hi\">\u092e\u0948\u0902 \u0907\u0938 \u0926\u093f\u0928 \u0938\u0947 \u0905\u092a\u0928\u0947 \u0930\u093f\u0936\u094d\u0924\u0947\u0926\u093e\u0930/\u0938\u094d\u0935\u092f\u0902 \u0915\u094b \u091a\u093f\u0915\u093f\u0924\u094d\u0938\u093e, \u0909\u092a\u091a\u093e\u0930\u093e\u0924\u094d\u092e\u0915 \u0914\u0930 \u092e\u0928\u094b\u0935\u0948\u091c\u094d\u091e\u093e\u0928\u093f\u0915 \u0938\u0939\u093e\u092f\u0924\u093e \u0938\u0947\u0935\u093e\u090f\u0902 \u092a\u094d\u0930\u0926\u093e\u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u092a\u0948\u0932\u093f\u090f\u091f\u093f\u0935 \u0915\u0947\u092f\u0930 \u0932\u0902\u0922\u094c\u0930 \u0938\u093e\u092e\u0941\u0926\u093e\u092f\u093f\u0915 \u0905\u0938\u094d\u092a\u0924\u093e\u0932 (LCH), \u092e\u0938\u0942\u0930\u0940 \u0915\u094b \u0938\u0939\u092e\u0924\u093f \u0926\u0947\u0924\u093e \u0939\u0942\u0902\u0964 \u092e\u0948\u0902 \u0938\u092e\u091d\u0924\u093e \u0939\u0942\u0902 \u0915\u093f \u092f\u0926\u093f \u092e\u0947\u0930\u0947 \u092a\u093e\u0938 \u0938\u0947\u0935\u093e\u0913\u0902, LCH \u092f\u093e \u092e\u0947\u0930\u0947 \u0930\u093f\u0936\u094d\u0924\u0947\u0926\u093e\u0930 \u0915\u0947 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u0915\u094b\u0908 \u092a\u094d\u0930\u0936\u094d\u0928 \u0939\u0948 \u0924\u094b \u092e\u0941\u091d\u0947 \u0909\u0928\u0938\u0947 \u092a\u0942\u091b\u0928\u0947 \u0915\u0940 \u0905\u0928\u0941\u092e\u0924\u093f \u0939\u0948 \u0914\u0930 \u092a\u094d\u0930\u094b\u0924\u094d\u0938\u093e\u0939\u093f\u0924 \u0915\u093f\u092f\u093e \u091c\u093e\u0924\u093e \u0939\u0948\u0964 \u092e\u0948\u0902 \u0938\u092e\u091d\u0924\u093e \u0939\u0942\u0902 \u0915\u093f \u092e\u0948\u0902 \u092c\u093f\u0928\u093e \u0915\u093f\u0938\u0940 \u0926\u0902\u0921 \u0915\u0947 \u0915\u093f\u0938\u0940 \u092d\u0940 \u0938\u092e\u092f \u0938\u0939\u092e\u0924\u093f \u0935\u093e\u092a\u0938 \u0932\u0947\u0928\u0947 \u092e\u0947\u0902 \u0938\u0915\u094d\u0937\u092e \u0939\u0942\u0902\u0964</p><p lang=\"hi\">\u092e\u0948\u0902 \u0905\u092a\u0928\u0940 \u091b\u0935\u093f \u0915\u094b \u092b\u094b\u091f\u094b\u0917\u094d\u0930\u093e\u092b\u0930/\u0935\u0940\u0921\u093f\u092f\u094b\u0917\u094d\u0930\u093e\u092b\u0930 \u0926\u094d\u0935\u093e\u0930\u093e \u0932\u0947\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0938\u0939\u092e\u0924 \u0939\u0942\u0902 \u091c\u094b \u092a\u0948\u0932\u093f\u090f\u091f\u093f\u0935 \u0915\u0947\u092f\u0930 LCH \u0915\u093e \u092a\u094d\u0930\u0924\u093f\u0928\u093f\u0927\u093f\u0924\u094d\u0935 \u0915\u0930\u0924\u093e \u0939\u0948\u0964 \u092e\u0948\u0902 \u0938\u092e\u091d\u0924\u093e \u0939\u0942\u0902 \u0915\u093f \u092a\u0948\u0932\u093f\u090f\u091f\u093f\u0935 \u0915\u0947\u092f\u0930 LCH \u092a\u0930\u093f\u092f\u094b\u091c\u0928\u093e \u092e\u0947\u0902 \u0935\u093f\u092d\u093f\u0928\u094d\u0928 \u0924\u0930\u0940\u0915\u094b\u0902 \u0938\u0947 \u092e\u0926\u0926 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0907\u0932\u0947\u0915\u094d\u091f\u094d\u0930\u0949\u0928\u093f\u0915 \u092f\u093e \u092a\u094d\u0930\u093f\u0902\u091f \u092a\u094d\u0930\u093e\u0930\u0942\u092a \u092e\u0947\u0902 \u092e\u0947\u0930\u0940 \u091b\u0935\u093f \u0915\u093e \u0909\u092a\u092f\u094b\u0917 \u0915\u0930 \u0938\u0915\u0924\u093e \u0939\u0948, \u091c\u093f\u0938\u092e\u0947\u0902 \u0936\u093e\u092e\u093f\u0932 \u0939\u0948: \u0938\u0902\u0917\u0920\u0928 \u0915\u0940 \u0917\u0924\u093f\u0935\u093f\u0927\u093f\u092f\u094b\u0902 \u0915\u094b \u092c\u0922\u093c\u093e\u0935\u093e \u0926\u0947\u0928\u093e; \u091c\u093f\u0938 \u092a\u094d\u0930\u0936\u093f\u0915\u094d\u0937\u0923 \u092e\u0947\u0902 \u092e\u0948\u0902 \u092d\u093e\u0917 \u0932\u0947 \u0930\u0939\u093e \u0939\u0942\u0902 \u0909\u0938\u0915\u0947 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0915\u094b \u091a\u093f\u0924\u094d\u0930\u093f\u0924 \u0915\u0930\u0928\u093e; \u092d\u0935\u093f\u0937\u094d\u092f \u0915\u0947 \u092a\u094d\u0930\u0936\u093f\u0915\u094d\u0937\u0923 \u0915\u093e\u0930\u094d\u092f\u0915\u094d\u0930\u092e\u094b\u0902 (\u0915\u093f\u0924\u093e\u092c\u094b\u0902, \u0930\u093f\u092a\u094b\u0930\u094d\u091f\u094b\u0902 \u0914\u0930 \u092a\u0924\u094d\u0930\u0915, \u0914\u0930 \u0935\u0940\u0921\u093f\u092f\u094b \u092f\u093e \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u091c\u0948\u0938\u0940 \u092e\u0941\u0926\u094d\u0930\u093f\u0924 \u0938\u093e\u092e\u0917\u094d\u0930\u0940 \u092a\u0930) \u0915\u093e \u092a\u094d\u0930\u091a\u093e\u0930 \u0915\u0930\u0928\u093e\u0964</p></div>"
   },
   {
    "description": "Name of the person consenting - the patient themselves, or a relative on their behalf.",
@@ -806,7 +806,7 @@
    "link_fieldname": "pcid"
   }
  ],
- "modified": "2026-10-22 22:11:19.908915",
+ "modified": "2026-10-23 12:33:43.917648",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",

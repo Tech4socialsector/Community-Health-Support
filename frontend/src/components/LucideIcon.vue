@@ -10,7 +10,14 @@
   and doesn't opt out of inheritAttrs, so Vue already merges a caller's
   class (h-4 w-4, etc) onto this <svg> automatically; binding $attrs here
   too just applied the same class a second time. -->
-  <svg v-if="ready" viewBox="0 0 24 24" class="lucide-icon">
+  <span
+    v-if="customImageSrc"
+    class="lucide-icon-image"
+    :style="{ maskImage: `url(${customImageSrc})`, webkitMaskImage: `url(${customImageSrc})` }"
+    role="img"
+    :aria-label="name"
+  />
+  <svg v-else-if="ready" viewBox="0 0 24 24" class="lucide-icon">
     <use :href="`#${resolvedName}`" />
   </svg>
 </template>
@@ -19,19 +26,33 @@
 import { computed, onMounted, ref } from 'vue'
 import { ensureLucideSpriteLoaded, hasLucideSymbol } from '@/data/lucideSprite'
 import { toLucideIconName } from '@/data/legacyIconNames'
+import pregnantWomanIcon from '@/assets/icons/pregnant-woman.png'
 
 const props = defineProps({
   name: { type: String, required: true },
 })
+
+// A handful of icons this app needs that Lucide's set simply doesn't have
+// (no pregnant-woman icon at all) - a hand-picked image instead of a vector
+// symbol. Rendered as a CSS mask (background-color: currentColor, clipped
+// to the image's own alpha shape) rather than a plain <img>, so it's
+// tinted by the same text-* colour classes as the vector icons - a plain
+// <img> would always just render the source PNG's own black pixels.
+const CUSTOM_IMAGE_ICONS = {
+  'pregnant-woman': pregnantWomanIcon,
+}
+const customImageSrc = computed(() => CUSTOM_IMAGE_ICONS[props.name] || null)
 
 // ensureLucideSpriteLoaded() fetches the sprite once and injects its
 // <symbol>s directly into the current document (see lucideSprite.js), so
 // <use href="#name"> - a same-document fragment reference - resolves
 // without a second network request or cross-origin <use> restrictions.
 // Gating render on that injection (rather than referencing eagerly) avoids
-// a flash of nothing-rendered before the symbols exist in the DOM.
+// a flash of nothing-rendered before the symbols exist in the DOM. Skipped
+// entirely for a custom image icon - a plain <img src> needs none of this.
 const ready = ref(false)
 onMounted(async () => {
+  if (customImageSrc.value) return
   await ensureLucideSpriteLoaded()
   ready.value = true
 })
@@ -62,5 +83,15 @@ no matter what size was actually requested. */
   stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+.lucide-icon-image {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 </style>

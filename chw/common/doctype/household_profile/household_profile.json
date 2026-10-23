@@ -15,19 +15,19 @@
   "household_head_name",
   "total_family_members",
   "phone_no",
-  "house",
-  "caste",
+  "status",
   "others_caste",
-  "type_of_housing",
+  "caste",
   "column_break_kkvt",
+  "house",
+  "type_of_housing",
   "electricity",
   "farming",
   "drinkingwater",
   "toilet",
   "cattles",
-  "health_worker_name",
-  "status",
-  "address"
+  "address",
+  "health_worker_name"
  ],
  "fields": [
   {
@@ -175,7 +175,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-22 21:16:35.002525",
+ "modified": "2026-10-23 10:24:31.597101",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

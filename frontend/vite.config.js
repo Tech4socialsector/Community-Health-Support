@@ -68,7 +68,7 @@ export default defineConfig({
         // precached - API responses are deliberately never cached here, so
         // a CHW never sees stale patient/visit data while offline; they'll
         // just get a clear network-error state from the app itself instead.
-        globPatterns: ['**/*.{js,css,png,svg,ico}'],
+        globPatterns: ['**/*.{js,css,png,svg,ico,woff2}'],
         // navigateFallback: null, not just omitted - vite-plugin-pwa
         // defaults this to 'index.html' when unset, and Workbox's
         // navigateFallback only works against an entry that's actually in

@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Inter (the same variable font frappe-ui itself ships), self-hosted so it
+   works offline like the rest of this PWA - a CDN font would just be a
+   missing font (and a blocked request) out in the field with no signal.
+   One file covers every weight 100-900, so every font-bold/font-semibold
+   etc. already used across the app renders in Inter's own matching weight
+   instead of the browser fattening/thinning a single static weight. Applied
+   via tailwind.config.js's fontFamily.sans, so every element gets it with
+   no per-component change. */
+@font-face {
+  font-family: 'InterVar';
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+  src: url('./assets/fonts/Inter.var.woff2') format('woff2-variations'), url('./assets/fonts/Inter.var.woff2') format('woff2');
+}
+
+/* Smoother glyph edges for a font this light-weight at small sizes -
+   standard pairing for Inter, used on its own marketing site. */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 /* Brand frappe-ui's own "strong" surfaces - solid buttons (Save, New,
    Log in), switches, tab indicators, tooltips, the calendar's today - in
    the logo's navy instead of near-black, so every built-in component
@@ -62,6 +86,20 @@
 }
 [data-reka-popper-content-wrapper] {
   z-index: 100 !important;
+}
+
+/* Field labels (frappe-ui's FormLabel, under every text/select/link/date
+   field across every doctype form) render at a thin, pale gray by default -
+   legible on a design system's own style guide, not on a phone in the
+   field. Bolder and a touch darker app-wide, closer to how Desk's own form
+   labels read. Scoped to FormLabel's own signature classes so it doesn't
+   touch unrelated labels (Checkbox's own label is already bold and dark). */
+label.text-ink-gray-5 {
+  font-weight: 600;
+  color: theme('colors.gray.700');
+}
+.dark label.text-ink-gray-5 {
+  color: theme('colors.gray.300');
 }
 
 /* Calmer page canvas behind the white cards. */

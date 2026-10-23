@@ -32,12 +32,12 @@ const STAT_CARD_BASE =
 // colours for the Work Orders status cards.
 const STAT_TONES = {
   white: 'bg-white ring-gray-200 dark:bg-gray-900 dark:ring-gray-800',
-  navy: 'border-t-[3px] border-t-navy-600 bg-white ring-gray-200 dark:border-t-navy-400 dark:bg-gray-900 dark:ring-gray-800',
-  forest: 'border-t-[3px] border-t-forest-600 bg-white ring-gray-200 dark:border-t-forest-400 dark:bg-gray-900 dark:ring-gray-800',
-  blue: 'border-t-[3px] border-t-blue-500 bg-white ring-gray-200 dark:border-t-blue-400 dark:bg-gray-900 dark:ring-gray-800',
-  amber: 'border-t-[3px] border-t-amber-500 bg-white ring-gray-200 dark:border-t-amber-400 dark:bg-gray-900 dark:ring-gray-800',
-  red: 'border-t-[3px] border-t-red-500 bg-white ring-gray-200 dark:border-t-red-400 dark:bg-gray-900 dark:ring-gray-800',
-  green: 'border-t-[3px] border-t-green-600 bg-white ring-gray-200 dark:border-t-green-400 dark:bg-gray-900 dark:ring-gray-800',
+  navy: 'border-2 border-navy-500 bg-white ring-gray-200 dark:border-navy-400 dark:bg-gray-900 dark:ring-gray-800',
+  forest: 'border-2 border-forest-500 bg-white ring-gray-200 dark:border-forest-400 dark:bg-gray-900 dark:ring-gray-800',
+  blue: 'border-2 border-blue-500 bg-white ring-gray-200 dark:border-blue-400 dark:bg-gray-900 dark:ring-gray-800',
+  amber: 'border-2 border-amber-500 bg-white ring-gray-200 dark:border-amber-400 dark:bg-gray-900 dark:ring-gray-800',
+  red: 'border-2 border-red-500 bg-white ring-gray-200 dark:border-red-400 dark:bg-gray-900 dark:ring-gray-800',
+  green: 'border-2 border-green-600 bg-white ring-gray-200 dark:border-green-400 dark:bg-gray-900 dark:ring-gray-800',
 }
 
 const STAT_COUNT_TONES = {
@@ -52,7 +52,8 @@ const STAT_COUNT_TONES = {
 // Plain white card - loading placeholders.
 export const STAT_CARD = `${STAT_CARD_BASE} ${STAT_TONES.white}`
 
-const toneAt = (index) => (index % 2 === 0 ? 'navy' : 'forest')
+// One consistent brand color for every card, not alternating navy/forest.
+const toneAt = () => 'forest'
 
 // A card in a named tone (Work Orders statuses: 'blue', 'red', ...).
 export function statCardTone(tone) {
@@ -84,10 +85,17 @@ export function sectionHeadAt(index) {
 }
 
 export const STAT_GRID = 'grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-4'
-export const STAT_GRID_4 = 'grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4'
+// Flex, not grid: on an incomplete last row (e.g. 11 cards = 4+4+3), grid
+// would leave the 4th slot an empty gap - flex-wrap lets the row's actual
+// cards (flex-grow, see statCardAt's callers) share that leftover width
+// instead, same row count as before everywhere a full row still fits.
+export const STAT_GRID_4 = 'flex flex-wrap gap-3 sm:gap-4'
+// Paired with STAT_GRID_4 on each card: 2-up on a phone, 4-up from lg, and
+// grow to fill a short last row either way.
+export const STAT_CARD_BASIS_4 = 'grow basis-[calc(50%-0.375rem)] sm:basis-[calc(50%-0.5rem)] lg:basis-[calc(25%-0.75rem)]'
 
-export const STAT_LABEL = 'line-clamp-2 text-[13px] font-medium leading-snug text-gray-600 dark:text-gray-300 sm:text-sm'
-const STAT_COUNT_BASE = 'block text-[1.625rem] font-bold leading-none tabular-nums sm:text-[2rem]'
+export const STAT_LABEL = 'line-clamp-2 text-base font-bold leading-snug text-navy-900 dark:text-gray-100 sm:text-lg'
+const STAT_COUNT_BASE = 'block text-xl font-bold leading-none tabular-nums sm:text-[1.75rem]'
 export const STAT_COUNT = `${STAT_COUNT_BASE} text-navy-900 dark:text-gray-100`
 export const STAT_CTA = 'inline-flex items-center gap-1 text-[13px] font-semibold text-forest-700 dark:text-forest-300 sm:text-sm'
 
@@ -108,15 +116,21 @@ const FOCUS = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-forest
 
 export const BTN_PRIMARY = `inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-forest-700 px-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-forest-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-forest-600 dark:hover:bg-forest-500 ${FOCUS}`
 export const BTN_SECONDARY = `inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-white px-3.5 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-gray-800 ${FOCUS}`
+// A tinted variant of BTN_SECONDARY - the list view's own toolbar (Refresh,
+// Export, Filter, Sort, Columns) and its quick-filter boxes, so that row
+// reads as one organized, colored strip instead of plain white buttons.
+// Applied with BTN_SECONDARY (after it, so these colors win) rather than
+// replacing it, to keep the same shape/size/focus-ring rules.
+export const BTN_TOOLBAR_TONE = '!bg-forest-50 !text-forest-800 !ring-forest-200 hover:!bg-forest-100 dark:!bg-forest-900/30 dark:!text-forest-200 dark:!ring-forest-800 dark:hover:!bg-forest-900/50'
 // The square "+ New" on cards - above the card's stretched link (z-10).
 export const BTN_ADD = `relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-forest-700 text-white shadow-sm transition hover:bg-forest-800 dark:bg-forest-600 dark:hover:bg-forest-500 ${FOCUS}`
 
 export const TABLE_WRAP = 'overflow-auto rounded-xl ring-1 ring-gray-200 dark:ring-gray-800'
 export const TABLE = 'w-full text-left text-sm'
-export const THEAD = 'sticky top-0 z-10 bg-gray-50 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+export const THEAD = 'sticky top-0 z-10 bg-navy-100 text-[11px] font-semibold uppercase tracking-wider text-navy-900 dark:bg-navy-900 dark:text-navy-100'
 export const TH = 'whitespace-nowrap px-4 py-3'
 export const TBODY = 'divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-900'
-export const TR = 'cursor-pointer transition hover:bg-forest-50/60 focus:bg-forest-50/60 focus:outline-none dark:hover:bg-gray-800/60 dark:focus:bg-gray-800/60'
+export const TR = 'group cursor-pointer transition hover:bg-forest-100 focus:bg-forest-100 focus:outline-none dark:hover:bg-forest-900/40 dark:focus:bg-forest-900/40'
 const TD_BASE = 'whitespace-nowrap px-4 py-3'
 export const TD = `${TD_BASE} text-gray-700 dark:text-gray-300`
 // The row's identifying column (ID / patient) - its own variant rather than
@@ -129,7 +143,10 @@ export const TD_STRONG = `${TD_BASE} font-semibold text-navy-900 dark:text-gray-
 export const LIST_TABLE_WRAP = 'overflow-auto border-y border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900'
 export const LIST_TH = 'whitespace-nowrap px-3 py-2.5'
 export const LIST_TD = 'whitespace-nowrap px-3 py-2.5 text-gray-700 dark:text-gray-300'
-export const LIST_TD_STRONG = 'whitespace-nowrap px-3 py-2.5 font-semibold text-navy-900 dark:text-gray-100'
+// The ID cell - styled as the link it is (it's what actually opens the
+// record), in the app's own link colour, underlined on hover/focus so it
+// doesn't read as just bolder plain text.
+export const LIST_TD_STRONG = 'whitespace-nowrap px-3 py-2.5 font-semibold text-forest-700 dark:text-forest-300'
 
 // The phone version of a table row: a stacked card with a light brand tint
 // and a coloured stripe down its left edge, alternating navy / forest (the

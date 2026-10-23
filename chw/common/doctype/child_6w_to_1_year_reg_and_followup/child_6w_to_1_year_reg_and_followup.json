@@ -14,8 +14,8 @@
   "gram_panchayat",
   "sub_cemtre",
   "age",
-  "occupation",
   "column_break_vl1",
+  "occupation",
   "health_worker_name",
   "date_of_visit",
   "time_from",
@@ -26,8 +26,8 @@
   "husband_section",
   "mothers_name",
   "husbands_name",
-  "husbands_occupation",
   "column_break_hs1",
+  "husbands_occupation",
   "husbands_phone_number",
   "history_section",
   "pmh_diabetes",
@@ -59,9 +59,9 @@
   "birth_weight",
   "birth_length",
   "labor_birth_complications",
-  "column_break_bd2",
   "comp_blood_transfusion",
   "comp_meconium",
+  "column_break_bd2",
   "comp_difficult_labor_delivery",
   "comp_fetal_distress",
   "comp_infection",
@@ -155,7 +155,6 @@
    "label": "Time To"
   },
   {
-   "description": "Calculated automatically from the Date of Visit (registration date) and the Child 6w-1y Visit Interval Master. Not editable by hand.",
    "fieldname": "next_visit_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -165,7 +164,6 @@
   },
   {
    "bold": 1,
-   "description": "High Risk only: visit early, within this window. Blank for Normal. Reflects the most recently completed visit's Baby Condition - not a sticky flag, so it clears once a later visit comes back Normal.",
    "fieldname": "child_risk_alert",
    "fieldtype": "Data",
    "label": "Risk Alert",
@@ -298,7 +296,6 @@
    "label": "Birth Details"
   },
   {
-   "description": "Optional - links to a Birth Registration record and auto-fills Date of Birth below. If left blank, the visit schedule uses Delivery Date (to the right) instead.",
    "fieldname": "birth_registration_id",
    "fieldtype": "Link",
    "label": "Birth Registration ID",
@@ -420,7 +417,7 @@
    "collapsible": 1,
    "fieldname": "followup_section",
    "fieldtype": "Section Break",
-   "label": "Followup Visits (Condition, Danger Signs, Education, Referrals)"
+   "label": "Followup Visits"
   },
   {
    "fieldname": "followup_visits",
@@ -464,7 +461,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-20 15:34:28.539023",
+ "modified": "2026-10-23 14:47:20.697287",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Reg and Followup",

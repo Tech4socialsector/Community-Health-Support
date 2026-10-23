@@ -14,9 +14,12 @@
 
     <ErrorMessage v-if="error" :message="error" />
 
-    <div v-else class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <!-- Flex, not grid: an odd card count (e.g. 5 = 2+2+1) would otherwise
+    leave a blank gap beside the last row's lone card - flex-wrap lets it
+    grow to fill that row's full width instead. -->
+    <div v-else class="flex flex-wrap gap-4">
       <template v-if="loading && !indicators.length">
-        <div v-for="i in 4" :key="i" :class="[ui.CARD, 'space-y-3 p-4 sm:p-5']">
+        <div v-for="i in 4" :key="i" :class="[ui.CARD, 'grow basis-full space-y-3 p-4 sm:p-5 lg:basis-[calc(50%-0.5rem)]']">
           <Skeleton width="55%" height="1rem" />
           <Skeleton width="80%" height="0.75rem" />
           <div class="flex items-center gap-5">
@@ -32,7 +35,12 @@
         v-for="(item, index) in indicators"
         v-else
         :key="item.key"
-        :class="[ui.statCardTone(index % 2 ? 'green' : 'navy'), '!cursor-default !justify-start !gap-0 !p-4 hover:!translate-y-0 hover:!shadow-sm sm:!p-5', { 'opacity-60': loading }]"
+        :class="[
+          ui.statCardTone(index % 2 ? 'green' : 'navy'),
+          'grow basis-full !cursor-default !justify-start !gap-0 !p-4 hover:!translate-y-0 hover:!shadow-sm sm:!p-5 lg:basis-[calc(50%-0.5rem)]',
+          index % 2 ? 'hover:!bg-green-50 dark:hover:!bg-green-900/20' : 'hover:!bg-navy-50 dark:hover:!bg-navy-900/20',
+          { 'opacity-60': loading },
+        ]"
       >
         <div class="flex w-full items-start justify-between gap-3">
           <div class="min-w-0">

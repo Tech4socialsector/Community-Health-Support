@@ -61,7 +61,11 @@
             separate actions - nesting the "+ New" link inside an outer link
             is invalid HTML. The stretched ::after on the title link makes
             the whole card clickable anyway; "+ New" sits above it (z-10). -->
-            <div v-for="(item, index) in mod.doctypes" :key="item.route" :class="ui.statCardAt(index)">
+            <div
+              v-for="(item, index) in mod.doctypes"
+              :key="item.route"
+              :class="[ui.statCardAt(index), 'hover:!bg-forest-100 dark:hover:!bg-forest-800/40']"
+            >
               <router-link
                 :to="{ name: 'DoctypeList', params: { doctypeRoute: item.route } }"
                 :title="t(item.displayLabel)"

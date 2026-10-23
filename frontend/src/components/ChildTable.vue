@@ -86,40 +86,49 @@
     <Dialog v-model="showRowEditor" :options="{ title: t('{0} - Row {1}', [t(field.label), (editingIdx ?? 0) + 1]), size: '3xl' }">
       <template #body-content>
         <div v-if="editingRow" class="space-y-5">
-          <div v-for="sec in editorSections" :key="sec.key">
+          <!-- Each Section Break splits off as its own banded block (same
+          colored header bars as the main form and RecordView, alternating
+          the brand's two colors) - no icon badge here, just the band and a
+          bolder, colored label, so a row with several sections reads as
+          clearly separated groups instead of one long stack. -->
+          <div
+            v-for="(sec, sectionIndex) in editorSections"
+            :key="sec.key"
+            :class="sec.label ? 'overflow-hidden rounded-lg ring-1 ring-gray-200 dark:ring-gray-800' : ''"
+          >
             <button
               v-if="sec.label && sec.collapsible"
               type="button"
-              class="mb-2 flex w-full items-center justify-between gap-2 text-left"
+              class="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left"
+              :class="sectionHeadAt(sectionIndex).bar"
               :aria-expanded="openEditorSections.has(sec.key)"
               @click="toggleEditorSection(sec.key)"
             >
-              <h3 class="text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h3>
-              <LucideIcon :name="openEditorSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" class="h-3.5 w-3.5 text-gray-400" />
+              <h3 class="text-sm font-bold" :class="sectionHeadAt(sectionIndex).text">{{ t(sec.label) }}</h3>
+              <LucideIcon :name="openEditorSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" class="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
             </button>
-            <h3 v-else-if="sec.label" class="mb-2 text-sm font-semibold text-navy-900 dark:text-gray-100">
+            <h3
+              v-else-if="sec.label"
+              class="px-3 py-2.5 text-sm font-bold"
+              :class="[sectionHeadAt(sectionIndex).bar, sectionHeadAt(sectionIndex).text]"
+            >
               {{ t(sec.label) }}
             </h3>
 
-            <div v-show="!sec.collapsible || openEditorSections.has(sec.key)" class="space-y-4">
+            <div v-show="!sec.collapsible || openEditorSections.has(sec.key)" class="space-y-4" :class="sec.label ? 'p-3' : ''">
               <template v-for="block in sec.blocks" :key="block.key || block">
                 <!-- A Heading or HTML item just sits in its own column's
                 stack, same as a further-down heading (e.g. "NT Scan" under
                 "Dating Ultrasounds") staying paired with whatever's
-                alongside it in the next column. -->
-                <!-- Same as the main form: Desk's columns and order kept,
-                rows lined up across both sides. -->
+                alongside it in the next column. Same as the main form: each
+                column stacks its own items independently, so a tall field
+                (a textarea) only makes its own column taller. -->
                 <div
                   class="grid grid-cols-1 gap-x-4 gap-y-4 sm:[grid-template-columns:repeat(var(--row-cols),minmax(0,1fr))]"
                   :style="{ '--row-cols': block.columns.length }"
                 >
-                  <template v-for="(col, ci) in block.columns" :key="ci">
-                    <div
-                      v-for="item in col"
-                      :key="item.key"
-                      class="min-w-0 sm:[grid-column:var(--cell-col)] sm:[grid-row:var(--cell-row)]"
-                      :style="cellStyle(block, item)"
-                    >
+                  <div v-for="(col, ci) in block.columns" :key="ci" class="min-w-0 space-y-4">
+                    <template v-for="item in col" :key="item.key">
                       <h4
                         v-if="item.kind === 'heading'"
                         class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
@@ -158,8 +167,8 @@
                         :link-query="item.field.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(item.field.fieldname, editingRow) : null"
                         v-model="editingRow[item.field.fieldname]"
                       />
-                    </div>
-                  </template>
+                    </template>
+                  </div>
                 </div>
               </template>
             </div>
@@ -182,21 +191,9 @@ import DynamicField from '@/components/DynamicField.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { useMeta, useFormFields } from '@/data/useMeta'
 import { formatFieldValue, isEmptyValue } from '@/data/recordFormat'
-import { rowStatusPillClass } from '@/data/ui'
+import { rowStatusPillClass, sectionHeadAt } from '@/data/ui'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
-import { buildFormSections, placeColumnItems } from '@/data/formSections'
-
-// Grid position of one item in a columns block (see placeColumnItems).
-const blockPlacement = new WeakMap()
-function cellStyle(block, item) {
-  let place = blockPlacement.get(block)
-  if (!place) {
-    place = placeColumnItems(block.columns)
-    blockPlacement.set(block, place)
-  }
-  const p = place.get(item.key)
-  return p ? { '--cell-col': `${p.col} / span ${p.span}`, '--cell-row': p.row } : {}
-}
+import { buildFormSections } from '@/data/formSections'
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
 import { t } from '@/data/i18n'

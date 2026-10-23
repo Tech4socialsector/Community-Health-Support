@@ -12,9 +12,9 @@
   "village",
   "gram_panchayat",
   "sub_centre",
+  "column_break_gvxz",
   "father_husband_name",
   "name_of_child",
-  "column_break_gvxz",
   "date_of_delivery",
   "phone_number",
   "health_worker_name",
@@ -41,7 +41,6 @@
    "options": "Birth Registration"
   },
   {
-   "description": "Best-matched from her Pregnancy Registration (closest estimated due date to actual delivery date) at PNC creation time. Read-only reference back to her ANC care.",
    "fieldname": "anc_followup_id",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -134,7 +133,6 @@
    "options": "Baby PNC Followup Child"
   },
   {
-   "description": "Calculated automatically from the delivery date and the PNC Visit Interval Master's visit schedule. Not editable by hand.",
    "fieldname": "next_pnc_visit_date",
    "fieldtype": "Date",
    "label": "Visit due Date",
@@ -149,7 +147,6 @@
   },
   {
    "bold": 1,
-   "description": "High Risk only: visit her early, within this window. Blank for Normal patients.",
    "fieldname": "pnc_visit_risk_alert",
    "fieldtype": "Data",
    "hidden": 1,
@@ -157,7 +154,6 @@
    "read_only": 1
   },
   {
-   "description": "Set automatically from a Mother followup row's Patient Condition = Risk. Not manually editable - internal, drives the Risk Alert, the urgent follow-up chain, and My Work's High Risk view.",
    "fieldname": "high_risk",
    "fieldtype": "Select",
    "hidden": 1,
@@ -207,7 +203,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-20 14:27:08.436959",
+ "modified": "2026-10-23 12:00:09.451143",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",

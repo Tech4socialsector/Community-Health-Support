@@ -19,11 +19,11 @@
         :tabindex="readOnly ? -1 : undefined"
         :placeholder="readOnly ? '' : t('Search {0}…', [t(field.options)])"
         autocomplete="off"
-        class="h-7 w-full rounded border-0 px-2 pr-8 text-base focus:outline-none dark:text-gray-100"
+        class="h-7 w-full rounded border px-2 pr-8 text-base focus:outline-none dark:text-gray-100"
         :class="
           readOnly
-            ? 'cursor-default bg-gray-50 text-gray-700 dark:bg-gray-800/60'
-            : 'bg-gray-100 text-gray-900 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-forest-400 dark:bg-gray-800'
+            ? 'cursor-default border-gray-100 bg-gray-50 text-gray-700 dark:border-gray-800 dark:bg-gray-800/60'
+            : 'border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 hover:border-gray-300 focus:ring-2 focus:ring-forest-400 dark:border-gray-700 dark:bg-gray-900'
         "
         role="combobox"
         :aria-expanded="open"

@@ -157,20 +157,6 @@ function groupConsecutiveCheckboxes(column) {
   return result
 }
 
-// Where each item of a columns block sits on the desktop grid: every field
-// stays in the column Desk put it in, in Desk's order - so moving a field or
-// a Column Break in Desk (DocType or Customize Form) moves it here too - and
-// the Nth item of each column sits on row N so the two sides line up.
-//
-// Returns a Map: item.key -> { col, row, span }.
-export function placeColumnItems(columns) {
-  const place = new Map()
-  columns.forEach((col, ci) => {
-    col.forEach((item, ri) => place.set(item.key, { col: ci + 1, row: ri + 1, span: 1 }))
-  })
-  return place
-}
-
 // Whether a section contains a given fieldname, in any of its columns or as
 // a table/html/heading block's own key.
 export function sectionHasField(sec, fieldname) {

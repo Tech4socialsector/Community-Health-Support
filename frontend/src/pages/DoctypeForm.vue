@@ -20,25 +20,25 @@
         >
           <LucideIcon name="arrow-left" class="h-4 w-4" />
         </button>
+        <!-- The doctype's own icon (no tile/background behind it - just the
+        glyph), title on top (the form this is), the record's own ID
+        underneath - same hierarchy as the read-only RecordView page's
+        header. -->
+        <LucideIcon :name="moduleItem?.icon || 'file-text'" class="h-10 w-10 flex-shrink-0 text-forest-700 dark:text-forest-300" />
         <div class="min-w-0 flex-1">
-          <p :class="[ui.SECTION_LABEL, 'truncate']">{{ t(formLabel) }}</p>
-          <div class="flex min-w-0 items-center gap-2">
-            <h1 class="truncate text-base font-semibold text-navy-900 dark:text-gray-100 sm:text-lg">
-              {{ isNew ? t('New {0}', [t(formLabel)]) : isTempName(name) ? t('New {0}', [t(formLabel)]) : name }}
-            </h1>
-            <!-- Desk's "Not Saved": stays until a save actually succeeds, so
-            an edited form is never mistaken for a saved one. -->
-            <span v-if="showNotSaved" :class="[ui.PILL, ui.TONE.amber, 'flex-shrink-0 !px-2 !py-0 text-[11px]']">{{ t('Not saved') }}</span>
-            <!-- Saved, but only on this phone so far (offline mode). -->
-            <span
-              v-else-if="values.__offline"
-              :class="[ui.PILL, ui.TONE.blue, 'flex-shrink-0 gap-1 !px-2 !py-0 text-[11px]']"
-            >
-              <LucideIcon name="cloud-upload" class="h-3 w-3" />
-              {{ t('Not synced') }}
-            </span>
-          </div>
+          <h1 class="truncate text-base font-bold text-navy-900 dark:text-gray-100 sm:text-lg">{{ t(formLabel) }}</h1>
+          <p class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">
+            {{ isNew ? t('New {0}', [t(formLabel)]) : isTempName(name) ? t('New {0}', [t(formLabel)]) : name }}
+          </p>
         </div>
+        <!-- Desk's "Not Saved": stays until a save actually succeeds, so an
+        edited form is never mistaken for a saved one. -->
+        <span v-if="showNotSaved" :class="[ui.PILL, ui.TONE.amber, 'flex-shrink-0 !px-2.5 !py-1']">{{ t('Not saved') }}</span>
+        <!-- Saved, but only on this phone so far (offline mode). -->
+        <span v-else-if="values.__offline" :class="[ui.PILL, ui.TONE.blue, 'flex-shrink-0 gap-1 !px-2.5 !py-1']">
+          <LucideIcon name="cloud-upload" class="h-3 w-3" />
+          {{ t('Not synced') }}
+        </span>
         <!-- Shared across Volunteer, Nurse and Doctor: a live glance at
         whether each Lab/Scan Investigation panel is done, without needing
         to open rows that Volunteer can't even see. -->
@@ -196,28 +196,53 @@
 
         <DocConnections v-if="!isNew && name && isGenericRoute" :doctype="doctype" :name="name" :refresh-key="activityKey" />
 
-        <!-- Desk's layout: one card per section (Section / Tab Break) with its
-        title, collapsible ones closed until tapped, each table inside the
-        section it belongs to and Heading fields as sub-headings. Sections
-        whose fields are all hidden by conditions disappear, as in Desk.
-        Inside a card: Desk's own Column Break positions become real grid
-        columns (not an auto-flowing CSS column layout, which filled columns
-        by vertical space and scrambled which fields Desk actually grouped
-        together) - on a phone every block still stacks to one column. -->
-        <section v-for="sec in formSections" :key="sec.key" :class="[ui.CARD, 'p-4 sm:p-6']">
+        <!-- Desk's layout, in its own skin rather than Desk's plain white
+        boxes: one card per section (Section / Tab Break), each with a
+        colored header band + icon badge (alternating the brand's two
+        colors, like Home's cards and the read-only RecordView page) instead
+        of a bare heading - collapsible ones closed until tapped, each table
+        inside the section it belongs to and Heading fields as sub-headings.
+        Sections whose fields are all hidden by conditions disappear, as in
+        Desk. Inside a card: Desk's own Column Break positions become real
+        grid columns (not an auto-flowing CSS column layout, which filled
+        columns by vertical space and scrambled which fields Desk actually
+        grouped together) - on a phone every block still stacks to one
+        column. -->
+        <section
+          v-for="(sec, sectionIndex) in formSections"
+          :key="sec.key"
+          :class="[ui.CARD, 'overflow-hidden !shadow-md']"
+        >
           <button
             v-if="sec.label && sec.collapsible"
             type="button"
-            class="flex w-full items-center justify-between gap-2 text-left"
+            class="flex w-full items-center gap-3 px-4 py-3 text-left sm:px-6"
+            :class="ui.sectionHeadAt(sectionIndex).bar"
             :aria-expanded="openSections.has(sec.key)"
             @click="toggleSection(sec.key)"
           >
-            <h2 class="text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h2>
-            <LucideIcon :name="openSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" class="h-4 w-4 text-gray-400" />
+            <span :class="sectionIconTileClass(sectionIndex)">
+              <LucideIcon :name="sectionIconAt(sectionIndex)" class="h-4 w-4" />
+            </span>
+            <h2 class="flex-1 truncate text-sm font-bold" :class="ui.sectionHeadAt(sectionIndex).text">{{ t(sec.label) }}</h2>
+            <LucideIcon :name="openSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" class="h-4 w-4 flex-shrink-0 text-gray-400" />
           </button>
-          <h2 v-else-if="sec.label" class="mb-4 text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h2>
+          <h2
+            v-else-if="sec.label"
+            class="flex items-center gap-3 px-4 py-3 text-sm font-bold sm:px-6"
+            :class="[ui.sectionHeadAt(sectionIndex).bar, ui.sectionHeadAt(sectionIndex).text]"
+          >
+            <span :class="sectionIconTileClass(sectionIndex)">
+              <LucideIcon :name="sectionIconAt(sectionIndex)" class="h-4 w-4" />
+            </span>
+            {{ t(sec.label) }}
+          </h2>
 
-          <div v-show="!sec.collapsible || openSections.has(sec.key)" class="space-y-5" :class="{ 'mt-4': sec.label && sec.collapsible }">
+          <div
+            v-show="!sec.collapsible || openSections.has(sec.key)"
+            class="space-y-5 p-4 sm:p-6"
+            :class="{ 'pt-4': sec.label }"
+          >
             <template v-for="block in sec.blocks" :key="block.key || block">
               <div v-if="block.kind === 'table'" class="min-w-0" :data-fieldname="block.key">
                 <ChildTable
@@ -235,23 +260,18 @@
               real grid columns, each filled top-to-bottom like Desk's - a
               Heading or HTML item just sits in its own column's stack,
               same as a further-down heading (e.g. "NT Scan" under "Dating
-              Ultrasounds") staying paired with whatever's alongside it. -->
-              <!-- Desk's own columns and order, with rows lined up across
-              both sides (see placeColumnItems). Cells stay in Desk's column
-              order in the markup, so on a phone everything still stacks as
-              Desk has it. -->
+              Ultrasounds") staying paired with whatever's alongside it.
+              Each column stacks its own items independently (not locked to
+              a shared row per item) - a tall field (a textarea) in one
+              column then only makes that column taller, instead of forcing
+              blank space into the other. -->
               <div
                 v-else
                 class="grid grid-cols-1 gap-x-6 gap-y-5 sm:[grid-template-columns:repeat(var(--form-cols),minmax(0,1fr))]"
                 :style="{ '--form-cols': block.columns.length }"
               >
-                <template v-for="(col, ci) in block.columns" :key="ci">
-                  <div
-                    v-for="item in col"
-                    :key="item.key"
-                    class="min-w-0 sm:[grid-column:var(--cell-col)] sm:[grid-row:var(--cell-row)]"
-                    :style="cellStyle(block, item)"
-                  >
+                <div v-for="(col, ci) in block.columns" :key="ci" class="min-w-0 space-y-5">
+                  <template v-for="item in col" :key="item.key">
                     <h3
                       v-if="item.kind === 'heading'"
                       class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
@@ -293,8 +313,8 @@
                         v-model="values[item.field.fieldname]"
                       />
                     </div>
-                  </div>
-                </template>
+                  </template>
+                </div>
               </div>
             </template>
           </div>
@@ -324,7 +344,7 @@ import { findModuleByRoute } from '@/data/modules'
 import * as ui from '@/data/ui'
 import { useMeta, useFormFields, useTableFields } from '@/data/useMeta'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
-import { buildFormSections, sectionHasField, placeColumnItems } from '@/data/formSections'
+import { buildFormSections, sectionHasField } from '@/data/formSections'
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
 import { isPhoneField, warnIfNotDigits } from '@/doctype-hooks/utils'
@@ -378,9 +398,8 @@ const metaResource = useMeta(doctype)
 // the record (or a prefilled link on a new one) is in.
 const crumbs = computed(() => formCrumbs(route.params.doctypeRoute, name, values, isNew))
 
-const formLabel = computed(
-  () => findModuleByRoute(route.params.doctypeRoute)?.label || metaResource.data?.name || doctype,
-)
+const moduleItem = computed(() => findModuleByRoute(route.params.doctypeRoute))
+const formLabel = computed(() => moduleItem.value?.label || metaResource.data?.name || doctype)
 const fields = useFormFields(metaResource)
 const tableFields = useTableFields(metaResource)
 const hooks = getDoctypeHooks(doctype)
@@ -427,6 +446,22 @@ const openSections = reactive(new Set())
 function toggleSection(key) {
   if (openSections.has(key)) openSections.delete(key)
   else openSections.add(key)
+}
+
+// Section card header badges: a small, varied set of neutral icons (not
+// meaning colours - see ui.js's colour rules) so the cards don't all read
+// identically, cycled independently of the 2-tone bar/text colour
+// alternation (ui.sectionHeadAt) so two adjacent same-tone sections still
+// look distinct from each other.
+const SECTION_ICONS = ['clipboard-list', 'layers', 'list-checks', 'folder-open']
+function sectionIconAt(index) {
+  return SECTION_ICONS[index % SECTION_ICONS.length]
+}
+function sectionIconTileClass(index) {
+  const forest = index % 2 === 0
+  return `flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-white ${
+    forest ? 'bg-forest-600 dark:bg-forest-500' : 'bg-navy-600 dark:bg-navy-500'
+  }`
 }
 
 // --- "Not saved" -------------------------------------------------------
@@ -638,18 +673,6 @@ function linkQueryFor(fieldname, row = null, tableField = null) {
 }
 function rowClassFor(tableField, row) {
   return hooks?.rowClass?.(tableField, row, values) || ''
-}
-// Grid position of one item in a columns block - worked out once per block
-// (blocks are rebuilt whenever the visible fields change).
-const blockPlacement = new WeakMap()
-function cellStyle(block, item) {
-  let place = blockPlacement.get(block)
-  if (!place) {
-    place = placeColumnItems(block.columns)
-    blockPlacement.set(block, place)
-  }
-  const p = place.get(item.key)
-  return p ? { '--cell-col': `${p.col} / span ${p.span}`, '--cell-row': p.row } : {}
 }
 
 function fieldClassFor(fieldname) {

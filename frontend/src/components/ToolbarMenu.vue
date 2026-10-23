@@ -7,7 +7,7 @@
   <div ref="root" class="relative">
     <button
       type="button"
-      :class="[ui.BTN_SECONDARY, '!h-8', { '!ring-forest-400': open, '!h-9 !w-9 !px-0': iconOnly }]"
+      :class="[ui.BTN_SECONDARY, tone === 'forest' && ui.BTN_TOOLBAR_TONE, '!h-8', { '!ring-forest-400': open, '!h-9 !w-9 !px-0': iconOnly }]"
       :aria-expanded="open"
       :aria-label="iconOnlyOnPhone || iconOnly ? label : undefined"
       :title="iconOnly ? label : undefined"
@@ -76,6 +76,10 @@ defineProps({
   // Just the icon at every width (a form header's "..." menu) - the label
   // is still its accessible name and tooltip.
   iconOnly: { type: Boolean, default: false },
+  // 'forest' tints the trigger button (see ui.BTN_TOOLBAR_TONE) - opt-in,
+  // so other menus (the form header's "...", the Home language switcher)
+  // keep their own look.
+  tone: { type: String, default: null },
 })
 
 const open = ref(false)

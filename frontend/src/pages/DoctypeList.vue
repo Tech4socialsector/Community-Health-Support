@@ -63,7 +63,11 @@
                 class="h-8 w-full rounded-lg border-0 bg-white pl-9 pr-3 text-sm text-gray-900 ring-1 ring-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-forest-400 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700"
               />
             </div>
-            <div v-for="field in inlineFilterFields" :key="field.fieldname" class="w-44 flex-shrink-0">
+            <div
+              v-for="field in inlineFilterFields"
+              :key="field.fieldname"
+              class="w-44 flex-shrink-0 rounded-lg bg-forest-50 p-1 dark:bg-forest-900/20"
+            >
               <ListFilterControl :field="field" v-model="filterValues[field.fieldname]" />
             </div>
             <button
@@ -77,17 +81,17 @@
           </div>
 
           <div class="flex flex-shrink-0 items-center gap-1.5 sm:gap-2">
-            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2']" :aria-label="t('Refresh')" :title="t('Refresh')" :disabled="loading" @click="load">
+            <button type="button" :class="[ui.BTN_SECONDARY, ui.BTN_TOOLBAR_TONE, '!h-8 !px-2']" :aria-label="t('Refresh')" :title="t('Refresh')" :disabled="loading" @click="load">
               <LucideIcon name="refresh-cw" class="h-4 w-4" :class="{ 'animate-spin': loading }" />
             </button>
-            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2 sm:!px-3']" :disabled="exporting || !total" :aria-label="t('Export')" :title="t('Export')" @click="exportCsv()">
+            <button type="button" :class="[ui.BTN_SECONDARY, ui.BTN_TOOLBAR_TONE, '!h-8 !px-2 sm:!px-3']" :disabled="exporting || !total" :aria-label="t('Export')" :title="t('Export')" @click="exportCsv()">
               <LucideIcon :name="exporting ? 'loader-circle' : 'download'" class="h-4 w-4" :class="{ 'animate-spin': exporting }" />
               <span class="hidden sm:inline">{{ t('Export') }}</span>
             </button>
 
             <!-- Desk's filter popup: condition rows. On a phone / tablet the
             standard filters are in it too, as there are no boxes there. -->
-            <ToolbarMenu :label="t('Filter')" icon="list-filter" :badge="activeFilterCount || null" align="right" width="sm:w-auto" icon-only-on-phone>
+            <ToolbarMenu :label="t('Filter')" icon="list-filter" :badge="activeFilterCount || null" align="right" width="sm:w-auto" icon-only-on-phone tone="forest">
               <template #default="{ close }">
                 <FilterBuilder
                   v-model="advancedFilters"
@@ -101,7 +105,7 @@
             </ToolbarMenu>
 
             <!-- Sort: the field, plus ascending / descending - Desk's sort menu. -->
-            <ToolbarMenu :label="sortLabel" icon="arrow-up-down" align="right" width="sm:w-60" icon-only-on-phone>
+            <ToolbarMenu :label="sortLabel" icon="arrow-up-down" align="right" width="sm:w-60" icon-only-on-phone tone="forest">
               <template #default="{ close }">
                 <div class="mb-2 grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800">
                   <button
@@ -131,7 +135,7 @@
             </ToolbarMenu>
 
             <!-- Columns: also what the phone cards show. -->
-            <ToolbarMenu :label="t('Columns')" icon="columns-3" align="right" width="sm:w-auto" icon-only-on-phone>
+            <ToolbarMenu :label="t('Columns')" icon="columns-3" align="right" width="sm:w-auto" icon-only-on-phone tone="forest">
               <ColumnManager
                 :fields="availableColumns"
                 :model-value="visibleColumnNames"
@@ -214,7 +218,7 @@
           the header row kept in view. -->
           <div :class="[ui.LIST_TABLE_WRAP, 'hidden max-h-[calc(100vh-16rem)] min-h-[12rem] sm:block', { 'opacity-60': loading }]">
             <table :class="ui.TABLE">
-              <thead :class="[ui.THEAD, 'sticky top-0 z-10 [&_th]:bg-gray-50 dark:[&_th]:bg-gray-800']">
+              <thead :class="[ui.THEAD, 'sticky top-0 z-10 [&_th]:bg-navy-50 dark:[&_th]:bg-navy-900']">
                 <tr>
                   <th class="w-10 py-2.5 pl-3 pr-1">
                     <input
@@ -229,6 +233,7 @@
                   <th :class="ui.LIST_TH">{{ t('ID') }}</th>
                   <th v-for="col in columns" :key="col.fieldname" :class="ui.LIST_TH">{{ t(col.label) }}</th>
                   <th :class="[ui.LIST_TH, 'text-right']">{{ t('Last Modified') }}</th>
+                  <th :class="[ui.LIST_TH, 'text-right']">{{ t('Actions') }}</th>
                 </tr>
               </thead>
               <tbody :class="ui.TBODY">
@@ -267,6 +272,28 @@
                   </td>
                   <td :class="[ui.LIST_TD, 'text-right tabular-nums']" :title="formatFieldValue(row.modified, { fieldtype: 'Datetime' })">
                     {{ shortAgo(row.modified) }}
+                  </td>
+                  <td :class="[ui.LIST_TD, 'text-right']" @click.stop>
+                    <div class="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        class="flex h-7 w-7 items-center justify-center rounded-md bg-navy-50 text-navy-700 ring-1 ring-navy-100 transition hover:bg-navy-200 hover:text-navy-900 dark:bg-navy-900/40 dark:text-navy-200 dark:ring-navy-800 dark:hover:bg-navy-800"
+                        :aria-label="t('View {0}', [row.name])"
+                        :title="t('View')"
+                        @click="goToRecordView(row.name)"
+                      >
+                        <LucideIcon name="eye" class="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        class="flex h-7 w-7 items-center justify-center rounded-md bg-forest-50 text-forest-700 ring-1 ring-forest-100 transition hover:bg-forest-200 hover:text-forest-900 dark:bg-forest-900/40 dark:text-forest-300 dark:ring-forest-800 dark:hover:bg-forest-800"
+                        :aria-label="t('Edit {0}', [row.name])"
+                        :title="t('Edit')"
+                        @click="goToRow(row.name)"
+                      >
+                        <LucideIcon name="pencil" class="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -850,5 +877,12 @@ function goToRow(name) {
   } else {
     router.push({ name: route.name.replace('List', 'Form'), params: { name } })
   }
+}
+
+// The read-only detail page (RecordView) - same for every doctype, generic
+// or dedicated route alike, since it's keyed by the real doctype name
+// rather than a route slug.
+function goToRecordView(name) {
+  router.push({ name: 'RecordView', params: { doctype: props.doctype, name } })
 }
 </script>

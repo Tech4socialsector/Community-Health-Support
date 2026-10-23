@@ -30,9 +30,9 @@
   "feeding_type",
   "feeding_mixed_specify",
   "feeding_problems",
+  "column_break_c1",
   "immunisation_up_to_date",
   "if_no_which_ones_are_missing",
-  "column_break_c1",
   "complementary_feeding_6_months",
   "color",
   "babys_general_condition",
@@ -46,8 +46,8 @@
   "danger_blue_mouth",
   "danger_lethargic",
   "danger_cold",
-  "column_break_d1",
   "danger_irritable",
+  "column_break_d1",
   "nurse_notified_danger_signs",
   "problems_identified",
   "notes_support_care_provided",
@@ -57,11 +57,11 @@
   "edu_iron_calcium",
   "edu_exclusive_breastfeeding",
   "edu_family_planning",
-  "column_break_edu1",
   "edu_kegel_exercises",
   "edu_postpartum_depression",
   "edu_child_immunization_schedule",
   "edu_child_weight_gain_chart",
+  "column_break_edu1",
   "date_of_next_visit",
   "next_visit_window",
   "urgent_followup",
@@ -82,7 +82,6 @@
    "label": "Baby / Child Details"
   },
   {
-   "description": "Which scheduled checkup this row is, from Child 6w-1y Visit Interval Master (e.g. \"6th Week\", \"6th Month\") - filled in automatically when the row is generated, same as the dates either side of it.",
    "fieldname": "milestone_label",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -123,7 +122,6 @@
    "label": "Patient Symptoms / Concerns"
   },
   {
-   "description": "Automatic - calculated from the child's Date of Birth and this row's own Visit Ending Date, as \"X months Y days\" (a month counted as 30 days, same as the rest of this app's scheduling).",
    "fieldname": "baby_age",
    "fieldtype": "Data",
    "label": "Baby's Age",
@@ -298,7 +296,6 @@
    "label": "Notes and Support / Care Provided"
   },
   {
-   "description": "Set this to Risk if the baby needs urgent attention - triggers an extra early follow-up.",
    "fieldname": "baby_condition",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -311,56 +308,56 @@
    "label": "Education Provided to Mother or Family"
   },
   {
+   "default": "0",
    "fieldname": "edu_postpartum_self_care",
-   "fieldtype": "Select",
-   "label": "Postpartum Self Care: Nutrition, Sleep Counseling (handout)",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Postpartum Self Care: Nutrition, Sleep Counseling (handout)"
   },
   {
+   "default": "0",
    "fieldname": "edu_iron_calcium",
-   "fieldtype": "Select",
-   "label": "Iron and Calcium (postnatal)",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Iron and Calcium (postnatal)"
   },
   {
+   "default": "0",
    "fieldname": "edu_exclusive_breastfeeding",
-   "fieldtype": "Select",
-   "label": "Exclusive Breastfeeding 0-6 Months and Complementary Feeding (handout)",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Exclusive Breastfeeding 0-6 Months and Complementary Feeding (handout)"
   },
   {
+   "default": "0",
    "fieldname": "edu_family_planning",
-   "fieldtype": "Select",
-   "label": "Family Planning Teaching and Handout",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Family Planning Teaching and Handout"
   },
   {
    "fieldname": "column_break_edu1",
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "edu_kegel_exercises",
-   "fieldtype": "Select",
-   "label": "Kegel Exercises (postnatal)",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Kegel Exercises (postnatal)"
   },
   {
+   "default": "0",
    "fieldname": "edu_postpartum_depression",
-   "fieldtype": "Select",
-   "label": "Postpartum Depression (handout)",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Postpartum Depression (handout)"
   },
   {
+   "default": "0",
    "fieldname": "edu_child_immunization_schedule",
-   "fieldtype": "Select",
-   "label": "Child Immunization Schedule (0-1 year)",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Child Immunization Schedule (0-1 year)"
   },
   {
+   "default": "0",
    "fieldname": "edu_child_weight_gain_chart",
-   "fieldtype": "Select",
-   "label": "Child Weight Gain Chart (0-1 year)",
-   "options": "\nYes\nNo"
+   "fieldtype": "Check",
+   "label": "Child Weight Gain Chart (0-1 year)"
   },
   {
    "fieldname": "referrals_section",
@@ -396,7 +393,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Auto-filled with the same date driving Next Visit Date - not editable by hand.",
    "fieldname": "date_of_next_visit",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -404,7 +400,6 @@
    "read_only": 1
   },
   {
-   "description": "The current visit window, shown as a range (From - To). Read-only, same on every row.",
    "fieldname": "next_visit_window",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -413,7 +408,6 @@
   },
   {
    "default": "0",
-   "description": "System marker - set automatically when this row is an extra early follow-up inserted after a Risk finding. Not for manual use.",
    "fieldname": "urgent_followup",
    "fieldtype": "Check",
    "hidden": 1,
@@ -489,7 +483,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-08 17:21:03.662648",
+ "modified": "2026-10-23 14:37:51.310045",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Child 6w to 1 Year Followup",
