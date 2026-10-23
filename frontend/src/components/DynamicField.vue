@@ -14,7 +14,7 @@
   />
 
   <div v-else-if="controlType === 'attach'">
-    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
+    <label class="mb-1.5 block text-xs text-ink-gray-5">{{ t(field.label) }}</label>
     <div v-if="modelValue" class="flex items-center gap-3 rounded-lg border p-2 dark:border-gray-800">
       <img
         v-if="isImageField"

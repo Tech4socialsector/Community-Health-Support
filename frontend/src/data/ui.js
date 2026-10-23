@@ -163,6 +163,15 @@ export const TONE = {
 }
 
 export const PILL = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1'
+
+// Child-table follow-up rows (ANC, PNC, NCD, Child Growth...) are generated
+// with a Pending/Completed status - coloured so the open visits stand out
+// in the grid at a glance. Any other value gets no pill (plain text).
+const ROW_STATUS_TONE = { Pending: 'amber', Completed: 'green' }
+export function rowStatusPillClass(col, value) {
+  const tone = col.fieldtype === 'Select' && ROW_STATUS_TONE[value]
+  return tone ? `${PILL} ${TONE[tone]}` : ''
+}
 // Compact all-caps flag (e.g. HIGH RISK) beside a name.
 export const FLAG = 'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1'
 

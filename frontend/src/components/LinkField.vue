@@ -5,7 +5,9 @@
   picked value is ever stored, so a half-typed name can't be saved as if
   it were an ID. -->
   <div ref="root">
-    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">
+    <!-- Same label and box size as frappe-ui's FormControl (every other
+    field), so a Link field doesn't sit bigger and push rows out of line. -->
+    <label class="mb-1.5 block text-xs text-ink-gray-5">
       {{ t(field.label) }}<span v-if="field.reqd" class="text-red-500"> *</span>
     </label>
     <div class="relative">
@@ -17,7 +19,7 @@
         :tabindex="readOnly ? -1 : undefined"
         :placeholder="readOnly ? '' : t('Search {0}…', [t(field.options)])"
         autocomplete="off"
-        class="h-9 w-full rounded-lg border-0 px-3 pr-8 text-sm focus:outline-none dark:text-gray-100"
+        class="h-7 w-full rounded border-0 px-2 pr-8 text-base focus:outline-none dark:text-gray-100"
         :class="
           readOnly
             ? 'cursor-default bg-gray-50 text-gray-700 dark:bg-gray-800/60'
@@ -36,7 +38,7 @@
       <button
         v-if="modelValue && !readOnly"
         type="button"
-        class="absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-700"
+        class="absolute right-1 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:hover:bg-gray-700"
         :aria-label="t('Clear')"
         @mousedown.prevent="clear"
       >

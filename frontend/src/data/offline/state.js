@@ -5,6 +5,10 @@ import { reactive } from 'vue'
 // "connected" to a tower that passes no data, which onLine reports as fine.
 export const offlineState = reactive({
   online: typeof navigator === 'undefined' ? true : navigator.onLine,
+  // Offline because the signal is too weak to work on (requests far too
+  // slow), not gone - the badge says so, and the phone's copy is used the
+  // same way until the connection is steady again.
+  weak: false,
   // Outbox counts, by status.
   pending: 0,
   errors: 0,
@@ -25,17 +29,32 @@ export const offlineState = reactive({
 })
 
 export function markOnline() {
+  offlineState.weak = false
   if (!offlineState.online) {
     offlineState.online = true
     window.dispatchEvent(new CustomEvent('chw:online'))
   }
 }
 
-export function markOffline() {
+export function markOffline({ weak = false } = {}) {
   offlineState.online = false
+  offlineState.weak = weak
+}
+
+// Chrome on Android reports the connection's real quality: 2G or worse is
+// too slow to fill forms against the server, so the phone's copy is used
+// from the start instead of after each request has timed out.
+export function connectionTooWeak() {
+  const c = typeof navigator !== 'undefined' ? navigator.connection : null
+  return !!c && ['slow-2g', '2g'].includes(c.effectiveType)
 }
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('online', () => markOnline())
+  if (connectionTooWeak()) markOffline({ weak: true })
+  // The browser's own "online" only means some network is back - sync.js
+  // checks it is steady (see watchConnection) before going back online.
   window.addEventListener('offline', () => markOffline())
+  navigator.connection?.addEventListener?.('change', () => {
+    if (connectionTooWeak()) markOffline({ weak: true })
+  })
 }

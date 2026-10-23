@@ -15,7 +15,9 @@
       <SyncStatus class="ml-auto" />
     </div>
 
-    <main class="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4">
+    <!-- relative: keeps absolutely positioned bits (frappe-ui's sr-only
+    "(required)" label text) inside this scroll box - see AppLayout.vue. -->
+    <main class="relative min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-4">
       <slot />
     </main>
 

@@ -13,15 +13,18 @@
 //   { kind: 'field', key, field }
 //   { kind: 'heading', key, label }
 //   { kind: 'html', key, html }
-//   { kind: 'checkboxGroup', key, items: [{ kind: 'field', key, field }, ...] }
+//   { kind: 'checkboxGroup', key, items: [{ kind: 'field', key, field }, ...],
+//     stacked, heading?, headingKey? }
 // A Heading or HTML field is just another item in whichever column it sits
 // in - e.g. a second heading further down the same column (like "NT Scan"
 // under "Dating Ultrasounds") stays paired with whatever's alongside it in
 // the next column, same as Desk. Only a Table field forces a full-width
 // break, since Desk never renders a child table squeezed into a column.
 //
-// The "Pregnancy Assessment" checkboxes specifically (and only that named
-// group) become one checkboxGroup, rendered as its own small 2-column grid -
+// A run of 2+ checkboxes becomes one checkboxGroup (taking the heading just
+// above it along), stacked one per line as in Desk. The "Pregnancy
+// Assessment" checkboxes specifically (and only that named group) render as
+// a small 2-column grid instead -
 // Desk packs these onto the same row by pixel width; a plain one-per-line
 // stack (correct for every other checkbox run in the app) reads as a long,
 // sparse list for this one, and cramming them onto a single unbroken line
@@ -95,8 +98,8 @@ export function buildFormSections(fields, { formByName, tableByName = new Map(),
 
   // A run of two or more consecutive Check fields in the same column (no
   // Column Break/Heading/HTML/Table between them) collapses into one
-  // checkboxGroup item, so they render as a compact 2-up grid instead of
-  // each claiming a full stacked row.
+  // checkboxGroup item (see groupConsecutiveCheckboxes), so the run sits
+  // together in one cell instead of each checkbox claiming a full row.
   for (const sec of sections) {
     for (const block of sec.blocks) {
       if (block.kind !== 'columns') continue
@@ -122,9 +125,18 @@ function groupConsecutiveCheckboxes(column) {
   let run = []
   let runEligible = false
   let lastHeadingLabel = null
+  // Every other run of 2+ checkboxes stays one per line as in Desk, but as
+  // one item (with the heading right above it, if any): the two sides' rows
+  // line up, so loose checkboxes would each be stretched to the height of
+  // the field beside them and float far apart.
   const flushRun = () => {
-    if (runEligible && run.length > 1) {
-      result.push({ kind: 'checkboxGroup', key: run[0].key, items: run })
+    if (run.length > 1) {
+      const group = { kind: 'checkboxGroup', key: run[0].key, items: run, stacked: !runEligible }
+      if (result.at(-1)?.kind === 'heading') {
+        const heading = result.pop()
+        Object.assign(group, { heading: heading.label, headingKey: heading.key })
+      }
+      result.push(group)
     } else {
       result.push(...run)
     }
@@ -145,9 +157,25 @@ function groupConsecutiveCheckboxes(column) {
   return result
 }
 
+// Where each item of a columns block sits on the desktop grid: every field
+// stays in the column Desk put it in, in Desk's order - so moving a field or
+// a Column Break in Desk (DocType or Customize Form) moves it here too - and
+// the Nth item of each column sits on row N so the two sides line up.
+//
+// Returns a Map: item.key -> { col, row, span }.
+export function placeColumnItems(columns) {
+  const place = new Map()
+  columns.forEach((col, ci) => {
+    col.forEach((item, ri) => place.set(item.key, { col: ci + 1, row: ri + 1, span: 1 }))
+  })
+  return place
+}
+
 // Whether a section contains a given fieldname, in any of its columns or as
 // a table/html/heading block's own key.
 export function sectionHasField(sec, fieldname) {
-  const itemMatches = (i) => i.key === fieldname || (i.kind === 'checkboxGroup' && i.items.some((sub) => sub.key === fieldname))
+  const itemMatches = (i) =>
+    i.key === fieldname ||
+    (i.kind === 'checkboxGroup' && (i.headingKey === fieldname || i.items.some((sub) => sub.key === fieldname)))
   return sec.blocks.some((b) => (b.kind === 'columns' ? b.columns.some((col) => col.some(itemMatches)) : b.key === fieldname))
 }

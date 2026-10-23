@@ -58,7 +58,10 @@
               :key="col.fieldname"
               class="truncate border-b border-r border-gray-200 px-2 py-2 text-gray-900 dark:border-gray-700 dark:text-gray-100"
             >
-              {{ formatFieldValue(row[col.fieldname], col) }}
+              <span v-if="rowStatusPillClass(col, row[col.fieldname])" :class="rowStatusPillClass(col, row[col.fieldname])">
+                {{ formatFieldValue(row[col.fieldname], col) }}
+              </span>
+              <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
             </td>
             <td class="border-b border-gray-200 px-1 py-1 text-center dark:border-gray-700">
               <button
@@ -104,12 +107,19 @@
                 stack, same as a further-down heading (e.g. "NT Scan" under
                 "Dating Ultrasounds") staying paired with whatever's
                 alongside it in the next column. -->
+                <!-- Same as the main form: Desk's columns and order kept,
+                rows lined up across both sides. -->
                 <div
                   class="grid grid-cols-1 gap-x-4 gap-y-4 sm:[grid-template-columns:repeat(var(--row-cols),minmax(0,1fr))]"
                   :style="{ '--row-cols': block.columns.length }"
                 >
-                  <div v-for="(col, ci) in block.columns" :key="ci" class="min-w-0 space-y-4">
-                    <template v-for="item in col" :key="item.key">
+                  <template v-for="(col, ci) in block.columns" :key="ci">
+                    <div
+                      v-for="item in col"
+                      :key="item.key"
+                      class="min-w-0 sm:[grid-column:var(--cell-col)] sm:[grid-row:var(--cell-row)]"
+                      :style="cellStyle(block, item)"
+                    >
                       <h4
                         v-if="item.kind === 'heading'"
                         class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
@@ -121,17 +131,22 @@
                         class="rounded-lg bg-gray-50 p-4 text-sm leading-relaxed text-gray-800 dark:bg-gray-800/60 dark:text-gray-200"
                         v-html="item.html"
                       />
-                      <div v-else-if="item.kind === 'checkboxGroup'" class="grid grid-cols-2 gap-x-4 gap-y-2">
-                        <DynamicField
-                          v-for="sub in item.items"
-                          :key="sub.key"
-                          :field="sub.field"
-                          :doctype="doctype"
-                          :docname="docname"
-                          :doc="editingRow"
-                          :parent-doc="parentDoc"
-                          v-model="editingRow[sub.field.fieldname]"
-                        />
+                      <div v-else-if="item.kind === 'checkboxGroup'">
+                        <h4 v-if="item.heading" class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                          {{ t(item.heading) }}
+                        </h4>
+                        <div class="grid gap-x-4 gap-y-2" :class="item.stacked ? 'grid-cols-1' : 'grid-cols-2'">
+                          <DynamicField
+                            v-for="sub in item.items"
+                            :key="sub.key"
+                            :field="sub.field"
+                            :doctype="doctype"
+                            :docname="docname"
+                            :doc="editingRow"
+                            :parent-doc="parentDoc"
+                            v-model="editingRow[sub.field.fieldname]"
+                          />
+                        </div>
                       </div>
                       <DynamicField
                         v-else
@@ -143,8 +158,8 @@
                         :link-query="item.field.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(item.field.fieldname, editingRow) : null"
                         v-model="editingRow[item.field.fieldname]"
                       />
-                    </template>
-                  </div>
+                    </div>
+                  </template>
                 </div>
               </template>
             </div>
@@ -167,8 +182,21 @@ import DynamicField from '@/components/DynamicField.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { useMeta, useFormFields } from '@/data/useMeta'
 import { formatFieldValue, isEmptyValue } from '@/data/recordFormat'
+import { rowStatusPillClass } from '@/data/ui'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
-import { buildFormSections } from '@/data/formSections'
+import { buildFormSections, placeColumnItems } from '@/data/formSections'
+
+// Grid position of one item in a columns block (see placeColumnItems).
+const blockPlacement = new WeakMap()
+function cellStyle(block, item) {
+  let place = blockPlacement.get(block)
+  if (!place) {
+    place = placeColumnItems(block.columns)
+    blockPlacement.set(block, place)
+  }
+  const p = place.get(item.key)
+  return p ? { '--cell-col': `${p.col} / span ${p.span}`, '--cell-row': p.row } : {}
+}
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
 import { t } from '@/data/i18n'

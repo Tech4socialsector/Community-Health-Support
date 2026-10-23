@@ -1,8 +1,9 @@
 <template>
   <!-- Home / Household profile / HH-00027 / Family members - every part
   but the last is a link back up. Scrolls sideways on a narrow phone rather
-  than wrapping into several lines. -->
-  <nav aria-label="Breadcrumb" class="-mx-1 overflow-x-auto px-1">
+  than wrapping into several lines - with the scrollbar itself hidden, as it
+  otherwise draws a grey bar under the crumbs whenever they're cut off. -->
+  <nav aria-label="Breadcrumb" class="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
     <ol class="flex min-w-max items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
       <li v-for="(crumb, index) in crumbs" :key="index" class="flex items-center gap-1.5">
         <LucideIcon v-if="index > 0" name="chevron-right" class="h-3.5 w-3.5 flex-shrink-0 text-gray-300 dark:text-gray-600" />

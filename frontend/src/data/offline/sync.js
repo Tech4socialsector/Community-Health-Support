@@ -6,7 +6,7 @@
 import { call } from 'frappe-ui'
 import { ALL_STORES, idb } from './db'
 import { networkFetch } from './fetchProxy'
-import { markOffline, markOnline, offlineState } from './state'
+import { connectionTooWeak, markOffline, markOnline, offlineState } from './state'
 import {
   allRecords,
   deleteRecords,
@@ -32,10 +32,24 @@ const PREFETCH = [
 ]
 
 const SYNC_EVERY_MS = 5 * 60 * 1000
+// A ping slower than this doesn't count as a steady connection.
+const STEADY_PING_MS = 4000
 
 // ---- Talking to the server, never the phone's copy ------------------------
 
-class NetworkError extends Error {}
+class NetworkError extends Error {
+  constructor(message, { weak = false } = {}) {
+    super(message)
+    this.weak = weak
+  }
+}
+
+// A sync step that hangs on a weak signal must not hold up the Outbox
+// forever: given up after this, and tried again once the signal is steady
+// (every change carries its client id, so a step that did get through is
+// not repeated). The first full download is the one slow step allowed.
+const CALL_TIMEOUT_MS = 30000
+const DOWNLOAD_TIMEOUT_MS = 120000
 
 function messageFrom(body) {
   try {
@@ -55,10 +69,13 @@ function messageFrom(body) {
   return last || 'The server refused this change.'
 }
 
-async function serverCall(method, params) {
+async function serverCall(method, params, { timeout = CALL_TIMEOUT_MS } = {}) {
   let res
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeout)
   try {
     res = await networkFetch(`/api/method/${method}`, {
+      signal: controller.signal,
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -69,14 +86,22 @@ async function serverCall(method, params) {
       body: JSON.stringify(params || {}),
     })
   } catch (e) {
+    clearTimeout(timer)
+    if (controller.signal.aborted) throw new NetworkError('Network too slow', { weak: true })
     throw new NetworkError(e?.message || 'Network error')
   }
-  if ([502, 503, 504].includes(res.status)) throw new NetworkError(`Server unavailable (${res.status})`)
+  if ([502, 503, 504].includes(res.status)) {
+    clearTimeout(timer)
+    throw new NetworkError(`Server unavailable (${res.status})`)
+  }
   let body = {}
   try {
     body = await res.json()
   } catch {
-    // An HTML error page - nothing to read.
+    // An HTML error page - nothing to read (or the body timed out).
+    if (controller.signal.aborted) throw new NetworkError('Network too slow', { weak: true })
+  } finally {
+    clearTimeout(timer)
   }
   if (!res.ok) {
     const error = new Error(messageFrom(body))
@@ -140,7 +165,7 @@ async function runDownload(full) {
   const params = {}
   if (since) params.since = since
   if (metasHash) params.metas_hash = metasHash
-  const data = await serverCall('chw.offline.get_offline_data', params)
+  const data = await serverCall('chw.offline.get_offline_data', params, { timeout: DOWNLOAD_TIMEOUT_MS })
   // Sent only when a form changed since the phone's copy.
   if (data.metas) {
     await putMetas(data.metas)
@@ -226,7 +251,7 @@ async function runPush() {
         else await pushUpdate(entry, map)
       } catch (e) {
         if (e instanceof NetworkError) {
-          markOffline()
+          markOffline({ weak: e.weak })
           return
         }
         // Logged out on the server: nothing will sync until the CHW logs in.
@@ -349,7 +374,7 @@ export async function syncNow({ full = false } = {}) {
     // Changes made while downloading.
     if (offlineState.pending) await push()
   } catch (e) {
-    if (e instanceof NetworkError) markOffline()
+    if (e instanceof NetworkError) markOffline({ weak: e.weak })
     else offlineState.lastSyncError = e.message
   }
 }
@@ -422,14 +447,38 @@ if (typeof window !== 'undefined') {
     queuedTimer = setTimeout(() => started && offlineState.online && push(), 1500)
   })
   // While offline, check now and then whether the network is back - one
-  // failed request (a blip) must not leave the app "Offline" for long.
-  setInterval(async () => {
-    if (!started || offlineState.online) return
+  // failed request (a blip) must not leave the app "Offline" for long. Back
+  // means steady: two quick answers in a row on a connection that isn't 2G,
+  // so a signal that flickers in and out doesn't start a sync that stalls
+  // halfway. Going online then sends the Outbox and fetches what changed
+  // (the 'chw:online' listener above).
+  let goodChecks = 0
+  let checking = false
+  const checkConnection = async () => {
+    if (offlineState.online || checking) return
+    checking = true
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), STEADY_PING_MS)
     try {
-      const res = await networkFetch('/api/method/ping', { cache: 'no-store' })
-      if (res.ok) markOnline()
+      const res = await networkFetch('/api/method/ping', { cache: 'no-store', signal: controller.signal })
+      goodChecks = res.ok && !connectionTooWeak() ? goodChecks + 1 : 0
     } catch {
-      // still offline
+      goodChecks = 0
+    } finally {
+      clearTimeout(timer)
+      checking = false
     }
-  }, 10000)
+    if (goodChecks >= 2) {
+      goodChecks = 0
+      markOnline()
+    } else if (goodChecks === 1) {
+      // Confirm soon rather than at the next 10-second tick.
+      setTimeout(checkConnection, 3000)
+    }
+  }
+  setInterval(checkConnection, 10000)
+  window.addEventListener('online', () => {
+    goodChecks = 0
+    checkConnection()
+  })
 }

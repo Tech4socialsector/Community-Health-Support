@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="mb-1.5 flex items-center justify-between">
-      <label class="text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
+      <label class="text-xs text-ink-gray-5">{{ t(field.label) }}</label>
       <div class="flex items-center gap-1">
         <span v-if="point" class="text-xs text-gray-400 dark:text-gray-500">
           {{ point.lat.toFixed(5) }}, {{ point.lng.toFixed(5) }}

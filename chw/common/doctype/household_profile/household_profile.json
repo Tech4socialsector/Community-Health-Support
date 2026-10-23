@@ -15,19 +15,19 @@
   "household_head_name",
   "total_family_members",
   "phone_no",
-  "status",
+  "house",
   "caste",
   "others_caste",
-  "house",
-  "column_break_kkvt",
   "type_of_housing",
+  "column_break_kkvt",
   "electricity",
   "farming",
   "drinkingwater",
   "toilet",
   "cattles",
-  "address",
-  "health_worker_name"
+  "health_worker_name",
+  "status",
+  "address"
  ],
  "fields": [
   {
@@ -36,30 +36,12 @@
    "label": "Repondent Details "
   },
   {
-   "fieldname": "household_head_name",
-   "fieldtype": "Data",
+   "default": "Today",
+   "fieldname": "survay_date",
+   "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Head of the Family "
-  },
-  {
-   "fieldname": "total_family_members",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Total Family Members in the Family",
-   "non_negative": 1
-  },
-  {
-   "fieldname": "caste",
-   "fieldtype": "Select",
-   "label": "Caste the family belongs to ",
-   "options": "\nGeneral\nSC\nST\nOBC\nNot Applicable\nOthers, specify"
-  },
-  {
-   "depends_on": "eval: doc.caste == \"Others, specify\"",
-   "fieldname": "others_caste",
-   "fieldtype": "Data",
-   "label": "Others, Please Specify"
+   "label": "Survey Date"
   },
   {
    "fieldname": "village",
@@ -86,18 +68,24 @@
    "options": "Sub Centre"
   },
   {
+   "fieldname": "household_head_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Head of the Family "
+  },
+  {
+   "fieldname": "total_family_members",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Family Members in the Family",
+   "non_negative": 1
+  },
+  {
    "fieldname": "phone_no",
    "fieldtype": "Data",
    "label": "Phone Number",
    "length": 10
-  },
-  {
-   "default": "Today",
-   "fieldname": "survay_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Survey Date"
   },
   {
    "fieldname": "house",
@@ -106,10 +94,26 @@
    "options": "\nHut\nTiled house\nTerraced house"
   },
   {
+   "fieldname": "caste",
+   "fieldtype": "Select",
+   "label": "Caste the family belongs to ",
+   "options": "\nGeneral\nSC\nST\nOBC\nNot Applicable\nOthers, specify"
+  },
+  {
+   "depends_on": "eval: doc.caste == \"Others, specify\"",
+   "fieldname": "others_caste",
+   "fieldtype": "Data",
+   "label": "Others, Please Specify"
+  },
+  {
    "fieldname": "type_of_housing",
    "fieldtype": "Select",
    "label": "Type of Housing",
    "options": "\nTemporary\nPermanent"
+  },
+  {
+   "fieldname": "column_break_kkvt",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "electricity",
@@ -143,15 +147,6 @@
    "options": "\nNo\ncow, goat\ncow only\ngoat only"
   },
   {
-   "fieldname": "column_break_kkvt",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "address",
-   "fieldtype": "Small Text",
-   "label": "Address"
-  },
-  {
    "fieldname": "health_worker_name",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -165,6 +160,11 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "\nI live here\nI work outside\nout of town"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
   }
  ],
  "grid_page_length": 50,
@@ -175,7 +175,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-09 10:26:18.780727",
+ "modified": "2026-10-22 21:16:35.002525",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

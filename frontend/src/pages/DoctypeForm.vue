@@ -236,13 +236,22 @@
               Heading or HTML item just sits in its own column's stack,
               same as a further-down heading (e.g. "NT Scan" under "Dating
               Ultrasounds") staying paired with whatever's alongside it. -->
+              <!-- Desk's own columns and order, with rows lined up across
+              both sides (see placeColumnItems). Cells stay in Desk's column
+              order in the markup, so on a phone everything still stacks as
+              Desk has it. -->
               <div
                 v-else
                 class="grid grid-cols-1 gap-x-6 gap-y-5 sm:[grid-template-columns:repeat(var(--form-cols),minmax(0,1fr))]"
                 :style="{ '--form-cols': block.columns.length }"
               >
-                <div v-for="(col, ci) in block.columns" :key="ci" class="min-w-0 space-y-5">
-                  <template v-for="item in col" :key="item.key">
+                <template v-for="(col, ci) in block.columns" :key="ci">
+                  <div
+                    v-for="item in col"
+                    :key="item.key"
+                    class="min-w-0 sm:[grid-column:var(--cell-col)] sm:[grid-row:var(--cell-row)]"
+                    :style="cellStyle(block, item)"
+                  >
                     <h3
                       v-if="item.kind === 'heading'"
                       class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
@@ -255,18 +264,23 @@
                       :data-fieldname="item.key"
                       v-html="item.html"
                     />
-                    <!-- A run of Check fields Desk packs onto the same rows
-                    (e.g. "Pregnancy Assessment") - a compact 2-up grid
-                    instead of each claiming its own full-width stacked row. -->
-                    <div v-else-if="item.kind === 'checkboxGroup'" class="grid grid-cols-2 gap-x-4 gap-y-2">
-                      <div v-for="sub in item.items" :key="sub.key" :data-fieldname="sub.key" :class="fieldClassFor(sub.field.fieldname)">
-                        <DynamicField
-                          :field="sub.field"
-                          :doctype="doctype"
-                          :docname="isNew ? null : name"
-                          :doc="values"
-                          v-model="values[sub.field.fieldname]"
-                        />
+                    <!-- A run of Check fields under its heading: one per line
+                    as in Desk, or a compact 2-up grid where Desk packs them
+                    onto the same rows (e.g. "Pregnancy Assessment"). -->
+                    <div v-else-if="item.kind === 'checkboxGroup'">
+                      <h3 v-if="item.heading" class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        {{ t(item.heading) }}
+                      </h3>
+                      <div class="grid gap-x-4 gap-y-2" :class="item.stacked ? 'grid-cols-1' : 'grid-cols-2'">
+                        <div v-for="sub in item.items" :key="sub.key" :data-fieldname="sub.key" :class="fieldClassFor(sub.field.fieldname)">
+                          <DynamicField
+                            :field="sub.field"
+                            :doctype="doctype"
+                            :docname="isNew ? null : name"
+                            :doc="values"
+                            v-model="values[sub.field.fieldname]"
+                          />
+                        </div>
                       </div>
                     </div>
                     <div v-else :data-fieldname="item.key" :class="fieldClassFor(item.field.fieldname)">
@@ -279,8 +293,8 @@
                         v-model="values[item.field.fieldname]"
                       />
                     </div>
-                  </template>
-                </div>
+                  </div>
+                </template>
               </div>
             </template>
           </div>
@@ -310,13 +324,13 @@ import { findModuleByRoute } from '@/data/modules'
 import * as ui from '@/data/ui'
 import { useMeta, useFormFields, useTableFields } from '@/data/useMeta'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
-import { buildFormSections, sectionHasField } from '@/data/formSections'
+import { buildFormSections, sectionHasField, placeColumnItems } from '@/data/formSections'
 import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
 import { isPhoneField, warnIfNotDigits } from '@/doctype-hooks/utils'
 import { getDoctypeHooks } from '@/doctype-hooks'
 import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
-import { currentHealthWorkerResource } from '@/data/currentHealthWorker'
+import { dataCollectorResource } from '@/data/dataCollector'
 import { t } from '@/data/i18n'
 import { offlineState } from '@/data/offline/state'
 import { getRecord, isLocalName, isTempName } from '@/data/offline/store'
@@ -625,21 +639,35 @@ function linkQueryFor(fieldname, row = null, tableField = null) {
 function rowClassFor(tableField, row) {
   return hooks?.rowClass?.(tableField, row, values) || ''
 }
+// Grid position of one item in a columns block - worked out once per block
+// (blocks are rebuilt whenever the visible fields change).
+const blockPlacement = new WeakMap()
+function cellStyle(block, item) {
+  let place = blockPlacement.get(block)
+  if (!place) {
+    place = placeColumnItems(block.columns)
+    blockPlacement.set(block, place)
+  }
+  const p = place.get(item.key)
+  return p ? { '--cell-col': `${p.col} / span ${p.span}`, '--cell-row': p.row } : {}
+}
+
 function fieldClassFor(fieldname) {
   return hooks?.fieldClass?.(fieldname, values) || ''
 }
 
 // Any doctype whose form has a health_worker_name ("Data Collector") field
-// defaults it to the current user's own linked Health Worker record on a
-// new entry - generic, so it applies across every doctype that has the
-// field without each one needing its own hook for this. Guarded on the
-// field still being empty so it never overwrites a value a doctype-specific
-// hook (or the user) has already set.
+// defaults it to the logged-in user's own Health Worker record on a new
+// entry - Administrator included (one is created for a user who has none) -
+// generic, so it applies across every doctype that has the field without
+// each one needing its own hook for this. Guarded on the field still being
+// empty so it never overwrites a value a doctype-specific hook (or the
+// user) has already set.
 function applyCurrentHealthWorkerDefault() {
   if (!isNew) return
   if (!fields.value.some((f) => f.fieldname === 'health_worker_name')) return
   if (values.health_worker_name) return
-  const healthWorker = currentHealthWorkerResource.data
+  const healthWorker = dataCollectorResource.data
   if (healthWorker) {
     values.health_worker_name = healthWorker
     // A default, not an edit - it may arrive after the form has loaded.
@@ -647,7 +675,7 @@ function applyCurrentHealthWorkerDefault() {
   }
 }
 
-watch(() => currentHealthWorkerResource.data, applyCurrentHealthWorkerDefault)
+watch(() => dataCollectorResource.data, applyCurrentHealthWorkerDefault)
 
 // --- Prefill from the URL ----------------------------------------------
 // A new entry opened from a record's Connections panel (or a list filtered
@@ -684,6 +712,9 @@ function applyNewDocDefaults() {
 watch(
   () => metaResource.data,
   () => {
+    // The Data Collector default needs the form's fields - when the meta is
+    // the last thing to arrive, this is the only pass that can fill it.
+    applyCurrentHealthWorkerDefault()
     applyQueryPrefill()
     applyNewDocDefaults()
   },

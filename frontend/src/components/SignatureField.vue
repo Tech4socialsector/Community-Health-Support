@@ -5,7 +5,7 @@
   the other way round. -->
   <div>
     <div class="mb-1.5 flex items-center justify-between gap-2">
-      <label class="text-sm text-gray-700 dark:text-gray-300">
+      <label class="text-xs text-ink-gray-5">
         {{ t(field.label) }}<span v-if="field.reqd" class="text-red-500"> *</span>
       </label>
       <button

@@ -30,7 +30,7 @@ const label = computed(() => {
   if (attention.value) return attention.value === 1 ? t('1 needs attention') : t('{0} need attention', [attention.value])
   if (busy.value) return s.ready ? t('Syncing…') : t('Getting offline data…')
   if (s.pending) return s.pending === 1 ? t('1 to sync') : t('{0} to sync', [s.pending])
-  if (!s.online) return t('Offline')
+  if (!s.online) return s.weak ? t('Weak network') : t('Offline')
   // Online, but this phone hasn't got its offline copy yet.
   if (!s.ready) return t('Not ready offline')
   return t('Synced')

@@ -148,7 +148,6 @@
    "label": "Time To"
   },
   {
-   "description": "Calculated automatically from the delivery date and the Postpartum Visit Interval Master's visit schedule. Not editable by hand.",
    "fieldname": "next_visit_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -158,7 +157,6 @@
   },
   {
    "bold": 1,
-   "description": "High Risk only: visit her early, within this window. Blank for Normal patients. Reflects the most recently completed visit's Mother's/Baby's Condition - not a sticky flag, so it clears once a later visit comes back Normal.",
    "fieldname": "postpartum_risk_alert",
    "fieldtype": "Data",
    "label": "Risk Alert",
@@ -447,7 +445,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-20 14:24:42.673127",
+ "modified": "2026-10-22 22:26:24.761445",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",

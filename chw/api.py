@@ -43,6 +43,34 @@ def get_current_health_worker():
     return frappe.db.get_value('Health Worker', {'user': frappe.session.user}, 'name')
 
 
+@frappe.whitelist(methods=['POST'])
+def get_or_create_data_collector():
+    """The logged-in user's own Health Worker record, for the Vue forms'
+    "Data Collector" (health_worker_name) default - Administrator included.
+
+    Kept separate from get_current_health_worker on purpose: that one also
+    scopes worklists/dashboards, where Administrator (no record) must keep
+    seeing everything. A user with no Health Worker yet gets one created,
+    linked to their login, so the field can always be filled - the record is
+    only ever the caller's own, which is why permissions are bypassed here.
+    """
+    user = frappe.session.user
+    if user == 'Guest':
+        return None
+    existing = frappe.db.get_value('Health Worker', {'user': user}, 'name')
+    if existing:
+        return existing
+
+    # Health Worker is named by prompt: use the person's full name, made
+    # unique with the login if another record already has that name.
+    name = frappe.utils.get_fullname(user) or user
+    if frappe.db.exists('Health Worker', name):
+        name = f'{name} ({user})'
+    doc = frappe.get_doc({'doctype': 'Health Worker', 'user': user})
+    doc.insert(ignore_permissions=True, set_name=name)
+    return doc.name
+
+
 @frappe.whitelist()
 def get_villages():
     """Return all village names for the dashboard's Village filter."""

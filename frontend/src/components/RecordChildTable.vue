@@ -21,6 +21,9 @@
           <td class="px-3 py-2 tabular-nums text-gray-400">{{ index + 1 }}</td>
           <td v-for="col in columns" :key="col.fieldname" class="whitespace-nowrap px-3 py-2 text-gray-700 dark:text-gray-300">
             <span v-if="isEmptyValue(row[col.fieldname])" class="text-gray-300 dark:text-gray-600">—</span>
+            <span v-else-if="rowStatusPillClass(col, row[col.fieldname])" :class="rowStatusPillClass(col, row[col.fieldname])">
+              {{ formatFieldValue(row[col.fieldname], col) }}
+            </span>
             <template v-else>{{ formatFieldValue(row[col.fieldname], col) }}</template>
           </td>
         </tr>
@@ -34,6 +37,7 @@ import { computed } from 'vue'
 import Skeleton from '@/components/Skeleton.vue'
 import { useMeta } from '@/data/useMeta'
 import { isEmptyValue, formatFieldValue, isLayoutField } from '@/data/recordFormat'
+import { rowStatusPillClass } from '@/data/ui'
 import { t } from '@/data/i18n'
 
 const props = defineProps({

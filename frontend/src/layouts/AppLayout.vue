@@ -6,7 +6,10 @@
     <AppSidebar />
     <div class="flex min-w-0 flex-1 flex-col">
       <TopNavbar />
-      <main class="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
+      <!-- relative: frappe-ui's screen-reader "(required)" text on a mandatory
+      label is position:absolute - without a positioned ancestor it escapes
+      this scroll box, lengthens the page and adds a second scrollbar. -->
+      <main class="relative min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4 sm:px-6 sm:py-6">
         <slot />
       </main>
     </div>

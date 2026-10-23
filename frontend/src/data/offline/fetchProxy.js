@@ -36,8 +36,11 @@ import { t } from '@/data/i18n'
 
 let realFetch = null
 
-// A request that hangs (a tower with no data) counts as offline after this.
-const READ_TIMEOUT_MS = 15000
+// Longer than this on a weak signal and the CHW is left staring at a
+// spinner - the phone's copy is used instead (reads), or the change goes to
+// the Outbox (saves), and the app works offline until the signal is steady.
+const READ_TIMEOUT_MS = 6000
+const WRITE_TIMEOUT_MS = 8000
 // Methods that only read - safe to answer from the phone's copy. Anything
 // else is treated as a change and never answered from an old copy.
 const READ_RE = /^(get|search|has_|fetch|load|list|count|validate)/
@@ -401,28 +404,48 @@ async function proxied(input, init = {}) {
     // connection drops after the server saved it - but before the answer
     // came back - the queued retry gets that record, not a duplicate.
     const clientId = target?.action === 'insert' && (await hasDoctype(target.doc.doctype)) ? randomId() : null
+    const send = async () => {
+      if (!clientId) return realFetch(input, init)
+      let res = await realFetch('/api/method/chw.offline.push_insert', {
+        ...init,
+        method: 'POST',
+        body: JSON.stringify({ client_id: clientId, doc: target.doc }),
+      })
+      if (res.ok) {
+        const body = await res.json()
+        res = respond(req, body.message?.doc)
+        // Same notices a plain insert would show (msgprint on save).
+        if (body._server_messages) {
+          const out = await res.json()
+          out._server_messages = body._server_messages
+          res = new Response(JSON.stringify(out), { status: 200, headers: { 'Content-Type': 'application/json' } })
+        }
+      }
+      return res
+    }
+    const sent = send()
+    let slow = false
     try {
       let res
-      if (clientId) {
-        res = await realFetch('/api/method/chw.offline.push_insert', {
-          ...init,
-          method: 'POST',
-          body: JSON.stringify({ client_id: clientId, doc: target.doc }),
-        })
-        if (res.ok) {
-          const body = await res.json()
-          res = respond(req, body.message?.doc)
-          // Same notices a plain insert would show (msgprint on save).
-          if (body._server_messages) {
-            const out = await res.json()
-            out._server_messages = body._server_messages
-            res = new Response(JSON.stringify(out), { status: 200, headers: { 'Content-Type': 'application/json' } })
-          }
+      try {
+        res = await (target ? withTimeout(sent, WRITE_TIMEOUT_MS) : sent)
+      } catch (e) {
+        if (e?.message !== 'Network timeout') throw e
+        // Signal too weak to wait on: the change goes to the Outbox and the
+        // CHW carries on. The request already sent may still get through -
+        // the Outbox's retry then finds it done (same client id for a new
+        // record; an edit just sets the same values again), never a copy.
+        slow = true
+        const queued = await saveLocally(req, target, clientId || undefined)
+        if (queued.ok) {
+          markOffline({ weak: true })
+          sent.catch(() => {})
+          return queued
         }
-      } else {
-        res = await realFetch(input, init)
+        // Not possible on the phone (record never downloaded): keep waiting.
+        res = await sent
       }
-      markOnline()
+      if (!slow) markOnline()
       if (res.ok && target) learn({ ...req, kind: 'doc', doctype: target.doctype || target.doc?.doctype }, res.clone())
       return res
     } catch (e) {
@@ -444,11 +467,17 @@ async function proxied(input, init = {}) {
       res = await withTimeout(pending, READ_TIMEOUT_MS)
     } catch (e) {
       if (e?.message !== 'Network timeout') throw e
-      // Slow, not necessarily offline (a busy server, a big report): use
-      // the phone's copy if there is one, else keep waiting for the server.
-      // Never marked offline for slowness alone - only a failed request is.
+      // Too slow to work on: answer from the phone's copy and treat the
+      // signal as weak, so the next screens open from the phone at once
+      // instead of each waiting here too; sync.js switches back when the
+      // connection is steady. With no copy (a report the phone can't make)
+      // the server is still waited for.
       const local = await answerLocally(req)
-      if (local) return local
+      if (local) {
+        pending.catch(() => {})
+        markOffline({ weak: true })
+        return local
+      }
       res = await pending
     }
     // A gateway error is the server being unreachable, not an answer.
