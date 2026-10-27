@@ -16,10 +16,11 @@
  "fields": [
   {
    "fieldname": "type",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Type"
+   "label": "Type",
+   "options": "Type of Habit Master"
   },
   {
    "fieldname": "duration_of_use",
@@ -52,7 +53,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-15 16:50:02.842511",
+ "modified": "2026-10-26 14:40:10.269483",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Habits Child Table",

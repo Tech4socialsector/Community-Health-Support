@@ -1,4 +1,4 @@
-// Ports chw/common/doctype/anc_follow_up/anc_follow_up.js (the Desk form
+// Ports chw/mch/doctype/anc_follow_up/anc_follow_up.js (the Desk form
 // script) into the Vue app's hook contract - see doctype-hooks/index.js and
 // DoctypeForm.vue. Records are entered from both Desk and this app, so the
 // live results here must match Desk's and what anc_follow_up.py computes on
@@ -54,7 +54,7 @@ const windowPolicyCache = {}
 async function getWindowPolicy(highRisk) {
   const key = highRisk || 'No'
   if (!windowPolicyCache[key]) {
-    windowPolicyCache[key] = call('chw.common.doctype.anc_follow_up.anc_follow_up.get_window_policy_for_js', {
+    windowPolicyCache[key] = call('chw.mch.doctype.anc_follow_up.anc_follow_up.get_window_policy_for_js', {
       high_risk: key,
     })
       .then((msg) => ({

@@ -2,7 +2,7 @@ import frappe
 from dateutil.relativedelta import relativedelta
 from frappe.utils import getdate, today
 
-from chw.common.doctype.child_growth_monitoring.child_growth_monitoring import get_care_stage
+from chw.mch.doctype.child_growth_monitoring.child_growth_monitoring import get_care_stage
 
 # Same keys chw.api.chw_visit_summary() returns and CHW Dashboard Snapshot stores.
 DASHBOARD_SNAPSHOT_STAT_KEYS = [
@@ -65,7 +65,7 @@ def refresh_family_member_ages():
 	from chw.common.doctype.family_members.family_members import get_age_values
 
 	today_date = getdate(today())
-	fields = ["age", "age_in_months", "age_in_days", "age_detail"]
+	fields = ["age"]
 	records = frappe.get_all(
 		"Family members",
 		filters={"date_of_birth": ["is", "set"]},

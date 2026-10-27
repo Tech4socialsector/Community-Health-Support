@@ -9,11 +9,14 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AiAssistant: typeof import('./src/components/AiAssistant.vue')['default']
+    AppMark: typeof import('./src/components/AppMark.vue')['default']
     AppSidebar: typeof import('./src/components/AppSidebar.vue')['default']
     AwesomeBar: typeof import('./src/components/AwesomeBar.vue')['default']
     Breadcrumbs: typeof import('./src/components/Breadcrumbs.vue')['default']
+    CalendarPanel: typeof import('./src/components/CalendarPanel.vue')['default']
     ChildTable: typeof import('./src/components/ChildTable.vue')['default']
     ColumnManager: typeof import('./src/components/ColumnManager.vue')['default']
+    DateField: typeof import('./src/components/DateField.vue')['default']
     DocActivity: typeof import('./src/components/DocActivity.vue')['default']
     DocConnections: typeof import('./src/components/DocConnections.vue')['default']
     DynamicField: typeof import('./src/components/DynamicField.vue')['default']

@@ -7,7 +7,7 @@
   <div ref="root" class="relative">
     <button
       type="button"
-      :class="[ui.BTN_SECONDARY, '!h-8', { '!ring-forest-400': open, '!h-9 !w-9 !px-0': iconOnly }]"
+      :class="[ui.BTN_TOOLBAR, '!h-8', { '!ring-forest-400 !bg-forest-100': open, '!h-9 !w-9 !px-0': iconOnly }]"
       :aria-expanded="open"
       :aria-label="iconOnlyOnPhone || iconOnly ? label : undefined"
       :title="iconOnly ? label : undefined"

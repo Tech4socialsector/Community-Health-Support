@@ -24,20 +24,24 @@ export const CARD =
 // Shape and behaviour only - colour comes from one STAT_TONES entry (see
 // ICON_TILE_BASE for why the two are kept apart).
 const STAT_CARD_BASE =
-  'group relative flex min-h-[8.5rem] flex-col justify-between gap-3 rounded-xl p-4 text-left shadow-sm ring-1 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-forest-300 focus-within:ring-2 focus-within:ring-forest-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-400 dark:hover:ring-forest-700 sm:min-h-[10rem] sm:p-5'
+  'group relative flex min-h-[8.5rem] flex-col justify-between gap-3 rounded-xl p-4 text-left ring-1 transition hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-forest-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-forest-400 sm:min-h-[10rem] sm:p-5'
 
-// White card with a thin coloured line along the top edge; the card's
+// White card with a thin, even border all round in its colour; on hover
+// the card is tinted and the border turns thicker and stronger. The card's
 // number takes the same colour (statCountTone). navy / forest are the
 // brand pair (alternated on Home and Overview); the rest are meaning
-// colours for the Work Orders status cards.
+// colours for the Work Orders status cards. (A thick top-only border bent
+// into a crescent at the rounded corners, so the colour is on the ring.)
+// No drop shadow: it drew a grey edge under the coloured ring, so the
+// border read as two colours.
 const STAT_TONES = {
-  white: 'bg-white ring-gray-200 dark:bg-gray-900 dark:ring-gray-800',
-  navy: 'border-t-[3px] border-t-navy-600 bg-white ring-gray-200 dark:border-t-navy-400 dark:bg-gray-900 dark:ring-gray-800',
-  forest: 'border-t-[3px] border-t-forest-600 bg-white ring-gray-200 dark:border-t-forest-400 dark:bg-gray-900 dark:ring-gray-800',
-  blue: 'border-t-[3px] border-t-blue-500 bg-white ring-gray-200 dark:border-t-blue-400 dark:bg-gray-900 dark:ring-gray-800',
-  amber: 'border-t-[3px] border-t-amber-500 bg-white ring-gray-200 dark:border-t-amber-400 dark:bg-gray-900 dark:ring-gray-800',
-  red: 'border-t-[3px] border-t-red-500 bg-white ring-gray-200 dark:border-t-red-400 dark:bg-gray-900 dark:ring-gray-800',
-  green: 'border-t-[3px] border-t-green-600 bg-white ring-gray-200 dark:border-t-green-400 dark:bg-gray-900 dark:ring-gray-800',
+  white: 'bg-white ring-gray-200 hover:ring-forest-300 dark:bg-gray-900 dark:ring-gray-800 dark:hover:ring-forest-700',
+  navy: 'bg-white ring-navy-300 hover:bg-navy-50 hover:ring-2 hover:ring-navy-600 dark:bg-gray-900 dark:ring-navy-600 dark:hover:bg-navy-900/40 dark:hover:ring-navy-300',
+  forest: 'bg-white ring-forest-300 hover:bg-forest-50 hover:ring-2 hover:ring-forest-600 dark:bg-gray-900 dark:ring-forest-600 dark:hover:bg-forest-900/40 dark:hover:ring-forest-300',
+  blue: 'bg-white ring-blue-300 hover:bg-blue-50 hover:ring-2 hover:ring-blue-600 dark:bg-gray-900 dark:ring-blue-700 dark:hover:bg-blue-900/30 dark:hover:ring-blue-300',
+  amber: 'bg-white ring-amber-300 hover:bg-amber-50 hover:ring-2 hover:ring-amber-600 dark:bg-gray-900 dark:ring-amber-700 dark:hover:bg-amber-900/30 dark:hover:ring-amber-300',
+  red: 'bg-white ring-red-300 hover:bg-red-50 hover:ring-2 hover:ring-red-600 dark:bg-gray-900 dark:ring-red-700 dark:hover:bg-red-900/30 dark:hover:ring-red-300',
+  green: 'bg-white ring-green-300 hover:bg-green-50 hover:ring-2 hover:ring-green-600 dark:bg-gray-900 dark:ring-green-700 dark:hover:bg-green-900/30 dark:hover:ring-green-300',
 }
 
 const STAT_COUNT_TONES = {
@@ -52,14 +56,17 @@ const STAT_COUNT_TONES = {
 // Plain white card - loading placeholders.
 export const STAT_CARD = `${STAT_CARD_BASE} ${STAT_TONES.white}`
 
-const toneAt = (index) => (index % 2 === 0 ? 'navy' : 'forest')
+// One colour for every card (Home forms, Overview programs) - they used to
+// alternate navy / forest, which read as two border colours side by side.
+const CARD_TONE = 'forest'
+const toneAt = () => CARD_TONE
 
 // A card in a named tone (Work Orders statuses: 'blue', 'red', ...).
 export function statCardTone(tone) {
   return `${STAT_CARD_BASE} ${STAT_TONES[tone] || STAT_TONES.white}`
 }
 
-// Alternating navy / forest by position (Home forms, Overview programs).
+// The card colour for a card at `index` (Home forms, Overview programs).
 export function statCardAt(index) {
   return statCardTone(toneAt(index))
 }
@@ -109,6 +116,49 @@ const FOCUS = 'focus:outline-none focus-visible:ring-2 focus-visible:ring-forest
 export const BTN_PRIMARY = `inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-forest-700 px-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-forest-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-forest-600 dark:hover:bg-forest-500 ${FOCUS}`
 export const BTN_SECONDARY = `inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-white px-3.5 text-sm font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-900 dark:text-gray-200 dark:ring-gray-700 dark:hover:bg-gray-800 ${FOCUS}`
 // The square "+ New" on cards - above the card's stretched link (z-10).
+// Toolbar buttons (list Refresh / Export / Filter / Sort / Columns, form
+// "More actions"): a light green fill so they read as buttons, not text.
+export const BTN_TOOLBAR = `inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-forest-50 px-3.5 text-sm font-semibold text-forest-800 ring-1 ring-forest-200 transition hover:bg-forest-100 hover:ring-forest-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-forest-900/40 dark:text-forest-200 dark:ring-forest-800 dark:hover:bg-forest-900/70 ${FOCUS}`
+
+// Per-row actions at the end of a list row: view (read-only record page)
+// and edit (the form).
+const ROW_ACTION_BASE = `inline-flex h-8 w-8 items-center justify-center rounded-lg ring-1 transition ${FOCUS}`
+export const ROW_ACTION_VIEW = `${ROW_ACTION_BASE} bg-navy-50 text-navy-700 ring-navy-100 hover:bg-navy-100 hover:ring-navy-200 dark:bg-navy-900/40 dark:text-navy-200 dark:ring-navy-800 dark:hover:bg-navy-900/70`
+export const ROW_ACTION_EDIT = `${ROW_ACTION_BASE} bg-forest-50 text-forest-700 ring-forest-100 hover:bg-forest-100 hover:ring-forest-200 dark:bg-forest-900/40 dark:text-forest-200 dark:ring-forest-800 dark:hover:bg-forest-900/70`
+
+// Form sections: a card with a thin plain border and a tinted title bar.
+export const FORM_SECTION = 'overflow-hidden rounded-xl bg-white ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800'
+// Section title bars alternate green / blue (by position), each with an
+// icon tile picked from the title (iconForSection) in the same colour.
+const FORM_SECTION_HEAD_BASE = 'flex w-full items-center gap-3 border-b px-4 py-3 text-left sm:px-6'
+const FORM_SECTION_TONES = {
+  forest: {
+    head: 'border-forest-100 bg-forest-50/80 dark:border-forest-900 dark:bg-forest-900/30',
+    icon: 'bg-forest-700 text-white dark:bg-forest-600',
+    title: 'text-forest-900 dark:text-forest-100',
+    chevron: 'text-forest-700 dark:text-forest-300',
+  },
+  navy: {
+    head: 'border-navy-100 bg-navy-50/80 dark:border-navy-900 dark:bg-navy-900/30',
+    icon: 'bg-navy-700 text-white dark:bg-navy-600',
+    title: 'text-navy-900 dark:text-navy-100',
+    chevron: 'text-navy-700 dark:text-navy-300',
+  },
+}
+const formSectionTone = (index) => FORM_SECTION_TONES[index % 2 === 0 ? 'forest' : 'navy']
+export function formSectionHeadAt(index) {
+  return `${FORM_SECTION_HEAD_BASE} ${formSectionTone(index).head}`
+}
+export function formSectionIconAt(index) {
+  return `flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${formSectionTone(index).icon}`
+}
+export function formSectionTitleAt(index) {
+  return `text-sm font-semibold sm:text-[15px] ${formSectionTone(index).title}`
+}
+export function formSectionChevronAt(index) {
+  return `h-4 w-4 ${formSectionTone(index).chevron}`
+}
+
 export const BTN_ADD = `relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-forest-700 text-white shadow-sm transition hover:bg-forest-800 dark:bg-forest-600 dark:hover:bg-forest-500 ${FOCUS}`
 
 export const TABLE_WRAP = 'overflow-auto rounded-xl ring-1 ring-gray-200 dark:ring-gray-800'
@@ -116,7 +166,7 @@ export const TABLE = 'w-full text-left text-sm'
 export const THEAD = 'sticky top-0 z-10 bg-gray-50 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:bg-gray-800 dark:text-gray-400'
 export const TH = 'whitespace-nowrap px-4 py-3'
 export const TBODY = 'divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-900'
-export const TR = 'cursor-pointer transition hover:bg-forest-50/60 focus:bg-forest-50/60 focus:outline-none dark:hover:bg-gray-800/60 dark:focus:bg-gray-800/60'
+export const TR = 'cursor-pointer transition hover:bg-forest-100 focus:bg-forest-100 focus:outline-none dark:hover:bg-forest-900/40 dark:focus:bg-forest-900/40'
 const TD_BASE = 'whitespace-nowrap px-4 py-3'
 export const TD = `${TD_BASE} text-gray-700 dark:text-gray-300`
 // The row's identifying column (ID / patient) - its own variant rather than
@@ -126,7 +176,7 @@ export const TD_STRONG = `${TD_BASE} font-semibold text-navy-900 dark:text-gray-
 // The full list view, Desk-style: flat (no card frame, just a line top and
 // bottom), stretched edge to edge, with tighter cells - more of the
 // record visible, none of the inset a framed card adds on both sides.
-export const LIST_TABLE_WRAP = 'overflow-auto border-y border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900'
+export const LIST_TABLE_WRAP = 'overflow-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-800'
 export const LIST_TH = 'whitespace-nowrap px-3 py-2.5'
 export const LIST_TD = 'whitespace-nowrap px-3 py-2.5 text-gray-700 dark:text-gray-300'
 export const LIST_TD_STRONG = 'whitespace-nowrap px-3 py-2.5 font-semibold text-navy-900 dark:text-gray-100'

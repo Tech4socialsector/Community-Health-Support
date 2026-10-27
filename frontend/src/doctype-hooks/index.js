@@ -1,8 +1,10 @@
 import ancFollowUp from './ancFollowUp'
+import birthRegistration from './birthRegistration'
 import child6wTo1Year from './child6wTo1Year'
 import childGrowthMonitoring from './childGrowthMonitoring'
 import familyMembers from './familyMembers'
 import householdProfile from './householdProfile'
+import mainScreeningForm from './mainScreeningForm'
 import ncd from './ncd'
 import pnc from './pnc'
 import postpartum from './postpartum'
@@ -37,10 +39,12 @@ import pregnancyRegistration from './pregnancyRegistration'
 // values set after an await are picked up like any other change.
 const HOOKS = {
   'ANC Follow-up': ancFollowUp,
+  'Birth Registration': birthRegistration,
   'Child 6w to 1 Year Reg and Followup': child6wTo1Year,
   'Child Growth Monitoring': childGrowthMonitoring,
   'Family members': familyMembers,
   'Household profile': householdProfile,
+  'Main Screening Form': mainScreeningForm,
   NCD: ncd,
   PNC: pnc,
   'Postpartum Reg and Followup': postpartum,

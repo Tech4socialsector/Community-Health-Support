@@ -300,7 +300,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-15 17:08:09.655846",
+ "modified": "2026-10-26 10:38:45.456037",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",
@@ -339,6 +339,61 @@
    "read": 1,
    "report": 1,
    "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MCH Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Palliative Care Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mental Health Care Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "NCD Care Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cancer Worker",
    "share": 1,
    "write": 1
   }

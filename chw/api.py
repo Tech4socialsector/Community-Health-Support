@@ -11,6 +11,8 @@ from frappe.utils.file_manager import get_file_path
 from PIL import Image
 from frappe.utils import getdate, add_days, add_months, cint
 
+from chw.programmes import is_doctype_disabled
+
 
 PRIVILEGED_ROLES = {'Administrator', 'System Manager', 'Program Coordinator'}
 
@@ -279,6 +281,8 @@ def _doctype_connection_links(doctype):
     for link in frappe.get_meta(doctype).links or []:
         if link.hidden or link.is_child_table or not link.link_doctype or not link.link_fieldname:
             continue
+        if is_doctype_disabled(link.link_doctype):
+            continue
         links.append({'doctype': link.link_doctype, 'fieldname': link.link_fieldname})
     return links
 
@@ -311,6 +315,10 @@ def get_app_modules():
             }
             for item in (module_doc.doctypes or [])
             if item.doctype_name
+            and not is_doctype_disabled(item.doctype_name)
+            # A programme-only user (Cancer Worker, ...) sees just the forms
+            # they can open, as Desk does - not the other programmes'.
+            and frappe.has_permission(item.doctype_name, 'read')
         ]
         if not doctypes:
             continue
@@ -562,6 +570,8 @@ def global_search(txt):
         for item in (module_doc.doctypes or []):
             if not item.doctype_name or item.doctype_name in seen_doctypes:
                 continue
+            if is_doctype_disabled(item.doctype_name):
+                continue
             seen_doctypes.add(item.doctype_name)
             doctype_routes[item.doctype_name] = item.route or frappe.scrub(item.doctype_name).replace('_', '-')
 
@@ -746,7 +756,7 @@ def pnc_fully_completed_names(village=None):
     schedule was generated over) has fully elapsed. Time-based rather than an
     all-rows-completed check, since a missed visit doesn't mean her postnatal
     period hasn't ended."""
-    from chw.common.doctype.pnc.pnc import PNC_SCHEDULE_DURATION_MONTHS
+    from chw.mch.doctype.pnc.pnc import PNC_SCHEDULE_DURATION_MONTHS
 
     today_date = getdate(frappe.utils.nowdate())
     cutoff_delivery_date = add_months(today_date, -PNC_SCHEDULE_DURATION_MONTHS)
@@ -2024,6 +2034,8 @@ def get_chw_dashboard_cards(village=None, health_worker=None, date_range=None):
 
     cards = []
     for card in CHW_DASHBOARD_CARDS:
+        if is_doctype_disabled(card['doctype']):
+            continue
         filters = _dashboard_filters(card, village, health_worker, date_range)
         try:
             count = frappe.db.count(card['doctype'], filters)
@@ -2171,7 +2183,7 @@ def chw_dashboard_drilldown_excel(card_key, filters=None, page_length=None, star
 # drilldown pair instead of being forced into that generic engine. ----
 
 # The 3 ANC Follow-up followup tables, by their parent fieldname (matches
-# chw.common.doctype.anc_follow_up.anc_follow_up.FOLLOWUP_TABLE_FIELDS).
+# chw.mch.doctype.anc_follow_up.anc_follow_up.FOLLOWUP_TABLE_FIELDS).
 ANC_FOLLOWUP_CHILD_DOCTYPES = {
     'anc_followup': 'ANC Followup Child',
     'anc_followup_for_nurse': 'ANC Followup Nurse',
@@ -2817,7 +2829,7 @@ def _pnc_track_from_date(rows, delivery_date):
     row on this table wins first, otherwise the normal schedule lookup for
     however many visits are completed. Returns (window_start, next_date,
     is_urgent) or (None, None, False) if this table has nothing due."""
-    from chw.common.doctype.pnc.pnc import PNC
+    from chw.mch.doctype.pnc.pnc import PNC
 
     urgent_rows = [(i, row) for i, row in enumerate(rows) if row.urgent_followup and row.status != 'Completed']
     if urgent_rows:
@@ -2919,7 +2931,7 @@ def _enrich_anc_records_live(records):
     """From-date / Alert-date / High-Risk for ANC records, computed live from
     LMP date + the Visit Schedule Master + the Nurse follow-up rows only
     - reusing the exact same calculation the ANC Follow-up form itself runs
-    (chw.common.doctype.anc_follow_up.anc_follow_up.ANCFollowup), instead of
+    (chw.mch.doctype.anc_follow_up.anc_follow_up.ANCFollowup), instead of
     reading fields that were pre-calculated and stored on save. Volunteer and
     Doctor are open-ended manual logs with no schedule and no Work Order
     List connection, so their rows never factor in here. Batches its reads
@@ -2930,7 +2942,7 @@ def _enrich_anc_records_live(records):
     if not anc_records:
         return records
 
-    from chw.common.doctype.anc_follow_up.anc_follow_up import ANCFollowup
+    from chw.mch.doctype.anc_follow_up.anc_follow_up import ANCFollowup
 
     pregnant_ids = list({r.get('pregnant_id') for r in anc_records if r.get('pregnant_id')})
     pregnancies = frappe.get_all(
@@ -3010,7 +3022,7 @@ def _enrich_postpartum_records_live(records):
     if not postpartum_records:
         return records
 
-    from chw.common.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup import PostpartumRegandFollowup
+    from chw.mch.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup import PostpartumRegandFollowup
 
     names = [r['name'] for r in postpartum_records]
     deliveries = frappe.get_all(
@@ -3075,7 +3087,7 @@ def _enrich_child_6w_1y_records_live(records):
     if not child_records:
         return records
 
-    from chw.common.doctype.child_6w_to_1_year_reg_and_followup.child_6w_to_1_year_reg_and_followup import (
+    from chw.mch.doctype.child_6w_to_1_year_reg_and_followup.child_6w_to_1_year_reg_and_followup import (
         Child6wto1YearRegandFollowup,
     )
 

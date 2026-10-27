@@ -4,7 +4,7 @@ from chw.api import find_matching_anc_followup
 
 
 def execute():
-	frappe.reload_doc("common", "doctype", "pnc")
+	frappe.reload_doc("mch", "doctype", "pnc")
 
 	pnc_records = frappe.get_all(
 		"PNC",

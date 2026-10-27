@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "primary_details_tab",
-  "hmis_patient_registration",
+  "date",
   "hhid",
   "village",
   "gram_panchayat",
@@ -18,50 +18,16 @@
   "gender",
   "date_of_birth",
   "age",
-  "age_detail",
-  "age_in_months",
-  "age_in_days",
   "column_break_zdna",
   "phone_number",
   "marital_status",
-  "yellow_card",
   "occupation",
   "other_occupation",
   "education_status",
   "education",
-  "date",
   "health_worker_name",
   "status",
-  "section_break_kdnz",
-  "disability",
-  "type_of_disability",
-  "referal_for_the_disability",
-  "does_the_person_needs_an_preconception",
-  "past_visit",
-  "folic_acid",
-  "does_the_person_have_any_mental_health_condition",
-  "is_the_person_currently_pregnant",
-  "column_break_imal",
-  "type_of_mental_health",
-  "past_treatment",
-  "referal_for_the_mental_health",
-  "does_the_person_require_palliative_care",
-  "patient_condition",
-  "does_the_person_require_home_visit",
-  "referal_for_the_pallative_care",
-  "is_the_patient_postpartum",
-  "is_the_patient_a_child_0_to_1",
-  "charity_section",
-  "charity_breadwinner_occupation",
-  "charity_dependent_ratio",
-  "charity_health_condition",
-  "charity_living_conditions",
-  "charity_disability_severity",
-  "charity_mch_assessment",
-  "charity_column_break",
-  "charity_assessment_score",
-  "suggested_charity_percentage",
-  "cancer_tab",
+  "cancer_family_member_details_section",
   "spouse_father_name",
   "monthly_income",
   "cancer_column_break",
@@ -118,12 +84,6 @@
    "label": "Age"
   },
   {
-   "fieldname": "age_detail",
-   "fieldtype": "Data",
-   "label": "Age (Years, Months, Days)",
-   "read_only": 1
-  },
-  {
    "fieldname": "marital_status",
    "fieldtype": "Select",
    "label": "Marital Status",
@@ -145,25 +105,6 @@
    "in_standard_filter": 1,
    "label": "Village",
    "options": "Village",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.age >=60;",
-   "fieldname": "yellow_card",
-   "fieldtype": "Select",
-   "label": "Yellow card",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "age_in_months",
-   "fieldtype": "Int",
-   "label": "Age in Months",
-   "read_only": 1
-  },
-  {
-   "fieldname": "age_in_days",
-   "fieldtype": "Int",
-   "label": "Age in Days",
    "read_only": 1
   },
   {
@@ -204,30 +145,10 @@
    "label": "If Other, please specify"
   },
   {
-   "fieldname": "disability",
-   "fieldtype": "Select",
-   "label": "Person with a Disability",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval:doc.disability==\"Yes\"",
-   "fieldname": "type_of_disability",
-   "fieldtype": "Link",
-   "label": "Type Of Disability",
-   "options": "Type Of Disability"
-  },
-  {
    "fieldname": "health_worker_name",
    "fieldtype": "Link",
    "label": "Data Collector",
    "options": "Health Worker",
-   "read_only": 1
-  },
-  {
-   "description": "LCH Palliative Care Charity Criteria: 20-24 = >80%, 17-19 = 60-80%, 12-16 = 40-60%, 7-11 = 20-40%, below 7 = 0-20%.",
-   "fieldname": "suggested_charity_percentage",
-   "fieldtype": "Data",
-   "label": "Suggested Charity %",
    "read_only": 1
   },
   {
@@ -243,120 +164,6 @@
    "label": "Head of the Family Member"
   },
   {
-   "fieldname": "hmis_patient_registration",
-   "fieldtype": "Link",
-   "label": "HMIS HIN",
-   "options": "Patient Registration",
-   "read_only": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "section_break_kdnz",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:doc.disability==\"Yes\"",
-   "fieldname": "referal_for_the_disability",
-   "fieldtype": "Data",
-   "label": "Referal for the disability"
-  },
-  {
-   "depends_on": "eval:doc.gender==\"Female\"",
-   "fieldname": "does_the_person_needs_an_preconception",
-   "fieldtype": "Select",
-   "label": "Does the person needs an Preconception",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_needs_an_preconception == \"Yes\"",
-   "fieldname": "past_visit",
-   "fieldtype": "Select",
-   "label": "Past Visit",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "does_the_person_have_any_mental_health_condition",
-   "fieldtype": "Select",
-   "label": "Does the person have any mental health condition?",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "column_break_imal",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_have_any_mental_health_condition == \"Yes\"",
-   "fieldname": "type_of_mental_health",
-   "fieldtype": "Data",
-   "label": "Type of Mental Health"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_have_any_mental_health_condition == \"Yes\"",
-   "fieldname": "past_treatment",
-   "fieldtype": "Select",
-   "label": "Past Treatment",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_have_any_mental_health_condition == \"Yes\"",
-   "fieldname": "referal_for_the_mental_health",
-   "fieldtype": "Data",
-   "label": "Referal for the Mental Health"
-  },
-  {
-   "fieldname": "does_the_person_require_palliative_care",
-   "fieldtype": "Select",
-   "label": "Does the person require palliative care?",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_require_palliative_care == \"Yes\"",
-   "fieldname": "patient_condition",
-   "fieldtype": "Data",
-   "label": "Patient Condition"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_require_palliative_care == \"Yes\"",
-   "fieldname": "does_the_person_require_home_visit",
-   "fieldtype": "Select",
-   "label": "Does the person require home visit",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_require_palliative_care == \"Yes\"",
-   "fieldname": "referal_for_the_pallative_care",
-   "fieldtype": "Data",
-   "label": "Referal for the pallative care"
-  },
-  {
-   "depends_on": "eval: doc.does_the_person_needs_an_preconception == \"Yes\"",
-   "fieldname": "folic_acid",
-   "fieldtype": "Select",
-   "label": "Folic Acid",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval: doc.gender == \"Female\"",
-   "fieldname": "is_the_person_currently_pregnant",
-   "fieldtype": "Select",
-   "label": "Is the person currently pregnant?",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval: doc.gender == \"Female\"",
-   "description": "Delivered a child in the last 6 weeks.",
-   "fieldname": "is_the_patient_postpartum",
-   "fieldtype": "Select",
-   "label": "Is the patient postpartum?",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "is_the_patient_a_child_0_to_1",
-   "fieldtype": "Select",
-   "label": "Is the patient a child (0-1 years)?",
-   "options": "\nYes\nNo"
-  },
-  {
    "fetch_from": "hhid.gram_panchayat",
    "fieldname": "gram_panchayat",
    "fieldtype": "Link",
@@ -369,65 +176,6 @@
    "fieldtype": "Link",
    "label": "Sub Center",
    "options": "Sub Centre"
-  },
-  {
-   "fieldname": "charity_section",
-   "fieldtype": "Section Break",
-   "label": "Charity Assessment (LCH Criteria)"
-  },
-  {
-   "fieldname": "charity_breadwinner_occupation",
-   "fieldtype": "Select",
-   "label": "Occupation of the Primary Breadwinner",
-   "options": "\nDoes not have any reasonable breadwinners in the family.\nBreadwinners are daily wage laborers.\nBreadwinners have a monthly source of income, but on a contract basis.\nHas an established source of income from the government or private firm."
-  },
-  {
-   "fieldname": "charity_dependent_ratio",
-   "fieldtype": "Select",
-   "label": "Ratio of Family Members Earning Income to Number of Dependents",
-   "options": "\nFor every 1 person earning income, more than 6 people are dependents.\nFor every 1 person earning income, 5-6 people are dependents.\nFor every 1 person earning income, 3-4 people are dependents.\nFor every 1 person earning income, 1-2 people are dependents."
-  },
-  {
-   "fieldname": "charity_health_condition",
-   "fieldtype": "Select",
-   "label": "Health Condition of Family Members",
-   "options": "\nMore than one family member has a disability or a chronic illness.\nAny of the family members are undergoing regular medical treatment and have to pay from their pocket.\nFamily member is undergoing regular medical treatment and have insurance support.\nNo health concerns, avails medical support as and when needed without financial constraints."
-  },
-  {
-   "fieldname": "charity_living_conditions",
-   "fieldtype": "Select",
-   "label": "Living Conditions",
-   "options": "\nLiving in temporary tents or in houses made of mud with thatched roof.\nLiving in rented house without an owned one, with the required amenities.\nLiving in own house with multiple members sharing the same space or paying house loans.\nLiving in their own house with control over electricity and water."
-  },
-  {
-   "depends_on": "eval:doc.is_the_person_currently_pregnant!=\"Yes\"",
-   "fieldname": "charity_disability_severity",
-   "fieldtype": "Select",
-   "label": "Disability Severity",
-   "options": "\nNeeds to be carried around and requires assistance on a mobility device.\nRequires a wheelchair for mobility. Can propel wheelchair independently.\nCan walk with support /assistive device.\nCan move around independently."
-  },
-  {
-   "depends_on": "eval:doc.does_the_person_require_palliative_care!=\"Yes\"",
-   "fieldname": "charity_mch_assessment",
-   "fieldtype": "Select",
-   "label": "MCH Charity Assessment",
-   "options": "\nUnwanted girl child.\nChild with signs of malnutrition/ neglect.\nGirl Child.\nPregnancy with high risk factors."
-  },
-  {
-   "fieldname": "charity_column_break",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Sum of the 6 criteria above (each scored 1-4, highest need = 4). Range 6-24.",
-   "fieldname": "charity_assessment_score",
-   "fieldtype": "Int",
-   "label": "Overall Score",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cancer_tab",
-   "fieldtype": "Tab Break",
-   "label": "Cancer"
   },
   {
    "fieldname": "spouse_father_name",
@@ -454,37 +202,68 @@
    "fieldtype": "Select",
    "label": "Eligible for Cancer Screening",
    "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "cancer_family_member_details_section",
+   "fieldtype": "Section Break",
+   "label": "Cancer Family Member Details"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [
   {
+   "group": "MCH",
    "link_doctype": "Pregnancy Registration",
    "link_fieldname": "familymember_id"
   },
   {
+   "group": "MCH",
    "link_doctype": "Birth Registration",
    "link_fieldname": "fmid"
   },
   {
-   "link_doctype": "Palliative Care Initial Assessment Form",
-   "link_fieldname": "fmid"
-  },
-  {
+   "group": "MCH",
    "link_doctype": "Preconception Reg and Followup",
    "link_fieldname": "fmid"
   },
   {
+   "group": "MCH",
    "link_doctype": "Postpartum Reg and Followup",
    "link_fieldname": "fmid"
   },
   {
+   "group": "MCH",
    "link_doctype": "Child 6w to 1 Year Reg and Followup",
+   "link_fieldname": "fmid"
+  },
+  {
+   "group": "MCH",
+   "link_doctype": "Child Growth Monitoring",
+   "link_fieldname": "familymember_id"
+  },
+  {
+   "group": "Palliative Care",
+   "link_doctype": "Palliative Care Initial Assessment Form",
+   "link_fieldname": "fmid"
+  },
+  {
+   "group": "Mental Health Care",
+   "link_doctype": "Mental Health",
+   "link_fieldname": "family_members"
+  },
+  {
+   "group": "NCD Care",
+   "link_doctype": "NCD",
+   "link_fieldname": "familymember_id"
+  },
+  {
+   "group": "Cancer",
+   "link_doctype": "Main Screening Form",
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-10-15 16:50:02.842511",
+ "modified": "2026-10-27 10:31:20.049513",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",
@@ -523,6 +302,61 @@
    "read": 1,
    "report": 1,
    "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MCH Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Palliative Care Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Mental Health Care Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "NCD Care Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cancer Worker",
    "share": 1,
    "write": 1
   }

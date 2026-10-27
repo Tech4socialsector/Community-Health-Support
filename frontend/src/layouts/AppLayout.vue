@@ -14,6 +14,7 @@
 </template>
 
 <script setup>
+import { onBeforeUnmount, onMounted } from 'vue'
 import { breakpointsTailwind, useBreakpoints } from '@vueuse/core'
 import AppSidebar from '@/components/AppSidebar.vue'
 import TopNavbar from '@/components/TopNavbar.vue'
@@ -21,4 +22,11 @@ import MobileShell from '@/components/MobileShell.vue'
 
 const breakpoints = useBreakpoints(breakpointsTailwind)
 const isMobile = breakpoints.smaller('sm')
+
+// The shell is exactly one screen tall and scrolls inside <main>. Anything
+// that adds height below it (a long form's hidden parts, a popup's portal)
+// made the page itself scroll too - two scrollbars on one screen. While the
+// shell is up, the page never scrolls; only <main> does (see index.css).
+onMounted(() => document.documentElement.classList.add('chw-shell'))
+onBeforeUnmount(() => document.documentElement.classList.remove('chw-shell'))
 </script>

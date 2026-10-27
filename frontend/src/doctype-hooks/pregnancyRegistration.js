@@ -1,4 +1,4 @@
-// Ports chw/common/doctype/pregnancy_registration/pregnancy_registration.js
+// Ports chw/mch/doctype/pregnancy_registration/pregnancy_registration.js
 // (the Desk form script) into the Vue app's hook contract - see
 // doctype-hooks/index.js and DoctypeForm.vue. The derived values follow
 // pregnancy_registration.py validate(), which recomputes them on save, so

@@ -8,8 +8,8 @@ def execute():
 	spacing, any number of visits) is just data, never a code change. Seed
 	the default 2-row schedule (week 1, week 6) so existing sites keep
 	working without manual setup."""
-	frappe.reload_doc("chw_master", "doctype", "pnc_visit_schedule_row")
-	frappe.reload_doc("chw_master", "doctype", "pnc_visit_interval_master")
+	frappe.reload_doc("mch", "doctype", "pnc_visit_schedule_row")
+	frappe.reload_doc("mch", "doctype", "pnc_visit_interval_master")
 
 	master = frappe.get_single("PNC Visit Interval Master")
 	if master.visit_schedule:

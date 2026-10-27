@@ -25,9 +25,9 @@ import {
 // Read-only answers the forms ask for while being filled in (visit
 // schedules, the date format) - fetched once online so they're on the phone.
 const PREFETCH = [
-  ['chw.common.doctype.pnc.pnc.get_visit_schedule', undefined],
-  ['chw.common.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule', {}],
-  ['chw.common.doctype.child_6w_to_1_year_reg_and_followup.child_6w_to_1_year_reg_and_followup.get_visit_schedule', {}],
+  ['chw.mch.doctype.pnc.pnc.get_visit_schedule', undefined],
+  ['chw.mch.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule', {}],
+  ['chw.mch.doctype.child_6w_to_1_year_reg_and_followup.child_6w_to_1_year_reg_and_followup.get_visit_schedule', {}],
   ['frappe.client.get_single_value', { doctype: 'System Settings', field: 'date_format' }],
 ]
 

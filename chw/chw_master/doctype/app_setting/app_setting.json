@@ -6,6 +6,13 @@
  "field_order": [
   "app_name",
   "app_logo",
+  "section_break_programmes",
+  "enable_mch",
+  "enable_palliative",
+  "enable_mental_health",
+  "column_break_programmes",
+  "enable_ncd",
+  "enable_cancer",
   "section_break_login",
   "login_headline",
   "login_description",
@@ -34,6 +41,46 @@
    "fieldname": "app_logo",
    "fieldtype": "Attach Image",
    "label": "App Logo"
+  },
+  {
+   "fieldname": "section_break_programmes",
+   "fieldtype": "Section Break",
+   "label": "Programmes",
+   "description": "Turn on only the programmes this site runs. Household profile and Family members are always on. Turning a programme off hides its forms and stops new records; existing records are kept."
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_mch",
+   "fieldtype": "Check",
+   "label": "MCH"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_palliative",
+   "fieldtype": "Check",
+   "label": "Palliative Care"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_mental_health",
+   "fieldtype": "Check",
+   "label": "Mental Health Care"
+  },
+  {
+   "fieldname": "column_break_programmes",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_ncd",
+   "fieldtype": "Check",
+   "label": "NCD Care"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_cancer",
+   "fieldtype": "Check",
+   "label": "Cancer"
   },
   {
    "fieldname": "section_break_login",
@@ -133,7 +180,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-14 12:00:00.000000",
+ "modified": "2026-10-20 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "App Setting",

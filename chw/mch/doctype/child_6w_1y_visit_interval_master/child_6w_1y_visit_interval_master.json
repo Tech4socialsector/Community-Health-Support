@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2026-09-29 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "visit_schedule"
+ ],
+ "fields": [
+  {
+   "description": "One row per visit, in order - however many rows exist, that's how many visits there are. Each row is fully independent, so any protocol shape (a gap in between, back-to-back weeks, irregular spacing) is just data - no code change needed. Same pattern as PNC Visit Interval Master, just anchored on the child's own Date of Birth instead of the mother's delivery date.",
+   "fieldname": "visit_schedule",
+   "fieldtype": "Table",
+   "label": "Visit Schedule",
+   "options": "Child 6w-1y Visit Schedule Row"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-20 15:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MCH",
+ "name": "Child 6w-1y Visit Interval Master",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "role": "MCH Worker"
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

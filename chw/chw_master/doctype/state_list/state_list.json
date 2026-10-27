@@ -18,7 +18,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-30 10:45:41.078875",
+ "modified": "2026-10-20 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "State List",
@@ -57,6 +57,36 @@
    "role": "Program Coordinator",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "MCH Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Palliative Care Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Mental Health Care Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "NCD Care Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Cancer Worker"
   }
  ],
  "row_format": "Dynamic",

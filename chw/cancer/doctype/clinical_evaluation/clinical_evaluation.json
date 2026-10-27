@@ -15,6 +15,8 @@
   "patient_column_break",
   "mobile_number",
   "village",
+  "grampanchayat",
+  "sub_center",
   "date_of_evaluation",
   "oral_tab",
   "oral_clinical_evaluation",
@@ -122,7 +124,6 @@
    "label": "Patient Details"
   },
   {
-   "description": "Optional. Pick the patient's screening record to fill these details automatically.",
    "fieldname": "main_screening_form",
    "fieldtype": "Link",
    "label": "Main Screening Form",
@@ -179,9 +180,10 @@
    "fetch_from": "main_screening_form.village",
    "fetch_if_empty": 1,
    "fieldname": "village",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Village"
+   "label": "Village",
+   "options": "Village"
   },
   {
    "default": "Today",
@@ -405,14 +407,14 @@
    "depends_on": "eval:doc.breast_mammogram=='Yes'",
    "fieldname": "breast_mammogram_right",
    "fieldtype": "Small Text",
-   "label": "Mammogram – Right Breast",
+   "label": "Mammogram \u2013 Right Breast",
    "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_mammogram=='Yes'"
   },
   {
    "depends_on": "eval:doc.breast_mammogram=='Yes'",
    "fieldname": "breast_mammogram_left",
    "fieldtype": "Small Text",
-   "label": "Mammogram – Left Breast",
+   "label": "Mammogram \u2013 Left Breast",
    "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_mammogram=='Yes'"
   },
   {
@@ -443,14 +445,14 @@
    "depends_on": "eval:doc.breast_ultrasound=='Yes'",
    "fieldname": "breast_ultrasound_right",
    "fieldtype": "Small Text",
-   "label": "Ultrasound – Right Breast",
+   "label": "Ultrasound \u2013 Right Breast",
    "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_ultrasound=='Yes'"
   },
   {
    "depends_on": "eval:doc.breast_ultrasound=='Yes'",
    "fieldname": "breast_ultrasound_left",
    "fieldtype": "Small Text",
-   "label": "Ultrasound – Left Breast",
+   "label": "Ultrasound \u2013 Left Breast",
    "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes' && doc.breast_ultrasound=='Yes'"
   },
   {
@@ -773,13 +775,27 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "main_screening_form.panchayat",
+   "fieldname": "grampanchayat",
+   "fieldtype": "Link",
+   "label": "Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "main_screening_form.sub_center",
+   "fieldname": "sub_center",
+   "fieldtype": "Link",
+   "label": "Sub Center",
+   "options": "Sub Centre"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-15 16:50:02.842511",
+ "modified": "2026-10-26 11:03:12.380414",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Clinical Evaluation",
@@ -799,6 +815,40 @@
    "role": "System Manager",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cancer Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
    "write": 1
   }
  ],

@@ -1,4 +1,4 @@
-// Ports chw/common/doctype/ncd/ncd.js (the Desk form script) into the Vue
+// Ports chw/ncd_care/doctype/ncd/ncd.js (the Desk form script) into the Vue
 // app's hook contract - see doctype-hooks/index.js and DoctypeForm.vue.
 // The visit schedule and next-visit date follow ncd.py (generate_visit_schedule,
 // set_next_followup_date) so what the form shows is what gets saved: the

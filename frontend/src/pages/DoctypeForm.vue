@@ -110,61 +110,71 @@
         Inside a card: two independent columns (CSS multi-column, not a
         grid) so fields of different heights never push the columns out of
         line; spacing is each field's own bottom margin. -->
-        <section v-for="sec in formSections" :key="sec.key" :class="[ui.CARD, 'p-4 sm:p-6']">
+        <section v-for="sec in formSections" :key="sec.key" :class="ui.FORM_SECTION">
           <button
             v-if="sec.label && sec.collapsible"
             type="button"
-            class="flex w-full items-center justify-between gap-2 text-left"
+            :class="[ui.formSectionHeadAt(labelIndex(sec)), { '!border-b-0': !openSections.has(sec.key) }]"
             :aria-expanded="openSections.has(sec.key)"
             @click="toggleSection(sec.key)"
           >
-            <h2 class="text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h2>
-            <LucideIcon :name="openSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" class="h-4 w-4 text-gray-400" />
+            <span :class="ui.formSectionIconAt(labelIndex(sec))" aria-hidden="true"><LucideIcon :name="iconForSection(sec.label)" class="h-4 w-4" /></span>
+            <h2 :class="[ui.formSectionTitleAt(labelIndex(sec)), 'flex-1']">{{ t(sec.label) }}</h2>
+            <LucideIcon :name="openSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" :class="ui.formSectionChevronAt(labelIndex(sec))" />
           </button>
-          <h2 v-else-if="sec.label" class="mb-4 text-sm font-semibold text-navy-900 dark:text-gray-100">{{ t(sec.label) }}</h2>
+          <div v-else-if="sec.label" :class="ui.formSectionHeadAt(labelIndex(sec))">
+            <span :class="ui.formSectionIconAt(labelIndex(sec))" aria-hidden="true"><LucideIcon :name="iconForSection(sec.label)" class="h-4 w-4" /></span>
+            <h2 :class="ui.formSectionTitleAt(labelIndex(sec))">{{ t(sec.label) }}</h2>
+          </div>
 
-          <div v-show="!sec.collapsible || openSections.has(sec.key)" class="sm:columns-2 sm:gap-x-8" :class="{ 'mt-4': sec.label && sec.collapsible }">
-            <template v-for="item in sec.items" :key="item.key">
-              <h3
-                v-if="item.kind === 'heading'"
-                class="mb-3 break-inside-avoid text-xs font-semibold uppercase tracking-wide text-gray-500 sm:[column-span:all] dark:text-gray-400"
-              >
-                {{ t(item.label) }}
-              </h3>
-              <div
-                v-else-if="item.kind === 'html'"
-                class="mb-5 break-inside-avoid rounded-lg bg-gray-50 p-4 text-sm leading-relaxed text-gray-800 sm:[column-span:all] dark:bg-gray-800/60 dark:text-gray-200 [&_hr]:my-3 [&_hr]:border-gray-200 [&_p+p]:mt-3 [&_strong]:font-semibold"
-                :data-fieldname="item.key"
-                v-html="item.html"
-              />
-              <div v-else-if="item.kind === 'table'" class="mb-5 min-w-0 break-inside-avoid sm:[column-span:all]" :data-fieldname="item.key">
-                <ChildTable
-                  :field="item.field"
-                  :parent-doc="values"
-                  :doctype="doctype"
-                  :link-query-for="(fieldname, row) => linkQueryFor(fieldname, row, item.field.fieldname)"
-                  :row-class="(row) => rowClassFor(item.field.fieldname, row)"
-                  v-model="values[item.field.fieldname]"
-                  @row-added="(row, idx) => onRowAdded(item.field.fieldname, row, idx)"
-                  @rows-removed="(rows) => onRowsRemoved(item.field.fieldname, rows)"
-                />
+          <div v-show="!sec.collapsible || openSections.has(sec.key)" class="p-4 sm:p-6">
+            <!-- Desk's columns: each Column Break starts the next column, and
+            every field (Small Text too) stays inside its own column. -->
+            <div class="grid gap-x-8" :class="columnGrid(sec)">
+              <div v-for="(col, colIndex) in sec.columns" :key="colIndex" class="min-w-0">
+                <template v-for="item in col" :key="item.key">
+                  <h3
+                    v-if="item.kind === 'heading'"
+                    class="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                  >
+                    {{ t(item.label) }}
+                  </h3>
+                  <div
+                    v-else-if="item.kind === 'html'"
+                    class="mb-5 rounded-lg bg-gray-50 p-4 text-sm leading-relaxed text-gray-800 dark:bg-gray-800/60 dark:text-gray-200 [&_hr]:my-3 [&_hr]:border-gray-200 [&_p+p]:mt-3 [&_strong]:font-semibold"
+                    :data-fieldname="item.key"
+                    v-html="item.html"
+                  />
+                  <div v-else-if="item.kind === 'table'" class="mb-5 min-w-0" :data-fieldname="item.key">
+                    <ChildTable
+                      :field="item.field"
+                      :parent-doc="values"
+                      :doctype="doctype"
+                      :link-query-for="(fieldname, row) => linkQueryFor(fieldname, row, item.field.fieldname)"
+                      :row-class="(row) => rowClassFor(item.field.fieldname, row)"
+                      v-model="values[item.field.fieldname]"
+                      @row-added="(row, idx) => onRowAdded(item.field.fieldname, row, idx)"
+                      @rows-removed="(rows) => onRowsRemoved(item.field.fieldname, rows)"
+                    />
+                  </div>
+                  <div
+                    v-else
+                    :data-fieldname="item.key"
+                    class="mb-5 min-w-0"
+                    :class="fieldClassFor(item.field.fieldname)"
+                  >
+                    <DynamicField
+                      :field="item.field"
+                      :doctype="doctype"
+                      :docname="isNew ? null : name"
+                      :doc="values"
+                      :link-query="item.field.fieldtype === 'Link' ? linkQueryFor(item.field.fieldname) : null"
+                      v-model="values[item.field.fieldname]"
+                    />
+                  </div>
+                </template>
               </div>
-              <div
-                v-else
-                :data-fieldname="item.key"
-                class="mb-5 min-w-0 break-inside-avoid"
-                :class="[{ 'sm:[column-span:all]': isWideField(item.field) }, fieldClassFor(item.field.fieldname)]"
-              >
-                <DynamicField
-                  :field="item.field"
-                  :doctype="doctype"
-                  :docname="isNew ? null : name"
-                  :doc="values"
-                  :link-query="item.field.fieldtype === 'Link' ? linkQueryFor(item.field.fieldname) : null"
-                  v-model="values[item.field.fieldname]"
-                />
-              </div>
-            </template>
+            </div>
           </div>
         </section>
 
@@ -190,6 +200,7 @@ import { formCrumbs, findParentRecord } from '@/data/breadcrumbs'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { findModuleByRoute } from '@/data/modules'
 import * as ui from '@/data/ui'
+import { iconForSection } from '@/data/recordFormat'
 import { useMeta, useFormFields, useTableFields } from '@/data/useMeta'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
 import { applyDefaults } from '@/data/defaults'
@@ -252,20 +263,6 @@ const fields = useFormFields(metaResource)
 const tableFields = useTableFields(metaResource)
 const hooks = getDoctypeHooks(doctype)
 
-const WIDE_FIELDTYPES = new Set([
-  'Small Text',
-  'Long Text',
-  'Text Editor',
-  'Code',
-  'Geolocation',
-  'Table MultiSelect',
-  'Attach',
-  'Attach Image',
-])
-function isWideField(field) {
-  return WIDE_FIELDTYPES.has(field.fieldtype)
-}
-
 watchEffect(() => {
   setPageTitle(isNew ? t('New {0}', [t(metaResource.data?.name || doctype)]) : name)
 })
@@ -299,32 +296,70 @@ const formSections = computed(() => {
   const formByName = new Map(visibleFormFields.value.map((f) => [f.fieldname, f]))
   const tableByName = new Map(visibleTableFields.value.map((f) => [f.fieldname, f]))
   const sections = []
-  let current = { key: '__top', label: '', collapsible: false, items: [] }
+  // `columns`: the section split at its Column Breaks, as Desk lays it out
+  // (each field stays in its own column). `items` is the same fields in one
+  // list, for lookups.
+  const newSection = (key, label, collapsible) => ({ key, label, collapsible, items: [], columns: [[]] })
+  let current = newSection('__top', '', false)
+  const add = (item) => {
+    current.items.push(item)
+    current.columns[current.columns.length - 1].push(item)
+  }
   const close = () => {
     if (current.items.some((i) => i.kind !== 'heading')) sections.push(current)
   }
   for (const f of metaResource.data?.fields || []) {
     if (f.fieldtype === 'Section Break' || f.fieldtype === 'Tab Break') {
       close()
-      current = { key: f.fieldname, label: f.label || '', collapsible: !!f.collapsible, items: [] }
+      current = newSection(f.fieldname, f.label || '', !!f.collapsible)
+    } else if (f.fieldtype === 'Column Break') {
+      // A break before any field of the section only opens the first column.
+      if (current.columns[current.columns.length - 1].length || current.columns.length > 1) current.columns.push([])
     } else if (f.fieldtype === 'Heading') {
       // Labels like "<h5>Cardiovascular</h5>" - Desk renders the tag; here
       // the heading style does that job, so only the text is kept.
       const label = (f.label || '').replace(/<[^>]*>/g, '').trim()
-      if (label && !f.hidden && visibleNames.value.has(f.fieldname)) current.items.push({ kind: 'heading', key: f.fieldname, label })
+      if (label && !f.hidden && visibleNames.value.has(f.fieldname)) add({ kind: 'heading', key: f.fieldname, label })
     } else if (f.fieldtype === 'HTML') {
       // Fixed text from the form's design (e.g. the Palliative consent
       // wording, English + Hindi) - Desk shows it as written.
-      if (f.options && !f.hidden && visibleNames.value.has(f.fieldname)) current.items.push({ kind: 'html', key: f.fieldname, html: f.options })
+      if (f.options && !f.hidden && visibleNames.value.has(f.fieldname)) add({ kind: 'html', key: f.fieldname, html: f.options })
     } else if (tableByName.has(f.fieldname)) {
-      current.items.push({ kind: 'table', key: f.fieldname, field: tableByName.get(f.fieldname) })
+      add({ kind: 'table', key: f.fieldname, field: tableByName.get(f.fieldname) })
     } else if (formByName.has(f.fieldname)) {
-      current.items.push({ kind: 'field', key: f.fieldname, field: formByName.get(f.fieldname) })
+      add({ kind: 'field', key: f.fieldname, field: formByName.get(f.fieldname) })
     }
   }
   close()
+  // Drop trailing empty columns (a Column Break at the end of a section).
+  for (const sec of sections) {
+    while (sec.columns.length > 1 && !sec.columns[sec.columns.length - 1].length) sec.columns.pop()
+  }
   return sections
 })
+
+// Position among the titled sections only, so the green / blue title bars
+// keep alternating even with untitled sections in between.
+const titledIndex = computed(() => {
+  const map = new Map()
+  let i = 0
+  for (const sec of formSections.value) if (sec.label) map.set(sec.key, i++)
+  return map
+})
+function labelIndex(sec) {
+  return titledIndex.value.get(sec.key) ?? 0
+}
+
+// Grid for a section's columns - literal class names so Tailwind keeps them.
+const COLUMN_GRID = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+}
+function columnGrid(sec) {
+  return COLUMN_GRID[Math.min(sec.columns.length, 4)]
+}
 
 // Collapsible sections start closed, as in Desk.
 const openSections = reactive(new Set())
@@ -633,6 +668,36 @@ const fetchFromMap = computed(() => {
 let lastLinkValues = {}
 const fetchSeq = {}
 
+// "doctype.field" fetch sources the server refused - a fetch_from naming a
+// field the linked doctype doesn't have (NCD's familymember_id.high_risk:
+// Family members has no high_risk). Desk skips such a field silently and
+// fills the rest; one get_value for all of them fails as a whole, which left
+// every fetched field on the form empty. So: on failure, ask field by field,
+// fill what works and stop asking for the rest.
+const badFetchSources = new Set()
+
+async function getLinkedValues(doctype, name, sources) {
+  const wanted = sources.filter((s) => !badFetchSources.has(`${doctype}.${s}`))
+  if (!wanted.length) return {}
+  try {
+    return await call('frappe.client.get_value', { doctype, filters: name, fieldname: wanted })
+  } catch (e) {
+    // An unknown column comes back as an OperationalError (the SQL error
+    // text only in developer mode). Offline / no access: not the field's
+    // fault - fail as before.
+    const unknownField =
+      e?.exc_type === 'OperationalError' || /unknown column|not permitted|invalid field/i.test(`${e?.message || ''} ${e?.exc || ''}`)
+    if (!unknownField) throw e
+    if (wanted.length === 1) {
+      badFetchSources.add(`${doctype}.${wanted[0]}`)
+      console.warn(`fetch_from: ${doctype} has no readable field "${wanted[0]}" - skipped`)
+      return {}
+    }
+    const parts = await Promise.all(wanted.map((s) => getLinkedValues(doctype, name, [s])))
+    return Object.assign({}, ...parts)
+  }
+}
+
 async function fetchLinkedValues(linkFieldname, value) {
   const linkField = metaResource.data?.fields.find((f) => f.fieldname === linkFieldname)
   const targets = fetchFromMap.value[linkFieldname] || []
@@ -656,11 +721,7 @@ async function fetchLinkedValues(linkFieldname, value) {
     return
   }
   try {
-    const linked = await call('frappe.client.get_value', {
-      doctype: linkField.options,
-      filters: value,
-      fieldname: [...new Set(targets.map((t) => t.source))],
-    })
+    const linked = await getLinkedValues(linkField.options, value, [...new Set(targets.map((t) => t.source))])
     // Dropped if the Link changed again while this was in flight.
     if (seq !== fetchSeq[linkFieldname] || values[linkFieldname] !== value) return
     for (const t of targets) {

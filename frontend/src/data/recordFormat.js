@@ -120,6 +120,50 @@ const FIELD_ICON_RULES = [
   [/status/i, 'badge-check'],
 ]
 
+// ---- Icons for form section headings ----
+// Picked from the section's title, so every form gets one without setup.
+// Checked in order, more specific first ("Patient Details" is a person,
+// "Diagnosis & Treatment" is clinical, "Tests" is the lab).
+const SECTION_ICON_RULES = [
+  [/patient|personal|respondent|repondent|beneficiary|basic|primary|registration|demograph/i, 'user-round'],
+  [/family|member|relationship/i, 'users'],
+  [/household|house|housing|living/i, 'house'],
+  [/\bid\b|identity|aadha?r|document/i, 'id-card'],
+  [/address|location|village|area/i, 'map-pin'],
+  [/oral|mouth|dental/i, 'smile'],
+  [/breast/i, 'heart-pulse'],
+  [/cervi|vagin|gyn|menstru|uter/i, 'flower-2'],
+  [/cancer|screening|survey/i, 'ribbon'],
+  [/test|lab|investigation|cytology|biopsy|report|result|hpv/i, 'flask-conical'],
+  [/scan|ultra|usg|imaging|mammo|x-?ray/i, 'scan-line'],
+  [/colpo|microscop/i, 'microscope'],
+  [/diagnos|treatment|clinical|evaluation|examination|assessment|finding/i, 'stethoscope'],
+  [/referr|refferal/i, 'send'],
+  [/follow|visit|schedule|appointment/i, 'calendar-check'],
+  [/history|past|previous/i, 'history'],
+  [/habit|tobacco|smok|alcohol/i, 'cigarette'],
+  [/pregnan|anc|pnc|delivery|birth|baby|child|newborn|infant|postpartum|preconception/i, 'baby'],
+  [/vital|sign|bp\b|pressure/i, 'activity'],
+  [/danger|risk|alert|warning/i, 'triangle-alert'],
+  [/medicine|medication|drug|prescription/i, 'pill'],
+  [/vaccin|immuni/i, 'syringe'],
+  [/nutrition|feed|diet|food/i, 'apple'],
+  [/growth|weight|height|measure/i, 'scale'],
+  [/mental|mood|psych/i, 'brain'],
+  [/palliative|care|support/i, 'heart-handshake'],
+  [/education|counsel|teach|awareness/i, 'graduation-cap'],
+  [/consent|declaration|signature/i, 'file-check'],
+  [/comment|note|remark|other/i, 'notebook-pen'],
+]
+
+export function iconForSection(label) {
+  const text = String(label || '')
+  for (const [pattern, icon] of SECTION_ICON_RULES) {
+    if (pattern.test(text)) return icon
+  }
+  return 'clipboard-list'
+}
+
 const FIELDTYPE_ICONS = {
   Date: 'calendar',
   Datetime: 'calendar',

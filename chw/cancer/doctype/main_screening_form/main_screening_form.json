@@ -9,6 +9,7 @@
   "main_screening_form_tab",
   "main_screening_form_section",
   "landmark_if_any_column",
+  "fmid",
   "date_of_examination",
   "name1",
   "gender",
@@ -20,6 +21,7 @@
   "street_name",
   "village",
   "panchayat",
+  "sub_center",
   "town___area",
   "landmark_if_any",
   "mobile_number",
@@ -53,59 +55,74 @@
   "tab_2_tab",
   "test_section",
   "oral_examination",
+  "oral_screening_status",
+  "oral_questions_section",
   "tobacco_user",
-  "yesoral",
   "symptoms",
+  "symptom_ulcer_in_the_mouth",
+  "symptom_swelling_neck_oral_cavity",
+  "symptom_difficulty_in_swallowing",
+  "symptom_change_in_voice",
+  "symptom_sharp_teeth_denture",
+  "sharp_teeth_denture_details",
+  "symptom_others",
+  "symptom_others_details",
+  "yesoral",
   "dental_hygiene",
   "clinical_findings",
+  "ompd_section",
   "leukoplakia",
-  "if_leukoplakia__is_yes",
   "if_site",
   "if_size",
+  "if_leukoplakia__is_yes",
   "if_single_lesion",
   "if_heterogenous",
   "if_multiple_lesion",
   "if_hetro",
   "erthyroplakia",
-  "if_erthyroplakia_yes",
   "if_site_copy",
   "if_size_copy",
+  "if_erthyroplakia_yes",
+  "column_break_tiqf",
   "oral_submucous_fibrosis",
   "if_oral_submucous_fibrosis_yes",
   "non_healing_ulcer",
-  "if_non_healing_ulcer_yes",
   "if_site_copy_copy",
   "if_size_copy_copy",
+  "if_non_healing_ulcer_yes",
   "smoker_palate",
   "lichen_planus",
   "if_lichen_planus_yes",
-  "column_break_mhhp",
   "oral_lichenoid_reaction",
   "if_oral_lichenoid_reaction_yes",
   "others",
   "if_others",
-  "h5benign_lesionh",
+  "benign_lesion_section",
   "melanoplakia",
   "nodule",
   "if_nodule_yes",
   "ulcer",
-  "if_ulcer",
   "site_ulcer",
   "size_ulcer",
+  "if_ulcer",
+  "column_break_cjeo",
   "tobacco_pouch_keratosis",
   "if_tobacco_pouch_keratosi_yes",
   "other",
   "others_o",
-  "h5cancerous_lesionh",
+  "cancerous_lesion_section",
   "cancerous_lesion",
-  "if_cancerous_lesion_yes",
   "site_can",
   "if_size_ca",
   "appearance",
-  "h5significant_cervical_nodesh",
+  "if_cancerous_lesion_yes",
+  "cervical_nodes_section",
   "significant_cervical_nodes",
+  "oral_referral_section",
   "refferal",
   "if_refferal_yes",
+  "oral_referral_note",
+  "oral_screening_completed_note",
   "if__referral_for_cancerous_lesion",
   "if_no_is_chosen_then_screening_is_completed",
   "breast_screening__questionnaire_tab",
@@ -147,6 +164,11 @@
  ],
  "fields": [
   {
+   "fieldname": "main_screening_form_tab",
+   "fieldtype": "Tab Break",
+   "label": "Main Screening Form"
+  },
+  {
    "fieldname": "main_screening_form_section",
    "fieldtype": "Section Break",
    "label": "Main Screening Form"
@@ -156,32 +178,46 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "fmid",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Family Member ID",
+   "options": "Family members"
+  },
+  {
    "fieldname": "date_of_examination",
    "fieldtype": "Date",
    "label": "Date of Examination"
   },
   {
+   "fetch_from": "fmid.family_member",
+   "fetch_if_empty": 1,
    "fieldname": "name1",
    "fieldtype": "Data",
    "label": "Name"
   },
   {
+   "fetch_from": "fmid.gender",
    "fieldname": "gender",
    "fieldtype": "Select",
    "label": "Gender",
    "options": "\nMale\nFemale\nOther"
   },
   {
+   "fetch_from": "fmid.date_of_birth",
+   "fetch_if_empty": 1,
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of Birth"
   },
   {
+   "fetch_from": "fmid.age",
    "fieldname": "age",
    "fieldtype": "Int",
    "label": "Age"
   },
   {
+   "fetch_from": "fmid.spouse_father_name",
    "fieldname": "spi",
    "fieldtype": "Data",
    "label": "Father's / Spouse's Name"
@@ -202,14 +238,26 @@
    "label": "Street Name"
   },
   {
+   "fetch_from": "fmid.village",
+   "fetch_if_empty": 1,
    "fieldname": "village",
-   "fieldtype": "Data",
-   "label": "Village "
+   "fieldtype": "Link",
+   "label": "Village ",
+   "options": "Village"
   },
   {
+   "fetch_from": "fmid.gram_panchayat",
    "fieldname": "panchayat",
-   "fieldtype": "Data",
-   "label": "Panchayat"
+   "fieldtype": "Link",
+   "label": "Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "fetch_from": "fmid.sub_center",
+   "fieldname": "sub_center",
+   "fieldtype": "Link",
+   "label": "Sub Center",
+   "options": "Sub Centre"
   },
   {
    "fieldname": "town___area",
@@ -222,13 +270,15 @@
    "label": "Landmark If any "
   },
   {
+   "fetch_from": "fmid.phone_number",
+   "fetch_if_empty": 1,
    "fieldname": "mobile_number",
-   "fieldtype": "Phone",
+   "fieldtype": "Data",
    "label": "Mobile Number"
   },
   {
    "fieldname": "alternateno",
-   "fieldtype": "Phone",
+   "fieldtype": "Data",
    "label": "AlternateNo"
   },
   {
@@ -238,6 +288,7 @@
    "options": "Nil\nPrimary\nMiddle\nHigh School\nCollege\nNot known"
   },
   {
+   "fetch_from": "fmid.occupation",
    "fieldname": "occupation",
    "fieldtype": "Data",
    "label": "Occupation"
@@ -255,6 +306,7 @@
    "options": "\nYes\nNo\nNot Known"
   },
   {
+   "depends_on": "eval:doc.family_history_of_cancer==\"Yes\"",
    "fieldname": "if_yes",
    "fieldtype": "Table",
    "label": "If Yes",
@@ -278,67 +330,78 @@
    "options": "\nLess than 12 months ago\nMore than 12 months ago\nSurgical Menopause"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "have_you_undergone_surgical_removal_of_the_uterus",
    "fieldtype": "Select",
    "label": "Have you undergone surgical removal of the uterus",
    "options": "\nYes\nNo"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "abnormal_bleeding_per_vaginum",
    "fieldtype": "Select",
    "label": "Abnormal bleeding per vaginum",
    "options": "\nNone\nPost Menopausal bleeding\nPost coital bleeding\nInter menstrual  bleeding\nDUB\nOthers"
   },
   {
+   "fetch_from": "fmid.marital_status",
    "fieldname": "marital_status",
-   "fieldtype": "Select",
-   "label": "Marital status",
-   "options": "\nMarried\nNever married\nWidowed\nSeparated\nDivorced"
+   "fieldtype": "Data",
+   "label": "Marital status"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "age_at_marriage",
    "fieldtype": "Int",
    "label": "Age at marriage"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "total_pregnancies",
    "fieldtype": "Int",
    "label": "Total pregnancies"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "age_at_first_child_birth",
    "fieldtype": "Int",
    "label": "Age at first child birth"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "age_at_last_child_birth",
    "fieldtype": "Int",
    "label": "Age at last child birth"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "are_you_currently_pregnant",
    "fieldtype": "Select",
    "label": "Are you currently pregnant",
    "options": "\nYes\nNo"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "method_of_contraception_ever_used",
    "fieldtype": "Select",
    "label": "Method of contraception ever used",
    "options": "\nNil\nCondom\nPill\nIUCD\nTubectomy\nOthers"
   },
   {
+   "depends_on": "eval:doc.method_of_contraception_ever_used==\"Others\"",
    "fieldname": "if_method_of_contraception_ever_used_is_other",
    "fieldtype": "Data",
    "label": "If Method of contraception ever used is Other "
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "breast_fed_how_many_months",
    "fieldtype": "Select",
    "label": "Breast Fed, how many months",
    "options": "\nNil\n< 6 months\n6-12 months\n> 12 months"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "hormonal_therapy_how_long",
    "fieldtype": "Select",
    "label": "Hormonal Therapy, how long",
@@ -357,6 +420,7 @@
    "options": "Habits Child Table"
   },
   {
+   "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "have_you_ever_undergone_breast__cervix_screening_before",
    "fieldtype": "Select",
    "label": "Have you ever undergone Breast / Cervix screening before",
@@ -381,15 +445,33 @@
    "label": "Completed By"
   },
   {
+   "fieldname": "tab_2_tab",
+   "fieldtype": "Tab Break",
+   "label": "Oral Screening Questionnaire"
+  },
+  {
    "fieldname": "test_section",
    "fieldtype": "Section Break",
-   "label": "Oral Screening – Questionnaire"
+   "label": "Oral Screening \u2013 Questionnaire"
   },
   {
    "fieldname": "oral_examination",
    "fieldtype": "Select",
    "label": "Oral Examination",
-   "options": "\nYes\nNo\nNot Known"
+   "options": "\nYes\nNo\nNot now",
+   "reqd": 1
+  },
+  {
+   "fieldname": "oral_screening_status",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Oral Screening Status",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.oral_examination==\"Yes\"",
+   "fieldname": "oral_questions_section",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "tobacco_user",
@@ -398,17 +480,72 @@
    "options": "\nYes\nNo"
   },
   {
-   "depends_on": "eval:doc.tobacco_user==\"Yes\"",
-   "fieldname": "yesoral",
-   "fieldtype": "Select",
-   "label": "If Yes",
-   "options": "Ulcer in the mouth\nSwelling – neck/oral cavity\nDifficulty in swallowing\nChange in voice\nSharp teeth/ denture if yes (a open field to enter details)\nOthers"
-  },
-  {
    "fieldname": "symptoms",
    "fieldtype": "Select",
    "label": "Symptoms",
    "options": "\nYes\nNo"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.symptoms==\"Yes\"",
+   "fieldname": "symptom_ulcer_in_the_mouth",
+   "fieldtype": "Check",
+   "label": "Ulcer in the mouth"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.symptoms==\"Yes\"",
+   "fieldname": "symptom_swelling_neck_oral_cavity",
+   "fieldtype": "Check",
+   "label": "Swelling \u2013 neck/oral cavity"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.symptoms==\"Yes\"",
+   "fieldname": "symptom_difficulty_in_swallowing",
+   "fieldtype": "Check",
+   "label": "Difficulty in swallowing"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.symptoms==\"Yes\"",
+   "fieldname": "symptom_change_in_voice",
+   "fieldtype": "Check",
+   "label": "Change in voice"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.symptoms==\"Yes\"",
+   "fieldname": "symptom_sharp_teeth_denture",
+   "fieldtype": "Check",
+   "label": "Sharp teeth / denture"
+  },
+  {
+   "depends_on": "eval:doc.symptoms==\"Yes\" && doc.symptom_sharp_teeth_denture",
+   "fieldname": "sharp_teeth_denture_details",
+   "fieldtype": "Data",
+   "label": "Sharp teeth / denture details"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.symptoms==\"Yes\"",
+   "fieldname": "symptom_others",
+   "fieldtype": "Check",
+   "label": "Others"
+  },
+  {
+   "depends_on": "eval:doc.symptoms==\"Yes\" && doc.symptom_others",
+   "fieldname": "symptom_others_details",
+   "fieldtype": "Data",
+   "label": "Other symptoms"
+  },
+  {
+   "fieldname": "yesoral",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Symptoms (old single choice)",
+   "options": "Ulcer in the mouth\nSwelling \u2013 neck/oral cavity\nDifficulty in swallowing\nChange in voice\nSharp teeth/ denture if yes (a open field to enter details)\nOthers",
+   "read_only": 1
   },
   {
    "fieldname": "dental_hygiene",
@@ -423,6 +560,12 @@
    "options": "\nI. Normal\nII. Oral malignant potential disease"
   },
   {
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"II. Oral malignant potential disease\"",
+   "fieldname": "ompd_section",
+   "fieldtype": "Section Break",
+   "label": "II. Oral Malignant Potential Disease"
+  },
+  {
    "fieldname": "leukoplakia",
    "fieldtype": "Select",
    "label": "Leukoplakia ",
@@ -430,98 +573,133 @@
   },
   {
    "depends_on": "eval:doc.leukoplakia==\"Yes\"",
+   "fieldname": "if_site",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "depends_on": "eval:doc.leukoplakia==\"Yes\"",
+   "fieldname": "if_size",
+   "fieldtype": "Data",
+   "label": "Size"
+  },
+  {
+   "depends_on": "eval:doc.leukoplakia==\"Yes\"",
    "fieldname": "if_leukoplakia__is_yes",
    "fieldtype": "Select",
-   "label": "If Leukoplakia Yes",
-   "options": "\nSite\nSize\nSingle lesion\nMultiple lesion"
+   "label": "Single or multiple lesion",
+   "options": "\nSingle lesion\nMultiple lesion"
   },
   {
-   "depends_on": "eval:doc.if_leukoplakia__is_yes==\"Single lesion\"",
+   "depends_on": "eval:doc.leukoplakia==\"Yes\" && doc.if_leukoplakia__is_yes==\"Single lesion\"",
    "fieldname": "if_single_lesion",
    "fieldtype": "Select",
-   "label": "If Single Lesion",
-   "options": "\nHomogenous\nHeterogenous\nErythro- Leukoplakia"
-  },
-  {
-   "depends_on": "eval:doc.if_single_lesion==\"Heterogenous\"",
-   "fieldname": "if_heterogenous",
-   "fieldtype": "Select",
-   "label": "If Heterogenous",
-   "options": "\nNodular\nVerrucous"
-  },
-  {
-   "depends_on": "eval:doc.if_leukoplakia__is_yes==\"Multiple lesion\"",
-   "fieldname": "if_multiple_lesion",
-   "fieldtype": "Select",
-   "label": "If Multiple Lesion",
+   "label": "Single lesion",
    "options": "\nHomogenous\nHeterogenous"
   },
   {
-   "depends_on": "eval:doc.if_multiple_lesion==\"Heterogenous\"",
+   "depends_on": "eval:doc.leukoplakia==\"Yes\" && doc.if_leukoplakia__is_yes==\"Single lesion\" && doc.if_single_lesion==\"Heterogenous\"",
+   "fieldname": "if_heterogenous",
+   "fieldtype": "Select",
+   "label": "Heterogenous (single lesion)",
+   "options": "\nNodular\nVerrucous\nErythro- Leukoplakia"
+  },
+  {
+   "depends_on": "eval:doc.leukoplakia==\"Yes\" && doc.if_leukoplakia__is_yes==\"Multiple lesion\"",
+   "fieldname": "if_multiple_lesion",
+   "fieldtype": "Select",
+   "label": "Multiple lesion",
+   "options": "\nHomogenous\nHeterogenous"
+  },
+  {
+   "depends_on": "eval:doc.leukoplakia==\"Yes\" && doc.if_leukoplakia__is_yes==\"Multiple lesion\" && doc.if_multiple_lesion==\"Heterogenous\"",
    "fieldname": "if_hetro",
    "fieldtype": "Select",
-   "label": "If Heterogenous",
+   "label": "Heterogenous (multiple lesion)",
    "options": "\nNodular\nVerrucous\nErythro- Leukoplakia"
   },
   {
    "fieldname": "erthyroplakia",
    "fieldtype": "Select",
-   "label": "Erthyroplakia",
+   "label": "Erythroplakia",
    "options": "\nYes\nNo"
   },
   {
    "depends_on": "eval:doc.erthyroplakia==\"Yes\"",
-   "fieldname": "if_erthyroplakia_yes",
-   "fieldtype": "Select",
-   "label": "If Erthyroplakia Yes",
-   "options": "\nSite\nSize"
+   "fieldname": "if_site_copy",
+   "fieldtype": "Data",
+   "label": "Site"
   },
   {
-   "fieldname": "column_break_mhhp",
-   "fieldtype": "Column Break"
+   "depends_on": "eval:doc.erthyroplakia==\"Yes\"",
+   "fieldname": "if_size_copy",
+   "fieldtype": "Data",
+   "label": "Size"
+  },
+  {
+   "fieldname": "if_erthyroplakia_yes",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "If Erthyroplakia Yes",
+   "options": "\nSite\nSize",
+   "read_only": 1
   },
   {
    "fieldname": "oral_submucous_fibrosis",
    "fieldtype": "Select",
-   "label": "Oral submucous fibrosis ",
+   "label": "Oral submucous fibrosis",
    "options": "\nYes\nNo"
   },
   {
    "depends_on": "eval:doc.oral_submucous_fibrosis==\"Yes\"",
    "fieldname": "if_oral_submucous_fibrosis_yes",
    "fieldtype": "Select",
-   "label": "If Oral submucous fibrosis Yes",
+   "label": "Severity",
    "options": "\nMild\nModerate\nSevere"
   },
   {
    "fieldname": "non_healing_ulcer",
    "fieldtype": "Select",
-   "label": "Non healing ulcer",
+   "label": "Non-healing ulcer",
    "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.non_healing_ulcer==\"Yes\"",
+   "fieldname": "if_site_copy_copy",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "depends_on": "eval:doc.non_healing_ulcer==\"Yes\"",
+   "fieldname": "if_size_copy_copy",
+   "fieldtype": "Data",
+   "label": "Size"
   },
   {
    "fieldname": "if_non_healing_ulcer_yes",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "If Non healing ulcer Yes",
-   "options": "\nSite\nSize"
+   "options": "\nSite\nSize",
+   "read_only": 1
   },
   {
    "fieldname": "smoker_palate",
    "fieldtype": "Select",
-   "label": "Smoker palate ",
+   "label": "Smoker's palate",
    "options": "\nYes\nNo"
   },
   {
    "fieldname": "lichen_planus",
    "fieldtype": "Select",
-   "label": "Lichen planus ",
+   "label": "Lichen planus",
    "options": "\nYes\nNo"
   },
   {
    "depends_on": "eval:doc.lichen_planus==\"Yes\"",
    "fieldname": "if_lichen_planus_yes",
    "fieldtype": "Data",
-   "label": "If Lichen planus Yes"
+   "label": "Site"
   },
   {
    "fieldname": "oral_lichenoid_reaction",
@@ -533,7 +711,7 @@
    "depends_on": "eval:doc.oral_lichenoid_reaction==\"Yes\"",
    "fieldname": "if_oral_lichenoid_reaction_yes",
    "fieldtype": "Data",
-   "label": "If Oral lichenoid reaction Yes"
+   "label": "Site"
   },
   {
    "fieldname": "others",
@@ -545,12 +723,13 @@
    "depends_on": "eval:doc.others==\"Yes\"",
    "fieldname": "if_others",
    "fieldtype": "Data",
-   "label": "If Others"
+   "label": "Details"
   },
   {
-   "fieldname": "h5benign_lesionh",
-   "fieldtype": "Heading",
-   "label": "<h5>Benign lesion</h5>"
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"II. Oral malignant potential disease\"",
+   "fieldname": "benign_lesion_section",
+   "fieldtype": "Section Break",
+   "label": "III. Benign Lesion"
   },
   {
    "fieldname": "melanoplakia",
@@ -568,12 +747,168 @@
    "depends_on": "eval:doc.nodule==\"Yes\"",
    "fieldname": "if_nodule_yes",
    "fieldtype": "Data",
-   "label": "If Nodule Yes"
+   "label": "Site"
+  },
+  {
+   "fieldname": "ulcer",
+   "fieldtype": "Select",
+   "label": "Ulcer",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.ulcer==\"Yes\"",
+   "fieldname": "site_ulcer",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "depends_on": "eval:doc.ulcer==\"Yes\"",
+   "fieldname": "size_ulcer",
+   "fieldtype": "Data",
+   "label": "Size"
+  },
+  {
+   "fieldname": "if_ulcer",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "If Ulcer",
+   "options": "\nSite\nSize",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tobacco_pouch_keratosis",
+   "fieldtype": "Select",
+   "label": "Tobacco pouch keratosis",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.tobacco_pouch_keratosis==\"Yes\"",
+   "fieldname": "if_tobacco_pouch_keratosi_yes",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "fieldname": "other",
+   "fieldtype": "Select",
+   "label": "Others",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.other==\"Yes\"",
+   "fieldname": "others_o",
+   "fieldtype": "Data",
+   "label": "Details"
+  },
+  {
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"II. Oral malignant potential disease\"",
+   "fieldname": "cancerous_lesion_section",
+   "fieldtype": "Section Break",
+   "label": "IV. Cancerous Lesion"
+  },
+  {
+   "fieldname": "cancerous_lesion",
+   "fieldtype": "Select",
+   "label": "Cancerous lesion",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.cancerous_lesion==\"Yes\"",
+   "fieldname": "site_can",
+   "fieldtype": "Data",
+   "label": "Site"
+  },
+  {
+   "depends_on": "eval:doc.cancerous_lesion==\"Yes\"",
+   "fieldname": "if_size_ca",
+   "fieldtype": "Data",
+   "label": "Size"
+  },
+  {
+   "depends_on": "eval:doc.cancerous_lesion==\"Yes\"",
+   "fieldname": "appearance",
+   "fieldtype": "Data",
+   "label": "Appearance"
+  },
+  {
+   "fieldname": "if_cancerous_lesion_yes",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "If Cancerous lesion Yes",
+   "options": "\nSite\nSize\nAppearance",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"II. Oral malignant potential disease\"",
+   "fieldname": "cervical_nodes_section",
+   "fieldtype": "Section Break",
+   "label": "V. Significant Cervical Nodes"
+  },
+  {
+   "description": "> 1 cm, hard, fixed, suspicious node without evidence of infection",
+   "fieldname": "significant_cervical_nodes",
+   "fieldtype": "Select",
+   "label": "Significant cervical nodes",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.oral_examination==\"Yes\"",
+   "fieldname": "oral_referral_section",
+   "fieldtype": "Section Break",
+   "label": "Referral"
+  },
+  {
+   "fieldname": "refferal",
+   "fieldtype": "Select",
+   "label": "Referral",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.refferal==\"Yes\"",
+   "description": "Choose one. Choosing any of these moves the patient to Clinical Evaluation.",
+   "fieldname": "if_refferal_yes",
+   "fieldtype": "Select",
+   "label": "Referred for",
+   "options": "\nTCC\nReferral for Oral Malignant Potential Disease\nReferral for Cancerous lesion"
+  },
+  {
+   "depends_on": "eval:doc.refferal==\"Yes\"",
+   "fieldname": "oral_referral_note",
+   "fieldtype": "HTML",
+   "label": "Moves to Clinical Evaluation",
+   "options": "<p><b>Patient will move to Clinical Evaluation.</b></p>"
+  },
+  {
+   "depends_on": "eval:doc.refferal==\"No\"",
+   "fieldname": "oral_screening_completed_note",
+   "fieldtype": "HTML",
+   "label": "Screening Completed",
+   "options": "<p><b>Screening is completed.</b> Patient will NOT move to clinical evaluation.</p>"
+  },
+  {
+   "fieldname": "if__referral_for_cancerous_lesion",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "If  Referral for Cancerous lesion",
+   "options": "\nThis is a single select option\nChoosing this will move patient to clinical evaluation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "if_no_is_chosen_then_screening_is_completed",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "If No is chosen, then screening is completed",
+   "options": "Patient will NOT move to clinical evaluation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "breast_screening__questionnaire_tab",
+   "fieldtype": "Tab Break",
+   "label": "Breast Screening  Questionnaire"
   },
   {
    "fieldname": "breast_screening_section",
    "fieldtype": "Section Break",
-   "label": "Breast Screening – Questionnaire"
+   "label": "Breast Screening \u2013 Questionnaire"
   },
   {
    "fieldname": "breast_symptoms",
@@ -634,9 +969,14 @@
    "options": "<p><b>Screening is completed.</b> Patient will NOT move to clinical evaluation.</p>"
   },
   {
+   "fieldname": "cervical_screening_questionnaire_tab",
+   "fieldtype": "Tab Break",
+   "label": "Cervical Screening Questionnaire"
+  },
+  {
    "fieldname": "cervical_screening_section",
    "fieldtype": "Section Break",
-   "label": "Cervical Screening – Questionnaire"
+   "label": "Cervical Screening \u2013 Questionnaire"
   },
   {
    "description": "Set automatically on save. Stays Pending while any answer is Not now.",
@@ -813,187 +1153,24 @@
    "options": "<p><b>Screening is completed.</b> Patient will NOT move to clinical evaluation.</p>"
   },
   {
-   "fieldname": "tab_2_tab",
-   "fieldtype": "Tab Break",
-   "label": "Oral Screening Questionnaire"
+   "fieldname": "column_break_tiqf",
+   "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.if_leukoplakia__is_yes==\"Site\"",
-   "fieldname": "if_site",
-   "fieldtype": "Data",
-   "label": "If Site"
-  },
-  {
-   "depends_on": "eval:doc.if_leukoplakia__is_yes==\"Size\"",
-   "fieldname": "if_size",
-   "fieldtype": "Data",
-   "label": "If Size"
-  },
-  {
-   "depends_on": "eval:doc.if_erthyroplakia_yes==\"Site\"",
-   "fieldname": "if_site_copy",
-   "fieldtype": "Data",
-   "label": "If Site"
-  },
-  {
-   "depends_on": "eval:doc.if_non_healing_ulcer_yes==\"Site\"",
-   "fieldname": "if_site_copy_copy",
-   "fieldtype": "Data",
-   "label": "If Site"
-  },
-  {
-   "depends_on": "eval:doc.if_erthyroplakia_yes==\"Size\"",
-   "fieldname": "if_size_copy",
-   "fieldtype": "Data",
-   "label": "If Size"
-  },
-  {
-   "depends_on": "eval:doc.if_non_healing_ulcer_yes==\"Size\"",
-   "fieldname": "if_size_copy_copy",
-   "fieldtype": "Data",
-   "label": "If Size"
-  },
-  {
-   "fieldname": "ulcer",
-   "fieldtype": "Select",
-   "label": "Ulcer",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "if_ulcer",
-   "fieldtype": "Select",
-   "label": "If Ulcer",
-   "options": "\nSite\nSize"
-  },
-  {
-   "depends_on": "eval:doc.if_ulcer==\"Site\"",
-   "fieldname": "site_ulcer",
-   "fieldtype": "Data",
-   "label": "If Site"
-  },
-  {
-   "depends_on": "eval:doc.if_ulcer==\"Size\"",
-   "fieldname": "size_ulcer",
-   "fieldtype": "Data",
-   "label": "If Size"
-  },
-  {
-   "fieldname": "tobacco_pouch_keratosis",
-   "fieldtype": "Select",
-   "label": "Tobacco pouch keratosis",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval:doc.tobacco_pouch_keratosis==\"Yes\"",
-   "fieldname": "if_tobacco_pouch_keratosi_yes",
-   "fieldtype": "Data",
-   "label": "If Tobacco pouch keratosi Yes"
-  },
-  {
-   "fieldname": "other",
-   "fieldtype": "Select",
-   "label": "Others",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval:doc.other==\"Yes\"",
-   "fieldname": "others_o",
-   "fieldtype": "Data",
-   "label": "If Others"
-  },
-  {
-   "fieldname": "h5cancerous_lesionh",
-   "fieldtype": "Heading",
-   "label": "<h5>Cancerous lesion</h5>"
-  },
-  {
-   "fieldname": "cancerous_lesion",
-   "fieldtype": "Select",
-   "label": "Cancerous lesion",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "if_cancerous_lesion_yes",
-   "fieldtype": "Select",
-   "label": "If Cancerous lesion Yes",
-   "options": "\nSite\nSize\nAppearance"
-  },
-  {
-   "depends_on": "eval:doc.if_cancerous_lesion_yes==\"Site\"",
-   "fieldname": "site_can",
-   "fieldtype": "Data",
-   "label": "If Site"
-  },
-  {
-   "depends_on": "eval:doc.if_cancerous_lesion_yes==\"Size\"",
-   "fieldname": "if_size_ca",
-   "fieldtype": "Data",
-   "label": "If Size"
-  },
-  {
-   "depends_on": "eval:doc.if_cancerous_lesion_yes==\"Appearance\"",
-   "fieldname": "appearance",
-   "fieldtype": "Data",
-   "label": "Appearance"
-  },
-  {
-   "fieldname": "h5significant_cervical_nodesh",
-   "fieldtype": "Heading",
-   "label": "<h5>Significant Cervical nodes</h5>"
-  },
-  {
-   "fieldname": "significant_cervical_nodes",
-   "fieldtype": "Select",
-   "label": "Significant Cervical nodes",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "refferal",
-   "fieldtype": "Select",
-   "label": "Refferal",
-   "options": "\nYes\nNo"
-  },
-  {
-   "depends_on": "eval:doc.refferal==\"Yes\"",
-   "fieldname": "if_refferal_yes",
-   "fieldtype": "Select",
-   "label": "If Refferal Yes",
-   "options": "\nTCC\nReferral for Oral Malignant Potential Disease\nReferral for Cancerous lesion"
-  },
-  {
-   "depends_on": "eval:doc.if_refferal_yes==\"Referral for Cancerous lesion\"",
-   "fieldname": "if__referral_for_cancerous_lesion",
-   "fieldtype": "Select",
-   "label": "If  Referral for Cancerous lesion",
-   "options": "\nThis is a single select option\nChoosing this will move patient to clinical evaluation"
-  },
-  {
-   "depends_on": "eval:doc.refferal==\"No\"",
-   "fieldname": "if_no_is_chosen_then_screening_is_completed",
-   "fieldtype": "Select",
-   "label": "If No is chosen, then screening is completed",
-   "options": "Patient will NOT move to clinical evaluation"
-  },
-  {
-   "fieldname": "main_screening_form_tab",
-   "fieldtype": "Tab Break",
-   "label": "Main Screening Form"
-  },
-  {
-   "fieldname": "breast_screening__questionnaire_tab",
-   "fieldtype": "Tab Break",
-   "label": "Breast Screening  Questionnaire"
-  },
-  {
-   "fieldname": "cervical_screening_questionnaire_tab",
-   "fieldtype": "Tab Break",
-   "label": "Cervical Screening Questionnaire"
+   "fieldname": "column_break_cjeo",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2026-10-15 16:50:02.842511",
+ "links": [
+  {
+   "group": "Cancer",
+   "link_doctype": "Clinical Evaluation",
+   "link_fieldname": "main_screening_form"
+  }
+ ],
+ "modified": "2026-10-27 13:05:13.100084",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Main Screening Form",
@@ -1008,6 +1185,40 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cancer Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
    "share": 1,
    "write": 1
   }

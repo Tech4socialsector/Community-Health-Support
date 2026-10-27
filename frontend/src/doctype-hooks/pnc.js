@@ -1,4 +1,4 @@
-// Ports chw/common/doctype/pnc/pnc.js (the Desk form script) into the Vue
+// Ports chw/mch/doctype/pnc/pnc.js (the Desk form script) into the Vue
 // app's hook contract - see doctype-hooks/index.js and DoctypeForm.vue.
 // Records are entered from both Desk and this app, so the live results here
 // must match Desk's and what pnc.py computes on save. The mother/baby visit
@@ -34,7 +34,7 @@ const DEFAULT_RISK_ALERT_DAYS = 1
 // has no permission rules of its own, so it can't be listed directly. The
 // schedule is one-time setup, so it's fetched once per session.
 const getFullSchedule = cached(async () => {
-  const rows = await call('chw.common.doctype.pnc.pnc.get_visit_schedule')
+  const rows = await call('chw.mch.doctype.pnc.pnc.get_visit_schedule')
   if (rows && rows.length) return rows
   return DEFAULT_VISIT_SCHEDULE.map(([opens, closes]) => ({
     window_opens_day: opens,

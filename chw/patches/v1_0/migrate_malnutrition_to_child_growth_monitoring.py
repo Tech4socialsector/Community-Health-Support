@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import getdate
 
-from chw.common.doctype.child_growth_monitoring.child_growth_monitoring import get_stage_for_date
+from chw.mch.doctype.child_growth_monitoring.child_growth_monitoring import get_stage_for_date
 
 
 def execute():
@@ -12,8 +12,8 @@ def execute():
 	across before the old doctype's files (and, via remove_orphan_doctypes, its
 	DocType record) are removed later in this same migrate run.
 	"""
-	frappe.reload_doc("common", "doctype", "child_growth_followup")
-	frappe.reload_doc("common", "doctype", "child_growth_monitoring")
+	frappe.reload_doc("mch", "doctype", "child_growth_followup")
+	frappe.reload_doc("mch", "doctype", "child_growth_monitoring")
 
 	if not frappe.db.table_exists("Malnutrition"):
 		return

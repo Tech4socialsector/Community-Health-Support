@@ -119,6 +119,16 @@
     :reference-doctype="doctype"
     @update:model-value="$emit('update:modelValue', $event)"
   />
+  <DateField
+    v-else-if="controlType === 'datepicker' || controlType === 'datetimepicker'"
+    :label="t(field.label)"
+    :required="!!field.reqd"
+    :description="t(field.description) || ''"
+    :disabled="readOnly"
+    :with-time="controlType === 'datetimepicker'"
+    :model-value="modelValue"
+    @update:model-value="$emit('update:modelValue', $event)"
+  />
   <FormControl
     v-else
     :type="controlType"
@@ -139,6 +149,7 @@ import GeoLocationField from '@/components/GeoLocationField.vue'
 import TableMultiSelectField from '@/components/TableMultiSelectField.vue'
 import LinkField from '@/components/LinkField.vue'
 import SignatureField from '@/components/SignatureField.vue'
+import DateField from '@/components/DateField.vue'
 import { evaluateDependsOn } from '@/data/dependsOn'
 import { t } from '@/data/i18n'
 
@@ -192,9 +203,9 @@ const controlType = computed(() => {
     case 'Percent':
       return 'number'
     case 'Date':
-      return 'date'
+      return 'datepicker'
     case 'Datetime':
-      return 'datetime-local'
+      return 'datetimepicker'
     case 'Time':
       return 'time'
     case 'Signature':

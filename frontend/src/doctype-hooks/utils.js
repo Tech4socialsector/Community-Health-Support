@@ -4,6 +4,7 @@
 // dates a day out in India between 00:00 and 05:30 - Desk (moment) and the
 // server (Python dates) both work in local dates.
 
+import { ref } from 'vue'
 import { call, toast } from 'frappe-ui'
 import { t } from '@/data/i18n'
 
@@ -63,17 +64,19 @@ export function compareDates(a, b) {
 // writes it into text fields such as "next visit window" and risk alerts -
 // so a live preview reads exactly like the saved value. dd-mm-yyyy (this
 // site's setting) until it's known; CHW roles may not read System Settings.
-let dateFormat = 'dd-mm-yyyy'
+// Also what the date boxes show (DateField.vue), so they follow System
+// Settings automatically - hence a ref.
+export const siteDateFormat = ref('dd-mm-yyyy')
 call('frappe.client.get_single_value', { doctype: 'System Settings', field: 'date_format' })
   .then((f) => {
-    if (f) dateFormat = f
+    if (f) siteDateFormat.value = f
   })
   .catch(() => {})
 
 export function formatDate(value) {
   const d = parseDate(value)
   if (!d) return ''
-  return dateFormat
+  return siteDateFormat.value
     .replace('yyyy', String(d.getFullYear()))
     .replace('mm', pad(d.getMonth() + 1))
     .replace('dd', pad(d.getDate()))

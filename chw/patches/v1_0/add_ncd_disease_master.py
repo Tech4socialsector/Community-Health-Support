@@ -15,7 +15,7 @@ COMMON_NCD_DISEASES = {
 
 
 def execute():
-	frappe.reload_doc("chw_master", "doctype", "ncd_disease")
+	frappe.reload_doc("ncd_care", "doctype", "ncd_disease")
 	for disease, interval_days in COMMON_NCD_DISEASES.items():
 		if frappe.db.exists("NCD Disease", disease):
 			frappe.db.set_value("NCD Disease", disease, "interval_days", interval_days)

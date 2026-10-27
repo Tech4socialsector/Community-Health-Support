@@ -1,5 +1,11 @@
 // First, before anything can make a request - see the file.
 import './data/offline/install'
+// Inter, the font frappe-ui's theme asks for (InterVar). frappe-ui ships the
+// files but only loads them through its own style.css, which this app
+// doesn't import - without this the browser fell back to the system font.
+// By path: the package's exports don't list the font CSS, and importing its
+// style.css would pull in Tailwind a second time.
+import '../node_modules/frappe-ui/src/fonts/Inter/inter.css'
 import './index.css'
 import { createApp } from 'vue'
 import App from './App.vue'

@@ -1,4 +1,4 @@
-// Ports chw/common/doctype/child_growth_monitoring/child_growth_monitoring.js
+// Ports chw/mch/doctype/child_growth_monitoring/child_growth_monitoring.js
 // (the Desk form script) into the Vue app's hook contract - see
 // doctype-hooks/index.js and DoctypeForm.vue. Results must match what the
 // controller (child_growth_monitoring.py) recomputes on save: age, age in
@@ -177,9 +177,10 @@ export default {
     stateFor(values, ctx).dob = values.date_of_birth || null
   },
 
-  // Desk's set_query: only children up to 11 years can be picked.
+  // Desk's set_query: only children up to 11 years (132 months) can be
+  // picked, by date of birth - Family members has no Age in Months field.
   getLinkQuery(fieldname) {
-    if (fieldname === 'familymember_id') return { filters: { age_in_months: ['<=', 132] } }
+    if (fieldname === 'familymember_id') return { filters: { date_of_birth: ['>=', addMonths(today(), -132)] } }
     return null
   },
 

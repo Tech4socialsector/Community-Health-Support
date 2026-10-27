@@ -64,6 +64,15 @@
   z-index: 100 !important;
 }
 
+/* AppLayout's shell is the only scroll area while it's mounted (it adds
+   .chw-shell): the page itself stays put, so a long form shows one scrollbar,
+   not two. */
+html.chw-shell,
+html.chw-shell body {
+  height: 100%;
+  overflow: hidden;
+}
+
 /* Calmer page canvas behind the white cards. */
 body {
   background-color: theme('colors.gray.50');

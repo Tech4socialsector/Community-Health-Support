@@ -1,20 +1,19 @@
 {
- "app": "chw",
  "charts": [],
- "content": "[{\"id\":\"MfIUhWNivo\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Household Details\",\"col\":4}},{\"id\":\"cxs9pjDOiG\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Family Members\",\"col\":4}},{\"id\":\"n14mU_LhS-\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pregnancy Registration\",\"col\":4}},{\"id\":\"ancFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ANC Follow-up\",\"col\":4}},{\"id\":\"lgNLFGGKLJ\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Birth Registration\",\"col\":4}},{\"id\":\"zfNmA54s-M\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PNC Followup\",\"col\":4}},{\"id\":\"kfVraXbodY\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care Initial Assessment Form\",\"col\":4}},{\"id\":\"g2JEHutcmC\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care followup\",\"col\":4}},{\"id\":\"preconYest01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Preconception (Yesterday)\",\"col\":4}},{\"id\":\"postpartYest01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Postpartum (Yesterday)\",\"col\":4}},{\"id\":\"child6wYest01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Child 6w-1y (Yesterday)\",\"col\":4}},{\"id\":\"preconFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Preconception Followup\",\"col\":4}},{\"id\":\"postpartFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Postpartum Followup\",\"col\":4}},{\"id\":\"child6wFollowUp01\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Child 6w-1y Followup\",\"col\":4}}]",
+ "content": "[{\"id\":\"header-household_&_family\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Household &amp; Family</b></span>\",\"col\":12}},{\"id\":\"number_card-household_details\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Household Details\",\"col\":3}},{\"id\":\"number_card-family_members\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Family Members\",\"col\":3}},{\"id\":\"header-mch\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>MCH</b></span>\",\"col\":12}},{\"id\":\"number_card-pregnancy_registration\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Pregnancy Registration\",\"col\":3}},{\"id\":\"number_card-anc_follow_up\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"ANC Follow-up\",\"col\":3}},{\"id\":\"number_card-birth_registration\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Birth Registration\",\"col\":3}},{\"id\":\"number_card-pnc_followup\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"PNC Followup\",\"col\":3}},{\"id\":\"number_card-preconception_(yesterday)\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Preconception (Yesterday)\",\"col\":3}},{\"id\":\"number_card-postpartum_(yesterday)\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Postpartum (Yesterday)\",\"col\":3}},{\"id\":\"number_card-child_6w_1y_(yesterday)\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Child 6w-1y (Yesterday)\",\"col\":3}},{\"id\":\"header-palliative_care\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Palliative Care</b></span>\",\"col\":12}},{\"id\":\"number_card-palliative_care_initial_assessment_form_1\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care Initial Assessment Form-1\",\"col\":3}},{\"id\":\"number_card-palliative_care_followup_1\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Palliative Care followup-1\",\"col\":3}},{\"id\":\"header-mental_health_care\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Mental Health Care</b></span>\",\"col\":12}},{\"id\":\"number_card-mental_health_registrations\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Mental Health Registrations\",\"col\":3}},{\"id\":\"header-ncd_care\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>NCD Care</b></span>\",\"col\":12}},{\"id\":\"number_card-ncd_registrations\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"NCD Registrations\",\"col\":3}},{\"id\":\"header-cancer\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Cancer</b></span>\",\"col\":12}},{\"id\":\"number_card-cancer_screenings\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Cancer Screenings\",\"col\":3}},{\"id\":\"number_card-clinical_evaluations\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Clinical Evaluations\",\"col\":3}}]",
  "creation": "2026-09-23 10:29:40.101175",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
+ "for_user": "",
  "hide_custom": 0,
- "icon": "air-vent",
+ "icon": "house",
  "idx": 0,
  "indicator_color": "green",
  "is_hidden": 0,
  "label": "CHW App",
- "link_type": "DocType",
  "links": [],
- "modified": "2026-10-01 00:00:00.000000",
+ "modified": "2026-10-26 12:30:00.000000",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "CHW App",
@@ -22,14 +21,6 @@
   {
    "label": "Household Details",
    "number_card_name": "Household Details"
-  },
-  {
-   "label": "Palliative Care Initial Assessment Form",
-   "number_card_name": "Palliative Care Initial Assessment Form-1"
-  },
-  {
-   "label": "Palliative Care followup",
-   "number_card_name": "Palliative Care followup-1"
   },
   {
    "label": "Family Members",
@@ -40,16 +31,16 @@
    "number_card_name": "Pregnancy Registration"
   },
   {
+   "label": "ANC Follow-up",
+   "number_card_name": "ANC Follow-up"
+  },
+  {
    "label": "Birth Registration",
    "number_card_name": "Birth Registration"
   },
   {
    "label": "PNC Followup",
    "number_card_name": "PNC Followup"
-  },
-  {
-   "label": "ANC Follow-up",
-   "number_card_name": "ANC Follow-up"
   },
   {
    "label": "Preconception (Yesterday)",
@@ -64,31 +55,38 @@
    "number_card_name": "Child 6w-1y (Yesterday)"
   },
   {
-   "label": "Preconception Followup",
-   "number_card_name": "Preconception Followup"
+   "label": "Palliative Care Initial Assessment Form-1",
+   "number_card_name": "Palliative Care Initial Assessment Form-1"
   },
   {
-   "label": "Postpartum Followup",
-   "number_card_name": "Postpartum Followup"
+   "label": "Palliative Care followup-1",
+   "number_card_name": "Palliative Care followup-1"
   },
   {
-   "label": "Child 6w-1y Followup",
-   "number_card_name": "Child 6w-1y Followup"
+   "label": "Mental Health Registrations",
+   "number_card_name": "Mental Health Registrations"
+  },
+  {
+   "label": "NCD Registrations",
+   "number_card_name": "NCD Registrations"
+  },
+  {
+   "label": "Cancer Screenings",
+   "number_card_name": "Cancer Screenings"
+  },
+  {
+   "label": "Clinical Evaluations",
+   "number_card_name": "Clinical Evaluations"
   }
  ],
  "owner": "Administrator",
+ "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [
-  {
-   "role": "CHW Health Worker"
-  },
-  {
-   "role": "System Manager"
-  }
- ],
- "sequence_id": 0.0,
+ "roles": [],
+ "sequence_id": 1.0,
  "shortcuts": [],
+ "standard": 1,
  "title": "CHW App",
  "type": "Workspace"
 }

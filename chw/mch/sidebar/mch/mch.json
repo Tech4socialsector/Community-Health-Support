@@ -1,0 +1,33 @@
+{
+ "app": "chw",
+ "creation": "2026-10-25 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Sidebar",
+ "header_icon": "baby",
+ "idx": 0,
+ "items": [
+  {
+   "added": 0,
+   "child": 0,
+   "collapsible": 0,
+   "hidden": 1,
+   "icon": "layout-dashboard",
+   "indent": 0,
+   "is_default_module": 0,
+   "keep_closed": 0,
+   "label": "CHW App",
+   "link_to": "CHW App",
+   "link_type": "Workspace",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-10-25 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "MCH",
+ "name": "MCH",
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "MCH"
+}

@@ -17,7 +17,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-09 10:12:14.444682",
+ "modified": "2026-10-20 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "Gram Panchayat",
@@ -35,6 +35,54 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "MCH Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Palliative Care Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Mental Health Care Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "NCD Care Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Cancer Worker"
+  },
+  {
+   "read": 1,
+   "print": 1,
+   "report": 1,
+   "role": "CHW Health Worker"
+  },
+  {
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "share": 1,
+   "role": "Program Coordinator"
   }
  ],
  "row_format": "Dynamic",

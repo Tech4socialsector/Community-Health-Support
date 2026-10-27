@@ -1,4 +1,4 @@
-// Ports chw/common/doctype/postpartum_reg_and_followup/
+// Ports chw/mch/doctype/postpartum_reg_and_followup/
 // postpartum_reg_and_followup.js (the Desk form script) into the Vue app's
 // hook contract - see doctype-hooks/index.js and DoctypeForm.vue. The server
 // never builds this schedule itself (validate() only inserts urgent rows and
@@ -13,7 +13,7 @@
 import { addDays, cached, formatDate, isOpenUrgent, RISK_ALERT_FIELD_CLASS, URGENT_ROW_CLASS } from './utils'
 
 const TABLE = 'followup_visits'
-const SCHEDULE_METHOD = 'chw.common.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule'
+const SCHEDULE_METHOD = 'chw.mch.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule'
 
 // Last-resort fallback only, used if the Visit Schedule Master has no
 // Postpartum rows configured yet - same as DEFAULT_VISIT_SCHEDULE in the

@@ -1,0 +1,218 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-10-07 12:37:04.416241",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "preconception_nurse_notes_section",
+  "visit_date",
+  "bp",
+  "hr",
+  "rr",
+  "temp",
+  "height",
+  "weight",
+  "o2sat",
+  "column_break_qfdv",
+  "subjective",
+  "objective",
+  "assessment",
+  "plan",
+  "support_and_care_provided_section",
+  "education_provided",
+  "postpartum_self_care_nutrition_sleep_counseling_handout",
+  "iron_and_calcium_postnatal",
+  "breastfeed",
+  "family_planning_teaching_and_handout",
+  "kegel_exercises_postnatal",
+  "postpartum_depression_handout",
+  "child_immunization_schedule_0_to_1_year",
+  "child_weight_gain_chart_0_to_1_year"
+ ],
+ "fields": [
+  {
+   "fieldname": "subjective",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Subjective"
+  },
+  {
+   "fieldname": "objective",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Objective"
+  },
+  {
+   "fieldname": "column_break_qfdv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assessment",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assessment"
+  },
+  {
+   "fieldname": "plan",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plan"
+  },
+  {
+   "fieldname": "preconception_nurse_notes_section",
+   "fieldtype": "Section Break",
+   "label": "Preconception Nurse Notes"
+  },
+  {
+   "fieldname": "bp",
+   "fieldtype": "Int",
+   "label": "BP",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "hr",
+   "fieldtype": "Int",
+   "label": "HR",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "rr",
+   "fieldtype": "Int",
+   "label": "RR",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "temp",
+   "fieldtype": "Int",
+   "label": "Temp",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "height",
+   "fieldtype": "Int",
+   "label": "Height",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Int",
+   "label": "Weight",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "o2sat",
+   "fieldtype": "Int",
+   "label": "O2Sat",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "support_and_care_provided_section",
+   "fieldtype": "Section Break",
+   "label": "Support and Care Provided"
+  },
+  {
+   "fieldname": "education_provided",
+   "fieldtype": "Heading",
+   "label": "<h5>Education Provided</h5>"
+  },
+  {
+   "default": "0",
+   "fieldname": "postpartum_self_care_nutrition_sleep_counseling_handout",
+   "fieldtype": "Check",
+   "label": "Postpartum self care nutrition, sleep counseling (handout)",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "iron_and_calcium_postnatal",
+   "fieldtype": "Check",
+   "label": "Iron and Calcium (postnatal)",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "breastfeed",
+   "fieldtype": "Check",
+   "label": "Exclusive breastfeeding 0 to 6 months and complementary feeding (handout)",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "family_planning_teaching_and_handout",
+   "fieldtype": "Check",
+   "label": "Family planning teaching and handout",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "kegel_exercises_postnatal",
+   "fieldtype": "Check",
+   "label": "Kegel exercises (postnatal)",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "postpartum_depression_handout",
+   "fieldtype": "Check",
+   "label": "Postpartum Depression (handout)",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "child_immunization_schedule_0_to_1_year",
+   "fieldtype": "Check",
+   "label": "Child Immunization Schedule (0 to 1 year)",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "child_weight_gain_chart_0_to_1_year",
+   "fieldtype": "Check",
+   "label": "Child Weight Gain Chart (0 to 1 year)",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "visit_date",
+   "fieldtype": "Date",
+   "label": "Visit Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-07 16:25:33.850651",
+ "modified_by": "Administrator",
+ "module": "MCH",
+ "name": "Preconception Nurse Notes",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -77,10 +77,10 @@
           </div>
 
           <div class="flex flex-shrink-0 items-center gap-1.5 sm:gap-2">
-            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2']" :aria-label="t('Refresh')" :title="t('Refresh')" :disabled="loading" @click="load">
+            <button type="button" :class="[ui.BTN_TOOLBAR, '!h-8 !px-2']" :aria-label="t('Refresh')" :title="t('Refresh')" :disabled="loading" @click="load">
               <LucideIcon name="refresh-cw" class="h-4 w-4" :class="{ 'animate-spin': loading }" />
             </button>
-            <button type="button" :class="[ui.BTN_SECONDARY, '!h-8 !px-2 sm:!px-3']" :disabled="exporting || !total" :aria-label="t('Export')" :title="t('Export')" @click="exportCsv()">
+            <button type="button" :class="[ui.BTN_TOOLBAR, '!h-8 !px-2 sm:!px-3']" :disabled="exporting || !total" :aria-label="t('Export')" :title="t('Export')" @click="exportCsv()">
               <LucideIcon :name="exporting ? 'loader-circle' : 'download'" class="h-4 w-4" :class="{ 'animate-spin': exporting }" />
               <span class="hidden sm:inline">{{ t('Export') }}</span>
             </button>
@@ -214,7 +214,7 @@
           the header row kept in view. -->
           <div :class="[ui.LIST_TABLE_WRAP, 'hidden max-h-[calc(100vh-16rem)] min-h-[12rem] sm:block', { 'opacity-60': loading }]">
             <table :class="ui.TABLE">
-              <thead :class="[ui.THEAD, 'sticky top-0 z-10 [&_th]:bg-gray-50 dark:[&_th]:bg-gray-800']">
+              <thead :class="[ui.THEAD, 'sticky top-0 z-10 [&_th]:border-b [&_th]:border-forest-100 [&_th]:bg-forest-50 [&_th]:text-forest-800 dark:[&_th]:border-forest-900 dark:[&_th]:bg-gray-800 dark:[&_th]:text-forest-200']">
                 <tr>
                   <th class="w-10 py-2.5 pl-3 pr-1">
                     <input
@@ -229,6 +229,7 @@
                   <th :class="ui.LIST_TH">{{ t('ID') }}</th>
                   <th v-for="col in columns" :key="col.fieldname" :class="ui.LIST_TH">{{ t(col.label) }}</th>
                   <th :class="[ui.LIST_TH, 'text-right']">{{ t('Last Modified') }}</th>
+                  <th :class="[ui.LIST_TH, 'w-24 pr-4 text-right']">{{ t('Actions') }}</th>
                 </tr>
               </thead>
               <tbody :class="ui.TBODY">
@@ -249,7 +250,7 @@
                       @change="toggleRow(row.name)"
                     />
                   </td>
-                  <td :class="ui.LIST_TD_STRONG">
+                  <td :class="[ui.LIST_TD_STRONG, '!text-forest-700 dark:!text-forest-300']">
                     {{ isTempName(row.name) ? t('New') : row.name }}
                     <!-- Saved on this phone, not on the server yet (offline mode). -->
                     <span v-if="row.__offline" :class="[ui.PILL, ui.TONE.blue, 'ml-1.5 !px-1.5 !py-0 text-[10px]']">{{ t('Not synced') }}</span>
@@ -267,6 +268,31 @@
                   </td>
                   <td :class="[ui.LIST_TD, 'text-right tabular-nums']" :title="formatFieldValue(row.modified, { fieldtype: 'Datetime' })">
                     {{ shortAgo(row.modified) }}
+                  </td>
+                  <!-- View opens the read-only record page; edit the form
+                  (what clicking the row does too). A record saved on this
+                  phone but not synced yet has no server copy to view. -->
+                  <td class="py-1.5 pl-3 pr-4 text-right" @click.stop>
+                    <span class="inline-flex items-center gap-1.5">
+                      <router-link
+                        v-if="!isTempName(row.name)"
+                        :to="{ name: 'RecordView', params: { doctype: props.doctype, name: row.name } }"
+                        :class="ui.ROW_ACTION_VIEW"
+                        :title="t('View')"
+                        :aria-label="t('View {0}', [row.name])"
+                      >
+                        <LucideIcon name="eye" class="h-4 w-4" />
+                      </router-link>
+                      <button
+                        type="button"
+                        :class="ui.ROW_ACTION_EDIT"
+                        :title="t('Edit')"
+                        :aria-label="t('Edit {0}', [row.name])"
+                        @click="goToRow(row.name)"
+                      >
+                        <LucideIcon name="pencil" class="h-4 w-4" />
+                      </button>
+                    </span>
                   </td>
                 </tr>
               </tbody>

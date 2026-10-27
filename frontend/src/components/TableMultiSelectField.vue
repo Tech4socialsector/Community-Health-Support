@@ -2,18 +2,49 @@
   <div>
     <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
     <MultiSelect
+      v-model:open="listOpen"
       :model-value="selectedValues"
       :options="options"
       :placeholder="t('Select {0}...', [t(targetDoctype)])"
       @update:model-value="onUpdate"
+    >
+      <!-- Desk's "+ Create a new ..." inside the list (as in LinkField),
+      over the usual Clear All / Select All. -->
+      <template #footer="{ clearAll, selectAll, query }">
+        <button
+          v-if="canCreate"
+          type="button"
+          class="flex w-full items-center gap-1.5 border-t border-outline-gray-1 px-3 py-2 text-left text-sm font-medium text-forest-700 hover:bg-forest-50 dark:text-forest-300 dark:hover:bg-gray-800"
+          @click="startCreate(query)"
+        >
+          <LucideIcon name="plus" class="h-4 w-4" />
+          {{ t('Create a new {0}', [t(targetDoctype)]) }}<template v-if="query.trim()">: "{{ query.trim() }}"</template>
+        </button>
+        <div class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5">
+          <Button variant="ghost" size="sm" @click="clearAll">{{ t('Clear All') }}</Button>
+          <Button variant="ghost" size="sm" @click="selectAll">{{ t('Select All') }}</Button>
+        </div>
+      </template>
+    </MultiSelect>
+    <QuickCreateDialog
+      v-if="createMounted && targetDoctype"
+      v-model="createOpen"
+      :doctype="targetDoctype"
+      :initial-name="createName"
+      @created="onCreated"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { MultiSelect, call, useCall } from 'frappe-ui'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
+import { Button, MultiSelect, call, useCall } from 'frappe-ui'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { t } from '@/data/i18n'
+import { canCreateDoctype } from '@/data/createPermission'
+
+// Async for the same reason as in LinkField: the dialog renders fields.
+const QuickCreateDialog = defineAsyncComponent(() => import('@/components/QuickCreateDialog.vue'))
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -80,5 +111,31 @@ function onUpdate(values) {
     'update:modelValue',
     values.map((v) => ({ [linkFieldname.value]: v })),
   )
+}
+
+const canCreate = ref(false)
+watch(
+  targetDoctype,
+  async (doctype) => {
+    canCreate.value = !!doctype && (await canCreateDoctype(doctype))
+  },
+  { immediate: true },
+)
+
+const listOpen = ref(false)
+const createOpen = ref(false)
+const createMounted = ref(false)
+const createName = ref('')
+function startCreate(query) {
+  createName.value = (query || '').trim()
+  listOpen.value = false
+  createMounted.value = true
+  createOpen.value = true
+}
+function onCreated(name) {
+  if (!targetRecords.value.some((r) => r.name === name)) {
+    targetRecords.value = [...targetRecords.value, { name }].sort((a, b) => a.name.localeCompare(b.name))
+  }
+  if (!selectedValues.value.includes(name)) onUpdate([...selectedValues.value, name])
 }
 </script>

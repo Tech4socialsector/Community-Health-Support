@@ -99,25 +99,11 @@ import { call } from 'frappe-ui'
 import LucideIcon from '@/components/LucideIcon.vue'
 import { t } from '@/data/i18n'
 import { getMeta, getRecord, isTempName } from '@/data/offline/store'
+import { canCreateDoctype } from '@/data/createPermission'
 
 // Loaded when first needed - it renders fields itself (including Links),
 // so a plain import would be circular.
 const QuickCreateDialog = defineAsyncComponent(() => import('@/components/QuickCreateDialog.vue'))
-
-// "May this user create <doctype>?" - asked once per doctype per session,
-// as Desk only offers "Create a new ..." to roles with create permission.
-const createPermission = new Map()
-function canCreateDoctype(doctype) {
-  if (!createPermission.has(doctype)) {
-    createPermission.set(
-      doctype,
-      call('frappe.client.has_permission', { doctype, docname: '', perm_type: 'create' })
-        .then((r) => !!r?.has_permission)
-        .catch(() => false),
-    )
-  }
-  return createPermission.get(doctype)
-}
 
 const props = defineProps({
   field: { type: Object, required: true },

@@ -66,11 +66,24 @@ watch(
 const saving = ref(false)
 const saveError = ref(null)
 
+// App Setting's programme switches (enable_mch, enable_cancer ...) decide
+// which modules the home page, sidebar and routes offer - all loaded once
+// at start-up. Turning one on or off reloads the page after saving, so the
+// modules appear (or go) straight away.
+const programmeSwitches = (d) =>
+  JSON.stringify(Object.keys(d || {}).filter((k) => k.startsWith('enable_')).sort().map((k) => [k, !!d[k]]))
+
 async function save() {
   saving.value = true
   saveError.value = null
+  const switchesChanged = props.doctype === 'App Setting' && programmeSwitches(values) !== programmeSwitches(doc.doc)
   try {
     await doc.setValue.submit(values)
+    if (switchesChanged) {
+      toast.success(t('Saved. Reloading to update the modules…'))
+      setTimeout(() => window.location.reload(), 800)
+      return
+    }
     toast.success(t('Saved'))
   } catch (e) {
     saveError.value = e

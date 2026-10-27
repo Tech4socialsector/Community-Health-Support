@@ -61,7 +61,8 @@ import SettingsDialog from '@/components/SettingsDialog.vue'
 import AiAssistant from '@/components/AiAssistant.vue'
 import { session } from '@/data/session'
 import { accountActions } from '@/data/accountActions'
-import { brandingResource, appLogo } from '@/data/branding'
+import { brandingResource } from '@/data/branding'
+import AppMark from '@/components/AppMark.vue'
 import { activeModule, sidebarTrail } from '@/data/activeModule'
 import { childItemsOf } from '@/data/modules'
 import { notificationsResource, unreadCount, toggleNotifications } from '@/data/notifications'
@@ -91,7 +92,7 @@ notificationsResource.fetch()
 const header = computed(() => ({
   title: appName.value,
   subtitle: session.full_name || session.user,
-  logo: appLogo.value,
+  logo: AppMark,
   menuItems: [
     { label: t('Settings'), icon: 'settings', onClick: accountActions.settings },
     { label: t('Help'), icon: 'help-circle', onClick: accountActions.help },

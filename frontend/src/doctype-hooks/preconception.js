@@ -1,4 +1,4 @@
-// Ports chw/common/doctype/preconception_reg_and_followup/
+// Ports chw/mch/doctype/preconception_reg_and_followup/
 // preconception_reg_and_followup.js (the Desk form script) into the Vue
 // app's hook contract - see doctype-hooks/index.js and DoctypeForm.vue.
 // Row BMI follows the server's calculate_followup_bmi(), which recomputes it
