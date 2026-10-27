@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.utils import cint
 
 # Every programme the one chw app ships, switched on/off from App Setting ->
 # Programmes. Household profile and Family members are the common forms and
@@ -11,8 +12,11 @@ from frappe import _
 #   permissions are in the DocType JSON: create/write on the programme's
 #   forms and on Household profile / Family members, read on its masters and
 #   the common masters.
+# `field` - the App Setting switch for the programme.
 # `doctypes` - every form of the programme: hidden from the CHW app and
-#   blocked from new records while the programme is off.
+#   blocked from new records while the programme is off, or while the form's
+#   own App Setting tick box (form_field) is unticked. Programmes with one
+#   form have no tick box - their switch is enough.
 # `sidebar` - the subset shown in the CHW app's sidebar, in order. Forms
 #   that are already in another App Module Setting (e.g. the "CHW" module
 #   fixture carries the MCH and Palliative forms) stay where they are; only
@@ -108,6 +112,18 @@ PROGRAMMES = {
 	},
 }
 
+# Forms that link to another form of the same programme and can't be used
+# without it (ANC Follow-up's pregnant_id -> Pregnancy Registration ...).
+# Ticking a form in App Setting ticks what it needs on save.
+FORM_REQUIRES = {
+	"ANC Follow-up": ["Pregnancy Registration"],
+	"Birth Registration": ["Pregnancy Registration"],
+	"PNC": ["ANC Follow-up", "Birth Registration"],
+	"Child 6w to 1 Year Reg and Followup": ["Birth Registration"],
+	"Palliative care followup": ["Palliative Care Initial Assessment Form"],
+	"Clinical Evaluation": ["Main Screening Form"],
+}
+
 CACHE_KEY = "chw_disabled_programme_doctypes"
 
 
@@ -120,13 +136,36 @@ def enabled_programmes(settings=None):
 	return [key for key, p in PROGRAMMES.items() if settings.get(p["field"])]
 
 
+def form_field(doctype):
+	"""App Setting's tick box for one programme form: use_<form>."""
+	return "use_" + frappe.scrub(doctype)
+
+
+def has_form_ticks(p):
+	return len(p["doctypes"]) > 1
+
+
+def form_ticked(settings, doctype):
+	# Not set yet (e.g. a form added to a programme later) counts as ticked.
+	value = settings.get(form_field(doctype))
+	return value is None or bool(cint(value))
+
+
 def disabled_doctypes():
-	"""Every form of every programme that is switched off. Cached; cleared
+	"""Every form of every programme that is switched off, and the forms of
+	switched-on programmes that are unticked in App Setting. Cached; cleared
 	whenever App Setting is saved."""
 
 	def compute():
-		on = set(enabled_programmes())
-		return {dt for key, p in PROGRAMMES.items() if key not in on for dt in p["doctypes"]}
+		settings = frappe.db.get_singles_dict("App Setting", cast=True)
+		on = set(enabled_programmes(settings))
+		off = set()
+		for key, p in PROGRAMMES.items():
+			if key not in on:
+				off.update(p["doctypes"])
+			elif has_form_ticks(p):
+				off.update(dt for dt in p["doctypes"] if not form_ticked(settings, dt))
+		return off
 
 	return frappe.cache.get_value(CACHE_KEY, compute)
 
@@ -144,13 +183,50 @@ def block_disabled_programme(doc, method=None):
 		return
 	if not is_doctype_disabled(doc.doctype):
 		return
-	label = next(p["label"] for p in PROGRAMMES.values() if doc.doctype in p["doctypes"])
+	key, p = next((k, p) for k, p in PROGRAMMES.items() if doc.doctype in p["doctypes"])
+	if key in enabled_programmes():
+		frappe.throw(
+			_("{0} isn't used on this site. Tick it in App Setting → {1} Forms to add one.").format(
+				_(doc.doctype), _(p["module"])
+			),
+			title=_("Form turned off"),
+		)
 	frappe.throw(
 		_("{0} is turned off for this site. Turn it on in App Setting → Programmes to add a {1}.").format(
-			_(label), _(doc.doctype)
+			_(p["label"]), _(doc.doctype)
 		),
 		title=_("Programme turned off"),
 	)
+
+
+def validate_programme_forms(doc):
+	"""App Setting validate: for each switched-on programme, tick again the
+	forms a ticked form needs (FORM_REQUIRES) and say so, and refuse a
+	programme left with no form ticked - that's what its switch is for."""
+	added = []
+	for key, p in PROGRAMMES.items():
+		if not has_form_ticks(p) or not doc.get(p["field"]):
+			continue
+		changed = True
+		while changed:
+			changed = False
+			for dt in p["doctypes"]:
+				if not form_ticked(doc, dt):
+					continue
+				for need in FORM_REQUIRES.get(dt, []):
+					if need in p["doctypes"] and not form_ticked(doc, need):
+						doc.set(form_field(need), 1)
+						added.append(_("{0} (needed by {1})").format(_(need), _(dt)))
+						changed = True
+		if not any(form_ticked(doc, dt) for dt in p["doctypes"]):
+			frappe.throw(
+				_("Tick at least one {0} form, or turn {0} off.").format(_(p["module"])),
+				title=_("No {0} form ticked").format(_(p["module"])),
+			)
+	if added:
+		frappe.msgprint(
+			_("Also ticked: {0}").format(", ".join(added)), title=_("Forms added"), indicator="blue"
+		)
 
 
 def on_app_setting_update(doc, method=None):
@@ -263,9 +339,22 @@ def workspace_content(keys):
 		out = [block("header", title, text=f'<span class="h4"><b>{text}</b></span>', col=12)]
 		return out + [block("number_card", n, number_card_name=n, col=3) for n in cards]
 
+	# A programme's cards for forms unticked in App Setting are left out,
+	# and so is its heading if none are left.
+	off = disabled_doctypes()
+	card_doctype = dict(
+		frappe.get_all(
+			"Number Card",
+			filters={"name": ["in", [n for key in keys for n in PROGRAMMES[key]["number_cards"]]]},
+			fields=["name", "document_type"],
+			as_list=True,
+		)
+	)
 	content = group("Household & Family", CORE_NUMBER_CARDS)
 	for key in keys:
-		content += group(PROGRAMMES[key]["module"], PROGRAMMES[key]["number_cards"])
+		cards = [n for n in PROGRAMMES[key]["number_cards"] if card_doctype.get(n) not in off]
+		if cards:
+			content += group(PROGRAMMES[key]["module"], cards)
 	return content
 
 
@@ -293,11 +382,12 @@ def apply_desk_navigation(settings=None):
 		changed = True
 
 	programme_modules = {p["module"] for p in PROGRAMMES.values()}
+	off = disabled_doctypes()
 	for sidebar in frappe.get_all("Sidebar", filters={"app": "chw"}, fields=["name", "module"]):
 		rows = frappe.get_all(
 			"Sidebar Item",
 			filters={"parenttype": "Sidebar", "parent": sidebar.name},
-			fields=["name", "type", "label", "child", "hidden"],
+			fields=["name", "type", "label", "child", "hidden", "link_type", "link_to"],
 			order_by="idx asc",
 		)
 		section = None
@@ -310,6 +400,9 @@ def apply_desk_navigation(settings=None):
 				elif not row.child:
 					section = None
 				hide = 1 if section and section not in on else 0
+				# A form unticked in App Setting -> <programme> Forms.
+				if row.link_type == "DocType" and row.link_to in off:
+					hide = 1
 			if row.hidden != hide:
 				frappe.db.set_value("Sidebar Item", row.name, "hidden", hide, update_modified=False)
 				changed = True

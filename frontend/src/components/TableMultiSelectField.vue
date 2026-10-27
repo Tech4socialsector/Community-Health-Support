@@ -49,6 +49,9 @@ const QuickCreateDialog = defineAsyncComponent(() => import('@/components/QuickC
 const props = defineProps({
   field: { type: Object, required: true },
   modelValue: { type: Array, default: () => [] },
+  // Desk's set_query: { filters } narrowing the choices, from the doctype's
+  // hook module (getLinkQuery), as for a Link field.
+  linkQuery: { type: Object, default: null },
 })
 const emit = defineEmits(['update:modelValue'])
 
@@ -82,13 +85,19 @@ const targetDoctype = computed(() => {
 const targetRecords = ref([])
 let requestId = 0
 watch(
-  targetDoctype,
-  async (doctype) => {
+  () => [targetDoctype.value, JSON.stringify(props.linkQuery?.filters || null)],
+  async ([doctype]) => {
     if (!doctype) return
     const id = ++requestId
     try {
       // limit_page_length 0 = all; a multi-select needs every option.
-      const rows = await call('frappe.client.get_list', { doctype, fields: ['name'], limit_page_length: 0, order_by: 'name asc' })
+      const rows = await call('frappe.client.get_list', {
+        doctype,
+        fields: ['name'],
+        filters: props.linkQuery?.filters || undefined,
+        limit_page_length: 0,
+        order_by: 'name asc',
+      })
       if (id === requestId) targetRecords.value = rows || []
     } catch (e) {
       if (id === requestId) targetRecords.value = []
@@ -113,11 +122,13 @@ function onUpdate(values) {
   )
 }
 
+const NO_QUICK_CREATE = new Set(['DocType', 'Role', 'User'])
 const canCreate = ref(false)
 watch(
   targetDoctype,
   async (doctype) => {
-    canCreate.value = !!doctype && (await canCreateDoctype(doctype))
+    // Picking DocTypes or Roles (settings) is never a place to make new ones.
+    canCreate.value = !!doctype && !NO_QUICK_CREATE.has(doctype) && (await canCreateDoctype(doctype))
   },
   { immediate: true },
 )

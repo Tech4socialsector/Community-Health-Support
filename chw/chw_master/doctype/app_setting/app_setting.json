@@ -13,6 +13,25 @@
   "column_break_programmes",
   "enable_ncd",
   "enable_cancer",
+  "section_break_mch_forms",
+  "use_preconception_reg_and_followup",
+  "use_pregnancy_registration",
+  "use_anc_follow_up",
+  "use_birth_registration",
+  "use_pnc",
+  "column_break_mch_forms",
+  "use_postpartum_reg_and_followup",
+  "use_child_6w_to_1_year_reg_and_followup",
+  "use_child_growth_monitoring",
+  "use_mch_volunteer_intake_form_postpartum",
+  "section_break_palliative_forms",
+  "use_palliative_care_initial_assessment_form",
+  "column_break_palliative_forms",
+  "use_palliative_care_followup",
+  "section_break_cancer_forms",
+  "use_main_screening_form",
+  "column_break_cancer_forms",
+  "use_clinical_evaluation",
   "section_break_login",
   "login_headline",
   "login_description",
@@ -45,8 +64,7 @@
   {
    "fieldname": "section_break_programmes",
    "fieldtype": "Section Break",
-   "label": "Programmes",
-   "description": "Turn on only the programmes this site runs. Household profile and Family members are always on. Turning a programme off hides its forms and stops new records; existing records are kept."
+   "label": "Programmes"
   },
   {
    "default": "0",
@@ -83,6 +101,114 @@
    "label": "Cancer"
   },
   {
+   "depends_on": "eval:doc.enable_mch",
+   "fieldname": "section_break_mch_forms",
+   "fieldtype": "Section Break",
+   "label": "MCH Forms"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_preconception_reg_and_followup",
+   "fieldtype": "Check",
+   "label": "Preconception Reg and Followup"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_pregnancy_registration",
+   "fieldtype": "Check",
+   "label": "Pregnancy Registration"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_anc_follow_up",
+   "fieldtype": "Check",
+   "label": "ANC Follow-up"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_birth_registration",
+   "fieldtype": "Check",
+   "label": "Birth Registration"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_pnc",
+   "fieldtype": "Check",
+   "label": "PNC"
+  },
+  {
+   "fieldname": "column_break_mch_forms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_postpartum_reg_and_followup",
+   "fieldtype": "Check",
+   "label": "Postpartum Reg and Followup"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_child_6w_to_1_year_reg_and_followup",
+   "fieldtype": "Check",
+   "label": "Child 6w to 1 Year Reg and Followup"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_child_growth_monitoring",
+   "fieldtype": "Check",
+   "label": "Child Growth Monitoring"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_mch_volunteer_intake_form_postpartum",
+   "fieldtype": "Check",
+   "label": "MCH Volunteer Intake Form Postpartum"
+  },
+  {
+   "depends_on": "eval:doc.enable_palliative",
+   "fieldname": "section_break_palliative_forms",
+   "fieldtype": "Section Break",
+   "label": "Palliative Care Forms"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_palliative_care_initial_assessment_form",
+   "fieldtype": "Check",
+   "label": "Palliative Care Initial Assessment Form"
+  },
+  {
+   "fieldname": "column_break_palliative_forms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_palliative_care_followup",
+   "fieldtype": "Check",
+   "label": "Palliative care followup"
+  },
+  {
+   "depends_on": "eval:doc.enable_cancer",
+   "fieldname": "section_break_cancer_forms",
+   "fieldtype": "Section Break",
+   "label": "Cancer Forms"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_main_screening_form",
+   "fieldtype": "Check",
+   "label": "Main Screening Form"
+  },
+  {
+   "fieldname": "column_break_cancer_forms",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_clinical_evaluation",
+   "fieldtype": "Check",
+   "label": "Clinical Evaluation"
+  },
+  {
    "fieldname": "section_break_login",
    "fieldtype": "Section Break",
    "label": "Login Page"
@@ -95,7 +221,7 @@
    "label": "Login Headline"
   },
   {
-   "default": "Track visits, follow-ups, and growth monitoring in one place — built for community health workers on the ground.",
+   "default": "Track visits, follow-ups, and growth monitoring in one place \u2014 built for community health workers on the ground.",
    "description": "Supporting text shown below the headline on the login page.",
    "fieldname": "login_description",
    "fieldtype": "Small Text",
@@ -180,7 +306,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-20 12:00:00.000000",
+ "modified": "2026-10-27 16:23:04.208672",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "App Setting",

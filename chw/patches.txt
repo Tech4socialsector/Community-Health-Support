@@ -27,3 +27,4 @@ chw.patches.v1_0.seed_visit_schedule_master
 chw.patches.v1_0.enable_existing_programmes
 chw.patches.v1_0.backfill_household_member_counts
 chw.patches.v1_0.oral_screening_questionnaire_fields
+chw.patches.v1_0.tick_all_programme_forms

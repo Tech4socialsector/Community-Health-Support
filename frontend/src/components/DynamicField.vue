@@ -9,6 +9,7 @@
   <TableMultiSelectField
     v-else-if="controlType === 'table-multiselect'"
     :field="field"
+    :link-query="linkQuery"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   />
