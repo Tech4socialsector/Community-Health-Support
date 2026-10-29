@@ -73,11 +73,70 @@
   "enabled": 1,
   "icon": "box",
   "label": "CHW",
-  "modified": "2026-10-23 14:25:47.110878",
+  "modified": "2026-10-29 11:33:32.606301",
   "module_name": "CHW",
   "name": "CHW",
-  "restrict_by_role": 0,
-  "roles": [],
+  "restrict_by_role": 1,
+  "roles": [
+   {
+    "role": "CHW Health Worker"
+   },
+   {
+    "role": "CHW Coordinator"
+   },
+   {
+    "role": "Program Coordinator"
+   },
+   {
+    "role": "System Manager"
+   }
+  ],
   "sort_order": 1
+ },
+ {
+  "docstatus": 0,
+  "doctype": "App Module Setting",
+  "doctypes": [
+   {
+    "doctype_name": "Household profile",
+    "icon": "house",
+    "label": "Household profile",
+    "route": null
+   },
+   {
+    "doctype_name": "Family members",
+    "icon": "users",
+    "label": "Family members",
+    "route": null
+   },
+   {
+    "doctype_name": "Palliative Care Initial Assessment Form",
+    "icon": "hand-heart",
+    "label": "Palliative Care Initial Assessment Form",
+    "route": null
+   },
+   {
+    "doctype_name": "Palliative care followup",
+    "icon": "heart-handshake",
+    "label": "Palliative care followup",
+    "route": null
+   }
+  ],
+  "enabled": 1,
+  "icon": "hand-heart",
+  "label": "Palliative Care",
+  "modified": "2026-10-29 11:33:32.628887",
+  "module_name": "Palliative Care",
+  "name": "Palliative Care",
+  "restrict_by_role": 1,
+  "roles": [
+   {
+    "role": "Palliative Care Coordinator"
+   },
+   {
+    "role": "Palliative Care Worker"
+   }
+  ],
+  "sort_order": 2
  }
 ]

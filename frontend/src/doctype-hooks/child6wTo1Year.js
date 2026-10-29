@@ -116,9 +116,15 @@ function syncRowFields(values, windowStart, windowEnd) {
   let display = ''
   if (windowStart && windowEnd) {
     display = `${formatDate(windowStart)} to ${formatDate(windowEnd)}`
-    if (rows.length) rows[rows.length - 1].date_of_next_visit = windowEnd
+    // An urgent-followup row's own window is the Risk alert deadline, not
+    // this regular schedule's window - never overwritten by it.
+    const lastRow = rows.length ? rows[rows.length - 1] : null
+    if (lastRow && !lastRow.urgent_followup) lastRow.date_of_next_visit = windowEnd
   }
-  for (const row of rows) row.next_visit_window = display
+  for (const row of rows) {
+    if (row.urgent_followup) continue
+    row.next_visit_window = display
+  }
 }
 
 function setSummary(values, nextDate, riskAlert) {
@@ -154,7 +160,9 @@ async function calculateNextVisitDate(values) {
   if (!scheduleRows || seq !== state.calcSeq) return
 
   const currentRows = values[TABLE] || []
-  const completedCount = currentRows.filter((row) => row.status === 'Completed').length
+  // An urgent follow-up is an extra visit, not one of the numbered schedule
+  // visits - excluded so completing it doesn't skip a window.
+  const completedCount = currentRows.filter((row) => row.status === 'Completed' && !row.urgent_followup).length
   const window = getVisitWindow(completedCount + 1, scheduleRows)
   if (!window) {
     // Every configured visit has been completed - done for this child.

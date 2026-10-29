@@ -82,7 +82,7 @@
    "options": "Health Worker"
   },
   {
-   "description": "Set automatically from the latest Medical Followup Form row's \"Date of Next Visit\" - edit it by hand only to override that.",
+   "description": "Set automatically from whichever track (Medical or Therapist) has a visit due sooner - edit it by hand only to override that.",
    "fieldname": "next_visit_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -148,6 +148,28 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Palliative Care Worker",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Palliative Care Coordinator",
    "share": 1,
    "write": 1
   }

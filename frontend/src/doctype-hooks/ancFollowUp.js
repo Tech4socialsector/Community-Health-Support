@@ -213,6 +213,19 @@ function syncChildRowFields(values, windowStart, windowEnd) {
   rows.forEach((row) => setIfChanged(row, 'next_visit_window', display))
 }
 
+// Manual phase has no single calculated window to share across rows any
+// more - each row's own "Next Visit Window" instead shows just that row's
+// own visit date through to whatever Date of Next Visit was typed on it, if
+// any; a row with nothing typed in shows nothing.
+function syncManualPhaseRowWindows(values) {
+  const rows = values[VOLUNTEER_TABLE_FIELD] || []
+  rows.forEach((row) => {
+    if (row.urgent_followup) return
+    const display = row.date_of_next_visit && row.date ? `${formatDate(row.date)} to ${formatDate(row.date_of_next_visit)}` : ''
+    setIfChanged(row, 'next_visit_window', display)
+  })
+}
+
 function setNextVisit(values, date, riskAlert) {
   setIfChanged(values, 'next_anc_visit_date', date)
   setIfChanged(values, 'next_anc_visit_date_auto', date)
@@ -235,9 +248,25 @@ function getPendingUrgent(values) {
 // result of a newer one.
 let calcSeq = 0
 
+// This function is itself what writes date_of_next_visit onto a row in
+// automatic phase (and the urgent branch) - without this guard, that write
+// would re-trigger onChildFieldChange's own listener for that same field
+// (added so a nurse's manual typing into it, in manual phase, live-updates
+// the preview) and recalculate forever. Anything this function writes while
+// the counter is above zero is its own echo, not a human edit.
+let activeCalcCount = 0
+
 async function calculateNextAncVisitDate(values) {
   const seq = ++calcSeq
+  activeCalcCount++
+  try {
+    await calculateNextAncVisitDateInner(values, seq)
+  } finally {
+    activeCalcCount--
+  }
+}
 
+async function calculateNextAncVisitDateInner(values, seq) {
   if (values.status === 'Closed') {
     // She's delivered - no more ANC visits are due.
     setNextVisit(values, null, '')
@@ -245,14 +274,6 @@ async function calculateNextAncVisitDate(values) {
     return
   }
   if (!values.pregnant_id) return
-
-  const urgent = getPendingUrgent(values)
-  if (urgent) {
-    // The urgent date itself is the early-visit signal - no alert on top.
-    setNextVisit(values, urgent.date, '')
-    syncChildRowFields(values, urgent.triggerDate, urgent.date)
-    return
-  }
 
   let info, policy
   try {
@@ -266,11 +287,27 @@ async function calculateNextAncVisitDate(values) {
 
   const { windowDays, alertWithinDays, automaticWindowCount } = policy
   const nurseRows = values[VOLUNTEER_TABLE_FIELD] || []
-  const completedCount = nurseRows.filter((row) => row.status === 'Completed').length
+  // An urgent follow-up is an extra visit squeezed in between regular
+  // windows, not one of the regular 30-day slots - completing it must not
+  // advance the regular schedule by a window it was never part of.
+  const completedCount = nurseRows.filter((row) => row.status === 'Completed' && !row.urgent_followup).length
   // Windows count from when the record was created (today for a new one),
   // exactly as the server's set_next_anc_visit_date does.
   const startingWindow = getWindowIndex(values.creation || today(), info.lmp_date, windowDays)
   const currentWindow = getCurrentWindow(startingWindow, completedCount)
+  // Computed up front, before the urgent short-circuit below, so the field
+  // it gates (the Volunteer row's own Date of Next Visit) stays correctly
+  // shown/hidden live, even while an urgent follow-up happens to be active.
+  setIfChanged(values, 'schedule_in_manual_phase', currentWindow > automaticWindowCount ? 1 : 0)
+
+  const urgent = getPendingUrgent(values)
+  if (urgent) {
+    // The urgent date itself is the early-visit signal - no alert on top.
+    setNextVisit(values, urgent.date, '')
+    syncChildRowFields(values, urgent.triggerDate, urgent.date)
+    return
+  }
+
   const windowStart = addDays(info.lmp_date, (currentWindow - 1) * windowDays)
   const windowEnd = addDays(windowStart, windowDays)
 
@@ -284,31 +321,34 @@ async function calculateNextAncVisitDate(values) {
     return
   }
 
-  // Manual phase: the Volunteer row with the latest visit date carries the
-  // real "Date of Next Visit". Checked in the server's order (no recorded
-  // date first, then a hand-edited override) so the preview doesn't change
-  // on save - Desk checked the override first.
-  const manualRows = nurseRows.filter((row) => row.date_of_next_visit)
-  if (!manualRows.length) {
-    // Never blank: suggest her current window until a date is recorded.
-    setNextVisit(values, windowEnd, riskAlert)
-    syncChildRowFields(values, windowStart, windowEnd)
-    return
-  }
+  // Manual phase: there's no further automatic window to calculate, so
+  // nothing is invented here. Everything stays blank until a nurse types a
+  // Date of Next Visit on a row herself; whichever row's own visit happened
+  // most recently is the one that counts.
+  setIfChanged(values, 'next_anc_visit_risk_alert', '')
 
   const current = values.next_anc_visit_date
   const lastAuto = values.next_anc_visit_date_auto
   if (current && lastAuto && dateKey(current) !== dateKey(lastAuto)) {
-    // Hand-edited date: leave it alone - no window or alert to show.
-    setIfChanged(values, 'next_anc_visit_risk_alert', '')
-    syncChildRowFields(values, null, null)
+    // A coordinator typed directly into Next ANC Visit Date itself,
+    // bypassing the rows entirely - respected as-is, never recalculated
+    // back out from under them.
+    syncManualPhaseRowWindows(values)
+    return
+  }
+
+  const manualRows = nurseRows.filter((row) => row.date_of_next_visit)
+  if (!manualRows.length) {
+    setIfChanged(values, 'next_anc_visit_date', null)
+    setIfChanged(values, 'next_anc_visit_date_auto', null)
+    syncManualPhaseRowWindows(values)
     return
   }
 
   const latestRow = latestBy(manualRows, (row) => dateKey(row.date))
-  // A typed date isn't a calculated window - no range or alert.
-  setNextVisit(values, latestRow.date_of_next_visit, '')
-  syncChildRowFields(values, null, null)
+  setIfChanged(values, 'next_anc_visit_date', latestRow.date_of_next_visit)
+  setIfChanged(values, 'next_anc_visit_date_auto', latestRow.date_of_next_visit)
+  syncManualPhaseRowWindows(values)
 }
 
 let generateSeq = 0
@@ -562,9 +602,12 @@ export default {
     if (fieldname === 'phone_number') warnIfNotDigits(values.phone_number)
   },
 
-  // Only date and status matter; everything this module writes into rows
-  // (lmp_date, pog_weeks, next_visit_window, date_of_next_visit) falls
-  // through here, so its echoes are ignored.
+  // lmp_date, pog_weeks and next_visit_window are purely this module's own
+  // output, never listened to. date_of_next_visit is too, in automatic
+  // phase - but in manual phase it's a nurse's own typed input, so it IS
+  // listened to there (guarded by activeCalcCount so this module's own
+  // automatic-phase write of that same field, further down, doesn't
+  // re-trigger itself).
   onChildFieldChange(tableField, fieldname, row, values) {
     if (!FOLLOWUP_TABLE_FIELDS.includes(tableField)) return
     const drivesSchedule = tableField === VOLUNTEER_TABLE_FIELD
@@ -573,6 +616,9 @@ export default {
       if (drivesSchedule) return calculateNextAncVisitDate(values)
     }
     if (fieldname === 'status' && drivesSchedule) return calculateNextAncVisitDate(values)
+    if (fieldname === 'date_of_next_visit' && drivesSchedule && activeCalcCount === 0) {
+      return calculateNextAncVisitDate(values)
+    }
 
     if (drivesSchedule && VOLUNTEER_VISIT_CONTENT_FIELDS.includes(fieldname) && autoCompleteVolunteerRow(row)) {
       return calculateNextAncVisitDate(values)
@@ -601,6 +647,14 @@ export default {
       // and has no default, so unlike Nurse/Doctor it would otherwise stay
       // blank forever on a hand-added row.
       row.window_start_date = today()
+      // The previous row's own typed Date of Next Visit already said when
+      // this visit is due - carried over here so the nurse isn't asked to
+      // type the same date twice.
+      const rows = values[VOLUNTEER_TABLE_FIELD] || []
+      const previousRow = rows[rows.indexOf(row) - 1]
+      if (previousRow && previousRow.date_of_next_visit) {
+        row.date = previousRow.date_of_next_visit
+      }
       return fillNewRowPregnancyInfo(row, values)
     }
   },

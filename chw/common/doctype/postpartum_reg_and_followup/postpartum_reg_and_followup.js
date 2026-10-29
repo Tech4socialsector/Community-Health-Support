@@ -175,12 +175,15 @@ function sync_row_fields(frm, window_start, window_end) {
 	let display = "";
 	if (window_start && window_end) {
 		display = `${frappe.datetime.str_to_user(window_start)} to ${frappe.datetime.str_to_user(window_end)}`;
-		if (rows.length) {
-			const last_row = rows[rows.length - 1];
+		// An urgent-followup row's own window is the Risk alert deadline,
+		// not this regular schedule's window - never overwritten by it.
+		const last_row = rows.length ? rows[rows.length - 1] : null;
+		if (last_row && !last_row.urgent_followup) {
 			frappe.model.set_value(last_row.doctype, last_row.name, "date_of_next_visit", window_end);
 		}
 	}
 	rows.forEach((row) => {
+		if (row.urgent_followup) return;
 		row.next_visit_window = display;
 	});
 	frm.refresh_field("followup_visits");
@@ -220,7 +223,9 @@ function calculate_next_visit_date(frm) {
 	}
 
 	const high_risk = currently_high_risk(rows);
-	const completed_count = rows.filter((row) => row.status === "Completed").length;
+	// An urgent follow-up is an extra visit, not one of the numbered
+	// schedule visits - excluded so completing it doesn't skip a window.
+	const completed_count = rows.filter((row) => row.status === "Completed" && !row.urgent_followup).length;
 	const visit_number = completed_count + 1;
 	const my_token = ++visit_date_calc_token;
 

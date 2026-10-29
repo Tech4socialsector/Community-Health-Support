@@ -45,7 +45,21 @@ fixtures = [
 	# without this, a fresh install or a teammate's pull only ever shows the
 	# Vue app's own empty-sidebar default, same blank-list problem the
 	# Number Card fixture above was added to fix for the Desk dashboard.
-	{"dt": "App Module Setting", "filters": [["name", "=", "CHW"]]},
+	{"dt": "App Module Setting", "filters": [["name", "in", ["CHW", "Palliative Care"]]]},
+	# The two roles App Module Setting's own role-restriction fields link to
+	# above - without this, importing that fixture on a fresh site would
+	# point at Roles that don't exist there yet.
+	{"dt": "Role", "filters": [["name", "in", ["Palliative Care Coordinator", "Palliative Care Worker"]]]},
+	# Document-level access for the two Palliative Care roles. Household
+	# profile and Family members already have a Custom DocPerm row (metta's
+	# "CHW Coordinator" layer) - once a doctype has any Custom DocPerm row,
+	# Frappe ignores that doctype's own permissions entirely (see
+	# chw/permissions.py), so granting those two roles access there has to
+	# go through Custom DocPerm too, not just the doctype's own JSON.
+	{
+		"dt": "Custom DocPerm",
+		"filters": [["role", "in", ["Palliative Care Coordinator", "Palliative Care Worker"]]],
+	},
 ]
 
 app_name = "chw"

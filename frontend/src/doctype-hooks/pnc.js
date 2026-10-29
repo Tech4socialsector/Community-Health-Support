@@ -86,8 +86,10 @@ function computeTrack(values, rows, scheduleRows) {
   }
 
   // Each visit's window is a direct lookup in the master's schedule, not a
-  // repeating interval from the last visit.
-  const completedCount = rows.filter((row) => row.status === 'Completed').length
+  // repeating interval from the last visit. An urgent follow-up is an extra
+  // visit, not one of the numbered schedule visits - excluded so completing
+  // it doesn't skip a window.
+  const completedCount = rows.filter((row) => row.status === 'Completed' && !row.urgent_followup).length
   const window = getVisitWindow(completedCount + 1, scheduleRows)
   if (!window) {
     // every visit on this table has been completed
@@ -109,9 +111,15 @@ function syncRowFields(values, tableField, windowStart, windowEnd) {
   let display = ''
   if (windowStart && windowEnd) {
     display = `${formatDate(windowStart)} to ${formatDate(windowEnd)}`
-    if (rows.length) setIfChanged(rows[rows.length - 1], 'date_of_next_visit', windowEnd)
+    // An urgent-followup row's own window is the Risk alert deadline, not
+    // this regular schedule's window - never overwritten by it.
+    const lastRow = rows.length ? rows[rows.length - 1] : null
+    if (lastRow && !lastRow.urgent_followup) setIfChanged(lastRow, 'date_of_next_visit', windowEnd)
   }
-  rows.forEach((row) => setIfChanged(row, 'next_visit_window', display))
+  rows.forEach((row) => {
+    if (row.urgent_followup) return
+    setIfChanged(row, 'next_visit_window', display)
+  })
 }
 
 // Bumped per recalculation: a slower, older call must not overwrite the

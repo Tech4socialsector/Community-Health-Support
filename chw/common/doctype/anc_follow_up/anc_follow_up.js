@@ -86,6 +86,9 @@ function auto_complete_volunteer_row(frm, cdt, cdn) {
 // apply its result; every earlier one quietly no-ops once it resolves.
 let anc_visit_date_calc_token = 0;
 
+// See the guard comment inside calculate_next_anc_visit_date.
+let anc_visit_date_calc_active = 0;
+
 frappe.ui.form.on("ANC Follow-up", {
 	setup(frm) {
 		// Only pregnancies registered for a family member - Pregnancy
@@ -147,6 +150,14 @@ frappe.ui.form.on("ANC Follow-up", {
 		// stay blank forever on a hand-added row.
 		const row = locals[cdt][cdn];
 		row.window_start_date = frappe.datetime.get_today();
+		// The previous row's own typed Date of Next Visit already said when
+		// this visit is due - carried over here so the nurse isn't asked to
+		// type the same date twice.
+		const rows = frm.doc[VOLUNTEER_TABLE_FIELD] || [];
+		const previous_row = rows[rows.length - 2];
+		if (previous_row && previous_row.date_of_next_visit) {
+			row.date = previous_row.date_of_next_visit;
+		}
 		frm.refresh_field(VOLUNTEER_TABLE_FIELD);
 		fill_new_row_pregnancy_info(frm, cdt, cdn, VOLUNTEER_TABLE_FIELD);
 		highlight_risk_rows(frm);
@@ -207,6 +218,14 @@ function register_followup_table_events(child_doctype, drives_schedule) {
 		},
 		status(frm) {
 			if (drives_schedule) calculate_next_anc_visit_date(frm);
+		},
+		// Purely this module's own output in automatic phase - but in manual
+		// phase it's a nurse's own typed input, so it's live-recalculated
+		// here too, guarded so the write calculate_next_anc_visit_date
+		// itself makes to this same field (automatic phase/urgent branch)
+		// doesn't re-trigger itself.
+		date_of_next_visit(frm) {
+			if (drives_schedule && anc_visit_date_calc_active === 0) calculate_next_anc_visit_date(frm);
 		},
 		patient_condition(frm) {
 			highlight_risk_rows(frm);
@@ -685,33 +704,53 @@ function calculate_next_anc_visit_date(frm) {
 	}
 	if (!frm.doc.pregnant_id) return;
 
-	const pending_urgent = get_pending_urgent(frm);
-	if (pending_urgent) {
-		frm.set_value("next_anc_visit_date", pending_urgent.date);
-		frm.set_value("next_anc_visit_date_auto", pending_urgent.date);
-		// The urgent date itself already IS the early-visit signal - no
-		// separate alert needed on top of it.
-		set_risk_alert(frm, "");
-		sync_child_row_fields(frm, pending_urgent.trigger_date, pending_urgent.date);
-		return;
-	}
-
+	// This function is itself what writes date_of_next_visit onto a row in
+	// automatic phase (and the urgent branch), via sync_child_row_fields
+	// below - without this guard, that write would re-trigger the
+	// date_of_next_visit row handler (added so a nurse's manual typing into
+	// it, in manual phase, live-updates the preview) and recalculate
+	// forever. The .finally() only decrements once every nested promise
+	// here has actually settled - anything written before then is this
+	// function's own echo, not a human edit.
+	anc_visit_date_calc_active++;
 	get_pregnancy_info(frm.doc.pregnant_id).then((info) => {
 		if (!info.lmp_date) return;
 
-		get_window_policy(info.high_risk).then(({ window_days, alert_within_days, automatic_window_count }) => {
+		return get_window_policy(info.high_risk).then(({ window_days, alert_within_days, automatic_window_count }) => {
 			// A newer call to this function has started since this chain
 			// began - let that one's result stand instead of overwriting it
 			// with this now-stale one.
 			if (my_token !== anc_visit_date_calc_token) return;
 
-			const completed_count = (frm.doc[VOLUNTEER_TABLE_FIELD] || []).filter((row) => row.status === "Completed").length;
+			// An urgent follow-up is an extra visit squeezed in between regular
+			// windows, not one of the regular 30-day slots - completing it must
+			// not advance the regular schedule by a window it was never part of.
+			const completed_count = (frm.doc[VOLUNTEER_TABLE_FIELD] || []).filter(
+				(row) => row.status === "Completed" && !row.urgent_followup
+			).length;
 			const starting_window = get_window_index(
 				frm.doc.creation || frappe.datetime.get_today(),
 				info.lmp_date,
 				window_days
 			);
 			const current_window = get_current_window(starting_window, completed_count);
+			// Computed up front, before the urgent short-circuit below, so
+			// the field it gates (the Volunteer row's own Date of Next
+			// Visit) stays correctly shown/hidden live, even while an
+			// urgent follow-up happens to be active.
+			frm.set_value("schedule_in_manual_phase", current_window > automatic_window_count ? 1 : 0);
+
+			const pending_urgent = get_pending_urgent(frm);
+			if (pending_urgent) {
+				frm.set_value("next_anc_visit_date", pending_urgent.date);
+				frm.set_value("next_anc_visit_date_auto", pending_urgent.date);
+				// The urgent date itself already IS the early-visit signal -
+				// no separate alert needed on top of it.
+				set_risk_alert(frm, "");
+				sync_child_row_fields(frm, pending_urgent.trigger_date, pending_urgent.date);
+				return;
+			}
+
 			const window_start = frappe.datetime.add_days(info.lmp_date, (current_window - 1) * window_days);
 			const window_end = frappe.datetime.add_days(window_start, window_days);
 
@@ -731,36 +770,53 @@ function calculate_next_anc_visit_date(frm) {
 				return;
 			}
 
-			// Manual phase - whichever Volunteer row has the most recently
-			// visited date's "Date of Next Visit" wins. Until she has
-			// actually recorded one, never leave this blank - show her
-			// current month's window (from LMP) as a starting suggestion.
+			// Manual phase - there's no further automatic window to
+			// calculate, so nothing is invented here. Everything stays
+			// blank until a nurse types a Date of Next Visit on a row
+			// herself; whichever row's own visit happened most recently is
+			// the one that counts.
+			set_risk_alert(frm, "");
+
 			const current = frm.doc.next_anc_visit_date;
 			const last_auto = frm.doc.next_anc_visit_date_auto;
 			if (current && last_auto && current !== last_auto) {
-				// user has manually overridden the date; leave it alone - it's
-				// no longer a calculated window, so there's no range or alert
-				// to show.
-				set_risk_alert(frm, "");
-				sync_child_row_fields(frm, null, null);
+				// A coordinator typed directly into Next ANC Visit Date
+				// itself, bypassing the rows entirely - respected as-is,
+				// never recalculated back out from under them.
+				sync_manual_phase_row_windows(frm);
 				return;
 			}
 
 			const manual_rows = (frm.doc[VOLUNTEER_TABLE_FIELD] || []).filter((row) => row.date_of_next_visit);
 			if (!manual_rows.length) {
-				frm.set_value("next_anc_visit_date", window_end);
-				frm.set_value("next_anc_visit_date_auto", window_end);
-				set_risk_alert(frm, risk_alert);
-				sync_child_row_fields(frm, window_start, window_end);
+				frm.set_value("next_anc_visit_date", null);
+				frm.set_value("next_anc_visit_date_auto", null);
+				sync_manual_phase_row_windows(frm);
 				return;
 			}
 
 			const latest_row = manual_rows.sort((a, b) => (a.date > b.date ? 1 : -1))[manual_rows.length - 1];
 			frm.set_value("next_anc_visit_date", latest_row.date_of_next_visit);
 			frm.set_value("next_anc_visit_date_auto", latest_row.date_of_next_visit);
-			// A manually typed date isn't a calculated window either.
-			set_risk_alert(frm, "");
-			sync_child_row_fields(frm, null, null);
+			sync_manual_phase_row_windows(frm);
 		});
+	}).finally(() => {
+		anc_visit_date_calc_active--;
 	});
+}
+
+function sync_manual_phase_row_windows(frm) {
+	// Manual phase has no single calculated window to share across rows any
+	// more - each row's own "Next Visit Window" instead shows just that
+	// row's own visit date through to whatever Date of Next Visit was typed
+	// on it, if any; a row with nothing typed in shows nothing.
+	const rows = frm.doc[VOLUNTEER_TABLE_FIELD] || [];
+	rows.forEach((row) => {
+		if (row.urgent_followup) return;
+		row.next_visit_window =
+			row.date_of_next_visit && row.date
+				? `${frappe.datetime.str_to_user(row.date)} to ${frappe.datetime.str_to_user(row.date_of_next_visit)}`
+				: "";
+	});
+	frm.refresh_field(VOLUNTEER_TABLE_FIELD);
 }

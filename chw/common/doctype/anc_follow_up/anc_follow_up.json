@@ -24,6 +24,7 @@
   "next_anc_visit_date",
   "next_anc_visit_risk_alert",
   "next_anc_visit_date_auto",
+  "schedule_in_manual_phase",
   "section_break_lxnr",
   "current_status_column",
   "delivery_status",
@@ -146,6 +147,15 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Next ANC Visit Date (auto-calculated, internal)",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Internal - true once the automatic window schedule has run past its configured Automatic Window Count, so the Volunteer row's own \"Date of Next Visit\" becomes the real manual override instead of a value the engine would just overwrite.",
+   "fieldname": "schedule_in_manual_phase",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Schedule In Manual Phase (internal)",
    "read_only": 1
   },
   {

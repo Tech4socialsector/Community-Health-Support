@@ -460,6 +460,8 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:parent.schedule_in_manual_phase",
+   "description": "Only shown once the automatic schedule has run past its configured window count - until then it's recalculated and overwritten every save, so editing it has no effect.",
    "fieldname": "date_of_next_visit",
    "fieldtype": "Date",
    "label": "Date of Next Visit"

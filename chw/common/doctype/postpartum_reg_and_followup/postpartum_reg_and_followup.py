@@ -58,7 +58,13 @@ class PostpartumRegandFollowup(Document):
 				next_row = table[i + 1] if i + 1 < len(table) else None
 				already_inserted = next_row and next_row.urgent_followup
 				if not already_inserted:
-					effective_visit_number = len([r for r in table[: i + 1] if r.status == "Completed"])
+					# A previously completed urgent follow-up is an extra visit,
+					# not one of the numbered schedule visits - excluded here so
+					# it doesn't push this trigger's own visit number (and the
+					# urgent-within-days setting looked up from it) too high.
+					effective_visit_number = len(
+						[r for r in table[: i + 1] if r.status == "Completed" and not r.urgent_followup]
+					)
 					urgent_within_days = self.get_urgent_visit_within_days(effective_visit_number)
 					urgent_date = add_days(getdate(row.date_of_visit), urgent_within_days)
 					next_row_too_soon = next_row and getdate(next_row.date_of_visit) <= urgent_date
@@ -107,9 +113,9 @@ class PostpartumRegandFollowup(Document):
 		return latest.mother_condition == "Risk" or latest.baby_condition == "Risk"
 
 	def set_next_visit_date(self):
-		# Each visit's window is a direct row lookup from the Postpartum
-		# Visit Interval Master's Visit Schedule table - however many rows
-		# are configured there, that's how many visits this protocol has.
+		# Each visit's window is a direct row lookup from the shared Visit
+		# Schedule Master's rows for this program - however many rows are
+		# configured there, that's how many visits this protocol has.
 		# Any days not covered by a row (a gap between two windows) simply
 		# have nothing due - the code never looks at those days at all.
 		if not self.delivery_date:
@@ -130,7 +136,13 @@ class PostpartumRegandFollowup(Document):
 			self.sync_row_fields(urgent.trigger_date, urgent.date)
 			return
 
-		visit_number = len([row for row in self.followup_visits if row.status == "Completed"]) + 1
+		# An urgent follow-up is an extra visit squeezed in between regular
+		# windows, not one of the numbered schedule visits - completing it
+		# must not advance the regular schedule by a visit it was never
+		# part of.
+		visit_number = len(
+			[row for row in self.followup_visits if row.status == "Completed" and not row.urgent_followup]
+		) + 1
 		window = self.get_visit_window(visit_number)
 		if window is None:
 			# every scheduled visit has been completed
@@ -164,12 +176,18 @@ class PostpartumRegandFollowup(Document):
 		# "Next Visit Window" is a plain read-only range shown on every row.
 		if window_start and window_end:
 			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
-			if self.followup_visits:
+			# An urgent-followup row's own window (see
+			# insert_urgent_followups_for_risk_rows) is the Risk alert
+			# deadline, not this regular schedule's window - never
+			# overwritten by it, regardless of call order.
+			if self.followup_visits and not self.followup_visits[-1].urgent_followup:
 				self.followup_visits[-1].date_of_next_visit = window_end
 		else:
 			display = ""
 
 		for row in self.followup_visits:
+			if row.urgent_followup:
+				continue
 			row.next_visit_window = display
 
 	@staticmethod

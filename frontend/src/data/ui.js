@@ -85,6 +85,14 @@ export function sectionHeadAt(index) {
 }
 
 export const STAT_GRID = 'grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-4'
+// A module with few enough cards to fully fill a fixed 2-column grid (e.g.
+// a role restricted to exactly 4 forms) stays at 2 columns on every screen
+// size, so it always reads as an even block (2x2) instead of spreading into
+// a single row of 4 on a wide screen. Modules with more cards than that
+// keep the progressive STAT_GRID scaling, unchanged.
+export function statGridFor(count) {
+  return count > 0 && count <= 4 ? 'grid grid-cols-2 gap-3 sm:gap-4' : STAT_GRID
+}
 // Flex, not grid: on an incomplete last row (e.g. 11 cards = 4+4+3), grid
 // would leave the 4th slot an empty gap - flex-wrap lets the row's actual
 // cards (flex-grow, see statCardAt's callers) share that leftover width

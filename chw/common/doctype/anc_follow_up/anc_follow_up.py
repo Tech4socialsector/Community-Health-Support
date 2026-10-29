@@ -494,6 +494,11 @@ class ANCFollowup(Document):
 				next_row = table[i + 1] if i + 1 < len(table) else None
 				already_inserted = next_row and next_row.urgent_followup
 				if not already_inserted:
+					# The window opens the day after the Risk visit (not on
+					# it - that visit is already done) and must close by the
+					# alert_within_days deadline, same day as the urgent
+					# row's own "date".
+					window_start = add_days(getdate(row.date), 1)
 					urgent_date = add_days(getdate(row.date), alert_within_days)
 					next_row_too_soon = next_row and getdate(next_row.date) <= urgent_date
 					if not next_row_too_soon:
@@ -504,6 +509,9 @@ class ANCFollowup(Document):
 						new_row.urgent_followup = 1
 						new_row.lmp_date = row.lmp_date
 						new_row.pog_weeks = self.calculate_pog(row.lmp_date, urgent_date) if row.lmp_date else ""
+						new_row.next_visit_window = "{0} to {1}".format(
+							frappe.utils.formatdate(window_start), frappe.utils.formatdate(urgent_date)
+						)
 						table.remove(new_row)
 						table.insert(i + 1, new_row)
 						for idx, r in enumerate(table):
@@ -528,6 +536,24 @@ class ANCFollowup(Document):
 		)
 		if not reg or not reg.lmp_date:
 			return
+
+		high_risk = reg.high_risk or "No"
+		window_days, alert_within_days, automatic_window_count = self.get_window_policy(high_risk)
+		# An urgent follow-up is an extra visit squeezed in between regular
+		# windows, not one of the regular 30-day slots - completing it must
+		# not advance the regular schedule by a window it was never part of.
+		completed_count = len([
+			row for row in self.get(VOLUNTEER_TABLE_FIELD) if row.status == "Completed" and not row.urgent_followup
+		])
+		starting_window = self.get_window_index(self.creation or getdate(), reg.lmp_date, window_days)
+		current_window = self.get_current_window(starting_window, completed_count)
+		# Computed up front, before the urgent short-circuit below, so the
+		# flag stays accurate even while an urgent follow-up happens to be
+		# active - it answers "has this pregnancy's schedule exceeded the
+		# automatic window count", a question unrelated to whether a Risk
+		# visit is pending right now.
+		self.schedule_in_manual_phase = 1 if current_window > automatic_window_count else 0
+
 		urgent = self.get_pending_urgent_followup()
 		if urgent:
 			self.next_anc_visit_date = urgent.date
@@ -535,12 +561,6 @@ class ANCFollowup(Document):
 			self.next_anc_visit_risk_alert = ""
 			self.sync_child_row_fields(urgent.trigger_date, urgent.date)
 			return
-
-		high_risk = reg.high_risk or "No"
-		window_days, alert_within_days, automatic_window_count = self.get_window_policy(high_risk)
-		completed_count = len([row for row in self.get(VOLUNTEER_TABLE_FIELD) if row.status == "Completed"])
-		starting_window = self.get_window_index(self.creation or getdate(), reg.lmp_date, window_days)
-		current_window = self.get_current_window(starting_window, completed_count)
 
 		window_start = add_days(getdate(reg.lmp_date), (current_window - 1) * window_days)
 		window_end = add_days(window_start, window_days)
@@ -562,35 +582,49 @@ class ANCFollowup(Document):
 			self.sync_child_row_fields(window_start, window_end)
 			return
 
-		# Manual phase from here on - whichever Volunteer row carries the most
-		# recently visited date's "Date of Next Visit" is the real answer.
-		# Until she has actually recorded one, never leave this blank - show
-		# her current month's window (from LMP) as a starting suggestion
-		# instead.
-		manual_rows = [row for row in self.get(VOLUNTEER_TABLE_FIELD) if row.get("date_of_next_visit")]
-		if not manual_rows:
-			self.next_anc_visit_date = window_end
-			self.next_anc_visit_date_auto = window_end
-			self.next_anc_visit_risk_alert = risk_alert
-			self.sync_child_row_fields(window_start, window_end)
-			return
+		# Manual phase from here on - there's no further automatic window to
+		# calculate, so nothing is invented here. Everything stays blank
+		# until a nurse types a Date of Next Visit on a row herself;
+		# whichever row's own visit happened most recently is the one that
+		# counts, same "most recent wins" rule PNC/Postpartum use elsewhere.
+		self.next_anc_visit_risk_alert = ""
 
 		current = getdate(self.next_anc_visit_date) if self.next_anc_visit_date else None
 		last_auto = getdate(self.next_anc_visit_date_auto) if self.next_anc_visit_date_auto else None
 		if current and last_auto and current != last_auto:
-			# user has manually overridden the date; leave it alone - it's no
-			# longer a calculated window, so there's no range or alert to show.
-			self.next_anc_visit_risk_alert = ""
-			self.sync_child_row_fields(None, None)
+			# A coordinator typed directly into Next ANC Visit Date itself,
+			# bypassing the rows entirely - respected as-is, never
+			# recalculated back out from under them.
+			self.sync_manual_phase_row_windows()
+			return
+
+		manual_rows = [row for row in self.get(VOLUNTEER_TABLE_FIELD) if row.get("date_of_next_visit")]
+		if not manual_rows:
+			self.next_anc_visit_date = None
+			self.next_anc_visit_date_auto = None
+			self.sync_manual_phase_row_windows()
 			return
 
 		latest_row = max(manual_rows, key=lambda r: getdate(r.date))
 		calculated_date = getdate(latest_row.get("date_of_next_visit"))
 		self.next_anc_visit_date = calculated_date
 		self.next_anc_visit_date_auto = calculated_date
-		# A manually typed date isn't a calculated window either.
-		self.next_anc_visit_risk_alert = ""
-		self.sync_child_row_fields(None, None)
+		self.sync_manual_phase_row_windows()
+
+	def sync_manual_phase_row_windows(self):
+		# Manual phase has no single calculated window to share across rows
+		# any more - each row's own "Next Visit Window" instead shows just
+		# that row's own visit date through to whatever Date of Next Visit
+		# was typed on it, if any; a row with nothing typed in shows nothing.
+		for row in self.get(VOLUNTEER_TABLE_FIELD):
+			if row.urgent_followup:
+				continue
+			if row.get("date_of_next_visit") and row.date:
+				row.next_visit_window = "{0} to {1}".format(
+					frappe.utils.formatdate(row.date), frappe.utils.formatdate(row.date_of_next_visit)
+				)
+			else:
+				row.next_visit_window = ""
 
 	def sync_child_row_fields(self, window_start, window_end):
 		# "Date of Next Visit" and "Next Visit Window" are auto-filled on the
@@ -602,10 +636,15 @@ class ANCFollowup(Document):
 		else:
 			display = ""
 
+		# An urgent-followup row's own window (see _insert_urgent_followups)
+		# is the Risk alert deadline, not this rolling schedule's window -
+		# never overwritten by it, regardless of call order.
 		table = self.get(VOLUNTEER_TABLE_FIELD)
-		if window_start and window_end and table:
+		if window_start and window_end and table and not table[-1].urgent_followup:
 			table[-1].date_of_next_visit = window_end
 		for row in table:
+			if row.urgent_followup:
+				continue
 			row.next_visit_window = display
 
 	def get_pending_urgent_followup(self):

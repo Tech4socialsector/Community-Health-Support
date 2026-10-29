@@ -324,6 +324,13 @@ def get_app_modules():
     user_roles = set(frappe.get_roles())
     names = frappe.get_all('App Module Setting', pluck='name', order_by='sort_order asc')
 
+    # A user visible to more than one module (e.g. Administrator, who
+    # implicitly holds every role, or anyone given both a general CHW role
+    # and a restricted one like Palliative Care Coordinator) would otherwise
+    # see the same DocType's card twice - once per module. Earlier modules
+    # (by sort_order) win; a DocType already shown there is dropped from any
+    # later module instead of repeated.
+    seen_doctypes = set()
     modules = []
     for name in names:
         module_doc = frappe.get_cached_doc('App Module Setting', name)
@@ -338,10 +345,11 @@ def get_app_modules():
                 'links': _doctype_connection_links(item.doctype_name),
             }
             for item in (module_doc.doctypes or [])
-            if item.doctype_name
+            if item.doctype_name and item.doctype_name not in seen_doctypes
         ]
         if not doctypes:
             continue
+        seen_doctypes.update(d['doctype_name'] for d in doctypes)
         modules.append({
             'label': module_doc.label,
             'icon': module_doc.icon or 'file-text',
@@ -2652,18 +2660,34 @@ CHW_WORK_ORDER_TYPES = [
         'key': 'palliative',
         'label': 'Palliative Care',
         'doctype': 'Palliative care followup',
-        'date_field': None,
+        # next_visit_date is the parent's own field, kept in sync by
+        # Palliativecarefollowup.set_next_visit_date(): whichever track
+        # (Medical or Therapist) has an open Pending row, that row's own
+        # Visit Date is what's actually due - same Status-driven rule every
+        # other type uses. No window/risk calculation here - this program
+        # has neither, by design.
+        'date_field': 'next_visit_date',
         'from_date_field': None,
         'high_risk_field': None,
         'alert_field': None,
         'patient_field': 'name1',
         'patient_fallback_field': None,
-        'has_date': False,
+        'has_date': True,
         'has_village': False,
         'has_health_worker': False,
         'followup_doctype': None,
         'followup_table_field': None,
         'followup_date_field': None,
+        # Two independent tracks, both counted toward "completed this week" -
+        # see _work_order_followup_sources. followup_status_field marks
+        # these sources as Status-aware (filtered to Completed), since
+        # unlike the other types' rows, these exist whether or not the
+        # visit has actually happened yet.
+        'followup_sources': [
+            ('Medical Followup Form', 'visit_date'),
+            ('CHW APF', 'visit_date'),
+        ],
+        'followup_status_field': 'status',
     },
     {
         'key': 'postpartum',
@@ -2880,7 +2904,9 @@ def _pnc_track_from_date(rows, delivery_date):
         trigger_date = getdate(trigger_row.date) if trigger_row else getdate(earliest.date)
         return trigger_date, getdate(earliest.date), True
 
-    completed_count = len([row for row in rows if row.status == 'Completed'])
+    # An urgent follow-up is an extra visit, not one of the numbered schedule
+    # visits - excluded so completing it doesn't skip a window.
+    completed_count = len([row for row in rows if row.status == 'Completed' and not row.urgent_followup])
     window = PNC.get_visit_window(completed_count + 1)
     if not window:
         return None, None, False
@@ -2890,8 +2916,8 @@ def _pnc_track_from_date(rows, delivery_date):
 
 
 def _enrich_pnc_records_live(records):
-    """From-date AND High-Risk for PNC records, computed live from the PNC
-    Visit Interval Master's Visit Schedule + the record's own Mother and
+    """From-date AND High-Risk for PNC records, computed live from the shared
+    Visit Schedule Master's rows for PNC + the record's own Mother and
     Baby child rows - mirroring PNC._compute_track/set_next_pnc_visit_date
     exactly (mother and baby tracked independently, whichever is due sooner
     wins), instead of the list view's generic due_date-minus-30 fallback.
@@ -3039,7 +3065,9 @@ def _enrich_anc_records_live(records):
             continue
 
         window_days, alert_within_days, _ = ANCFollowup.get_window_policy(high_risk)
-        completed_count = len(completed_rows)
+        # An urgent follow-up is an extra visit, not one of the regular
+        # 30-day slots - excluded so completing it doesn't skip a window.
+        completed_count = len([row for row in rows if row.status == 'Completed' and not row.urgent_followup])
         starting_window = ANCFollowup.get_window_index(r.get('creation') or getdate(), pregnancy.lmp_date, window_days)
         current_window = ANCFollowup.get_current_window(starting_window, completed_count)
         window_start = add_days(getdate(pregnancy.lmp_date), (current_window - 1) * window_days)
@@ -3106,7 +3134,9 @@ def _enrich_postpartum_records_live(records):
             r['from_date'] = str(trigger_date)
             continue
 
-        completed_count = len([row for row in rows if row.status == 'Completed'])
+        # An urgent follow-up is an extra visit, not one of the numbered
+        # schedule visits - excluded so completing it doesn't skip a window.
+        completed_count = len([row for row in rows if row.status == 'Completed' and not row.urgent_followup])
         window = PostpartumRegandFollowup.get_visit_window(completed_count + 1)
         r['from_date'] = str(add_days(getdate(delivery_date), window.start_offset)) if window else None
 
@@ -3175,35 +3205,58 @@ def _enrich_child_6w_1y_records_live(records):
             r['from_date'] = str(trigger_date)
             continue
 
-        completed_count = len(completed_rows)
+        # An urgent follow-up is an extra visit, not one of the numbered
+        # schedule visits - excluded so completing it doesn't skip a window.
+        completed_count = len([row for row in rows if row.status == 'Completed' and not row.urgent_followup])
         window = Child6wto1YearRegandFollowup.get_visit_window(completed_count + 1)
         r['from_date'] = str(add_days(getdate(birth_date), window.start_offset)) if window else None
 
     return records
 
 
+def _work_order_followup_sources(wtype):
+    """(doctype, date_field) pairs this type's "completed this week" count
+    and records are read from. Most types have exactly one followup table;
+    Palliative Care has two independent tracks (Medical and Therapist), both
+    counted together - set via 'followup_sources' instead of the single
+    followup_doctype/followup_date_field pair the other types use."""
+    if wtype.get('followup_sources'):
+        return wtype['followup_sources']
+    if not wtype['followup_doctype']:
+        return []
+    return [(wtype['followup_doctype'], wtype['followup_date_field'])]
+
+
 def _work_order_completed_count(wtype, village, health_worker, from_date, to_date):
     """How many followup visits (child-table rows, across all this type's
     parent records) were actually logged in [from_date, to_date] - i.e. work
-    the CHW has already done, not what's still due. Palliative Care has no
-    followup table wired up for this (has_date=False), so it's never called
-    for that type."""
-    if not wtype['followup_doctype']:
+    the CHW has already done, not what's still due."""
+    sources = _work_order_followup_sources(wtype)
+    if not sources:
         return 0
 
     parent_names = _work_order_matching_parent_names(wtype, village, health_worker)
     if parent_names is not None and not parent_names:
         return 0
 
-    filters = [[wtype['followup_date_field'], 'between', [from_date, to_date]]]
-    if parent_names is not None:
-        filters.append(['parent', 'in', parent_names])
-
-    try:
-        return frappe.db.count(wtype['followup_doctype'], filters)
-    except Exception:
-        frappe.log_error(f"Error counting completed {wtype['followup_doctype']} for chw-work-order-list")
-        return 0
+    # Only Palliative Care sets this - its rows exist whether or not the
+    # visit has actually happened yet, so "completed" has to mean Status =
+    # Completed, not merely a row with a date in range. The other types
+    # never pre-generate a Pending row due in a past/current week in
+    # practice, so this stays unset for them (same count as before).
+    status_field = wtype.get('followup_status_field')
+    total = 0
+    for followup_doctype, date_field in sources:
+        filters = [[date_field, 'between', [from_date, to_date]]]
+        if status_field:
+            filters.append([status_field, '=', 'Completed'])
+        if parent_names is not None:
+            filters.append(['parent', 'in', parent_names])
+        try:
+            total += frappe.db.count(followup_doctype, filters)
+        except Exception:
+            frappe.log_error(f"Error counting completed {followup_doctype} for chw-work-order-list")
+    return total
 
 
 def _work_order_high_risk_records(wtype, village, health_worker):
@@ -3287,27 +3340,33 @@ def _work_order_high_risk_records(wtype, village, health_worker):
 
 
 def _work_order_completed_records(wtype, village, health_worker, from_date, to_date):
-    if not wtype['followup_doctype']:
+    sources = _work_order_followup_sources(wtype)
+    if not sources:
         return []
 
     parent_names = _work_order_matching_parent_names(wtype, village, health_worker)
     if parent_names is not None and not parent_names:
         return []
 
-    filters = [[wtype['followup_date_field'], 'between', [from_date, to_date]]]
-    if parent_names is not None:
-        filters.append(['parent', 'in', parent_names])
-
-    try:
-        rows = frappe.get_all(
-            wtype['followup_doctype'],
-            filters=filters,
-            fields=['parent', wtype['followup_date_field']],
-            limit_page_length=200,
-        )
-    except Exception:
-        frappe.log_error(f"Error fetching completed {wtype['followup_doctype']} for chw-work-order-list")
-        return []
+    # See _work_order_completed_count for why this only applies to Palliative
+    # Care's sources.
+    status_field = wtype.get('followup_status_field')
+    rows = []
+    for followup_doctype, date_field in sources:
+        filters = [[date_field, 'between', [from_date, to_date]]]
+        if status_field:
+            filters.append([status_field, '=', 'Completed'])
+        if parent_names is not None:
+            filters.append(['parent', 'in', parent_names])
+        try:
+            rows.extend(frappe.get_all(
+                followup_doctype,
+                filters=filters,
+                fields=['parent', f'{date_field} as due_date'],
+                limit_page_length=200,
+            ))
+        except Exception:
+            frappe.log_error(f"Error fetching completed {followup_doctype} for chw-work-order-list")
     if not rows:
         return []
 
@@ -3347,7 +3406,7 @@ def _work_order_completed_records(wtype, village, health_worker, from_date, to_d
             'visit_type': wtype['label'],
             'patient': _work_order_patient_name(parent, wtype),
             'village': parent.get('village') if wtype['has_village'] else None,
-            'due_date': str(r.get(wtype['followup_date_field']) or ''),
+            'due_date': str(r.get('due_date') or ''),
             'from_date': None,
             'high_risk': high_risk,
             'alert_date': None,

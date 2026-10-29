@@ -103,7 +103,13 @@ class PNC(Document):
 				next_row = table[i + 1] if i + 1 < len(table) else None
 				already_inserted = next_row and next_row.urgent_followup
 				if not already_inserted:
-					effective_visit_number = len([r for r in table[: i + 1] if r.status == "Completed"])
+					# A previously completed urgent follow-up is an extra visit,
+					# not one of the numbered schedule visits - excluded here so
+					# it doesn't push this trigger's own visit number (and the
+					# urgent-within-days setting looked up from it) too high.
+					effective_visit_number = len(
+						[r for r in table[: i + 1] if r.status == "Completed" and not r.urgent_followup]
+					)
 					urgent_within_days = self.get_urgent_visit_within_days(effective_visit_number)
 					urgent_date = add_days(getdate(row.date), urgent_within_days)
 					next_row_too_soon = next_row and getdate(next_row.date) <= urgent_date
@@ -189,7 +195,11 @@ class PNC(Document):
 				is_urgent=True,
 			)
 
-		visit_number = len([row for row in table if row.status == "Completed"]) + 1
+		# An urgent follow-up is an extra visit squeezed in between regular
+		# windows, not one of the numbered schedule visits - completing it
+		# must not advance the regular schedule by a visit it was never
+		# part of.
+		visit_number = len([row for row in table if row.status == "Completed" and not row.urgent_followup]) + 1
 		window = self.get_visit_window(visit_number)
 		if window is None:
 			# every visit on this table has been completed
@@ -225,12 +235,17 @@ class PNC(Document):
 		# "Next Visit Window" is a plain read-only range shown on every row.
 		if window_start and window_end:
 			display = "{0} to {1}".format(frappe.utils.formatdate(window_start), frappe.utils.formatdate(window_end))
-			if table:
+			# An urgent-followup row's own window (see _insert_urgent_followups)
+			# is the Risk alert deadline, not this regular schedule's window -
+			# never overwritten by it, regardless of call order.
+			if table and not table[-1].urgent_followup:
 				table[-1].date_of_next_visit = window_end
 		else:
 			display = ""
 
 		for row in table:
+			if row.urgent_followup:
+				continue
 			row.next_visit_window = display
 
 	@staticmethod

@@ -56,7 +56,7 @@
             <span :class="ui.COUNT_BADGE">{{ mod.doctypes.length }}</span>
             <span class="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
           </div>
-          <div :class="ui.STAT_GRID">
+          <div :class="ui.statGridFor(mod.doctypes.length)">
             <!-- Card is a plain div (not a link) because it holds two
             separate actions - nesting the "+ New" link inside an outer link
             is invalid HTML. The stretched ::after on the title link makes
