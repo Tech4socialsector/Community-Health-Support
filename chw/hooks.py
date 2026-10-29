@@ -60,6 +60,35 @@ fixtures = [
 		"dt": "Custom DocPerm",
 		"filters": [["role", "in", ["Palliative Care Coordinator", "Palliative Care Worker"]]],
 	},
+	# The standard print formats built for each CHW form's "Print" button
+	# (Desk and the Vue app both call these by name - see print_utils.py and
+	# frontend/src/data/printFormats.js). Extend this list as more are built.
+	{
+		"dt": "Print Format",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Household Profile Print",
+					"ANC Follow-up Print",
+					"Birth Registration Print",
+					"Child 6w-1y Print",
+					"Child Growth Monitoring Print",
+					"Family Members Print",
+					"MCH Postpartum Intake Print",
+					"Mental Health Print",
+					"NCD Print",
+					"Palliative Care Followup Print",
+					"Palliative Care Initial Assessment Print",
+					"PNC Print",
+					"Postpartum Print",
+					"Preconception Print",
+					"Pregnancy Registration Print",
+				],
+			]
+		],
+	},
 ]
 
 app_name = "chw"
@@ -91,7 +120,7 @@ add_to_apps_screen = [
 
 # include js, css files in header of desk.html
 app_include_css = "/assets/chw/css/chw_desk.css"
-# app_include_js = "/assets/chw/js/chw.js"
+app_include_js = "print_preview.bundle.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/chw/css/chw.css"

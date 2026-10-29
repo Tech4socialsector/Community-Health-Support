@@ -2,6 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Pregnancy Registration", {
+	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "Pregnancy Registration Print"));
+		}
+	},
 	setup(frm) {
 		frm.set_query("familymember_id", () => ({
 			filters: { gender: "Female" },

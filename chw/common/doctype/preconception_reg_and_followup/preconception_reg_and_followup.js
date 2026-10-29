@@ -2,6 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Preconception Reg and Followup", {
+	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "Preconception Print"));
+		}
+	},
 	followup_visits_add(frm, cdt, cdn) {
 		// The CHW is filling this in because the visit is happening right
 		// now, not scheduling one for later - default it to today so she

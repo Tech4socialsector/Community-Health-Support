@@ -52,6 +52,16 @@
           <LucideIcon name="flask-conical" class="h-4 w-4" />
         </button>
 
+        <button
+          v-if="canPrint"
+          type="button"
+          :class="[ui.BTN_SECONDARY, 'flex-shrink-0 !px-2.5']"
+          :aria-label="t('Print')"
+          @click="printOpen = true"
+        >
+          <LucideIcon name="printer" class="h-4 w-4" />
+        </button>
+
         <!-- Desk's "..." menu: Delete lives here, not as a button beside
         Save, so it can't be tapped by mistake. Only shown to people whose
         role may delete this record. -->
@@ -95,6 +105,15 @@
           </div>
         </template>
       </Dialog>
+
+      <PrintPreviewDialog
+        v-if="canPrint"
+        v-model="printOpen"
+        :doctype="doctype"
+        :docname="name"
+        :print-format="printFormat"
+        :title="t(formLabel)"
+      />
 
       <Dialog v-model="investigationStatusDialog" :options="{ title: t('Investigation Status'), size: '5xl' }">
         <template #body-header>
@@ -332,6 +351,8 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vu
 import { onKeyStroke, useEventListener } from '@vueuse/core'
 import { useDoc, useNewDoc, call, Dialog, ErrorMessage, toast } from 'frappe-ui'
 import ToolbarMenu from '@/components/ToolbarMenu.vue'
+import PrintPreviewDialog from '@/components/PrintPreviewDialog.vue'
+import { printFormatFor } from '@/data/printFormats.js'
 import AppLayout from '@/layouts/AppLayout.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import DynamicField from '@/components/DynamicField.vue'
@@ -894,6 +915,14 @@ function saveErrorText(e) {
 }
 
 const saveErrorBox = ref(null)
+
+// --- Print ---------------------------------------------------------------
+// Only shown once this doctype has a real Print Format configured (see
+// data/printFormats.js) and the record actually exists on the server - a
+// record saved only on this phone (offline) has nothing there yet to render.
+const printFormat = computed(() => printFormatFor(doctype))
+const canPrint = computed(() => !isNew && !!name && !isLocalName(name) && !!printFormat.value)
+const printOpen = ref(false)
 
 // --- Delete ------------------------------------------------------------
 // Asked of the server per record, so the menu matches the user's role

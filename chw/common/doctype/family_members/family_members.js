@@ -58,6 +58,11 @@ function preview_charity_score(frm) {
 }
 
 frappe.ui.form.on("Family members", {
+	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "Family Members Print"));
+		}
+	},
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
 			frappe.call({

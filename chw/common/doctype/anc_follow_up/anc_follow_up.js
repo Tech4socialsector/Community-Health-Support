@@ -116,6 +116,10 @@ frappe.ui.form.on("ANC Follow-up", {
 		}
 	},
 	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "ANC Follow-up Print"));
+		}
+
 		// Small delay - the grid renders its rows just after refresh fires,
 		// so styling immediately would sometimes miss rows not yet drawn.
 		setTimeout(() => highlight_risk_rows(frm), 300);

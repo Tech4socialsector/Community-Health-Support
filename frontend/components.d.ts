@@ -31,6 +31,7 @@ declare module 'vue' {
     NotificationPanel: typeof import('./src/components/NotificationPanel.vue')['default']
     NotificationSettingsPanel: typeof import('./src/components/NotificationSettingsPanel.vue')['default']
     PageHeader: typeof import('./src/components/PageHeader.vue')['default']
+    PrintPreviewDialog: typeof import('./src/components/PrintPreviewDialog.vue')['default']
     ProfilePanel: typeof import('./src/components/ProfilePanel.vue')['default']
     ProgramOverview: typeof import('./src/components/ProgramOverview.vue')['default']
     PwaUpdatePrompt: typeof import('./src/components/PwaUpdatePrompt.vue')['default']

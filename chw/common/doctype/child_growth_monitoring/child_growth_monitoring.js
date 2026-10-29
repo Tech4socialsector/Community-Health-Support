@@ -2,6 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Child Growth Monitoring", {
+	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "Child Growth Monitoring Print"));
+		}
+	},
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
 			frappe.call({

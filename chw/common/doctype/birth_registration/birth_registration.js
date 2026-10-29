@@ -2,6 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Birth Registration", {
+	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "Birth Registration Print"));
+		}
+	},
 	setup(frm) {
 		frm.set_query("family_member_id", () => ({
 			query: "chw.api.family_members_with_pregnancy_registration",

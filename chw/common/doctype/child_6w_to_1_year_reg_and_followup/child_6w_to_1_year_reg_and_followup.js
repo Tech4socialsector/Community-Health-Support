@@ -3,6 +3,10 @@
 
 frappe.ui.form.on("Child 6w to 1 Year Reg and Followup", {
 	refresh(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "Child 6w-1y Print"));
+		}
+
 		// date_of_birth is a fetch_from field - fetches don't fire their
 		// own change event (Frappe only fires that for an actual typed
 		// edit), so a brand new record would otherwise never trigger the

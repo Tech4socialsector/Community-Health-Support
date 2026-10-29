@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Household profile", {
+	refresh(frm) {
+		if (frm.is_new()) return;
+		frm.add_custom_button(__("Print"), () => chw.print_preview.show(frm, "Household Profile Print"));
+	},
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
 			frappe.call({
