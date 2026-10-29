@@ -53,6 +53,7 @@
   "mode_of_delivery",
   "facility",
   "birth_details_section2",
+  "baby_name",
   "gender",
   "birth_weight",
   "birth_length",
@@ -440,12 +441,17 @@
    "fieldtype": "Table",
    "label": "Postpartum Nurse Followup",
    "options": "Postpartum Nurse Notes"
+  },
+  {
+   "fieldname": "baby_name",
+   "fieldtype": "Data",
+   "label": "Baby Name"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-22 22:26:24.761445",
+ "modified": "2026-10-29 17:17:44.540949",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Reg and Followup",

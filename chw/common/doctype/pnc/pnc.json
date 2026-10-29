@@ -25,11 +25,7 @@
   "section_break_dmfm",
   "mother",
   "mother_folloup_nurse_notes",
-  "mother_followup_docter_notes",
-  "section_break_baby",
-  "baby",
-  "baby_followup_nurse_notes",
-  "baby_followup_docter_notes"
+  "mother_followup_docter_notes"
  ],
  "fields": [
   {
@@ -113,24 +109,13 @@
   {
    "fieldname": "section_break_dmfm",
    "fieldtype": "Section Break",
-   "label": "Mother"
+   "label": "Follow-up (Mother & Baby)"
   },
   {
    "fieldname": "mother",
    "fieldtype": "Table",
-   "label": "Mother Folloup Volunteer Notes",
+   "label": "Volunteer Follow-up",
    "options": "PNC Followup Child"
-  },
-  {
-   "fieldname": "section_break_baby",
-   "fieldtype": "Section Break",
-   "label": "Baby"
-  },
-  {
-   "fieldname": "baby",
-   "fieldtype": "Table",
-   "label": "Baby Followup Volunteer",
-   "options": "Baby PNC Followup Child"
   },
   {
    "fieldname": "next_pnc_visit_date",
@@ -164,25 +149,13 @@
   {
    "fieldname": "mother_folloup_nurse_notes",
    "fieldtype": "Table",
-   "label": "Mother Folloup Nurse Notes",
+   "label": "Nurse Follow-up",
    "options": "PNC Followup Mother Nurse Notes"
-  },
-  {
-   "fieldname": "baby_followup_nurse_notes",
-   "fieldtype": "Table",
-   "label": "Baby Followup Nurse Notes",
-   "options": "PNC Child Followup Nurse Notes"
-  },
-  {
-   "fieldname": "baby_followup_docter_notes",
-   "fieldtype": "Table",
-   "label": "Baby Followup Doctor Notes",
-   "options": "PNC Child Followup Docter Notes"
   },
   {
    "fieldname": "mother_followup_docter_notes",
    "fieldtype": "Table",
-   "label": "Mother Followup Docter Notes",
+   "label": "Doctor Follow-up",
    "options": "PNC Followup Mother Docter Notes"
   },
   {
@@ -203,7 +176,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-23 12:00:09.451143",
+ "modified": "2026-10-29 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",

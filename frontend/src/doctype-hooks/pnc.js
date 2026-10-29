@@ -1,10 +1,10 @@
 // Ports chw/common/doctype/pnc/pnc.js (the Desk form script) into the Vue
 // app's hook contract - see doctype-hooks/index.js and DoctypeForm.vue.
 // Records are entered from both Desk and this app, so the live results here
-// must match Desk's and what pnc.py computes on save. The mother/baby visit
-// rows in particular are only ever generated on the client (the server
-// never adds the scheduled rows), so without this the Vue form saved PNC
-// records with no schedule at all.
+// must match Desk's and what pnc.py computes on save. The visit rows (one
+// per visit, mother and baby together) in particular are only ever
+// generated on the client (the server never adds the scheduled rows), so
+// without this the Vue form saved PNC records with no schedule at all.
 
 import { call } from 'frappe-ui'
 import {
@@ -20,7 +20,10 @@ import {
   warnIfNotDigits,
 } from './utils'
 
-const TRACK_TABLES = ['mother', 'baby']
+// One Volunteer table: each visit row covers mother and baby.
+const TRACK_TABLES = ['mother']
+// Risk on either the mother or the baby raises High Risk.
+const CONDITION_FIELDS = ['patient_condition', 'baby_condition']
 
 // Last-resort fallback, as in Desk and pnc.py, if the PNC Visit Interval
 // Master has no Visit Schedule rows yet: (opens_day, closes_day) per visit.
@@ -73,7 +76,7 @@ function setIfChanged(obj, field, value) {
   if ((obj[field] ?? null) !== (value ?? null)) obj[field] = value
 }
 
-// Mirrors _compute_track in pnc.py: one track per table (mother, baby).
+// Mirrors _compute_track in pnc.py.
 function computeTrack(values, rows, scheduleRows) {
   // An open urgent row (inserted by the server on save after a Risk visit)
   // always wins on its table; its window runs from the row before it (the
@@ -137,42 +140,24 @@ async function calculateNextPncVisitDate(values) {
   }
   if (seq !== calcSeq || !values.date_of_delivery) return
 
-  // Mother and baby are tracked independently against the same schedule
-  // (both are checked on the same household visit); the shared Next PNC
-  // Visit Date shows whichever track is due first.
-  const motherTrack = computeTrack(values, values.mother || [], scheduleRows)
-  const babyTrack = computeTrack(values, values.baby || [], scheduleRows)
-  syncRowFields(values, 'mother', motherTrack.windowStart, motherTrack.windowEnd)
-  syncRowFields(values, 'baby', babyTrack.windowStart, babyTrack.windowEnd)
-
-  const candidates = [motherTrack, babyTrack].filter((t) => t.nextDate)
-  if (!candidates.length) {
-    // every scheduled visit, for both mother and baby, is complete
-    setIfChanged(values, 'next_pnc_visit_date', null)
-    setIfChanged(values, 'next_pnc_visit_date_auto', null)
-    setIfChanged(values, 'pnc_visit_risk_alert', '')
-    return
-  }
-
-  // An open urgent row on either track outranks an ordinary due date on
-  // the other, even a sooner one - a fresh risk mustn't be buried behind a
-  // routine visit.
-  const urgentCandidates = candidates.filter((t) => t.isUrgent)
-  const winner = earliestBy(urgentCandidates.length ? urgentCandidates : candidates, (t) => dateKey(t.nextDate))
-  setIfChanged(values, 'next_pnc_visit_date', winner.nextDate)
-  setIfChanged(values, 'next_pnc_visit_date_auto', winner.nextDate)
-  setIfChanged(values, 'pnc_visit_risk_alert', winner.riskAlert || '')
+  // One track for mother and baby (same visit row); nextDate is null once
+  // every scheduled visit is complete.
+  const track = computeTrack(values, values.mother || [], scheduleRows)
+  syncRowFields(values, 'mother', track.windowStart, track.windowEnd)
+  setIfChanged(values, 'next_pnc_visit_date', track.nextDate)
+  setIfChanged(values, 'next_pnc_visit_date_auto', track.nextDate)
+  setIfChanged(values, 'pnc_visit_risk_alert', track.riskAlert || '')
 }
 
 let generateSeq = 0
 
 // The whole schedule is known once the delivery date is: one row per
-// configured visit on BOTH tables, same dates. Only on a fresh record - if
-// either table already has rows, both are left alone and only the summary
+// configured visit (mother and baby together). Only on a fresh record - if
+// the table already has rows, they're left alone and only the summary
 // fields are recalculated.
 async function generateVisitSchedule(values) {
   const deliveryDate = values.date_of_delivery
-  const hasRows = () => (values.mother || []).length || (values.baby || []).length
+  const hasRows = () => (values.mother || []).length
   if (!deliveryDate || hasRows()) return calculateNextPncVisitDate(values)
 
   const seq = ++generateSeq
@@ -187,16 +172,11 @@ async function generateVisitSchedule(values) {
   if (seq !== generateSeq || values.date_of_delivery !== deliveryDate) return
   if (hasRows()) return calculateNextPncVisitDate(values)
 
-  const mother = []
-  const baby = []
-  scheduleRows.forEach((row) => {
-    const windowStart = addDays(deliveryDate, row.window_opens_day)
-    const windowEnd = addDays(deliveryDate, row.window_closes_day)
-    mother.push({ window_start_date: windowStart, date: windowEnd, status: 'Pending' })
-    baby.push({ window_start_date: windowStart, date: windowEnd, status: 'Pending' })
-  })
-  values.mother = mother
-  values.baby = baby
+  values.mother = scheduleRows.map((row) => ({
+    window_start_date: addDays(deliveryDate, row.window_opens_day),
+    date: addDays(deliveryDate, row.window_closes_day),
+    status: 'Pending',
+  }))
   return calculateNextPncVisitDate(values)
 }
 
@@ -237,11 +217,11 @@ export default {
   onChildFieldChange(tableField, fieldname, row, values) {
     if (!TRACK_TABLES.includes(tableField)) return
     if (fieldname === 'status') return calculateNextPncVisitDate(values)
-    const conditionField = tableField === 'mother' ? 'patient_condition' : 'baby_condition'
-    if (fieldname === conditionField) {
+    if (CONDITION_FIELDS.includes(fieldname)) {
       // high_risk has no entry point of its own on the form - a Risk
-      // finding on either table raises it (never lowers it), as on save.
-      if (row[conditionField] === 'Risk') values.high_risk = 'Yes'
+      // finding on the mother or the baby raises it (never lowers it), as
+      // on save.
+      if (row[fieldname] === 'Risk') values.high_risk = 'Yes'
       return calculateNextPncVisitDate(values)
     }
   },

@@ -23,3 +23,4 @@ chw.patches.v1_0.migrate_feather_icon_names_to_lucide
 chw.patches.v1_0.add_chw_roles
 chw.patches.v1_0.seed_pnc_visit_interval_rows
 chw.patches.v1_0.seed_visit_schedule_master
+chw.patches.v1_0.merge_pnc_baby_followups_into_mother

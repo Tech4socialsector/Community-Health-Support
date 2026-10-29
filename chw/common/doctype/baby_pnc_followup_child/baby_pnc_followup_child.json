@@ -229,7 +229,7 @@
   {
    "depends_on": "eval:doc.immunisation_up_to_date==\"No\"",
    "fieldname": "which_ones_are_missing",
-   "fieldtype": "Date",
+   "fieldtype": "Small Text",
    "label": "Which ones are missing"
   },
   {
@@ -242,7 +242,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-23 12:30:05.383468",
+ "modified": "2026-10-29 17:16:23.531686",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Baby PNC Followup Child",

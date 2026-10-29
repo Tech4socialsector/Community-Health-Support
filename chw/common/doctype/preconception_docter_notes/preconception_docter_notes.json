@@ -14,21 +14,13 @@
   "height",
   "weight",
   "o2sat",
+  "folic_acid",
+  "self_care_counseling",
   "column_break_qfdv",
   "objective",
   "subjective",
   "assessment",
-  "plan",
-  "support_and_care_provided_section",
-  "h5education_providedh5",
-  "postpartum_self_care_nutrition_sleep_counseling_handout",
-  "iron_and_calcium_postnatal",
-  "breastfeed",
-  "family_planning_teaching_and_handout",
-  "kegel_exercises_postnatal",
-  "postpartum_depression_handout",
-  "child_immunization_schedule_0_to_1_year",
-  "child_weight_gain_chart_0_to_1_year"
+  "plan"
  ],
  "fields": [
   {
@@ -73,9 +65,9 @@
   {
    "fieldname": "bp",
    "fieldtype": "Int",
-   "label": "BP",
    "in_list_view": 1,
-   "in_standard_filter": 1
+   "in_standard_filter": 1,
+   "label": "BP"
   },
   {
    "fieldname": "hr",
@@ -120,85 +112,23 @@
    "label": "O2Sat"
   },
   {
-   "fieldname": "support_and_care_provided_section",
-   "fieldtype": "Section Break",
-   "label": "Support and Care Provided"
+   "fieldname": "folic_acid",
+   "fieldtype": "Select",
+   "label": "Folic Acid Counseling (preconception visits and 1st trimester)",
+   "options": "\nYes\nNo"
   },
   {
-   "fieldname": "h5education_providedh5",
-   "fieldtype": "Heading",
-   "label": "<h5>Education Provided</h5>"
-  },
-  {
-   "default": "0",
-   "fieldname": "postpartum_self_care_nutrition_sleep_counseling_handout",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Postpartum self care nutrition, sleep counseling (handout)"
-  },
-  {
-   "default": "0",
-   "fieldname": "iron_and_calcium_postnatal",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Iron and Calcium (postnatal)"
-  },
-  {
-   "default": "0",
-   "fieldname": "breastfeed",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Exclusive breastfeeding 0 to 6 months and complementary feeding (handout)"
-  },
-  {
-   "default": "0",
-   "fieldname": "family_planning_teaching_and_handout",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Family planning teaching and handout"
-  },
-  {
-   "default": "0",
-   "fieldname": "kegel_exercises_postnatal",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Kegel exercises (postnatal)"
-  },
-  {
-   "default": "0",
-   "fieldname": "postpartum_depression_handout",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Postpartum Depression (handout)"
-  },
-  {
-   "default": "0",
-   "fieldname": "child_immunization_schedule_0_to_1_year",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Child Immunization Schedule (0 to 1 year)"
-  },
-  {
-   "default": "0",
-   "fieldname": "child_weight_gain_chart_0_to_1_year",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Child Weight Gain Chart (0 to 1 year)"
+   "fieldname": "self_care_counseling",
+   "fieldtype": "Select",
+   "label": "Self Care Counseling: Nutrition, Exercise and Sleep (handout)",
+   "options": "\nYes\nNo"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-07 16:35:17.462257",
+ "modified": "2026-10-29 17:07:35.018271",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Preconception Docter Notes",

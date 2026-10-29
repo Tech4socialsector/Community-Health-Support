@@ -35,7 +35,6 @@ class PNC(Document):
 		self.validate_gender()
 		self.sync_patient_condition_to_high_risk()
 		self.insert_urgent_followups_for_risk_rows()
-		self.insert_urgent_followups_for_baby_risk_rows()
 		self.set_next_pnc_visit_date()
 
 	def on_update(self):
@@ -60,13 +59,12 @@ class PNC(Document):
 
 	def sync_patient_condition_to_high_risk(self):
 		# The only way high_risk ever gets set - there's no manual entry
-		# point on the main form. Either the mother's own Patient Condition
-		# OR the baby's own Baby Condition can independently push this to
-		# Yes - a household visit can find either one at risk. A later
-		# "Normal" reading on either table never downgrades it back on its
-		# own.
+		# point on the main form. Mother and baby are checked on the same
+		# Volunteer visit row, and either the mother's Patient Condition OR
+		# the baby's Baby Condition can push this to Yes. A later "Normal"
+		# reading never downgrades it back on its own.
 		mother_risk = self._latest_condition(self.mother, "patient_condition") == "Risk"
-		baby_risk = self._latest_condition(self.baby, "baby_condition") == "Risk"
+		baby_risk = self._latest_condition(self.mother, "baby_condition") == "Risk"
 		if mother_risk or baby_risk:
 			self.high_risk = "Yes"
 
@@ -78,12 +76,14 @@ class PNC(Document):
 		return rows_with_condition[-1].get(fieldname)
 
 	def insert_urgent_followups_for_risk_rows(self):
-		self._insert_urgent_followups("mother", "patient_condition")
+		self._insert_urgent_followups("mother")
 
-	def insert_urgent_followups_for_baby_risk_rows(self):
-		self._insert_urgent_followups("baby", "baby_condition")
+	@staticmethod
+	def _is_risk_row(row):
+		# One visit row covers mother and baby - Risk on either one counts.
+		return row.get("patient_condition") == "Risk" or row.get("baby_condition") == "Risk"
 
-	def _insert_urgent_followups(self, table_field, condition_field):
+	def _insert_urgent_followups(self, table_field):
 		# Whenever a visit is Completed with its condition field = Risk, an
 		# earlier follow-up than the normal schedule is needed - insert it
 		# right after that row (not appended at the end), dated from that
@@ -92,14 +92,12 @@ class PNC(Document):
 		# own duration, found by counting how many visits are completed up
 		# to and including this one). Skipped if the next row already
 		# sitting there is close enough that a separate visit wouldn't add
-		# anything, and never inserted twice for the same trigger. Mother
-		# and baby run through this independently - a risk finding on one
-		# table only ever inserts into that same table.
+		# anything, and never inserted twice for the same trigger.
 		table = self.get(table_field)
 		i = 0
 		while i < len(table):
 			row = table[i]
-			if row.status == "Completed" and row.get(condition_field) == "Risk":
+			if row.status == "Completed" and self._is_risk_row(row):
 				next_row = table[i + 1] if i + 1 < len(table) else None
 				already_inserted = next_row and next_row.urgent_followup
 				if not already_inserted:
@@ -148,40 +146,18 @@ class PNC(Document):
 		return visit_schedule.get_urgent_visit_within_days("PNC", DEFAULT_RISK_ALERT_DAYS)
 
 	def set_next_pnc_visit_date(self):
-		# Mother and baby are tracked independently - each gets its own
-		# effective next-visit date (an open urgent row if either table has
-		# one, otherwise the normal schedule lookup) - but they share the
-		# exact same Visit Schedule master, since both are checked on the
-		# same household visit. The single shared "Next PNC Visit Date"
-		# field always shows whichever of the two tracks is due sooner.
+		# One track: mother and baby are checked on the same Volunteer visit
+		# row, so its schedule (or an open urgent row) decides the next
+		# visit for both.
 		if not self.date_of_delivery:
 			return
 
-		delivery_date = getdate(self.date_of_delivery)
-		mother_track = self._compute_track(self.mother, delivery_date)
-		baby_track = self._compute_track(self.baby, delivery_date)
-
-		self.sync_mother_row_fields(mother_track.window_start, mother_track.window_end)
-		self.sync_baby_row_fields(baby_track.window_start, baby_track.window_end)
-
-		candidates = [t for t in (mother_track, baby_track) if t.next_date]
-		if not candidates:
-			# every scheduled visit, for both mother and baby, is complete
-			self.next_pnc_visit_date = None
-			self.next_pnc_visit_date_auto = None
-			self.pnc_visit_risk_alert = ""
-			return
-
-		# An open urgent row on EITHER track always outranks an ordinary due
-		# date on the other, even if that ordinary date is sooner - a freshly
-		# flagged risk should never get buried behind a merely overdue
-		# routine visit. Only once neither track has an open urgent row does
-		# "whichever is due sooner" decide it.
-		urgent_candidates = [t for t in candidates if t.is_urgent]
-		winner = min(urgent_candidates or candidates, key=lambda t: t.next_date)
-		self.next_pnc_visit_date = winner.next_date
-		self.next_pnc_visit_date_auto = winner.next_date
-		self.pnc_visit_risk_alert = winner.risk_alert
+		track = self._compute_track(self.mother, getdate(self.date_of_delivery))
+		self.sync_mother_row_fields(track.window_start, track.window_end)
+		# None once every scheduled visit is complete.
+		self.next_pnc_visit_date = track.next_date
+		self.next_pnc_visit_date_auto = track.next_date
+		self.pnc_visit_risk_alert = track.risk_alert
 
 	def _compute_track(self, table, delivery_date):
 		# An open Urgent-tagged row on this table always wins first - it
@@ -225,9 +201,6 @@ class PNC(Document):
 
 	def sync_mother_row_fields(self, window_start, window_end):
 		self._sync_row_fields(self.mother, window_start, window_end)
-
-	def sync_baby_row_fields(self, window_start, window_end):
-		self._sync_row_fields(self.baby, window_start, window_end)
 
 	@staticmethod
 	def _sync_row_fields(table, window_start, window_end):

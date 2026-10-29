@@ -6,10 +6,16 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "vital_signs_postpartum_section",
+  "visit_section",
   "window_start_date",
   "date",
   "status",
+  "visit_column_break",
+  "date_of_next_visit",
+  "next_visit_window",
+  "urgent_followup",
+  "vital_signs_postpartum_section",
+  "h5vital_signs_postpartumh",
   "postpartum_depression_screen_phq_2_score",
   "h5patients_general_conditionh",
   "responds_appropriately",
@@ -49,9 +55,6 @@
   "if_abnormal",
   "teaching",
   "any_other_complaintremark",
-  "date_of_next_visit",
-  "next_visit_window",
-  "urgent_followup",
   "danger_signs_mother_section",
   "fever",
   "heavy_bleeding_bright_red",
@@ -76,9 +79,44 @@
   "h5referrals_and_action_planh",
   "was_a_referral_needed",
   "if_yes_where",
-  "patient_condition"
+  "patient_condition",
+  "baby_section",
+  "babys_current_age",
+  "baby_feeding",
+  "baby_feeding_if_other",
+  "baby_if_other_feedong_problem",
+  "baby_jaundice",
+  "baby_umbilical_cord",
+  "baby_skin_condition",
+  "baby_column_break_uuui",
+  "baby_weight_gain",
+  "baby_birth_weight_populate",
+  "baby_current_weight",
+  "baby_current_length",
+  "baby_immunization",
+  "baby_immunisation_up_to_date",
+  "baby_which_ones_are_missing",
+  "baby_vitals_section",
+  "baby_rr",
+  "baby_hr",
+  "baby_temp",
+  "baby_vitals_column_break",
+  "babys_general_condition",
+  "baby_if_unwell",
+  "baby_if_baby_general_condition_is_other",
+  "baby_mch_nurse_notified_of_danger_signs",
+  "baby_care_section",
+  "baby_any_other_complaintsremarks",
+  "baby_care_column_break",
+  "baby_care_provided_recomendations_given",
+  "baby_condition"
  ],
  "fields": [
+  {
+   "fieldname": "visit_section",
+   "fieldtype": "Section Break",
+   "label": "Visit"
+  },
   {
    "fieldname": "window_start_date",
    "fieldtype": "Date",
@@ -102,40 +140,8 @@
    "options": "Pending\nCompleted"
   },
   {
-   "description": "(< 95/60 or 140/90 +)",
-   "fieldname": "bp",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "BP"
-  },
-  {
-   "fieldname": "wound_infection",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Wound Assessment",
-   "options": "\nNormal\nSigns of infection (Redness, swelling, edema)"
-  },
-  {
-   "fieldname": "breast",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Breast normal or abnormal ",
-   "options": "\nNormal\nAbnormal"
-  },
-  {
-   "fieldname": "teaching",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Teaching"
-  },
-  {
-   "fieldname": "any_other_complaintremark",
-   "fieldtype": "Small Text",
-   "label": "Any other complaint/remark"
+   "fieldname": "visit_column_break",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "date_of_next_visit",
@@ -152,13 +158,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "patient_condition",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Patient Condition",
-   "options": "\nNormal\nRisk"
-  },
-  {
    "default": "0",
    "fieldname": "urgent_followup",
    "fieldtype": "Check",
@@ -167,83 +166,14 @@
    "read_only": 1
   },
   {
-   "description": "(< 60 or 110 +)",
-   "fieldname": "hr",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "HR"
+   "fieldname": "vital_signs_postpartum_section",
+   "fieldtype": "Section Break",
+   "label": "Mother"
   },
   {
-   "description": "(< 12 or 24 +)",
-   "fieldname": "rr",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "RR"
-  },
-  {
-   "description": "(38* C + )",
-   "fieldname": "temperature",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Temperature"
-  },
-  {
-   "fieldname": "weight",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Weight"
-  },
-  {
-   "fieldname": "bmi",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "label": "BMI"
-  },
-  {
-   "fieldname": "column_break_nhnx",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "mch_nurse_notified_of_abnormal_vital_signs",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "MCH nurse notified of abnormal vital signs",
-   "options": "\nYes\nNo"
-  },
-  {
-   "fieldname": "h5hbh",
+   "fieldname": "h5vital_signs_postpartumh",
    "fieldtype": "Heading",
-   "label": "<h5>HB</h5>"
-  },
-  {
-   "fieldname": "result",
-   "fieldtype": "Data",
-   "label": "Result"
-  },
-  {
-   "fieldname": "h5bsh",
-   "fieldtype": "Heading",
-   "label": "<h5>BS</h5>"
-  },
-  {
-   "fieldname": "bs_date",
-   "fieldtype": "Date",
-   "label": "BS Date"
-  },
-  {
-   "fieldname": "type",
-   "fieldtype": "Data",
-   "label": "Type"
-  },
-  {
-   "fieldname": "result_bs",
-   "fieldtype": "Data",
-   "label": "Result"
+   "label": "<h5>Vital Signs (Postpartum)</h5>"
   },
   {
    "fieldname": "postpartum_depression_screen_phq_2_score",
@@ -251,11 +181,6 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Postpartum Depression Screen (PHQ 2) score"
-  },
-  {
-   "fieldname": "vital_signs_postpartum_section",
-   "fieldtype": "Section Break",
-   "label": "Vital Signs (Postpartum)"
   },
   {
    "fieldname": "h5patients_general_conditionh",
@@ -295,18 +220,61 @@
    "label": "appears to be in pain or distress"
   },
   {
+   "description": "(< 95/60 or 140/90 +)",
+   "fieldname": "bp",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "BP"
+  },
+  {
    "fieldname": "column_break_wvbk",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_zkpv",
-   "fieldtype": "Section Break"
+   "description": "(< 12 or 24 +)",
+   "fieldname": "rr",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "RR"
   },
   {
-   "depends_on": "eval:doc.breast==\"Abnormal\"",
-   "fieldname": "if_abnormal",
-   "fieldtype": "Data",
-   "label": "if abnormal"
+   "description": "(< 60 or 110 +)",
+   "fieldname": "hr",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "HR"
+  },
+  {
+   "description": "(38* C + )",
+   "fieldname": "temperature",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Temperature"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Weight"
+  },
+  {
+   "fieldname": "bmi",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "BMI"
+  },
+  {
+   "fieldname": "mch_nurse_notified_of_abnormal_vital_signs",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "MCH nurse notified of abnormal vital signs",
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "weeks_postpartum",
@@ -314,6 +282,10 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Weeks postpartum"
+  },
+  {
+   "fieldname": "section_break_zkpv",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "wound",
@@ -327,6 +299,64 @@
    "fieldtype": "Select",
    "label": "Wound if Yes",
    "options": "\nC/S\nVaginal Repair"
+  },
+  {
+   "fieldname": "wound_infection",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Wound Assessment",
+   "options": "\nNormal\nSigns of infection (Redness, swelling, edema)"
+  },
+  {
+   "fieldname": "h5hbh",
+   "fieldtype": "Heading",
+   "label": "<h5>HB</h5>"
+  },
+  {
+   "fieldname": "result",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "fieldname": "h5bsh",
+   "fieldtype": "Heading",
+   "label": "<h5>BS</h5>"
+  },
+  {
+   "fieldname": "bs_date",
+   "fieldtype": "Date",
+   "label": "BS Date"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Data",
+   "label": "Type"
+  },
+  {
+   "fieldname": "result_bs",
+   "fieldtype": "Data",
+   "label": "Result"
+  },
+  {
+   "fieldname": "column_break_nhnx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "breast",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Breast normal or abnormal ",
+   "options": "\nNormal\nAbnormal"
+  },
+  {
+   "depends_on": "eval:doc.breast==\"Abnormal\"",
+   "fieldname": "ifabnormalbreast",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "if Abnormal"
   },
   {
    "fieldname": "bleeding",
@@ -378,6 +408,24 @@
    "fieldname": "if_bladder_others",
    "fieldtype": "Data",
    "label": "If Bladder Others"
+  },
+  {
+   "depends_on": "eval:doc.breast==\"Abnormal\"",
+   "fieldname": "if_abnormal",
+   "fieldtype": "Data",
+   "label": "if abnormal"
+  },
+  {
+   "fieldname": "teaching",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Teaching"
+  },
+  {
+   "fieldname": "any_other_complaintremark",
+   "fieldtype": "Small Text",
+   "label": "Any other complaint/remark"
   },
   {
    "fieldname": "danger_signs_mother_section",
@@ -530,19 +578,183 @@
    "label": "If Yes where"
   },
   {
-   "depends_on": "eval:doc.breast==\"Abnormal\"",
-   "fieldname": "ifabnormalbreast",
-   "fieldtype": "Data",
+   "fieldname": "patient_condition",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "if Abnormal"
+   "label": "Patient Condition",
+   "options": "\nNormal\nRisk"
+  },
+  {
+   "fieldname": "baby_section",
+   "fieldtype": "Section Break",
+   "label": "Baby"
+  },
+  {
+   "fieldname": "babys_current_age",
+   "fieldtype": "Int",
+   "label": "baby's Current age"
+  },
+  {
+   "fieldname": "baby_feeding",
+   "fieldtype": "Select",
+   "label": "Feeding",
+   "options": "\nExclusive Breastfeeding\nComplementary feeding (6mos +)\nOther\nFeeding Problems"
+  },
+  {
+   "depends_on": "eval:doc.baby_feeding==\"Other\"",
+   "fieldname": "baby_feeding_if_other",
+   "fieldtype": "Data",
+   "label": "Feeding If Other  "
+  },
+  {
+   "depends_on": "eval:doc.baby_feeding==\"Feeding Problems\"",
+   "fieldname": "baby_if_other_feedong_problem",
+   "fieldtype": "Data",
+   "label": "If other Feedong Problem"
+  },
+  {
+   "fieldname": "baby_jaundice",
+   "fieldtype": "Select",
+   "label": "Jaundice",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_umbilical_cord",
+   "fieldtype": "Select",
+   "label": "Umbilical Cord",
+   "options": "\nHealthy\nInfected"
+  },
+  {
+   "fieldname": "baby_skin_condition",
+   "fieldtype": "Select",
+   "label": "Baby Skin Condition",
+   "options": "\nActive\nskin warm and dry\nGood color"
+  },
+  {
+   "fieldname": "baby_column_break_uuui",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "baby_weight_gain",
+   "fieldtype": "Select",
+   "label": "Weight Gain",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_birth_weight_populate",
+   "fieldtype": "Data",
+   "label": "Birth weight populate"
+  },
+  {
+   "fieldname": "baby_current_weight",
+   "fieldtype": "Int",
+   "label": "Current Weight"
+  },
+  {
+   "fieldname": "baby_current_length",
+   "fieldtype": "Int",
+   "label": "Current Length"
+  },
+  {
+   "fieldname": "baby_immunization",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Immunization",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_immunisation_up_to_date",
+   "fieldtype": "Select",
+   "label": "Immunisation up to date",
+   "options": "\nYes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.baby_immunisation_up_to_date==\"No\"",
+   "fieldname": "baby_which_ones_are_missing",
+   "fieldtype": "Small Text",
+   "label": "Which ones are missing"
+  },
+  {
+   "fieldname": "baby_vitals_section",
+   "fieldtype": "Section Break",
+   "label": "Baby Vitals & General Condition"
+  },
+  {
+   "fieldname": "baby_rr",
+   "fieldtype": "Int",
+   "label": "RR"
+  },
+  {
+   "fieldname": "baby_hr",
+   "fieldtype": "Int",
+   "label": "HR"
+  },
+  {
+   "fieldname": "baby_temp",
+   "fieldtype": "Int",
+   "label": "Temp"
+  },
+  {
+   "fieldname": "baby_vitals_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "babys_general_condition",
+   "fieldtype": "Select",
+   "label": "Baby's general condition",
+   "options": "\nWell\nUnwell"
+  },
+  {
+   "depends_on": "eval:doc.babys_general_condition==\"Unwell\"",
+   "fieldname": "baby_if_unwell",
+   "fieldtype": "Select",
+   "label": "If Unwell",
+   "options": "\nDistressed\nFever\nConvulsions\nDifficulty breathing\nYellow skin/eyes (Jaundice)\nBlue lips/mouth\nLethargic / unusually sleepy\nCold to touch\nIrritable\nOther"
+  },
+  {
+   "depends_on": "eval:doc.baby_if_unwell==\"Other\"",
+   "fieldname": "baby_if_baby_general_condition_is_other",
+   "fieldtype": "Data",
+   "label": "If Baby General Condition is Other"
+  },
+  {
+   "fieldname": "baby_mch_nurse_notified_of_danger_signs",
+   "fieldtype": "Select",
+   "label": "MCH nurse notified of danger signs",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "baby_care_section",
+   "fieldtype": "Section Break",
+   "label": "Baby Care & Condition"
+  },
+  {
+   "fieldname": "baby_any_other_complaintsremarks",
+   "fieldtype": "Small Text",
+   "label": "Any other Complaints/remarks"
+  },
+  {
+   "fieldname": "baby_care_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "baby_care_provided_recomendations_given",
+   "fieldtype": "Small Text",
+   "label": "Care Provided/ Recomendations given"
+  },
+  {
+   "fieldname": "baby_condition",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Baby Condition",
+   "options": "\nNormal\nRisk"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-23 12:05:12.804844",
+ "modified": "2026-10-29 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC Followup Child",

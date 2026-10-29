@@ -2806,31 +2806,31 @@ def _anc_currently_risk_names(anc_names):
 
 
 def _pnc_currently_risk_names(pnc_names):
-    """PNC names whose most recently COMPLETED followup row - the Mother's
-    own Patient Condition or the Baby's own Baby Condition, whichever is
-    more recent - is Risk. Same "always the latest visit" rule as ANC."""
+    """PNC names whose most recently COMPLETED Volunteer followup row is
+    Risk - for the mother (Patient Condition) or the baby (Baby Condition),
+    both on that same visit row. Same "always the latest visit" rule as ANC."""
     if not pnc_names:
         return []
-    mother_rows = frappe.get_all(
+    rows = frappe.get_all(
         'PNC Followup Child',
         filters=[['parent', 'in', pnc_names], ['status', '=', 'Completed']],
-        fields=['parent', 'date', 'patient_condition'],
-    )
-    baby_rows = frappe.get_all(
-        'Baby PNC Followup Child',
-        filters=[['parent', 'in', pnc_names], ['status', '=', 'Completed']],
-        fields=['parent', 'date', 'baby_condition'],
+        fields=['parent', 'date', 'patient_condition', 'baby_condition'],
     )
     entries_by_parent = {}
-    for row in mother_rows:
-        entries_by_parent.setdefault(row.parent, []).append((row.date, row.patient_condition))
-    for row in baby_rows:
-        entries_by_parent.setdefault(row.parent, []).append((row.date, row.baby_condition))
+    for row in rows:
+        entries_by_parent.setdefault(row.parent, []).append((row.date, _pnc_row_condition(row)))
 
     return [
         name for name, entries in entries_by_parent.items()
         if max(entries, key=lambda e: getdate(e[0]))[1] == 'Risk'
     ]
+
+
+def _pnc_row_condition(row):
+    # One PNC visit row covers mother and baby: Risk if either one is.
+    if 'Risk' in (row.patient_condition, row.baby_condition):
+        return 'Risk'
+    return row.patient_condition or row.baby_condition
 
 
 def _postpartum_currently_risk_names(names):
@@ -2917,13 +2917,12 @@ def _pnc_track_from_date(rows, delivery_date):
 
 def _enrich_pnc_records_live(records):
     """From-date AND High-Risk for PNC records, computed live from the shared
-    Visit Schedule Master's rows for PNC + the record's own Mother and
-    Baby child rows - mirroring PNC._compute_track/set_next_pnc_visit_date
-    exactly (mother and baby tracked independently, whichever is due sooner
-    wins), instead of the list view's generic due_date-minus-30 fallback.
-    High Risk here reflects the most recently COMPLETED row's condition
-    (Mother's Patient Condition or Baby's Baby Condition, whichever is
-    later) - not PNC.high_risk, which is a sticky flag that never
+    Visit Schedule Master's rows for PNC + the record's Volunteer rows (each
+    covering mother and baby) - mirroring PNC._compute_track/
+    set_next_pnc_visit_date exactly, instead of the list view's generic
+    due_date-minus-30 fallback. High Risk here reflects the most recently
+    COMPLETED row's condition (Risk if the mother's Patient Condition or the
+    baby's Baby Condition is) - not PNC.high_risk, which is a sticky flag that never
     downgrades and drives the on-form Risk Alert instead, a separate
     concern. alert_date stays read from the real stored pnc_visit_risk_alert
     field elsewhere - unaffected by this. Mutates and returns the same
@@ -2941,29 +2940,16 @@ def _enrich_pnc_records_live(records):
     mother_rows = frappe.get_all(
         'PNC Followup Child',
         filters=[['parent', 'in', pnc_names]],
-        fields=['parent', 'status', 'urgent_followup', 'date', 'idx', 'patient_condition'],
+        fields=['parent', 'status', 'urgent_followup', 'date', 'idx', 'patient_condition', 'baby_condition'],
         order_by='parent asc, idx asc',
     ) if pnc_names else []
     mother_by_parent = {}
     for row in mother_rows:
         mother_by_parent.setdefault(row.parent, []).append(row)
 
-    baby_rows = frappe.get_all(
-        'Baby PNC Followup Child',
-        filters=[['parent', 'in', pnc_names]],
-        fields=['parent', 'status', 'urgent_followup', 'date', 'idx', 'baby_condition'],
-        order_by='parent asc, idx asc',
-    ) if pnc_names else []
-    baby_by_parent = {}
-    for row in baby_rows:
-        baby_by_parent.setdefault(row.parent, []).append(row)
-
     for r in pnc_records:
         completed_entries = [
-            (row.date, row.patient_condition) for row in mother_by_parent.get(r['name'], [])
-            if row.status == 'Completed'
-        ] + [
-            (row.date, row.baby_condition) for row in baby_by_parent.get(r['name'], [])
+            (row.date, _pnc_row_condition(row)) for row in mother_by_parent.get(r['name'], [])
             if row.status == 'Completed'
         ]
         if completed_entries:
@@ -2977,20 +2963,10 @@ def _enrich_pnc_records_live(records):
             r['from_date'] = None
             continue
 
-        mother_track = _pnc_track_from_date(mother_by_parent.get(r['name'], []), delivery_date)
-        baby_track = _pnc_track_from_date(baby_by_parent.get(r['name'], []), delivery_date)
-
-        candidates = [c for c in (mother_track, baby_track) if c[1]]
-        if not candidates:
-            r['from_date'] = None
-            continue
-
-        # An open urgent row on either track always outranks an ordinary due
-        # date on the other - see PNC.set_next_pnc_visit_date for the same
-        # rule on the form itself.
-        urgent_candidates = [c for c in candidates if c[2]]
-        winner_start, _, _ = min(urgent_candidates or candidates, key=lambda c: c[1])
-        r['from_date'] = str(winner_start)
+        # One track: each Volunteer row covers mother and baby - see
+        # PNC.set_next_pnc_visit_date for the same rule on the form itself.
+        start, next_date, _ = _pnc_track_from_date(mother_by_parent.get(r['name'], []), delivery_date)
+        r['from_date'] = str(start) if next_date else None
 
     return records
 
