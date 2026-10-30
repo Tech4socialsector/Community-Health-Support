@@ -330,7 +330,7 @@
   },
   {
    "fieldname": "blood_pressure",
-   "fieldtype": "Int",
+   "fieldtype": "Data",
    "label": "Blood pressure"
   },
   {
@@ -384,9 +384,9 @@
   },
   {
    "fieldname": "appearance_mark_if_abnormal",
-   "fieldtype": "Select",
+   "fieldtype": "Table MultiSelect",
    "label": "Appearance Mark if abnormal",
-   "options": "\nPallor\nJaundice\nClubbing\nCyanosis\nLymph Nodes\nEdema"
+   "options": "Appearance Child"
   },
   {
    "fieldname": "pupils_perrla",
@@ -806,7 +806,7 @@
    "link_fieldname": "pcid"
   }
  ],
- "modified": "2026-10-29 20:00:00.000000",
+ "modified": "2026-10-30 15:04:07.043589",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",

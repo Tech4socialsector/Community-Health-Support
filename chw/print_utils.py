@@ -11,4 +11,7 @@ def get_print_format_html(doctype, docname, print_format):
 	doc = frappe.get_doc(doctype, docname)
 	doc.check_permission("read")
 	pf = frappe.get_doc("Print Format", print_format)
-	return frappe.render_template(pf.html, {"doc": doc.as_dict()})
+	# The live Document, not doc.as_dict(): a dict's real .items() method
+	# would shadow a child table field literally named "items" in Jinja
+	# (doc.items would resolve to that method instead of the field).
+	return frappe.render_template(pf.html, {"doc": doc})

@@ -9,14 +9,53 @@
       :options="options"
       :placeholder="t('Select {0}...', [t(targetDoctype)])"
       @update:model-value="onUpdate"
+    >
+      <!-- Desk's "+ Create a new ..." for a Link field, ported here since a
+      Table MultiSelect otherwise only ever offers what already exists. -->
+      <template v-if="canCreate" #footer="{ clearAll, selectAll }">
+        <div class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5">
+          <Button variant="ghost" size="sm" @click="clearAll">{{ t('Clear All') }}</Button>
+          <Button variant="ghost" size="sm" @click="selectAll">{{ t('Select All') }}</Button>
+          <Button variant="ghost" size="sm" @click="startCreate">
+            <template #prefix><LucideIcon name="plus" class="h-3.5 w-3.5" /></template>
+            {{ t('Create new') }}
+          </Button>
+        </div>
+      </template>
+    </MultiSelect>
+    <QuickCreateDialog
+      v-if="createOpen || createMounted"
+      v-model="createOpen"
+      :doctype="targetDoctype"
+      @created="onCreated"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { MultiSelect, call, useCall } from 'frappe-ui'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
+import { Button, MultiSelect, call, useCall } from 'frappe-ui'
+import LucideIcon from '@/components/LucideIcon.vue'
 import { t } from '@/data/i18n'
+
+// Loaded when first needed - it renders fields itself, so a plain import
+// risks a circular dependency the way LinkField.vue also avoids it.
+const QuickCreateDialog = defineAsyncComponent(() => import('@/components/QuickCreateDialog.vue'))
+
+// "May this user create <doctype>?" - asked once per doctype per session,
+// as Desk only offers "Create a new ..." to roles with create permission.
+const createPermission = new Map()
+function canCreateDoctype(doctype) {
+  if (!createPermission.has(doctype)) {
+    createPermission.set(
+      doctype,
+      call('frappe.client.has_permission', { doctype, docname: '', perm_type: 'create' })
+        .then((r) => !!r?.has_permission)
+        .catch(() => false),
+    )
+  }
+  return createPermission.get(doctype)
+}
 
 const props = defineProps({
   field: { type: Object, required: true },
@@ -71,6 +110,28 @@ watch(
 )
 
 const options = computed(() => targetRecords.value.map((r) => ({ label: r.name, value: r.name })))
+
+const canCreate = ref(false)
+watch(
+  targetDoctype,
+  async (doctype) => {
+    canCreate.value = !!doctype && (await canCreateDoctype(doctype))
+  },
+  { immediate: true },
+)
+
+const createOpen = ref(false)
+const createMounted = ref(false)
+function startCreate() {
+  createMounted.value = true
+  createOpen.value = true
+}
+// Newly created, so it isn't in targetRecords yet - add it there too, or it
+// would show as selected but vanish from the list the next time it opens.
+function onCreated(name) {
+  if (!targetRecords.value.some((r) => r.name === name)) targetRecords.value = [...targetRecords.value, { name }]
+  onUpdate([...selectedValues.value, name])
+}
 
 const selectedValues = computed(() => {
   if (!linkFieldname.value) return []
