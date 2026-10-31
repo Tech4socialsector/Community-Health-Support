@@ -245,7 +245,7 @@
   },
   {
    "fieldname": "orientation_time",
-   "fieldtype": "Datetime",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Orientation \u2013 time"
@@ -497,7 +497,7 @@
   },
   {
    "fieldname": "input_intensity",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Intensity of input recommended"
@@ -558,7 +558,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-05 12:20:48.299546",
+ "modified": "2026-10-31 18:23:42.086891",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "CHW APF",

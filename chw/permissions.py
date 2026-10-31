@@ -60,3 +60,79 @@ def restore_standard_perms_hidden_by_custom():
 	if restored:
 		frappe.db.commit()
 	print(f"chw: restored standard permissions on {len(restored)} doctype(s): {', '.join(sorted(restored))}")
+
+
+# Lookup lists the CHW forms link to. Anyone who fills a form may add a
+# missing entry from the Link box ("+ Create a new ...", as in Desk) -
+# read and create only, never edit or delete; Program Manager and Report
+# Viewer only read. The same rows are in each doctype's own JSON; this
+# covers sites where the doctype has Custom DocPerm rows, which make
+# Frappe ignore the JSON (see restore_standard_perms_hidden_by_custom).
+MASTER_DOCTYPES = (
+	"Appearance",
+	"Cardiovascular",
+	"Does the patient need",
+	"Gastrointestinal",
+	"Genitourinary",
+	"Gram Panchayat",
+	"Mental Health Symptom Master",
+	"Musculatory System",
+	"NCD Disease",
+	"Neurological",
+	"Occupation",
+	"Past Medical History Master",
+	"Pregnancy High Risk Master",
+	"Relationship with the Head of the Family",
+	"Respiratory",
+	"State List",
+	"Sub Centre",
+	"Symptoms",
+	"Type Of Disability",
+	"Village",
+	"medicine name",
+)
+MASTER_CREATE_ROLES = (
+	"CHW Health Worker",
+	"CHW Coordinator",
+	"Data Collector",
+	"Coordinator",
+	"Palliative Care Coordinator",
+	"Palliative Care Worker",
+)
+MASTER_READ_ROLES = ("Program Manager", "Report Viewer")
+
+
+def grant_master_access_on_custom_perms():
+	"""Adds the master read/create rows to doctypes that have Custom DocPerm
+	rows - only raises flags that are off, never removes any. Runs
+	after_migrate (after restore_standard_perms_hidden_by_custom); safe to
+	repeat. Roles not on the site yet are skipped."""
+	roles_on_site = set(frappe.get_all("Role", pluck="name"))
+	changed = set()
+	for doctype in MASTER_DOCTYPES:
+		if not frappe.db.exists("Custom DocPerm", {"parent": doctype}):
+			continue
+		for role in MASTER_CREATE_ROLES + MASTER_READ_ROLES:
+			if role not in roles_on_site:
+				continue
+			want = {"read": 1, "report": 1, "print": 1}
+			if role in MASTER_CREATE_ROLES:
+				want["create"] = 1
+			name = frappe.db.get_value("Custom DocPerm", {"parent": doctype, "role": role, "permlevel": 0, "if_owner": 0})
+			if name:
+				current = frappe.db.get_value("Custom DocPerm", name, list(want), as_dict=True)
+				missing = {k: 1 for k in want if not current.get(k)}
+				if missing:
+					frappe.db.set_value("Custom DocPerm", name, missing)
+					changed.add(doctype)
+			else:
+				row = frappe.new_doc("Custom DocPerm")
+				row.update({"parent": doctype, "role": role, "permlevel": 0, **want})
+				row.insert(ignore_permissions=True)
+				changed.add(doctype)
+
+	for doctype in changed:
+		frappe.clear_cache(doctype=doctype)
+	if changed:
+		frappe.db.commit()
+	print(f"chw: master read/create access updated on {len(changed)} doctype(s)")

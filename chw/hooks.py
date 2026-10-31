@@ -206,6 +206,8 @@ page_renderer = ["chw.website.sw_renderer.ServiceWorkerRenderer"]
 # chw/permissions.py.
 after_migrate = [
 	"chw.permissions.restore_standard_perms_hidden_by_custom",
+	# CHW roles may add a missing master entry from a Link box.
+	"chw.permissions.grant_master_access_on_custom_perms",
 	# Fields added or relabelled in this update -> translated in the
 	# background for every language in use (see translation_tool).
 	"chw.translation_tool.translate_new_texts",

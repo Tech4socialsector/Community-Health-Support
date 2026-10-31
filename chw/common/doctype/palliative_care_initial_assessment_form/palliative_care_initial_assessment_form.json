@@ -663,7 +663,7 @@
   },
   {
    "fieldname": "familycaregiver_health_concerns",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "label": "Family/caregiver health concerns"
   },
   {
@@ -690,9 +690,9 @@
   },
   {
    "fieldname": "does_the_patient_need",
-   "fieldtype": "Table MultiSelect",
+   "fieldtype": "Select",
    "label": "Does the patient need any therapy",
-   "options": "Does the patient need Child"
+   "options": "\nYes\nNo"
   },
   {
    "fieldname": "column_break_cuoj",
@@ -806,7 +806,7 @@
    "link_fieldname": "pcid"
   }
  ],
- "modified": "2026-10-30 15:04:07.043589",
+ "modified": "2026-10-31 15:31:19.221379",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",
