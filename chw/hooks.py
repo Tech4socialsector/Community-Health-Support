@@ -65,6 +65,8 @@ fixtures = [
 					"Palliative Care Nurse",
 					"Palliative Care Doctor",
 					"Therapist",
+					"Driver",
+					"Field Worker",
 				],
 			]
 		],
