@@ -48,8 +48,27 @@ fixtures = [
 	{"dt": "App Module Setting", "filters": [["name", "in", ["CHW", "Palliative Care"]]]},
 	# The two roles App Module Setting's own role-restriction fields link to
 	# above - without this, importing that fixture on a fresh site would
-	# point at Roles that don't exist there yet.
-	{"dt": "Role", "filters": [["name", "in", ["Palliative Care Coordinator", "Palliative Care Worker"]]]},
+	# point at Roles that don't exist there yet. The five MCH / palliative
+	# staff roles ship here too, so every site gets them on migrate; their
+	# form permissions are set per site in Role Permission Manager.
+	{
+		"dt": "Role",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Palliative Care Coordinator",
+					"Palliative Care Worker",
+					"MCH Nurse",
+					"MCH Doctor",
+					"Palliative Care Nurse",
+					"Palliative Care Doctor",
+					"Therapist",
+				],
+			]
+		],
+	},
 	# Document-level access for the two Palliative Care roles. Household
 	# profile and Family members already have a Custom DocPerm row (metta's
 	# "CHW Coordinator" layer) - once a doctype has any Custom DocPerm row,
