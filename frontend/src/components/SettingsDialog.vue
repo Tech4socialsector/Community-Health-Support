@@ -92,7 +92,6 @@
               </div>
 
               <SettingsDoctypePanel v-else-if="activeTab === 'app-setting'" doctype="App Setting" />
-              <SettingsDoctypePanel v-else-if="activeTab === 'pnc-interval'" doctype="PNC Visit Interval Master" />
               <EmailSettingsPanel v-else-if="activeTab === 'email-settings'" @close="show = false" />
             </div>
           </div>
@@ -188,7 +187,6 @@ const groupedTabs = computed(() => {
       label: 'App Settings',
       tabs: [
         { key: 'app-setting', label: 'App Settings', icon: moduleIcon('sliders') },
-        { key: 'pnc-interval', label: 'PNC Visit Interval', icon: moduleIcon('calendar') },
       ],
     })
   }
