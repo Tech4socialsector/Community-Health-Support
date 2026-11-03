@@ -96,8 +96,9 @@ MASTER_CREATE_ROLES = (
 	"CHW Coordinator",
 	"Data Collector",
 	"Coordinator",
-	"Palliative Care Coordinator",
+	"Palliative Care Docter",
 	"Palliative Care Worker",
+	"MCH Doctor",
 )
 MASTER_READ_ROLES = ("Program Manager", "Report Viewer")
 

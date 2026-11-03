@@ -10,7 +10,7 @@
       <table class="w-full table-fixed border-collapse text-left text-sm" :style="{ minWidth: rows.length ? tableMinWidth : undefined }">
         <thead class="bg-gray-50 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
           <tr>
-            <th class="w-9 border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700">
+            <th v-if="writable" class="w-9 border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700">
               <input
                 type="checkbox"
                 class="h-3.5 w-3.5 rounded border-gray-300"
@@ -34,7 +34,7 @@
         </thead>
         <tbody>
           <tr v-if="!rows.length">
-            <td :colspan="gridColumns.length + 3" class="px-3 py-6 text-center text-sm text-gray-400">{{ t('No Data') }}</td>
+            <td :colspan="gridColumns.length + (writable ? 3 : 2)" class="px-3 py-6 text-center text-sm text-gray-400">{{ t('No Data') }}</td>
           </tr>
           <tr
             v-for="(row, idx) in rows"
@@ -43,7 +43,7 @@
             :class="[{ 'bg-gray-50 dark:bg-gray-800/60': selectedKeys.has(keyOf(row)) }, rowClass ? rowClass(row) : '']"
             @click="openRow(idx)"
           >
-            <td class="border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700" @click.stop>
+            <td v-if="writable" class="border-b border-r border-gray-200 px-2 py-2 dark:border-gray-700" @click.stop>
               <input
                 type="checkbox"
                 class="h-3.5 w-3.5 rounded border-gray-300"
@@ -67,10 +67,10 @@
               <button
                 type="button"
                 class="inline-flex h-7 w-7 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700"
-                :aria-label="t('Edit row {0}', [idx + 1])"
+                :aria-label="writable ? t('Edit row {0}', [idx + 1]) : t('View row {0}', [idx + 1])"
                 @click.stop="openRow(idx)"
               >
-                <LucideIcon name="pencil" class="h-3.5 w-3.5" />
+                <LucideIcon :name="writable ? 'pencil' : 'eye'" class="h-3.5 w-3.5" />
               </button>
             </td>
           </tr>
@@ -78,7 +78,7 @@
       </table>
     </div>
 
-    <div class="mt-2 flex items-center gap-2">
+    <div v-if="writable" class="mt-2 flex items-center gap-2">
       <Button size="sm" @click="addRow">{{ t('Add Row') }}</Button>
       <Button v-if="selectedKeys.size" size="sm" theme="red" @click="deleteSelected">{{ t('Delete') }}</Button>
     </div>
@@ -153,6 +153,7 @@
                             :docname="docname"
                             :doc="editingRow"
                             :parent-doc="parentDoc"
+                            :form-read-only="!writable"
                             v-model="editingRow[sub.field.fieldname]"
                           />
                         </div>
@@ -164,6 +165,7 @@
                         :docname="docname"
                         :doc="editingRow"
                         :parent-doc="parentDoc"
+                        :form-read-only="!writable"
                         :link-query="item.field.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(item.field.fieldname, editingRow) : null"
                         v-model="editingRow[item.field.fieldname]"
                       />
@@ -198,7 +200,7 @@ import { applyDefaults } from '@/data/defaults'
 import { rowKey } from '@/data/rowKey'
 import { t } from '@/data/i18n'
 
-const { field, modelValue, doctype, docname, parentDoc, linkQueryFor, rowClass } = defineProps({
+const { field, modelValue, doctype, docname, parentDoc, linkQueryFor, rowClass, permlevelWritable } = defineProps({
   field: { type: Object, required: true },
   modelValue: { type: Array, default: () => [] },
   doctype: { type: String, default: null },
@@ -209,8 +211,17 @@ const { field, modelValue, doctype, docname, parentDoc, linkQueryFor, rowClass }
   // and a CSS class per row (e.g. an open urgent visit tinted red).
   linkQueryFor: { type: Function, default: null },
   rowClass: { type: Function, default: null },
+  // Permlevels the current user may write to on the parent doctype (Role
+  // Permission Manager / Custom DocPerm). A Table field carrying a
+  // permlevel its role can't write - e.g. CHW Health Worker's read-only
+  // Doctor/Nurse followup notes - turns the whole table read-only: no Add
+  // Row/Delete, rows open to view only. Default [0] - "no restriction
+  // configured" for a caller that doesn't pass this.
+  permlevelWritable: { type: Array, default: () => [0] },
 })
 const emit = defineEmits(['update:modelValue', 'row-added', 'rows-removed'])
+
+const writable = computed(() => permlevelWritable.includes(field.permlevel || 0))
 
 const childMetaResource = useMeta(field.options)
 const columns = useFormFields(childMetaResource)

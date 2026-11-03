@@ -73,7 +73,7 @@
   "enabled": 1,
   "icon": "box",
   "label": "CHW",
-  "modified": "2026-10-29 11:33:32.606301",
+  "modified": "2026-11-03 11:33:57.765902",
   "module_name": "CHW",
   "name": "CHW",
   "restrict_by_role": 1,
@@ -89,6 +89,15 @@
    },
    {
     "role": "System Manager"
+   },
+   {
+    "role": "CHW Nurse"
+   },
+   {
+    "role": "MCH Doctor"
+   },
+   {
+    "role": "Field Worker"
    }
   ],
   "sort_order": 1
@@ -125,16 +134,28 @@
   "enabled": 1,
   "icon": "hand-heart",
   "label": "Palliative Care",
-  "modified": "2026-10-29 11:33:32.628887",
+  "modified": "2026-11-03 11:33:57.777136",
   "module_name": "Palliative Care",
   "name": "Palliative Care",
   "restrict_by_role": 1,
   "roles": [
    {
-    "role": "Palliative Care Coordinator"
+    "role": "Palliative Care Docter"
    },
    {
     "role": "Palliative Care Worker"
+   },
+   {
+    "role": "CHW Nurse"
+   },
+   {
+    "role": "Palliative Care Nurse"
+   },
+   {
+    "role": "Therapist"
+   },
+   {
+    "role": "Field Worker"
    }
   ],
   "sort_order": 2

@@ -272,6 +272,30 @@ def get_current_user_context():
     }
 
 
+@frappe.whitelist()
+def get_permlevel_access(doctype):
+    """Which Document Permission Levels the current user may read/write on
+    this doctype, from whatever is set in Role Permission Manager / Custom
+    DocPerm for their roles - frappe.get_meta() already merges a Custom
+    DocPerm override in, so this reflects either source the same way Desk's
+    own form renderer would. The Vue app (DynamicField/ChildTable) uses this
+    to grey out exactly the fields or child tables a permlevel restricts,
+    instead of only enforcing it server-side on save."""
+    meta = frappe.get_meta(doctype)
+    user_roles = set(frappe.get_roles())
+    read_levels = set()
+    write_levels = set()
+    for perm in meta.permissions:
+        if perm.role not in user_roles:
+            continue
+        level = perm.permlevel or 0
+        if perm.get('read'):
+            read_levels.add(level)
+        if perm.get('write'):
+            write_levels.add(level)
+    return {'read': sorted(read_levels), 'write': sorted(write_levels)}
+
+
 def row_visible_to_user(row, user_roles):
     """A CHW Dashboard Card row (`enabled` + `restrict_by_role` +
     comma-separated `roles`) is visible if enabled and either
@@ -326,7 +350,7 @@ def get_app_modules():
 
     # A user visible to more than one module (e.g. Administrator, who
     # implicitly holds every role, or anyone given both a general CHW role
-    # and a restricted one like Palliative Care Coordinator) would otherwise
+    # and a restricted one like Palliative Care Docter) would otherwise
     # see the same DocType's card twice - once per module. Earlier modules
     # (by sort_order) win; a DocType already shown there is dropped from any
     # later module instead of repeated.
@@ -345,7 +369,17 @@ def get_app_modules():
                 'links': _doctype_connection_links(item.doctype_name),
             }
             for item in (module_doc.doctypes or [])
-            if item.doctype_name and item.doctype_name not in seen_doctypes
+            # A module's doctype list is shared across every role that can
+            # see the module at all (e.g. "CHW" lists the Palliative Care
+            # forms too, for CHW Health Worker/Coordinator/Program
+            # Coordinator/System Manager, none of whom are in the separate
+            # "Palliative Care" module) - without this check, a role with no
+            # actual permission on one of those doctypes (e.g. MCH Doctor)
+            # still got a card for it, that just opened to an empty/blocked
+            # list.
+            if item.doctype_name
+            and item.doctype_name not in seen_doctypes
+            and frappe.has_permission(item.doctype_name, 'read')
         ]
         if not doctypes:
             continue

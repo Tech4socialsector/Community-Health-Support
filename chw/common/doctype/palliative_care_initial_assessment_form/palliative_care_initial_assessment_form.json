@@ -806,7 +806,7 @@
    "link_fieldname": "pcid"
   }
  ],
- "modified": "2026-10-31 15:31:19.221379",
+ "modified": "2026-11-03 11:33:56.601542",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Palliative Care Initial Assessment Form",
@@ -843,7 +843,62 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Palliative Care Coordinator",
+   "role": "Palliative Care Docter",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Nurse",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Palliative Care Nurse",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Therapist",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Field Worker",
    "share": 1,
    "write": 1
   }

@@ -162,13 +162,15 @@
    "fieldname": "anc_followup_for_nurse",
    "fieldtype": "Table",
    "label": "ANC Followup for Nurse",
-   "options": "ANC Followup Nurse"
+   "options": "ANC Followup Nurse",
+   "permlevel": 1
   },
   {
    "fieldname": "anc_followup_for_docter",
    "fieldtype": "Table",
    "label": "ANC  Doctor Followup",
-   "options": "ANC Followup Docter"
+   "options": "ANC Followup Docter",
+   "permlevel": 2
   },
   {
    "fieldname": "section_break_lxnr",
@@ -222,7 +224,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-22 17:37:38.994643",
+ "modified": "2026-11-02 21:54:13.800481",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Follow-up",

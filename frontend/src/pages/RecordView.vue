@@ -60,7 +60,7 @@
             </div>
           </div>
           <div class="relative flex w-full flex-shrink-0 items-center gap-2 sm:w-auto">
-            <button v-if="appItem" type="button" :class="[ui.BTN_PRIMARY, 'flex-1 sm:flex-none']" @click="editRecord">
+            <button v-if="appItem && canWrite" type="button" :class="[ui.BTN_PRIMARY, 'flex-1 sm:flex-none']" @click="editRecord">
               <LucideIcon name="pencil" class="h-4 w-4" />
               {{ t('Edit') }}
             </button>
@@ -201,6 +201,7 @@ import { useMeta } from '@/data/useMeta'
 import { findModuleByDoctype } from '@/data/modules'
 import { setPageTitle } from '@/data/pageTitle'
 import { isEmptyValue, formatFieldValue, isLayoutField, iconForField, toneFor } from '@/data/recordFormat'
+import { hasPermission } from '@/data/permissions'
 import * as ui from '@/data/ui'
 import { t } from '@/data/i18n'
 
@@ -241,6 +242,11 @@ const loadError = computed(() => docError.value || metaResource.error)
 // The app's own page for this DocType, if it has one (icon, label, Edit
 // target); null for DocTypes only reachable in Desk.
 const appItem = computed(() => findModuleByDoctype(props.doctype) || null)
+
+// A read-only role (e.g. CHW Health Worker on Pregnancy Registration) gets
+// no Edit button here either - this page is already their only way in.
+const canWrite = ref(false)
+hasPermission(props.doctype, 'write', props.name).then((v) => (canWrite.value = v))
 
 const title = computed(() => {
   const titleField = metaResource.data?.title_field

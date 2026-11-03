@@ -10,6 +10,7 @@
     v-else-if="controlType === 'table-multiselect'"
     :field="field"
     :model-value="modelValue"
+    :read-only="readOnly"
     @update:model-value="$emit('update:modelValue', $event)"
   />
 
@@ -133,6 +134,8 @@
     :required="!!field.reqd"
     :description="t(field.description) || undefined"
     :disabled="readOnly"
+    :min="isFrozenDate ? todayStr : undefined"
+    :max="isFrozenDate ? todayStr : undefined"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', toFieldValue($event))"
   />
@@ -159,13 +162,44 @@ const props = defineProps({
   // Desk conditions on the form (parent doc and, in a child row, the row).
   doc: { type: Object, default: null },
   parentDoc: { type: Object, default: null },
+  // Forces read-only regardless of this field's own read_only/permlevel -
+  // set by ChildTable when its own table field is permlevel-restricted, so
+  // every field in that table's row editor follows suit.
+  formReadOnly: { type: Boolean, default: false },
+  // Permlevels the current user may write to on this doctype (Role
+  // Permission Manager / Custom DocPerm, via chw.api.get_permlevel_access).
+  // Default [0] - "no restriction configured" for a field that doesn't ask.
+  permlevelWritable: { type: Array, default: () => [0] },
 })
 defineEmits(['update:modelValue'])
 
+// Household profile's Survey Date and Family members' visit Date must
+// always be today - a backdated or future-dated entry doesn't represent
+// the actual day of the household/family visit it's meant to record.
+const FROZEN_TO_TODAY_FIELDS = {
+  'Household profile': ['survay_date'],
+  'Family members': ['date'],
+}
+const isFrozenDate = computed(
+  () => controlType.value === 'date' && (FROZEN_TO_TODAY_FIELDS[props.doctype] || []).includes(props.field.fieldname),
+)
+// Local, not UTC - toISOString() would roll over to tomorrow/yesterday for
+// anyone west/east of UTC in the hours around midnight.
+const todayStr = computed(() => {
+  const d = new Date()
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+})
+
 // A number box gives text ("2"); Desk sends a real number, and server code
 // doing arithmetic with it (e.g. Household's pending members = total -
-// added) failed on text with a TypeError. Empty stays empty.
+// added) failed on text with a TypeError. Empty stays empty. A frozen date
+// field never emits anything but today - min/max on the input already keep
+// the browser's own picker from offering another date, this is the backstop
+// for whatever gets past that (typed input, a mobile picker that ignores
+// min/max, a paste).
 function toFieldValue(value) {
+  if (isFrozenDate.value) return todayStr.value
   if (controlType.value !== 'number') return value
   if (value === '' || value == null) return null
   const n = props.field.fieldtype === 'Int' ? parseInt(value, 10) : parseFloat(value)
@@ -174,11 +208,15 @@ function toFieldValue(value) {
 
 // Desk's read_only / read_only_depends_on: shown, but not editable - e.g.
 // Age, Village and other values the form or server fills in. Read-only
-// fields used to be ordinary editable boxes here.
+// fields used to be ordinary editable boxes here. A permlevel this field
+// carries (Role Permission Manager / Custom DocPerm) is the same idea from
+// the permission side - Desk's own form renderer greys it out the same way.
 const readOnly = computed(
   () =>
+    !!props.formReadOnly ||
     !!props.field.read_only ||
-    (!!props.field.read_only_depends_on && evaluateDependsOn(props.field.read_only_depends_on, props.doc || {}, props.parentDoc || props.doc)),
+    (!!props.field.read_only_depends_on && evaluateDependsOn(props.field.read_only_depends_on, props.doc || {}, props.parentDoc || props.doc)) ||
+    !props.permlevelWritable.includes(props.field.permlevel || 0),
 )
 
 const controlType = computed(() => {

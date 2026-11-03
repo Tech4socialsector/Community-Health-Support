@@ -12,7 +12,7 @@
           </div>
         </template>
         <template #actions>
-          <button v-if="metaResource.data" type="button" :class="ui.BTN_PRIMARY" @click="goToNew">
+          <button v-if="metaResource.data && canCreate" type="button" :class="ui.BTN_PRIMARY" @click="goToNew">
             <LucideIcon name="plus" class="h-4 w-4" />
             {{ t('New') }}
           </button>
@@ -205,7 +205,7 @@
         <div v-else-if="!rows.length" :class="ui.EMPTY_STATE">
           <LucideIcon name="inbox" class="h-8 w-8 text-gray-300 dark:text-gray-600" />
           <span>{{ isFiltered ? t('No records match these filters.') : t('No records yet.') }}</span>
-          <button v-if="!isFiltered" type="button" :class="[ui.BTN_PRIMARY, 'mt-2']" @click="goToNew">
+          <button v-if="!isFiltered && canCreate" type="button" :class="[ui.BTN_PRIMARY, 'mt-2']" @click="goToNew">
             <LucideIcon name="plus" class="h-4 w-4" />
             {{ t('Create the first one') }}
           </button>
@@ -285,6 +285,7 @@
                         <LucideIcon name="eye" class="h-4 w-4" />
                       </button>
                       <button
+                        v-if="canWrite"
                         type="button"
                         class="flex h-7 w-7 items-center justify-center rounded-md bg-forest-50 text-forest-700 ring-1 ring-forest-100 transition hover:bg-forest-200 hover:text-forest-900 dark:bg-forest-900/40 dark:text-forest-300 dark:ring-forest-800 dark:hover:bg-forest-800"
                         :aria-label="t('Edit {0}', [row.name])"
@@ -409,6 +410,7 @@ import { listCrumbs } from '@/data/breadcrumbs'
 import { STANDARD_FILTER_FIELDS, operatorLabel, toServerFilter } from '@/data/listFilters'
 import { setPageTitle, setPageCrumbs } from '@/data/pageTitle'
 import { isTempName } from '@/data/offline/store'
+import { hasPermission } from '@/data/permissions'
 import { t } from '@/data/i18n'
 import * as ui from '@/data/ui'
 
@@ -422,6 +424,16 @@ const router = useRouter()
 const metaResource = useMeta(props.doctype)
 const defaultColumns = useListFields(metaResource)
 const filterFields = useFilterFields(metaResource)
+
+// A role with only read access (e.g. CHW Health Worker on Pregnancy
+// Registration) gets no "New" button and no per-row Edit action - just the
+// existing read-only "View" (RecordView), which the default row click also
+// goes to instead of the edit form. Matches what Desk would show: no create
+// option, fields greyed out.
+const canCreate = ref(false)
+const canWrite = ref(false)
+hasPermission(props.doctype, 'create').then((v) => (canCreate.value = v))
+hasPermission(props.doctype, 'write').then((v) => (canWrite.value = v))
 
 // Shown translated; props.doctype itself stays English for the API calls.
 const pageTitle = computed(() => t(findModuleByRoute(route.params.doctypeRoute)?.label || props.doctype))
@@ -872,6 +884,13 @@ function goToNew() {
 }
 
 function goToRow(name) {
+  // A read-only role never lands on the edit form at all, whether they
+  // clicked the row or (formerly) the Edit pencil - straight to the same
+  // read-only view the eye icon already opens.
+  if (!canWrite.value) {
+    goToRecordView(name)
+    return
+  }
   if (isGenericRoute) {
     router.push({ name: 'DoctypeForm', params: { doctypeRoute: route.params.doctypeRoute, name } })
   } else {

@@ -77,7 +77,7 @@
             </button>
           </template>
         </ToolbarMenu>
-        <button type="button" :class="[ui.BTN_PRIMARY, 'flex-shrink-0']" :disabled="saving" @click="save">
+        <button v-if="canWrite" type="button" :class="[ui.BTN_PRIMARY, 'flex-shrink-0']" :disabled="saving" @click="save">
           <LucideIcon :name="saving ? 'loader-circle' : 'check'" class="h-4 w-4" :class="{ 'animate-spin': saving }" />
           {{ t('Save') }}
         </button>
@@ -270,6 +270,7 @@
                   :doctype="doctype"
                   :link-query-for="(fieldname, row) => linkQueryFor(fieldname, row, block.field.fieldname)"
                   :row-class="(row) => rowClassFor(block.field.fieldname, row)"
+                  :permlevel-writable="permlevelWritable"
                   v-model="values[block.field.fieldname]"
                   @row-added="(row, idx) => onRowAdded(block.field.fieldname, row, idx)"
                   @rows-removed="(rows) => onRowsRemoved(block.field.fieldname, rows)"
@@ -317,6 +318,7 @@
                             :doctype="doctype"
                             :docname="isNew ? null : name"
                             :doc="values"
+                            :permlevel-writable="permlevelWritable"
                             v-model="values[sub.field.fieldname]"
                           />
                         </div>
@@ -328,6 +330,7 @@
                         :doctype="doctype"
                         :docname="isNew ? null : name"
                         :doc="values"
+                        :permlevel-writable="permlevelWritable"
                         :link-query="item.field.fieldtype === 'Link' ? linkQueryFor(item.field.fieldname) : null"
                         v-model="values[item.field.fieldname]"
                       />
@@ -364,6 +367,7 @@ import LucideIcon from '@/components/LucideIcon.vue'
 import { findModuleByRoute } from '@/data/modules'
 import * as ui from '@/data/ui'
 import { useMeta, useFormFields, useTableFields } from '@/data/useMeta'
+import { usePermlevelAccess } from '@/data/permlevel'
 import { visibleFieldnames, withLiveRequired } from '@/data/dependsOn'
 import { buildFormSections, sectionHasField } from '@/data/formSections'
 import { applyDefaults } from '@/data/defaults'
@@ -413,6 +417,16 @@ function goBack() {
 
 const metaResource = useMeta(doctype)
 
+// Permlevels this role may write to on this doctype (Role Permission
+// Manager / Custom DocPerm) - e.g. CHW Health Worker can write level 0 on
+// PNC but not level 1 (the Doctor/Nurse followup notes), so those stay
+// visible but grey out instead of looking editable and failing on save.
+// Default [0] optimistically while loading - "no restriction configured",
+// which is also correct for the overwhelming majority of fields that never
+// carry a non-zero permlevel at all.
+const permlevelResource = usePermlevelAccess(doctype)
+const permlevelWritable = computed(() => permlevelResource.data?.write ?? [0])
+
 // The form's own name for the header ("Pregnancy Registration") - the app
 // item's label where there is one, else the DocType itself.
 // Recomputed as `values` loads / changes, so the parent crumb appears once
@@ -424,6 +438,23 @@ const formLabel = computed(() => moduleItem.value?.label || metaResource.data?.n
 const fields = useFormFields(metaResource)
 const tableFields = useTableFields(metaResource)
 const hooks = getDoctypeHooks(doctype)
+
+// Some doctype-hook callbacks are async and mutate `values` only once they
+// resolve (e.g. ANC Follow-up's next-visit-date recalculation, which awaits
+// two server round-trips). Saving the instant a field changes would send
+// whatever's in `values` right then - the stale, pre-recalculation value -
+// and the corrected one would only ever reach the server on a *second*
+// Save, once the hook had quietly finished in the background. Tracking
+// every hook call's promise here lets save() wait for all of them to
+// settle first, so one Save is always enough.
+const pendingHookWork = new Set()
+function trackHookCall(result) {
+  if (result && typeof result.then === 'function') {
+    pendingHookWork.add(result)
+    result.finally(() => pendingHookWork.delete(result))
+  }
+  return result
+}
 
 watchEffect(() => {
   setPageTitle(isNew ? t('New {0}', [t(metaResource.data?.name || doctype)]) : name)
@@ -612,7 +643,7 @@ function runScalarDiffLoop() {
       lastScalarSnapshot = current
       for (const fieldname of changed) {
         if (isPhoneField(hookCtx().getField(fieldname))) warnIfNotDigits(values[fieldname])
-        hooks.onFieldChange(fieldname, values, hookCtx())
+        trackHookCall(hooks.onFieldChange(fieldname, values, hookCtx()))
       }
     }
     lastScalarSnapshot = scalarSnapshot()
@@ -640,7 +671,7 @@ function runChildDiff() {
         if (!lastRow) continue
         const keys = new Set([...Object.keys(row), ...Object.keys(lastRow)])
         for (const k of keys) {
-          if (row[k] !== lastRow[k]) hooks.onChildFieldChange(fieldname, k, row, values, hookCtx())
+          if (row[k] !== lastRow[k]) trackHookCall(hooks.onChildFieldChange(fieldname, k, row, values, hookCtx()))
         }
       }
     }
@@ -667,7 +698,7 @@ function onRowAdded(tableField, row, idx) {
   if (!hooks?.onChildRowAdd) return
   applyingHookChange = true
   try {
-    hooks.onChildRowAdd(tableField, row, idx, values, hookCtx())
+    trackHookCall(hooks.onChildRowAdd(tableField, row, idx, values, hookCtx()))
   } finally {
     lastChildSnapshot = childRowsSnapshot()
     lastScalarSnapshot = scalarSnapshot()
@@ -679,7 +710,7 @@ function onRowsRemoved(tableField, removed) {
   if (!hooks?.onChildRowRemove) return
   applyingHookChange = true
   try {
-    hooks.onChildRowRemove(tableField, removed, values, hookCtx())
+    trackHookCall(hooks.onChildRowRemove(tableField, removed, values, hookCtx()))
   } finally {
     lastChildSnapshot = childRowsSnapshot()
     lastScalarSnapshot = scalarSnapshot()
@@ -888,7 +919,7 @@ function runAfterLoad() {
   afterLoadDone = true
   applyingHookChange = true
   try {
-    hooks.onAfterLoad(values, hookCtx())
+    trackHookCall(hooks.onAfterLoad(values, hookCtx()))
   } finally {
     initSnapshots()
     applyingHookChange = false
@@ -938,6 +969,34 @@ if (!isNew && name && !isLocalName(name)) {
 
 const confirmDelete = ref(false)
 const deleting = ref(false)
+
+// --- Write access --------------------------------------------------------
+// A read-only role (e.g. CHW Health Worker on Pregnancy Registration)
+// shouldn't be able to reach this editable form at all - DoctypeList.vue
+// and RecordView.vue already keep them off it, but someone can still land
+// here directly (a bookmark, a typed URL). Rather than let them fill out a
+// form that only rejects on Save, send them to the read-only RecordView
+// (existing record) or back out (a blocked "new" attempt) the moment the
+// permission check resolves. Defaults true so the form doesn't flash
+// read-only while the check is in flight. An offline-only record (not yet
+// synced) has no server permission to check yet, so it stays editable, same
+// as Delete/Print above skip it too.
+const canWrite = ref(true)
+if (isNew) {
+  call('frappe.client.has_permission', { doctype, docname: '', perm_type: 'create' })
+    .then((r) => {
+      canWrite.value = !!r?.has_permission
+      if (!canWrite.value) goBack()
+    })
+    .catch(() => {})
+} else if (name && !isLocalName(name)) {
+  call('frappe.client.has_permission', { doctype, docname: name, perm_type: 'write' })
+    .then((r) => {
+      canWrite.value = !!r?.has_permission
+      if (!canWrite.value) router.replace({ name: 'RecordView', params: { doctype, name } })
+    })
+    .catch(() => {})
+}
 
 // --- ANC Follow-up: Investigation Status --------------------------------
 // One shared button for Volunteer, Nurse and Doctor alike - a live
@@ -1154,6 +1213,13 @@ async function save() {
   saving.value = true
   saveError.value = null
   try {
+    // Wait for any doctype-hook recalculation still in flight (e.g. ANC
+    // Follow-up's next-visit-date, awaiting its own server round-trips) so
+    // this save includes its result - otherwise a Save fired right after
+    // the edit that triggered it would send the pre-recalculation value,
+    // and only a second Save (once the hook had quietly finished) would
+    // ever persist the corrected one.
+    if (pendingHookWork.size) await Promise.allSettled([...pendingHookWork])
     const missing = await missingMandatory()
     if (missing.length) {
       const text = t('Mandatory fields required: {0}', [missing.map((m) => m.label).join(', ')])

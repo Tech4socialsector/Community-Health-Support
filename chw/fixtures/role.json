@@ -7,9 +7,9 @@
   "home_page": "chw/home",
   "is_custom": 0,
   "modified": "2026-10-29 11:33:32.432410",
-  "name": "Palliative Care Coordinator",
+  "name": "Palliative Care Docter",
   "restrict_to_domain": null,
-  "role_name": "Palliative Care Coordinator",
+  "role_name": "Palliative Care Docter",
   "two_factor_auth": 0
  },
  {
@@ -33,22 +33,9 @@
   "home_page": "chw/home",
   "is_custom": 0,
   "modified": "2026-11-02 15:22:13.943634",
-  "name": "MCH Nurse",
+  "name": "CHW Nurse",
   "restrict_to_domain": null,
-  "role_name": "MCH Nurse",
-  "two_factor_auth": 0
- },
- {
-  "desk_access": 0,
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Role",
-  "home_page": "chw/home",
-  "is_custom": 0,
-  "modified": "2026-11-02 15:22:14.102745",
-  "name": "Palliative Care Nurse",
-  "restrict_to_domain": null,
-  "role_name": "Palliative Care Nurse",
+  "role_name": "CHW Nurse",
   "two_factor_auth": 0
  },
  {
@@ -101,6 +88,19 @@
   "name": "Field Worker",
   "restrict_to_domain": null,
   "role_name": "Field Worker",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": "chw/home",
+  "is_custom": 0,
+  "modified": "2026-11-03 10:33:27.026740",
+  "name": "Palliative Care Nurse",
+  "restrict_to_domain": null,
+  "role_name": "Palliative Care Nurse",
   "two_factor_auth": 0
  }
 ]

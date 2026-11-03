@@ -8,11 +8,12 @@
       :model-value="selectedValues"
       :options="options"
       :placeholder="t('Select {0}...', [t(targetDoctype)])"
+      :disabled="readOnly"
       @update:model-value="onUpdate"
     >
       <!-- Desk's "+ Create a new ..." for a Link field, ported here since a
       Table MultiSelect otherwise only ever offers what already exists. -->
-      <template v-if="canCreate" #footer="{ clearAll, selectAll }">
+      <template v-if="canCreate && !readOnly" #footer="{ clearAll, selectAll }">
         <div class="flex items-center justify-between gap-2 border-t border-outline-gray-1 px-2 py-1.5">
           <Button variant="ghost" size="sm" @click="clearAll">{{ t('Clear All') }}</Button>
           <Button variant="ghost" size="sm" @click="selectAll">{{ t('Select All') }}</Button>
@@ -60,6 +61,7 @@ function canCreateDoctype(doctype) {
 const props = defineProps({
   field: { type: Object, required: true },
   modelValue: { type: Array, default: () => [] },
+  readOnly: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue'])
 

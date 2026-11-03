@@ -48,9 +48,14 @@ fixtures = [
 	{"dt": "App Module Setting", "filters": [["name", "in", ["CHW", "Palliative Care"]]]},
 	# The two roles App Module Setting's own role-restriction fields link to
 	# above - without this, importing that fixture on a fresh site would
-	# point at Roles that don't exist there yet. The five MCH / palliative
-	# staff roles ship here too, so every site gets them on migrate; their
-	# form permissions are set per site in Role Permission Manager.
+	# point at Roles that don't exist there yet. The MCH / palliative staff
+	# roles ship here too, so every site gets them on migrate; their form
+	# permissions are set per site in Role Permission Manager. CHW Nurse
+	# covers both MCH and Palliative Care for a nurse doing both; Palliative
+	# Care Nurse is the separate, narrower role for a nurse who only works
+	# Palliative Care (no MCH access at all) - these are deliberately two
+	# different roles for two different staffing situations, not a
+	# duplicate of each other.
 	{
 		"dt": "Role",
 		"filters": [
@@ -58,11 +63,11 @@ fixtures = [
 				"name",
 				"in",
 				[
-					"Palliative Care Coordinator",
+					"Palliative Care Docter",
 					"Palliative Care Worker",
-					"MCH Nurse",
-					"MCH Doctor",
+					"CHW Nurse",
 					"Palliative Care Nurse",
+					"MCH Doctor",
 					"Palliative Care Doctor",
 					"Therapist",
 					"Driver",
@@ -79,7 +84,83 @@ fixtures = [
 	# go through Custom DocPerm too, not just the doctype's own JSON.
 	{
 		"dt": "Custom DocPerm",
-		"filters": [["role", "in", ["Palliative Care Coordinator", "Palliative Care Worker"]]],
+		"filters": [["role", "in", ["Palliative Care Docter", "Palliative Care Worker"]]],
+	},
+	# CHW Health Worker's Doctor/Nurse followup notes on ANC Follow-up and PNC
+	# are read-only while the rest of each form stays editable - these two
+	# doctypes already have a Custom DocPerm override, so the permlevel
+	# grants for every role that touches them live there too, not in the
+	# doctype's own JSON. permlevel 1 (Nurse notes) and 2 (Doctor notes, its
+	# own level so CHW Nurse can write one and only read the other) - every
+	# role here is read-only at 2, same as at 1, except CHW Nurse which
+	# reuses this filter's own role list below. Scoped to exactly these rows
+	# (not by role, like the fixture above) so this doesn't also drag in
+	# System Manager/Program Coordinator/CHW Coordinator's many unrelated
+	# Custom DocPerm rows on other doctypes. Needs its own "prefix" - two
+	# Custom DocPerm fixture entries with no prefix both write to
+	# custom_docperm.json and silently overwrite each other.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "followup_notes_permlevel",
+		"filters": [
+			["parent", "in", ["ANC Follow-up", "PNC"]],
+			["role", "in", ["CHW Coordinator", "CHW Health Worker", "Program Coordinator", "System Manager"]],
+			["permlevel", "in", [1, 2]],
+		],
+	},
+	# CHW Health Worker is downgraded to read-only on Pregnancy Registration
+	# (was full read/write/create) - same Custom DocPerm override situation,
+	# so it needs its own fixture row too, with its own prefix.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "chw_health_worker_pregnancy_registration",
+		"filters": [["parent", "=", "Pregnancy Registration"], ["role", "=", "CHW Health Worker"]],
+	},
+	# CHW Nurse's own access - full read/write/create on every MCH and
+	# Palliative Care form (Household profile, Family members, Birth
+	# Registration, Pregnancy Registration, ANC Follow-up, PNC, Village),
+	# all through Custom DocPerm since each of these already has an override
+	# for other roles. The permlevel 1/2 split on ANC Follow-up and PNC
+	# (Nurse notes writable, Doctor notes read-only) is this role's own rows
+	# within that same filter - captured here by role instead, so it doesn't
+	# need yet another prefix just for two doctypes already covered above.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "chw_nurse",
+		"filters": [["role", "=", "CHW Nurse"]],
+	},
+	# Palliative Care Nurse's own access - Household profile and Family
+	# members, through Custom DocPerm for the same reason as above. Its
+	# Palliative Care Initial Assessment Form / Palliative care followup
+	# access lives in those doctypes' own JSON (no Custom DocPerm override
+	# on either), so it ships via git, not a fixture.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "palliative_care_nurse",
+		"filters": [["role", "=", "Palliative Care Nurse"]],
+	},
+	# MCH Doctor's own access - full read/write/create at every level
+	# (base + Nurse notes + Doctor notes - nothing held back) on Household
+	# profile, Family members, Pregnancy Registration, Birth Registration,
+	# ANC Follow-up and PNC, through Custom DocPerm for the same reason as
+	# above. Preconception/Postpartum/Child 6w-1y and the master-doctype
+	# read+create grants live in those doctypes' own JSON, so they ship via
+	# git, not a fixture.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "mch_doctor",
+		"filters": [["role", "=", "MCH Doctor"]],
+	},
+	# Field Worker's own access - Household profile/Family members (full) and
+	# Pregnancy Registration/ANC Follow-up/Birth Registration/PNC (viewer,
+	# read only), through Custom DocPerm for the same reason as above. The
+	# Palliative Care forms (full) and Preconception/Postpartum/Child 6w-1y
+	# (viewer) live in those doctypes' own JSON, so they ship via git, not a
+	# fixture.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "field_worker",
+		"filters": [["role", "=", "Field Worker"]],
 	},
 	# The standard print formats built for each CHW form's "Print" button
 	# (Desk and the Vue app both call these by name - see print_utils.py and

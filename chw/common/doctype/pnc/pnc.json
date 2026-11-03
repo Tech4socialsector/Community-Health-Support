@@ -150,13 +150,15 @@
    "fieldname": "mother_folloup_nurse_notes",
    "fieldtype": "Table",
    "label": "Nurse Follow-up",
-   "options": "PNC Followup Mother Nurse Notes"
+   "options": "PNC Followup Mother Nurse Notes",
+   "permlevel": 1
   },
   {
    "fieldname": "mother_followup_docter_notes",
    "fieldtype": "Table",
    "label": "Doctor Follow-up",
-   "options": "PNC Followup Mother Docter Notes"
+   "options": "PNC Followup Mother Docter Notes",
+   "permlevel": 2
   },
   {
    "fetch_from": "birth_registration_id.gram_panchayat",
@@ -176,7 +178,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-29 18:00:00.000000",
+ "modified": "2026-11-02 21:54:13.966169",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "PNC",
