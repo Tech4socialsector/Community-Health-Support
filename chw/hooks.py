@@ -155,6 +155,15 @@ fixtures = [
 		"prefix": "field_worker",
 		"filters": [["role", "=", "Field Worker"]],
 	},
+	# Driver's own access - full read/write/create on Household profile and
+	# Family members (its actual job - the only two doctypes that show as
+	# Home cards for this role), plus full access (including delete) on
+	# Village, so a missing one can be added while entering a household.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "driver",
+		"filters": [["role", "=", "Driver"]],
+	},
 	# Preconception/Postpartum/Child 6w-1y, the two Palliative Care forms,
 	# and the 21 lookup/master doctypes used to be governed purely by their
 	# own doctype JSON `permissions` array - the one thing in this whole app

@@ -73,7 +73,7 @@
   "enabled": 1,
   "icon": "box",
   "label": "CHW",
-  "modified": "2026-11-03 11:33:57.765902",
+  "modified": "2026-11-03 15:54:37.967266",
   "module_name": "CHW",
   "name": "CHW",
   "restrict_by_role": 1,
@@ -98,6 +98,9 @@
    },
    {
     "role": "Field Worker"
+   },
+   {
+    "role": "Driver"
    }
   ],
   "sort_order": 1
