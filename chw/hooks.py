@@ -130,10 +130,9 @@ fixtures = [
 		"filters": [["role", "=", "CHW Nurse"]],
 	},
 	# Palliative Care Nurse's own access - Household profile and Family
-	# members, through Custom DocPerm for the same reason as above. Its
-	# Palliative Care Initial Assessment Form / Palliative care followup
-	# access lives in those doctypes' own JSON (no Custom DocPerm override
-	# on either), so it ships via git, not a fixture.
+	# members, plus (see the base_access fixture below) Palliative Care
+	# Initial Assessment Form / Palliative care followup, all through Custom
+	# DocPerm.
 	{
 		"dt": "Custom DocPerm",
 		"prefix": "palliative_care_nurse",
@@ -142,10 +141,7 @@ fixtures = [
 	# MCH Doctor's own access - full read/write/create at every level
 	# (base + Nurse notes + Doctor notes - nothing held back) on Household
 	# profile, Family members, Pregnancy Registration, Birth Registration,
-	# ANC Follow-up and PNC, through Custom DocPerm for the same reason as
-	# above. Preconception/Postpartum/Child 6w-1y and the master-doctype
-	# read+create grants live in those doctypes' own JSON, so they ship via
-	# git, not a fixture.
+	# ANC Follow-up and PNC, through Custom DocPerm.
 	{
 		"dt": "Custom DocPerm",
 		"prefix": "mch_doctor",
@@ -153,14 +149,68 @@ fixtures = [
 	},
 	# Field Worker's own access - Household profile/Family members (full) and
 	# Pregnancy Registration/ANC Follow-up/Birth Registration/PNC (viewer,
-	# read only), through Custom DocPerm for the same reason as above. The
-	# Palliative Care forms (full) and Preconception/Postpartum/Child 6w-1y
-	# (viewer) live in those doctypes' own JSON, so they ship via git, not a
-	# fixture.
+	# read only), through Custom DocPerm.
 	{
 		"dt": "Custom DocPerm",
 		"prefix": "field_worker",
 		"filters": [["role", "=", "Field Worker"]],
+	},
+	# Preconception/Postpartum/Child 6w-1y, the two Palliative Care forms,
+	# and the 21 lookup/master doctypes used to be governed purely by their
+	# own doctype JSON `permissions` array - the one thing in this whole app
+	# that only ever takes effect through a full code deploy (git push +
+	# migrate), unlike every Custom DocPerm fixture above, which has always
+	# synced to every site cleanly. That split is exactly what kept causing
+	# a role to "work in Role Permission Manager but not after deploying" -
+	# a role added there needed the *doctype's own JSON* edited too, in a
+	# second place, or it silently never reached environments where the
+	# JSON edit didn't make it into the deploy.
+	#
+	# Every role+permlevel these doctypes' JSON already granted has now
+	# been copied in as an explicit Custom DocPerm row (same values, so
+	# nobody's actual access changed) - these doctypes are now fully
+	# Custom-DocPerm-governed like everything else. From here on, any
+	# access change on them should be made directly in Role Permission
+	# Manager - one place, reliably deployed as a fixture - not in the
+	# doctype's own Permissions tab (which Frappe now ignores anyway, once
+	# a doctype has any Custom DocPerm row at all).
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "base_access",
+		"filters": [
+			[
+				"parent",
+				"in",
+				[
+					"Preconception Reg and Followup",
+					"Postpartum Reg and Followup",
+					"Child 6w to 1 Year Reg and Followup",
+					"Palliative Care Initial Assessment Form",
+					"Palliative care followup",
+					"Appearance",
+					"Cardiovascular",
+					"Does the patient need",
+					"Gastrointestinal",
+					"Genitourinary",
+					"Gram Panchayat",
+					"Mental Health Symptom Master",
+					"Musculatory System",
+					"NCD Disease",
+					"Neurological",
+					"Occupation",
+					"Past Medical History Master",
+					"Pregnancy High Risk Master",
+					"Relationship with the Head of the Family",
+					"Respiratory",
+					"State List",
+					"Sub Centre",
+					"Symptoms",
+					"Type Of Disability",
+					"Village",
+					"medicine name",
+				],
+			]
+		],
 	},
 	# The standard print formats built for each CHW form's "Print" button
 	# (Desk and the Vue app both call these by name - see print_utils.py and
