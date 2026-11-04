@@ -64,10 +64,14 @@ def restore_standard_perms_hidden_by_custom():
 
 # Lookup lists the CHW forms link to. Anyone who fills a form may add a
 # missing entry from the Link box ("+ Create a new ...", as in Desk) -
-# read and create only, never edit or delete; Program Manager and Report
-# Viewer only read. The same rows are in each doctype's own JSON; this
-# covers sites where the doctype has Custom DocPerm rows, which make
-# Frappe ignore the JSON (see restore_standard_perms_hidden_by_custom).
+# read and create only, never edit or delete; Report Viewer only read.
+# The same rows are in each doctype's own JSON; this covers sites where
+# the doctype has Custom DocPerm rows, which make Frappe ignore the JSON
+# (see restore_standard_perms_hidden_by_custom). Program Manager used to
+# be in the read-only list here too, but now has its own explicit access
+# (see the "program_manager" Custom DocPerm fixture in hooks.py) that
+# doesn't include these masters at all - it stays out of both role tuples
+# below so this hook never re-adds them.
 MASTER_DOCTYPES = (
 	"Appearance",
 	"Cardiovascular",
@@ -100,7 +104,7 @@ MASTER_CREATE_ROLES = (
 	"Palliative Care Worker",
 	"MCH Doctor",
 )
-MASTER_READ_ROLES = ("Program Manager", "Report Viewer")
+MASTER_READ_ROLES = ("Report Viewer",)
 
 
 def grant_master_access_on_custom_perms():

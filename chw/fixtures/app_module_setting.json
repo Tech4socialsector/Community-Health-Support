@@ -73,7 +73,7 @@
   "enabled": 1,
   "icon": "box",
   "label": "CHW",
-  "modified": "2026-11-03 15:54:37.967266",
+  "modified": "2026-11-04 15:54:30.649478",
   "module_name": "CHW",
   "name": "CHW",
   "restrict_by_role": 1,
@@ -101,6 +101,9 @@
    },
    {
     "role": "Driver"
+   },
+   {
+    "role": "Program Manager"
    }
   ],
   "sort_order": 1
@@ -137,7 +140,7 @@
   "enabled": 1,
   "icon": "hand-heart",
   "label": "Palliative Care",
-  "modified": "2026-11-03 11:33:57.777136",
+  "modified": "2026-11-04 15:54:30.820323",
   "module_name": "Palliative Care",
   "name": "Palliative Care",
   "restrict_by_role": 1,
@@ -159,6 +162,9 @@
    },
    {
     "role": "Field Worker"
+   },
+   {
+    "role": "Program Manager"
    }
   ],
   "sort_order": 2

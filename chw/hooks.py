@@ -72,6 +72,7 @@ fixtures = [
 					"Therapist",
 					"Driver",
 					"Field Worker",
+					"Program Manager",
 				],
 			]
 		],
@@ -163,6 +164,16 @@ fixtures = [
 		"dt": "Custom DocPerm",
 		"prefix": "driver",
 		"filters": [["role", "=", "Driver"]],
+	},
+	# Program Manager's own access - full read/write/create on Household
+	# profile and Family members, full access (including delete) on
+	# Village, and view-only (read/report/print, no write/create/delete)
+	# on every other MCH and Palliative Care form, so this role can see
+	# records across both modules without being able to edit them.
+	{
+		"dt": "Custom DocPerm",
+		"prefix": "program_manager",
+		"filters": [["role", "=", "Program Manager"]],
 	},
 	# Preconception/Postpartum/Child 6w-1y, the two Palliative Care forms,
 	# and the 21 lookup/master doctypes used to be governed purely by their
