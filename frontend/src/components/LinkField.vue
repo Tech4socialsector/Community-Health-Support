@@ -71,9 +71,11 @@
           <span v-if="r.label && r.label !== r.value" class="block truncate text-xs text-gray-600 dark:text-gray-300">{{ r.label }}</span>
           <span v-if="r.description" class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ r.description }}</span>
         </li>
-        <!-- Desk's "+ Create a new ..." - for people allowed to create it. -->
+        <!-- Desk's "+ Create a new ..." - for people allowed to create it,
+        unless the hook turns it off (Desk's only_select), e.g. a list of
+        referred screenings a new record could never be part of. -->
         <li
-          v-if="canCreate"
+          v-if="canCreate && !linkQuery?.onlySelect"
           role="option"
           class="mt-1 flex cursor-pointer items-center gap-1.5 rounded-md border-t border-gray-100 px-3 py-2 font-medium text-forest-700 hover:bg-forest-50 dark:border-gray-800 dark:text-forest-300 dark:hover:bg-gray-800"
           @click="startCreate"

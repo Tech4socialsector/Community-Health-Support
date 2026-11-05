@@ -8,6 +8,9 @@
  "field_order": [
   "patient_details_tab",
   "main_screening_form",
+  "oral_referred",
+  "breast_referred",
+  "cervical_referred",
   "patient_name",
   "gender",
   "date_of_birth",
@@ -127,11 +130,38 @@
    "fieldname": "main_screening_form",
    "fieldtype": "Link",
    "label": "Main Screening Form",
-   "options": "Main Screening Form"
+   "options": "Main Screening Form",
+   "description": "Only people referred in at least one screening (Referral = Yes, finished). Only the referred screenings' tabs are shown."
+  },
+  {
+   "fieldname": "oral_referred",
+   "fieldtype": "Check",
+   "label": "Referred for Oral",
+   "hidden": 1,
+   "read_only": 1,
+   "default": "0",
+   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form."
+  },
+  {
+   "fieldname": "breast_referred",
+   "fieldtype": "Check",
+   "label": "Referred for Breast",
+   "hidden": 1,
+   "read_only": 1,
+   "default": "0",
+   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form."
+  },
+  {
+   "fieldname": "cervical_referred",
+   "fieldtype": "Check",
+   "label": "Referred for Cervical",
+   "hidden": 1,
+   "read_only": 1,
+   "default": "0",
+   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form."
   },
   {
    "fetch_from": "main_screening_form.name1",
-   "fetch_if_empty": 1,
    "fieldname": "patient_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -141,25 +171,22 @@
   },
   {
    "fetch_from": "main_screening_form.gender",
-   "fetch_if_empty": 1,
    "fieldname": "gender",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Gender",
-   "options": "\nMale\nFemale\nOther",
+   "options": "\nMale\nFemale\nTransgender\nNot to specify\nOther",
    "reqd": 1
   },
   {
    "fetch_from": "main_screening_form.date_of_birth",
-   "fetch_if_empty": 1,
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of Birth"
   },
   {
    "fetch_from": "main_screening_form.age",
-   "fetch_if_empty": 1,
    "fieldname": "age",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -171,14 +198,12 @@
   },
   {
    "fetch_from": "main_screening_form.mobile_number",
-   "fetch_if_empty": 1,
    "fieldname": "mobile_number",
-   "fieldtype": "Phone",
+   "fieldtype": "Data",
    "label": "Mobile Number"
   },
   {
    "fetch_from": "main_screening_form.village",
-   "fetch_if_empty": 1,
    "fieldname": "village",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -195,14 +220,16 @@
   {
    "fieldname": "oral_tab",
    "fieldtype": "Tab Break",
-   "label": "Oral"
+   "label": "Oral",
+   "depends_on": "eval:doc.oral_referred"
   },
   {
    "fieldname": "oral_clinical_evaluation",
    "fieldtype": "Select",
    "label": "Oral Clinical Evaluation",
    "options": "\nYes\nNo",
-   "reqd": 1
+   "reqd": 0,
+   "mandatory_depends_on": "eval:doc.oral_referred"
   },
   {
    "depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
@@ -358,14 +385,16 @@
   {
    "fieldname": "breast_tab",
    "fieldtype": "Tab Break",
-   "label": "Breast"
+   "label": "Breast",
+   "depends_on": "eval:doc.breast_referred && doc.gender!=\"Male\""
   },
   {
    "fieldname": "breast_clinical_evaluation",
    "fieldtype": "Select",
    "label": "Breast Clinical Evaluation",
    "options": "\nYes\nNo",
-   "reqd": 1
+   "reqd": 0,
+   "mandatory_depends_on": "eval:doc.breast_referred && doc.gender!=\"Male\""
   },
   {
    "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
@@ -509,7 +538,8 @@
    "fieldtype": "Select",
    "label": "Biopsy",
    "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
-   "options": "\nYes\nNo\nNot now"
+   "options": "\nYes\nNo\nNot now",
+   "description": "\"Not now\" lets you go on, but the evaluation can't be submitted until Yes or No."
   },
   {
    "depends_on": "eval:doc.breast_biopsy=='Yes'",
@@ -572,14 +602,16 @@
   {
    "fieldname": "cervical_tab",
    "fieldtype": "Tab Break",
-   "label": "Cervical"
+   "label": "Cervical",
+   "depends_on": "eval:doc.cervical_referred && doc.gender!=\"Male\""
   },
   {
    "fieldname": "cervical_clinical_evaluation",
    "fieldtype": "Select",
    "label": "Cervical Clinical Evaluation",
    "options": "\nYes\nNo",
-   "reqd": 1
+   "reqd": 0,
+   "mandatory_depends_on": "eval:doc.cervical_referred && doc.gender!=\"Male\""
   },
   {
    "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
@@ -680,7 +712,7 @@
   },
   {
    "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
-   "description": "Select one or more",
+   "description": "Tick at least one - required.",
    "fieldname": "cervical_treatment_plan_section",
    "fieldtype": "Section Break",
    "label": "Treatment Plan"
@@ -795,7 +827,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-26 11:03:12.380414",
+ "modified": "2026-11-05 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Clinical Evaluation",

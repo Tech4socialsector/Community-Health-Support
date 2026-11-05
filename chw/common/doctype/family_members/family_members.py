@@ -8,18 +8,25 @@ from frappe.model.document import Document
 from frappe.utils import getdate, today
 from chw.api import validate_phone_number
 from chw.common.doctype.household_profile.household_profile import refresh_member_counts
+from chw.cancer.eligibility import after_member_change, apply_member_rules
 
 
 class Familymembers(Document):
 	def validate(self):
 		validate_phone_number(self.phone_number)
 		self.calculate_age()
+		# Cancer screening eligibility and the woman-as-head rule - only
+		# while the Cancer programme is on (chw.cancer.eligibility).
+		apply_member_rules(self)
 
 	def on_update(self):
 		refresh_member_counts(self.hhid)
+		after_member_change(self)
 
 	def after_delete(self):
 		refresh_member_counts(self.hhid)
+		self._deleted = True
+		after_member_change(self)
 
 	def calculate_age(self):
 		if not self.date_of_birth:

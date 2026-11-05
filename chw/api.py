@@ -330,6 +330,83 @@ def get_app_modules():
     return modules
 
 
+# Short names for the Home page's form rows, used while an App Module
+# Setting row keeps the DocType's own name as its label (a label someone
+# set by hand is shown as they wrote it).
+HOME_SHORT_LABELS = {
+    'Preconception Reg and Followup': 'Preconception',
+    'Pregnancy Registration': 'Pregnancy registration',
+    'ANC Follow-up': 'ANC follow-up',
+    'Birth Registration': 'Birth registration',
+    'Postpartum Reg and Followup': 'Postpartum',
+    'Child 6w to 1 Year Reg and Followup': 'Child 6 weeks – 1 year',
+    'Child Growth Monitoring': 'Growth monitoring',
+    'MCH Volunteer Intake Form Postpartum': 'Volunteer intake (postpartum)',
+    'Palliative Care Initial Assessment Form': 'Initial assessment',
+    'Palliative care followup': 'Follow-up',
+    'Mental Health': 'Registration',
+    'NCD': 'Registration',
+    'Main Screening Form': 'Main screening',
+    'Clinical Evaluation': 'Clinical evaluation',
+}
+
+
+@frappe.whitelist()
+def get_home_layout():
+    """The CHW app's Home page: the forms of get_app_modules (so the same
+    roles, App Setting switches and form ticks apply), regrouped by what they
+    are rather than by App Module Setting - Household profile and Family
+    members first, then one group per programme in PROGRAMMES order (MCH
+    split into its `home_stages`), then any other form an App Module Setting
+    adds, under its own module's label.
+
+    {core: [item], programmes: [{key, title, icon, stages: [{title, items}]}],
+     other: [{title, items}]} - item: {doctype_name, label, route}."""
+    from chw.programmes import CORE_FORMS, PROGRAMMES
+
+    items, other = {}, []
+    for module in get_app_modules():
+        leftover = []
+        for item in module['doctypes']:
+            dt = item['doctype_name']
+            if dt in items:
+                continue
+            label = item['label']
+            if label == dt:
+                label = HOME_SHORT_LABELS.get(dt, label)
+            items[dt] = {'doctype_name': dt, 'label': label, 'route': item['route']}
+            if dt not in CORE_FORMS and not any(dt in p['doctypes'] for p in PROGRAMMES.values()):
+                leftover.append(items[dt])
+        if leftover:
+            other.append({'title': module['label'], 'items': leftover})
+
+    programmes = []
+    for key, p in PROGRAMMES.items():
+        mine = [dt for dt in p['doctypes'] if dt in items]
+        if not mine:
+            continue
+        stages = []
+        placed = set()
+        for title, forms in p.get('home_stages') or []:
+            row = [items[dt] for dt in forms if dt in items]
+            placed.update(forms)
+            if row:
+                stages.append({'title': title, 'items': row})
+        rest = [items[dt] for dt in mine if dt not in placed]
+        if rest:
+            stages.append({'title': '' if not stages else _('Other'), 'items': rest})
+        # One stage left (e.g. only Pregnancy forms ticked) needs no heading.
+        if len(stages) == 1:
+            stages[0]['title'] = ''
+        programmes.append({'key': key, 'title': p.get('home_title') or p['module'], 'icon': p['icon'], 'stages': stages})
+
+    return {
+        'core': [items[dt] for dt in CORE_FORMS if dt in items],
+        'programmes': programmes,
+        'other': other,
+    }
+
+
 def _permitted_count(doctype, filters=None):
     """How many `doctype` records the current user can see that match
     `filters` - through frappe.get_list, so user permissions apply.
@@ -384,6 +461,8 @@ def get_doc_connections(doctype, name):
     for link in _doctype_connection_links(doctype):
         if not frappe.has_permission(link['doctype'], 'read'):
             continue
+        if not _connection_allowed(doctype, name, link['doctype']):
+            continue
         try:
             count = _permitted_count(link['doctype'], {link['fieldname']: name})
         except Exception:
@@ -391,6 +470,16 @@ def get_doc_connections(doctype, name):
             count = None
         connections.append({**link, 'count': count})
     return connections
+
+
+def _connection_allowed(doctype, name, link_doctype):
+    """Per-record gates on a connection: a Main Screening Form shows
+    Clinical Evaluation only once referred (as its Desk form script does)."""
+    if doctype == 'Main Screening Form' and link_doctype == 'Clinical Evaluation':
+        from chw.cancer.doctype.main_screening_form.main_screening_form import clinical_evaluation_allowed
+
+        return clinical_evaluation_allowed(frappe.get_doc(doctype, name))
+    return True
 
 
 LIST_STANDARD_FIELDS = {'name', 'creation', 'modified', 'owner', 'modified_by'}

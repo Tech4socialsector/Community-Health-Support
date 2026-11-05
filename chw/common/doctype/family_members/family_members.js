@@ -15,7 +15,13 @@ frappe.ui.form.on("Family members", {
 	},
 	date_of_birth(frm) {
 		calculate_age(frm);
+		set_cancer_eligibility(frm);
 	},
+	age: set_cancer_eligibility,
+	gender: set_cancer_eligibility,
+	tobacco_user: set_cancer_eligibility,
+	known_cancer_patient: set_cancer_eligibility,
+	cancer_eligibility_manual: set_cancer_eligibility,
 	phone_number(frm) {
 		if (frm.doc.phone_number && !/^\d*$/.test(frm.doc.phone_number)) {
 			frappe.msgprint({
@@ -79,4 +85,24 @@ function calculate_age(frm) {
 
 	let age = age_parts(dob, now);
 	frm.set_value("age", String(age.years));
+}
+
+// Cancer screening eligibility, as chw/cancer/eligibility.py works it out on
+// save - shown straight away. Only while the Cancer programme is on (its
+// section is hidden otherwise), and not when set by hand.
+function set_cancer_eligibility(frm) {
+	const section = frm.get_docfield("cancer_family_member_details_section");
+	if (!section || section.hidden || frm.doc.cancer_eligibility_manual) return;
+	const text = String(frm.doc.age ?? "").trim();
+	const age = text ? parseInt(text, 10) : null;
+	const woman = frm.doc.gender === "Female";
+	let eligible = "No";
+	let reason;
+	if (frm.doc.known_cancer_patient === "Yes") reason = __("Known cancer patient");
+	else if (woman && age != null && age >= 30 && age <= 65) eligible = "Yes";
+	else if (frm.doc.tobacco_user === "Yes") eligible = "Yes";
+	else if (woman) reason = age == null ? __("Age not known") : __("Age mismatch (not 30–65)");
+	else reason = __("Not a woman aged 30–65 and not a tobacco user");
+	frm.set_value("cancer_screening_eligible", eligible);
+	frm.set_value("cancer_not_eligible_reason", eligible === "Yes" ? "" : reason);
 }

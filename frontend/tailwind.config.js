@@ -40,6 +40,36 @@ export default {
           800: '#1d4429',
           900: '#15321f',
         },
+        // Programme accents for the Home page panels (Cancer, NCD, Mental
+        // Health), muted to sit beside forest (MCH) and navy (Palliative).
+        // White text passes 4.5:1 on 600 and up.
+        rosewood: {
+          50: '#fbf0f4',
+          100: '#f6dbe5',
+          200: '#efc3d3',
+          300: '#e099b3',
+          600: '#9d2f55',
+          700: '#832546',
+          900: '#4a1528',
+        },
+        ochre: {
+          50: '#fdf5ea',
+          100: '#fae7cc',
+          200: '#f1d2a8',
+          300: '#e5b277',
+          600: '#9a4a06',
+          700: '#7f3d05',
+          900: '#452103',
+        },
+        iris: {
+          50: '#f4f2fb',
+          100: '#e6e2f6',
+          200: '#cec6ec',
+          300: '#ab9fdc',
+          600: '#57479a',
+          700: '#47397f',
+          900: '#271f47',
+        },
       },
     },
   },

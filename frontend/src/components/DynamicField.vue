@@ -10,6 +10,7 @@
     v-else-if="controlType === 'table-multiselect'"
     :field="field"
     :link-query="linkQuery"
+    :read-only="readOnly"
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   />
@@ -58,8 +59,9 @@
   <FormControl
     v-else-if="controlType === 'select'"
     type="select"
-    :placeholder="t('Select option')"
+    :placeholder="readOnly ? '—' : t('Select option')"
     class="[&_[data-slot=trigger]]:w-full"
+    :class="readOnly ? READ_ONLY_SELECT : ''"
     :label="t(field.label)"
     :required="!!field.reqd"
     :options="selectOptions"
@@ -238,6 +240,12 @@ const fileName = computed(() => {
     return props.modelValue.split('/').pop()
   }
 })
+
+// A read-only Select (e.g. Household "Eligible", filled from the members)
+// looked like any other dropdown - arrow, "Select option" - though it
+// can't be opened. Shown as a plain grey value box instead, as in Desk.
+const READ_ONLY_SELECT =
+  '[&_[data-slot=trigger]]:pointer-events-none [&_[data-slot=trigger]]:!cursor-default [&_[data-slot=trigger]]:!bg-gray-50 [&_[data-slot=trigger]]:!text-gray-700 [&_[data-slot=trigger]]:!opacity-100 [&_[data-slot=trigger]_svg]:hidden dark:[&_[data-slot=trigger]]:!bg-gray-800/60 dark:[&_[data-slot=trigger]]:!text-gray-300'
 
 const selectOptions = computed(() => {
   const raw = props.field.options || ''

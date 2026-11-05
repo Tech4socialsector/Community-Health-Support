@@ -218,3 +218,74 @@ export const FLAG = 'inline-flex items-center rounded-full px-2 py-0.5 text-[10p
 
 export const WARNING_BOX =
   'flex items-start gap-3 rounded-xl bg-amber-50 p-4 text-sm text-amber-900 shadow-sm ring-1 ring-amber-200 dark:bg-amber-900/20 dark:text-amber-200 dark:ring-amber-900'
+
+// ---- Home page (pages/Home.vue, components/home/*) -----------------------
+
+// Borderless cards that float on a soft shadow all round, a little stronger
+// on hover. Dark mode keeps a hairline ring instead (shadows don't read
+// on a dark canvas).
+export const HOME_CARD =
+  'rounded-2xl bg-white shadow-[0_1px_3px_rgba(16,24,40,0.06),0_10px_28px_-8px_rgba(16,24,40,0.16)] transition-shadow duration-200 hover:shadow-[0_2px_6px_rgba(16,24,40,0.08),0_16px_36px_-8px_rgba(16,24,40,0.22)] dark:bg-gray-900 dark:shadow-none dark:ring-1 dark:ring-gray-800'
+
+// A form row inside a programme panel: a light tile, no outline. On hover
+// it brightens to white with its programme's tint ring (tone.rowHover).
+export const HOME_ROW =
+  'relative flex min-h-[2.875rem] items-center gap-3 rounded-xl bg-gray-50 py-1.5 pl-2.5 pr-2 ring-1 ring-transparent transition duration-150 hover:bg-white hover:shadow-[0_4px_14px_-4px_rgba(16,24,40,0.18)] dark:bg-gray-800/60 dark:hover:bg-gray-800'
+
+export const HOME_COUNT_PILL =
+  'inline-flex h-[1.375rem] min-w-[1.625rem] items-center justify-center rounded-full bg-white px-1.5 text-xs font-bold tabular-nums text-gray-900 shadow-[0_1px_2px_rgba(16,24,40,0.10)] dark:bg-gray-900 dark:text-gray-100'
+
+// One colour per programme, everywhere on its panel. Literal class strings
+// so Tailwind keeps them. `other` is for forms an App Module Setting adds
+// outside the five programmes.
+export const PROGRAMME_TONES = {
+  mch: {
+    rowHover: 'hover:ring-forest-300 dark:hover:ring-forest-700',
+    tile: 'bg-forest-700 shadow-lg shadow-forest-700/30',
+    text: 'text-forest-700 dark:text-forest-300',
+    tint: 'bg-forest-50 text-forest-700 dark:bg-forest-900/40 dark:text-forest-300',
+    button: 'bg-forest-700 hover:bg-forest-800 dark:bg-forest-600 dark:hover:bg-forest-500',
+    dot: 'bg-forest-700 dark:bg-forest-300',
+  },
+  palliative: {
+    rowHover: 'hover:ring-navy-300 dark:hover:ring-navy-700',
+    tile: 'bg-navy-600 shadow-lg shadow-navy-600/30',
+    text: 'text-navy-600 dark:text-navy-200',
+    tint: 'bg-navy-50 text-navy-600 dark:bg-navy-900/40 dark:text-navy-200',
+    button: 'bg-navy-600 hover:bg-navy-700 dark:bg-navy-500 dark:hover:bg-navy-400',
+    dot: 'bg-navy-600 dark:bg-navy-200',
+  },
+  cancer: {
+    rowHover: 'hover:ring-rosewood-300 dark:hover:ring-rosewood-700',
+    tile: 'bg-rosewood-600 shadow-lg shadow-rosewood-600/30',
+    text: 'text-rosewood-600 dark:text-rosewood-200',
+    tint: 'bg-rosewood-50 text-rosewood-600 dark:bg-rosewood-900/40 dark:text-rosewood-200',
+    button: 'bg-rosewood-600 hover:bg-rosewood-700 dark:bg-rosewood-600 dark:hover:bg-rosewood-700',
+    dot: 'bg-rosewood-600 dark:bg-rosewood-200',
+  },
+  ncd: {
+    rowHover: 'hover:ring-ochre-300 dark:hover:ring-ochre-700',
+    tile: 'bg-ochre-600 shadow-lg shadow-ochre-600/30',
+    text: 'text-ochre-600 dark:text-ochre-200',
+    tint: 'bg-ochre-50 text-ochre-600 dark:bg-ochre-900/40 dark:text-ochre-200',
+    button: 'bg-ochre-600 hover:bg-ochre-700 dark:bg-ochre-600 dark:hover:bg-ochre-700',
+    dot: 'bg-ochre-600 dark:bg-ochre-200',
+  },
+  mental_health: {
+    rowHover: 'hover:ring-iris-300 dark:hover:ring-iris-700',
+    tile: 'bg-iris-600 shadow-lg shadow-iris-600/30',
+    text: 'text-iris-600 dark:text-iris-200',
+    tint: 'bg-iris-50 text-iris-600 dark:bg-iris-900/40 dark:text-iris-200',
+    button: 'bg-iris-600 hover:bg-iris-700 dark:bg-iris-600 dark:hover:bg-iris-700',
+    dot: 'bg-iris-600 dark:bg-iris-200',
+  },
+  other: {
+    rowHover: 'hover:ring-gray-300 dark:hover:ring-gray-700',
+    tile: 'bg-gray-600 shadow-lg shadow-gray-600/30',
+    text: 'text-gray-700 dark:text-gray-300',
+    tint: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    button: 'bg-gray-700 hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500',
+    dot: 'bg-gray-600 dark:bg-gray-300',
+  },
+}
+export const programmeTone = (key) => PROGRAMME_TONES[key] || PROGRAMME_TONES.other

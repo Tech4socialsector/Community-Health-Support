@@ -69,9 +69,37 @@ function calculateAge(values) {
   values.age = String(age.years)
 }
 
+// Cancer screening eligibility, as the form changes - same rule as the
+// server's chw/cancer/eligibility.py (which sets it again on save): a woman
+// aged 30-65, or a tobacco user of any age, unless a known cancer patient.
+// Only while the Cancer programme is on, i.e. its section is shown.
+const ELIGIBILITY_INPUTS = new Set(['gender', 'age', 'date_of_birth', 'tobacco_user', 'known_cancer_patient', 'cancer_eligibility_manual'])
+
+function setCancerEligibility(values, ctx) {
+  if (ctx.getField('cancer_family_member_details_section')?.hidden) return
+  if (values.cancer_eligibility_manual) return
+  const ageText = String(values.age ?? '').trim()
+  const age = ageText ? parseInt(ageText, 10) : null
+  const woman = values.gender === 'Female'
+  let eligible = 'No'
+  let reason
+  if (values.known_cancer_patient === 'Yes') reason = t('Known cancer patient')
+  else if (woman && age != null && age >= 30 && age <= 65) eligible = 'Yes'
+  else if (values.tobacco_user === 'Yes') eligible = 'Yes'
+  else if (woman) reason = age == null ? t('Age not known') : t('Age mismatch (not 30–65)')
+  else reason = t('Not a woman aged 30–65 and not a tobacco user')
+  values.cancer_screening_eligible = eligible
+  values.cancer_not_eligible_reason = eligible === 'Yes' ? '' : reason
+}
+
 export default {
+  onAfterLoad(values, ctx) {
+    if (ctx.isNew) setCancerEligibility(values, ctx)
+  },
+
   onFieldChange(fieldname, values, ctx) {
     if (fieldname === 'date_of_birth') calculateAge(values)
+    if (ELIGIBILITY_INPUTS.has(fieldname)) setCancerEligibility(values, ctx)
     if (fieldname === 'phone_number') warnIfNotDigits(values.phone_number)
 
     // Desk always resets these on any occupation change (even back to

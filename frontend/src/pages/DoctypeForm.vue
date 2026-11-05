@@ -101,7 +101,9 @@
           <ErrorMessage :message="saveError" />
         </div>
 
-        <DocConnections v-if="!isNew && name && isGenericRoute" :doctype="doctype" :name="name" />
+        <!-- Re-fetched after each save: a connection can depend on what was
+        saved (Main Screening Form -> Clinical Evaluation once referred). -->
+        <DocConnections v-if="!isNew && name && isGenericRoute" :key="activityKey" :doctype="doctype" :name="name" />
 
         <!-- Desk's layout: one card per section (Section / Tab Break) with its
         title, collapsible ones closed until tapped, each table inside the

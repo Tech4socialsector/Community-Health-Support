@@ -3,6 +3,7 @@
     <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
     <MultiSelect
       v-model:open="listOpen"
+      :disabled="readOnly"
       :model-value="selectedValues"
       :options="options"
       :placeholder="t('Select {0}...', [t(targetDoctype)])"
@@ -12,7 +13,7 @@
       over the usual Clear All / Select All. -->
       <template #footer="{ clearAll, selectAll, query }">
         <button
-          v-if="canCreate"
+          v-if="canCreate && !readOnly"
           type="button"
           class="flex w-full items-center gap-1.5 border-t border-outline-gray-1 px-3 py-2 text-left text-sm font-medium text-forest-700 hover:bg-forest-50 dark:text-forest-300 dark:hover:bg-gray-800"
           @click="startCreate(query)"
@@ -52,6 +53,8 @@ const props = defineProps({
   // Desk's set_query: { filters } narrowing the choices, from the doctype's
   // hook module (getLinkQuery), as for a Link field.
   linkQuery: { type: Object, default: null },
+  // read_only / read_only_depends_on (e.g. a finished cancer screening).
+  readOnly: { type: Boolean, default: false },
 })
 const emit = defineEmits(['update:modelValue'])
 

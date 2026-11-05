@@ -211,7 +211,7 @@
   },
   {
    "fieldname": "alternate_mobile_number",
-   "fieldtype": "Phone",
+   "fieldtype": "Data",
    "label": "Alternate Mobile Number"
   },
   {
@@ -237,17 +237,20 @@
    "options": "\nRefused\nDoor Locked\nWork - Out of Station\nOut of Station - Short Visit\nAlready Screened\nSettled Outstation\nMedical Reasons"
   },
   {
+   "description": "Worked out from the family members: Yes when any member is eligible for cancer screening.",
    "fieldname": "cancer_screening_eligible",
    "fieldtype": "Select",
    "label": "Eligible",
-   "options": "\nYes\nNo"
+   "options": "\nYes\nNo",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.cancer_screening_eligible==\"No\"",
    "fieldname": "not_eligible_reason",
    "fieldtype": "Select",
    "label": "If No",
-   "options": "\nAge Mismatch\nKnown Cancer Patient\nOthers"
+   "options": "\nAge Mismatch\nKnown Cancer Patient\nOthers",
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.not_eligible_reason==\"Age Mismatch\"",
@@ -300,7 +303,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-26 10:38:45.456037",
+ "modified": "2026-11-05 10:12:50.618449",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

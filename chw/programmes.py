@@ -24,6 +24,9 @@ from frappe.utils import cint
 # `common_sections` - (DocType, Section/Tab Break) pairs on the common forms
 #   (Household profile, Family members) that only this programme needs. They
 #   are hidden while the programme is off - see apply_common_sections.
+# `home_stages`, `home_title` - how the CHW app's Home page shows the
+#   programme: its panel title (default: `module`) and, for a programme with
+#   many forms, the stage headings its forms are grouped under.
 # `number_cards`, `shortcuts`, `masters` - what the programme adds to the
 #   shared Desk workspace and sidebar (see apply_desk_navigation): its counts,
 #   its forms in flow order, and its own masters.
@@ -44,6 +47,12 @@ PROGRAMMES = {
 			"Child 6w to 1 Year Reg and Followup",
 			"Child Growth Monitoring",
 			"MCH Volunteer Intake Form Postpartum",
+		],
+		# The CHW app's Home page groups MCH's forms by stage of care.
+		"home_stages": [
+			("Pregnancy", ["Preconception Reg and Followup", "Pregnancy Registration", "ANC Follow-up"]),
+			("Birth & after", ["Birth Registration", "PNC", "Postpartum Reg and Followup"]),
+			("Child", ["Child 6w to 1 Year Reg and Followup", "Child Growth Monitoring"]),
 		],
 		"sidebar": [
 			"Preconception Reg and Followup",
@@ -99,6 +108,7 @@ PROGRAMMES = {
 		"role": "Cancer Worker",
 		"field": "enable_cancer",
 		"label": "Cancer Screening",
+		"home_title": "Cancer Screening",
 		"icon": "stethoscope",
 		"doctypes": ["Main Screening Form", "Clinical Evaluation"],
 		"sidebar": ["Main Screening Form", "Clinical Evaluation"],

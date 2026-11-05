@@ -2,6 +2,7 @@ import ancFollowUp from './ancFollowUp'
 import birthRegistration from './birthRegistration'
 import child6wTo1Year from './child6wTo1Year'
 import childGrowthMonitoring from './childGrowthMonitoring'
+import clinicalEvaluation from './clinicalEvaluation'
 import familyMembers from './familyMembers'
 import householdProfile from './householdProfile'
 import mainScreeningForm from './mainScreeningForm'
@@ -42,6 +43,7 @@ const HOOKS = {
   'Birth Registration': birthRegistration,
   'Child 6w to 1 Year Reg and Followup': child6wTo1Year,
   'Child Growth Monitoring': childGrowthMonitoring,
+  'Clinical Evaluation': clinicalEvaluation,
   'Family members': familyMembers,
   'Household profile': householdProfile,
   'Main Screening Form': mainScreeningForm,

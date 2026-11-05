@@ -32,7 +32,11 @@
   "monthly_income",
   "cancer_column_break",
   "tobacco_user",
-  "cancer_screening_eligible"
+  "known_cancer_patient",
+  "cancer_screening_eligible",
+  "cancer_not_eligible_reason",
+  "cancer_eligibility_manual",
+  "cancer_eligibility_note"
  ],
  "fields": [
   {
@@ -201,12 +205,39 @@
    "fieldname": "cancer_screening_eligible",
    "fieldtype": "Select",
    "label": "Eligible for Cancer Screening",
-   "options": "\nYes\nNo"
+   "options": "\nYes\nNo",
+   "read_only_depends_on": "eval:!doc.cancer_eligibility_manual",
+   "description": "Worked out automatically: women aged 30–65 and tobacco users of any age, unless a known cancer patient."
   },
   {
    "fieldname": "cancer_family_member_details_section",
    "fieldtype": "Section Break",
    "label": "Cancer Family Member Details"
+  },
+  {
+   "fieldname": "known_cancer_patient",
+   "fieldtype": "Select",
+   "label": "Known Cancer Patient",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "cancer_not_eligible_reason",
+   "fieldtype": "Data",
+   "label": "Not Eligible Because",
+   "read_only": 1,
+   "depends_on": "eval:doc.cancer_screening_eligible==\"No\""
+  },
+  {
+   "fieldname": "cancer_eligibility_manual",
+   "fieldtype": "Check",
+   "label": "Set eligibility by hand"
+  },
+  {
+   "fieldname": "cancer_eligibility_note",
+   "fieldtype": "Data",
+   "label": "Reason for setting it by hand",
+   "depends_on": "eval:doc.cancer_eligibility_manual",
+   "mandatory_depends_on": "eval:doc.cancer_eligibility_manual"
   }
  ],
  "grid_page_length": 50,
@@ -263,7 +294,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-10-27 10:31:20.049513",
+ "modified": "2026-11-04 15:00:00",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",
