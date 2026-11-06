@@ -34,6 +34,9 @@ import pregnancyRegistration from './pregnancyRegistration'
 //                                    Desk set_query -> { filters } / { query }
 //   rowClass(tableField, row, values) CSS class for a grid row (highlighting)
 //   fieldClass(fieldname, values)     CSS class for a field's wrapper
+//   submitLabel, submittedLabel       (strings) a submittable form's Submit
+//                                    button and its locked badge, e.g.
+//                                    "Finish evaluation" / "Finished"
 //
 // `values` is the reactive record (set fields on it directly); ctx is
 // { isNew, call, toast, meta, getField(fieldname) }. Hooks may be async;

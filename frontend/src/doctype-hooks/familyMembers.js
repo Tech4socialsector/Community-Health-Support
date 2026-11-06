@@ -101,6 +101,15 @@ export default {
     if (fieldname === 'date_of_birth') calculateAge(values)
     if (ELIGIBILITY_INPUTS.has(fieldname)) setCancerEligibility(values, ctx)
     if (fieldname === 'phone_number') warnIfNotDigits(values.phone_number)
+    // Age is typed only when the date of birth isn't known (it's read-only
+    // once a DOB is set) - whole years, as the server checks on save.
+    if (fieldname === 'age' && !values.date_of_birth) {
+      const age = String(values.age ?? '').trim()
+      if (age && (!/^\d+$/.test(age) || Number(age) > 120)) {
+        toast.remove('chw-age-warning')
+        toast.warning(t('Age must be a whole number of years (0 to 120), e.g. 45.'), { id: 'chw-age-warning' })
+      }
+    }
 
     // Desk always resets these on any occupation change (even back to
     // "Studying"/"Other"), so a stale value from an earlier choice never

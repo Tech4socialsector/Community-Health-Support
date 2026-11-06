@@ -22,6 +22,7 @@ CERVICAL_PLAN_FIELDS = [
 
 class ClinicalEvaluation(Document):
 	def validate(self):
+		self.check_one_per_screening()
 		self.check_referred()
 		self.set_referred_sites()
 		self.check_referred_questions()
@@ -29,6 +30,28 @@ class ClinicalEvaluation(Document):
 	def before_submit(self):
 		# Submit is this form's Finish (Clinical Forms v2).
 		self.check_finish_rules()
+
+	def check_one_per_screening(self):
+		# One evaluation per screening (a cancelled one doesn't count, so it
+		# can be amended) - the clinic worklist shows each patient once.
+		if not self.main_screening_form:
+			return
+		other = frappe.db.get_value(
+			"Clinical Evaluation",
+			{
+				"main_screening_form": self.main_screening_form,
+				"docstatus": ["<", 2],
+				"name": ["!=", self.name or ""],
+			},
+			"name",
+		)
+		if other:
+			frappe.throw(
+				_("{0} already has a Clinical Evaluation: {1}. Open that one instead.").format(
+					self.main_screening_form, other
+				),
+				title=_("Already evaluated"),
+			)
 
 	def check_referred(self):
 		# Only a screening finished with "Referral = Yes" (Oral, Breast or

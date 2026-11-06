@@ -36,6 +36,15 @@ class Familymembers(Document):
 			# Birth Registration, NCD, ANC, Palliative Care, Preconception,
 			# Postpartum, Child 6w-1y) fetches it straight from this same
 			# field - so it must be left exactly as entered, not wiped.
+			# It must be a whole number of years, though: NCD does int(age)
+			# and ANC Follow-up stores it in an Int field.
+			age = str(self.age or "").strip()
+			if age and (not age.isdigit() or int(age) > 120):
+				frappe.throw(
+					_("Age must be a whole number of years (0 to 120), e.g. 45."),
+					title=_("Check the age"),
+				)
+			self.age = str(int(age)) if age else self.age
 			return
 
 		dob = getdate(self.date_of_birth)

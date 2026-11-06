@@ -422,6 +422,15 @@ def _permitted_count(doctype, filters=None):
     return (rows[0].get('total') if rows else 0) or 0
 
 
+# A Home tile that shows another number than its record count: the
+# function returns it (or None to hide it), with the user's permissions.
+# Clinical Evaluation: everyone referred (the clinic worklist's Total), not
+# only the evaluations started so far.
+HOME_COUNT_OVERRIDES = {
+    'Clinical Evaluation': 'chw.cancer.worklist.referred_count',
+}
+
+
 @frappe.whitelist()
 def get_module_record_counts():
     """Record count per DocType on the Vue Home page tiles, in one round trip
@@ -440,7 +449,8 @@ def get_module_record_counts():
                 counts[doctype] = None
                 continue
             try:
-                counts[doctype] = _permitted_count(doctype)
+                override = HOME_COUNT_OVERRIDES.get(doctype)
+                counts[doctype] = frappe.get_attr(override)() if override else _permitted_count(doctype)
             except Exception:
                 frappe.log_error(f"Error counting {doctype} for the Home page")
                 counts[doctype] = None

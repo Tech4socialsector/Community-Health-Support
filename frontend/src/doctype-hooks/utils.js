@@ -82,6 +82,38 @@ export function formatDate(value) {
     .replace('dd', pad(d.getDate()))
 }
 
+// A date typed into a date box, in the site's format (dd-mm-yyyy here):
+// any of - / . or space between the parts, or just the 8 digits
+// (05112026). yyyy-mm-dd is accepted too. Returns Frappe's 'YYYY-MM-DD',
+// or null if it isn't a real date (31-02-2026, 5-13-2026, two-digit year).
+export function parseTypedDate(text) {
+  const raw = String(text || '').trim()
+  if (!raw) return null
+  let parts
+  if (/^\d{4}[-/.\s]\d{1,2}[-/.\s]\d{1,2}$/.test(raw)) {
+    const [y, m, d] = raw.split(/[-/.\s]/)
+    parts = { y, m, d }
+  } else {
+    const order = siteDateFormat.value.toLowerCase().match(/yyyy|mm|dd/g) || ['dd', 'mm', 'yyyy']
+    let pieces = raw.split(/[-/.\s]+/)
+    if (pieces.length === 1 && /^\d{8}$/.test(raw)) {
+      const widths = { dd: 2, mm: 2, yyyy: 4 }
+      let at = 0
+      pieces = order.map((tok) => raw.slice(at, (at += widths[tok])))
+    }
+    if (pieces.length !== 3) return null
+    parts = {}
+    order.forEach((tok, i) => (parts[tok === 'yyyy' ? 'y' : tok === 'mm' ? 'm' : 'd'] = pieces[i]))
+  }
+  if (!/^\d{4}$/.test(parts.y) || !/^\d{1,2}$/.test(parts.m) || !/^\d{1,2}$/.test(parts.d)) return null
+  const y = Number(parts.y)
+  const m = Number(parts.m)
+  const d = Number(parts.d)
+  const date = new Date(y, m - 1, d)
+  if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return null
+  return `${parts.y}-${pad(m)}-${pad(d)}`
+}
+
 // "12 weeks 3 days" between LMP and a date, as the Desk scripts and server
 // write POG; '' when the date is before LMP or either is missing.
 export function pogText(lmp, date) {

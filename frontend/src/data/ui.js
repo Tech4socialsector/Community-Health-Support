@@ -155,6 +155,10 @@ export function formSectionIconAt(index) {
 export function formSectionTitleAt(index) {
   return `text-sm font-semibold sm:text-[15px] ${formSectionTone(index).title}`
 }
+// A sub-section (one under a tab's first section): no bar - a bold
+// coloured heading inside the card, above its questions.
+export const FORM_SUBSECTION_HEAD = 'flex w-full items-center gap-2 px-4 pt-4 text-left sm:px-6 sm:pt-5'
+export const FORM_SUBSECTION_TITLE = 'text-[15px] font-semibold text-forest-700 dark:text-forest-300 sm:text-[16px]'
 export function formSectionChevronAt(index) {
   return `h-4 w-4 ${formSectionTone(index).chevron}`
 }

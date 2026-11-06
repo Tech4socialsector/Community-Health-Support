@@ -29,6 +29,11 @@
             <!-- Desk's "Not Saved": stays until a save actually succeeds, so
             an edited form is never mistaken for a saved one. -->
             <span v-if="showNotSaved" :class="[ui.PILL, ui.TONE.amber, 'flex-shrink-0 !px-2 !py-0 text-[11px]']">{{ t('Not saved') }}</span>
+            <!-- Submitted (e.g. a Clinical Evaluation finished): locked. -->
+            <span v-else-if="isLocked" :class="[ui.PILL, docstatus === 2 ? ui.TONE.red : ui.TONE.green, 'flex-shrink-0 gap-1 !px-2 !py-0 text-[11px]']">
+              <LucideIcon :name="docstatus === 2 ? 'ban' : 'lock'" class="h-3 w-3" />
+              {{ docstatus === 2 ? t('Cancelled') : submittedLabel }}
+            </span>
             <!-- Saved, but only on this phone so far (offline mode). -->
             <span
               v-else-if="values.__offline"
@@ -42,7 +47,7 @@
         <!-- Desk's "..." menu: Delete lives here, not as a button beside
         Save, so it can't be tapped by mistake. Only shown to people whose
         role may delete this record. -->
-        <ToolbarMenu v-if="canDelete" :label="t('More actions')" icon="ellipsis" icon-only align="right" width="sm:w-48" class="flex-shrink-0">
+        <ToolbarMenu v-if="canDelete && docstatus !== 1" :label="t('More actions')" icon="ellipsis" icon-only align="right" width="sm:w-48" class="flex-shrink-0">
           <template #default="{ close }">
             <button
               type="button"
@@ -54,12 +59,43 @@
             </button>
           </template>
         </ToolbarMenu>
-        <button type="button" :class="[ui.BTN_PRIMARY, 'flex-shrink-0']" :disabled="saving" @click="save">
+        <!-- Desk's Submit, for forms that have one (Clinical Evaluation:
+        "Finish evaluation"). Saves first if needed, asks, then locks. -->
+        <button
+          v-if="canSubmit"
+          type="button"
+          :class="[ui.BTN_TOOLBAR, 'flex-shrink-0']"
+          :disabled="saving || submitting"
+          :aria-label="submitLabel"
+          :title="submitLabel"
+          @click="startSubmit"
+        >
+          <LucideIcon :name="submitting ? 'loader-circle' : 'circle-check-big'" class="h-4 w-4" :class="{ 'animate-spin': submitting }" />
+          <span class="hidden min-[400px]:inline">{{ submitLabel }}</span>
+        </button>
+        <button v-if="!isLocked" type="button" :class="[ui.BTN_PRIMARY, 'flex-shrink-0']" :disabled="saving || submitting" @click="save">
           <LucideIcon :name="saving ? 'loader-circle' : 'check'" class="h-4 w-4" :class="{ 'animate-spin': saving }" />
           {{ t('Save') }}
         </button>
         </div>
       </div>
+
+      <Dialog v-model="confirmSubmit" :options="{ title: submitLabel + '?', size: 'sm' }">
+        <template #body-content>
+          <p class="text-sm text-gray-600 dark:text-gray-300">
+            {{ t('After this, {0} is locked and can\'t be changed. Continue?', [name]) }}
+          </p>
+        </template>
+        <template #actions>
+          <div class="flex justify-end gap-2">
+            <button type="button" :class="ui.BTN_SECONDARY" :disabled="submitting" @click="confirmSubmit = false">{{ t('Cancel') }}</button>
+            <button type="button" :class="ui.BTN_PRIMARY" :disabled="submitting" @click="submitRecord">
+              <LucideIcon :name="submitting ? 'loader-circle' : 'circle-check-big'" class="h-4 w-4" :class="{ 'animate-spin': submitting }" />
+              {{ submitLabel }}
+            </button>
+          </div>
+        </template>
+      </Dialog>
 
       <Dialog v-model="confirmDelete" :options="{ title: t('Delete {0}?', [name]), size: 'sm' }">
         <template #body-content>
@@ -116,20 +152,23 @@
           <button
             v-if="sec.label && sec.collapsible"
             type="button"
-            :class="[ui.formSectionHeadAt(labelIndex(sec)), { '!border-b-0': !openSections.has(sec.key) }]"
+            :class="sec.main ? [ui.formSectionHeadAt(labelIndex(sec)), { '!border-b-0': !openSections.has(sec.key) }] : [ui.FORM_SUBSECTION_HEAD, { 'pb-4 sm:pb-5': !openSections.has(sec.key) }]"
             :aria-expanded="openSections.has(sec.key)"
             @click="toggleSection(sec.key)"
           >
-            <span :class="ui.formSectionIconAt(labelIndex(sec))" aria-hidden="true"><LucideIcon :name="iconForSection(sec.label)" class="h-4 w-4" /></span>
-            <h2 :class="[ui.formSectionTitleAt(labelIndex(sec)), 'flex-1']">{{ t(sec.label) }}</h2>
-            <LucideIcon :name="openSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" :class="ui.formSectionChevronAt(labelIndex(sec))" />
+            <span v-if="sec.main" :class="ui.formSectionIconAt(labelIndex(sec))" aria-hidden="true"><LucideIcon :name="iconForSection(sec.label)" class="h-4 w-4" /></span>
+            <h2 :class="[sec.main ? ui.formSectionTitleAt(labelIndex(sec)) : ui.FORM_SUBSECTION_TITLE, 'flex-1']">{{ t(sec.label) }}</h2>
+            <LucideIcon :name="openSections.has(sec.key) ? 'chevron-up' : 'chevron-down'" :class="sec.main ? ui.formSectionChevronAt(labelIndex(sec)) : 'h-4 w-4 text-gray-500'" />
           </button>
-          <div v-else-if="sec.label" :class="ui.formSectionHeadAt(labelIndex(sec))">
+          <div v-else-if="sec.label && sec.main" :class="ui.formSectionHeadAt(labelIndex(sec))">
             <span :class="ui.formSectionIconAt(labelIndex(sec))" aria-hidden="true"><LucideIcon :name="iconForSection(sec.label)" class="h-4 w-4" /></span>
             <h2 :class="ui.formSectionTitleAt(labelIndex(sec))">{{ t(sec.label) }}</h2>
           </div>
+          <div v-else-if="sec.label" :class="ui.FORM_SUBSECTION_HEAD">
+            <h2 :class="ui.FORM_SUBSECTION_TITLE">{{ t(sec.label) }}</h2>
+          </div>
 
-          <div v-show="!sec.collapsible || openSections.has(sec.key)" class="p-4 sm:p-6">
+          <div v-show="!sec.collapsible || openSections.has(sec.key)" class="p-4 sm:p-6" :class="sec.label && !sec.main ? '!pt-3 sm:!pt-4' : ''">
             <!-- Desk's columns: each Column Break starts the next column, and
             every field (Small Text too) stays inside its own column. -->
             <div class="grid gap-x-8" :class="columnGrid(sec)">
@@ -147,7 +186,7 @@
                     :data-fieldname="item.key"
                     v-html="item.html"
                   />
-                  <div v-else-if="item.kind === 'table'" class="mb-5 min-w-0" :data-fieldname="item.key">
+                  <fieldset v-else-if="item.kind === 'table'" :disabled="isLocked" class="mb-5 min-w-0" :data-fieldname="item.key">
                     <ChildTable
                       :field="item.field"
                       :parent-doc="values"
@@ -158,7 +197,7 @@
                       @row-added="(row, idx) => onRowAdded(item.field.fieldname, row, idx)"
                       @rows-removed="(rows) => onRowsRemoved(item.field.fieldname, rows)"
                     />
-                  </div>
+                  </fieldset>
                   <div
                     v-else
                     :data-fieldname="item.key"
@@ -285,11 +324,16 @@ const values = reactive({})
 // once "identified as high risk?" is Yes), with mandatory_depends_on shown
 // as required. Hidden fields keep their values, as in Desk.
 const visibleNames = computed(() => visibleFieldnames(metaResource.data?.fields, values))
+// A submitted record (docstatus 1, or 2 = cancelled) is locked, as in Desk:
+// every field read-only, nothing required.
+const docstatus = computed(() => Number(values.docstatus || 0))
+const isLocked = computed(() => !isNew && docstatus.value > 0)
+const lockIfSubmitted = (f) => (isLocked.value ? { ...f, read_only: 1, read_only_depends_on: null, reqd: 0 } : f)
 const visibleFormFields = computed(() =>
-  fields.value.filter((f) => visibleNames.value.has(f.fieldname)).map((f) => withLiveRequired(f, values)),
+  fields.value.filter((f) => visibleNames.value.has(f.fieldname)).map((f) => lockIfSubmitted(withLiveRequired(f, values))),
 )
 const visibleTableFields = computed(() =>
-  tableFields.value.filter((f) => visibleNames.value.has(f.fieldname)).map((f) => withLiveRequired(f, values)),
+  tableFields.value.filter((f) => visibleNames.value.has(f.fieldname)).map((f) => lockIfSubmitted(withLiveRequired(f, values))),
 )
 
 // The form as Desk lays it out: sections in meta order, each with the
@@ -301,8 +345,13 @@ const formSections = computed(() => {
   // `columns`: the section split at its Column Breaks, as Desk lays it out
   // (each field stays in its own column). `items` is the same fields in one
   // list, for lookups.
-  const newSection = (key, label, collapsible) => ({ key, label, collapsible, items: [], columns: [[]] })
-  let current = newSection('__top', '', false)
+  // `main`: a tab's first section (its title bar is highlighted); the
+  // sections under it get a plain coloured heading. A form without tabs
+  // keeps every section highlighted, as before.
+  const metaFields = metaResource.data?.fields || []
+  const hasTabs = metaFields.some((f) => f.fieldtype === 'Tab Break')
+  const newSection = (key, label, collapsible, main) => ({ key, label, collapsible, main, items: [], columns: [[]] })
+  let current = newSection('__top', '', false, true)
   const add = (item) => {
     current.items.push(item)
     current.columns[current.columns.length - 1].push(item)
@@ -310,10 +359,13 @@ const formSections = computed(() => {
   const close = () => {
     if (current.items.some((i) => i.kind !== 'heading')) sections.push(current)
   }
-  for (const f of metaResource.data?.fields || []) {
+  for (const f of metaFields) {
     if (f.fieldtype === 'Section Break' || f.fieldtype === 'Tab Break') {
+      // A Section Break straight after its Tab Break (nothing between) is
+      // still the tab's first section.
+      const main = !hasTabs || f.fieldtype === 'Tab Break' || (current.main && !current.items.some((i) => i.kind !== 'heading'))
       close()
-      current = newSection(f.fieldname, f.label || '', !!f.collapsible)
+      current = newSection(f.fieldname, f.label || '', !!f.collapsible, main)
     } else if (f.fieldtype === 'Column Break') {
       // A break before any field of the section only opens the first column.
       if (current.columns[current.columns.length - 1].length || current.columns.length > 1) current.columns.push([])
@@ -345,7 +397,7 @@ const formSections = computed(() => {
 const titledIndex = computed(() => {
   const map = new Map()
   let i = 0
-  for (const sec of formSections.value) if (sec.label) map.set(sec.key, i++)
+  for (const sec of formSections.value) if (sec.label && sec.main) map.set(sec.key, i++)
   return map
 })
 function labelIndex(sec) {
@@ -834,6 +886,63 @@ if (!isNew && name && !isLocalName(name)) {
     .catch(() => (canDelete.value = false))
 }
 
+// --- Submit ------------------------------------------------------------
+// Desk's Submit for a submittable DocType - the form's "Finish" (Clinical
+// Evaluation: "Finish evaluation"; the doctype hook names it). The server
+// runs its before_submit checks and refuses with a reason, shown as for a
+// save. Needs the internet: a submit can't wait in the Outbox.
+const canSubmitPerm = ref(false)
+if (!isNew && name && !isLocalName(name)) {
+  call('frappe.client.has_permission', { doctype, docname: name, perm_type: 'submit' })
+    .then((r) => (canSubmitPerm.value = !!r?.has_permission))
+    .catch(() => (canSubmitPerm.value = false))
+}
+const canSubmit = computed(
+  () => !!metaResource.data?.is_submittable && !isNew && !isTempName(name) && docstatus.value === 0 && canSubmitPerm.value,
+)
+const submitLabel = computed(() => t(hooks?.submitLabel || 'Submit'))
+const submittedLabel = computed(() => t(hooks?.submittedLabel || 'Submitted'))
+const confirmSubmit = ref(false)
+const submitting = ref(false)
+
+async function startSubmit() {
+  if (!offlineState.online) {
+    toast.error(t('This needs the internet. Connect and try again.'))
+    return
+  }
+  // Unsaved edits are saved first - what's finished is what's on screen.
+  if (isDirty.value) {
+    await save()
+    if (saveError.value || isDirty.value) return
+  }
+  confirmSubmit.value = true
+}
+
+async function submitRecord() {
+  submitting.value = true
+  saveError.value = null
+  try {
+    // The saved record, fresh from the server (its own modified time), is
+    // what gets submitted.
+    const fresh = await call('frappe.client.get', { doctype, name })
+    await call('frappe.client.submit', { doc: fresh })
+    confirmSubmit.value = false
+    await existingDoc.reload()
+    await nextTick()
+    markSaved()
+    activityKey.value++
+    toast.success(t('{0}: {1}', [name, submittedLabel.value]))
+  } catch (e) {
+    confirmSubmit.value = false
+    saveError.value = e
+    toast.error(saveErrorText(e))
+    await nextTick()
+    saveErrorBox.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  } finally {
+    submitting.value = false
+  }
+}
+
 const confirmDelete = ref(false)
 const deleting = ref(false)
 
@@ -923,6 +1032,7 @@ async function showField(fieldname) {
 }
 
 async function save() {
+  if (isLocked.value) return
   saving.value = true
   saveError.value = null
   try {

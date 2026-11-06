@@ -39,6 +39,12 @@ async function setReferredSites(values, ctx) {
 }
 
 export default {
+  // Submit is this form's Finish (Clinical Forms v2) - the server's
+  // before_submit checks (breast biopsy "Not now", cervical treatment plan)
+  // run then. Finished evaluations show as Completed on the clinic worklist.
+  submitLabel: 'Finish evaluation',
+  submittedLabel: 'Finished',
+
   onAfterLoad(values, ctx) {
     // The screening may have been referred / finished since this was saved.
     setReferredSites(values, ctx)

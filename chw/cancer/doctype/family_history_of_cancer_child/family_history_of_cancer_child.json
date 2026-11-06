@@ -15,10 +15,11 @@
  "fields": [
   {
    "fieldname": "relation",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Relation"
+   "label": "Relation",
+   "options": "Relationship with the Head of the Family"
   },
   {
    "fieldname": "site",
@@ -46,7 +47,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-15 16:50:02.842511",
+ "modified": "2026-11-06 10:41:25.659280",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Family History of Cancer Child",

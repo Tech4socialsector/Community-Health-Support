@@ -20,6 +20,15 @@ OVERRIDE_ROLES = {"Program Coordinator", "System Manager", "Administrator"}
 
 
 class MainScreeningForm(Document):
+	def before_insert(self):
+		# Completed By and the consent witness: the person who made the
+		# screening, unless typed (the forms fill both on opening a new one).
+		name = frappe.utils.get_fullname(frappe.session.user)
+		if not self.completed_by:
+			self.completed_by = name
+		if self.consent_given == "Yes" and not self.consent_witness:
+			self.consent_witness = name
+
 	def validate(self):
 		self.check_consent()
 		self.check_first_questions()

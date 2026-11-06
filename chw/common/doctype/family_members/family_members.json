@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "FM-.#####",
- "creation": "2026-08-10 10:28:10.171922",
+ "creation": "2026-11-06 10:33:56.958195",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -85,7 +85,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Age"
+   "label": "Age",
+   "read_only_depends_on": "eval:doc.date_of_birth"
   },
   {
    "fieldname": "marital_status",
@@ -202,12 +203,12 @@
    "options": "\nYes\nNo"
   },
   {
+   "description": "Worked out automatically: women aged 30\u201365 and tobacco users of any age, unless a known cancer patient.",
    "fieldname": "cancer_screening_eligible",
    "fieldtype": "Select",
    "label": "Eligible for Cancer Screening",
    "options": "\nYes\nNo",
-   "read_only_depends_on": "eval:!doc.cancer_eligibility_manual",
-   "description": "Worked out automatically: women aged 30–65 and tobacco users of any age, unless a known cancer patient."
+   "read_only_depends_on": "eval:!doc.cancer_eligibility_manual"
   },
   {
    "fieldname": "cancer_family_member_details_section",
@@ -221,22 +222,23 @@
    "options": "\nYes\nNo"
   },
   {
+   "depends_on": "eval:doc.cancer_screening_eligible==\"No\"",
    "fieldname": "cancer_not_eligible_reason",
    "fieldtype": "Data",
    "label": "Not Eligible Because",
-   "read_only": 1,
-   "depends_on": "eval:doc.cancer_screening_eligible==\"No\""
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "cancer_eligibility_manual",
    "fieldtype": "Check",
    "label": "Set eligibility by hand"
   },
   {
+   "depends_on": "eval:doc.cancer_eligibility_manual",
    "fieldname": "cancer_eligibility_note",
    "fieldtype": "Data",
    "label": "Reason for setting it by hand",
-   "depends_on": "eval:doc.cancer_eligibility_manual",
    "mandatory_depends_on": "eval:doc.cancer_eligibility_manual"
   }
  ],
@@ -294,7 +296,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-11-04 15:00:00",
+ "modified": "2026-11-06 10:38:03.257405",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

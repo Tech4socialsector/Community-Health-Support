@@ -17,7 +17,19 @@ frappe.ui.form.on("Family members", {
 		calculate_age(frm);
 		set_cancer_eligibility(frm);
 	},
-	age: set_cancer_eligibility,
+	age(frm) {
+		// Typed by hand only when the date of birth isn't known (Age is
+		// read-only once a DOB is set). Whole years, as the server checks.
+		const age = String(frm.doc.age ?? "").trim();
+		if (!frm.doc.date_of_birth && age && (!/^\d+$/.test(age) || Number(age) > 120)) {
+			frappe.msgprint({
+				title: __("Check the age"),
+				message: __("Age must be a whole number of years (0 to 120), e.g. 45."),
+				indicator: "orange",
+			});
+		}
+		set_cancer_eligibility(frm);
+	},
 	gender: set_cancer_eligibility,
 	tobacco_user: set_cancer_eligibility,
 	known_cancer_patient: set_cancer_eligibility,

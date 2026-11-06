@@ -50,6 +50,11 @@ const NO_CACHE = new Set([
   'chw.api.get_connection_records',
 ])
 
+// Home tiles whose number isn't a record count (chw.api HOME_COUNT_OVERRIDES:
+// Clinical Evaluation shows everyone referred) - offline they keep the last
+// number the server gave rather than counting the records on the phone.
+const SERVER_COUNTED = new Set(['Clinical Evaluation'])
+
 function stable(value) {
   if (Array.isArray(value)) return `[${value.map(stable).join(',')}]`
   if (value && typeof value === 'object') {
@@ -232,7 +237,7 @@ async function answerLocally(req) {
       const doctypes = [...new Set(modules.flatMap((m) => (m.doctypes || []).map((d) => d.doctype_name)))]
       const cached = (await cachedValue('chw.api.get_module_record_counts')) || {}
       const local = await recordCounts(doctypes)
-      for (const d of doctypes) if (local[d] == null) local[d] = cached[d] ?? null
+      for (const d of doctypes) if (local[d] == null || SERVER_COUNTED.has(d)) local[d] = cached[d] ?? null
       return respond(req, local)
     }
     case 'chw.api.get_doc_connections': {

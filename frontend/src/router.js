@@ -79,6 +79,15 @@ const routes = [
     props: (route) => ({ doctype: route.meta.resolvedDoctype }),
     meta: { remountOnParamChange: true },
   },
+  // The Clinical Evaluation tile opens this clinic worklist instead of the
+  // plain list (see WORKLIST_DOCTYPES in the guard below).
+  {
+    path: '/:doctypeRoute/worklist',
+    name: 'ClinicalWorklist',
+    component: () => import('@/pages/ClinicalWorklist.vue'),
+    // No remountOnParamChange: its filters live in the query, and a filter
+    // click must not reload the page.
+  },
   {
     path: '/:doctypeRoute/new',
     name: 'DoctypeNew',
@@ -94,6 +103,8 @@ const routes = [
     meta: { remountOnParamChange: true },
   },
 ]
+
+const WORKLIST_DOCTYPES = new Set(['Clinical Evaluation'])
 
 let router = createRouter({
   history: createWebHistory('/chw'),
@@ -183,6 +194,18 @@ router.beforeEach(async (to, from, next) => {
       return
     }
     to.meta.resolvedDoctype = item.doctype_name
+    // Clinical Evaluation's list opens as the clinic worklist. A list with
+    // a query (?main_screening_form=… from Connections, ?view=all from the
+    // worklist's "All records") stays the plain list.
+    const hasWorklist = WORKLIST_DOCTYPES.has(item.doctype_name)
+    if (to.name === 'DoctypeList' && hasWorklist && !Object.keys(to.query).length) {
+      next({ name: 'ClinicalWorklist', params: { doctypeRoute: to.params.doctypeRoute }, replace: true })
+      return
+    }
+    if (to.name === 'ClinicalWorklist' && !hasWorklist) {
+      next({ name: 'DoctypeList', params: { doctypeRoute: to.params.doctypeRoute }, replace: true })
+      return
+    }
     // Keep the sidebar's module section in sync while browsing that
     // module's list/form pages, so it persists across navigation there.
     setActiveModule(item.module)

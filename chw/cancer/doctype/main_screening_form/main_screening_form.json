@@ -134,7 +134,6 @@
   "oral_screening_completed_note",
   "if__referral_for_cancerous_lesion",
   "if_no_is_chosen_then_screening_is_completed",
-  "oral_finish_section",
   "oral_finished",
   "oral_finished_on",
   "oral_finished_by",
@@ -149,7 +148,6 @@
   "breast_referral",
   "breast_referred_for",
   "breast_screening_completed_note",
-  "breast_finish_section",
   "breast_finished",
   "breast_finished_on",
   "breast_finished_by",
@@ -179,7 +177,6 @@
   "cervical_referral",
   "cervical_referred_for",
   "cervical_screening_completed_note",
-  "cervical_finish_section",
   "cervical_finished",
   "cervical_finished_on",
   "cervical_finished_by"
@@ -209,7 +206,8 @@
   {
    "fieldname": "date_of_examination",
    "fieldtype": "Date",
-   "label": "Date of Examination"
+   "label": "Date of Examination",
+   "default": "Today"
   },
   {
    "fetch_from": "fmid.family_member",
@@ -464,7 +462,9 @@
   {
    "fieldname": "completed_by",
    "fieldtype": "Data",
-   "label": "Completed By"
+   "label": "Completed By",
+   "read_only": 1,
+   "description": "Filled in with the name of the person logged in."
   },
   {
    "fieldname": "tab_2_tab",
@@ -926,7 +926,7 @@
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
-   "depends_on": "eval:doc.oral_examination==\"Yes\"",
+   "depends_on": "eval:doc.oral_examination==\"Yes\" || doc.oral_examination==\"No\"",
    "fieldname": "oral_referral_section",
    "fieldtype": "Section Break",
    "label": "Referral"
@@ -936,10 +936,11 @@
    "fieldtype": "Select",
    "label": "Referral",
    "options": "\nYes\nNo",
-   "read_only_depends_on": "eval:doc.oral_finished"
+   "read_only_depends_on": "eval:doc.oral_finished",
+   "depends_on": "eval:doc.oral_examination==\"Yes\""
   },
   {
-   "depends_on": "eval:doc.refferal==\"Yes\"",
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.refferal==\"Yes\"",
    "description": "Choose one. Choosing any of these moves the patient to Clinical Evaluation.",
    "fieldname": "if_refferal_yes",
    "fieldtype": "Select",
@@ -948,14 +949,14 @@
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
-   "depends_on": "eval:doc.refferal==\"Yes\"",
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.refferal==\"Yes\"",
    "fieldname": "oral_referral_note",
    "fieldtype": "HTML",
    "label": "Moves to Clinical Evaluation",
    "options": "<p><b>Patient will move to Clinical Evaluation.</b></p>"
   },
   {
-   "depends_on": "eval:doc.refferal==\"No\"",
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.refferal==\"No\"",
    "fieldname": "oral_screening_completed_note",
    "fieldtype": "HTML",
    "label": "Screening Completed",
@@ -1325,18 +1326,14 @@
    "fieldname": "consent_witness",
    "fieldtype": "Data",
    "label": "Witness / staff name",
-   "depends_on": "eval:doc.consent_given==\"Yes\""
+   "depends_on": "eval:doc.consent_given==\"Yes\"",
+   "description": "Filled in with your name - change it if someone else witnessed."
   },
   {
    "fieldname": "breast_screening_status",
    "fieldtype": "Data",
    "label": "Breast Screening Status",
    "read_only": 1
-  },
-  {
-   "fieldname": "oral_finish_section",
-   "fieldtype": "Section Break",
-   "label": "Finish"
   },
   {
    "fieldname": "oral_finished",
@@ -1361,11 +1358,6 @@
    "depends_on": "eval:doc.oral_finished"
   },
   {
-   "fieldname": "breast_finish_section",
-   "fieldtype": "Section Break",
-   "label": "Finish"
-  },
-  {
    "fieldname": "breast_finished",
    "fieldtype": "Check",
    "label": "Finish breast screening",
@@ -1386,11 +1378,6 @@
    "label": "Finished by",
    "read_only": 1,
    "depends_on": "eval:doc.breast_finished"
-  },
-  {
-   "fieldname": "cervical_finish_section",
-   "fieldtype": "Section Break",
-   "label": "Finish"
   },
   {
    "fieldname": "cervical_finished",
@@ -1424,7 +1411,7 @@
    "link_fieldname": "main_screening_form"
   }
  ],
- "modified": "2026-11-04 15:00:00",
+ "modified": "2026-11-06 16:00:00",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Main Screening Form",
