@@ -48,7 +48,10 @@ fixtures = [
 	# without this, a fresh install or a teammate's pull only ever shows the
 	# Vue app's own empty-sidebar default, same blank-list problem the
 	# Number Card fixture above was added to fix for the Desk dashboard.
-	{"dt": "App Module Setting", "filters": [["name", "=", "CHW"]]},
+	# Every module, not only "CHW": a module missing here (Cancer Screening
+	# was) has no sidebar entry and no route on a new site, so its forms
+	# can't be opened in the Vue app at all.
+	{"dt": "App Module Setting", "filters": [["name", "in", ["CHW", "Cancer Screening", "NCD", "Mental Health"]]]},
 ]
 
 app_name = "chw"

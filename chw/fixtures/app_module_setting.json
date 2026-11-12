@@ -79,5 +79,74 @@
   "restrict_by_role": 0,
   "roles": [],
   "sort_order": 1
+ },
+ {
+  "docstatus": 0,
+  "doctype": "App Module Setting",
+  "doctypes": [
+   {
+    "doctype_name": "Main Screening Form",
+    "icon": null,
+    "label": "Main Screening Form",
+    "route": null
+   },
+   {
+    "doctype_name": "Clinical Evaluation",
+    "icon": null,
+    "label": "Clinical Evaluation",
+    "route": null
+   }
+  ],
+  "enabled": 1,
+  "icon": "stethoscope",
+  "label": "Cancer Screening",
+  "modified": "2026-11-12 14:42:09.036021",
+  "module_name": "Cancer Screening",
+  "name": "Cancer Screening",
+  "restrict_by_role": 0,
+  "roles": [],
+  "sort_order": 2
+ },
+ {
+  "docstatus": 0,
+  "doctype": "App Module Setting",
+  "doctypes": [
+   {
+    "doctype_name": "NCD",
+    "icon": null,
+    "label": "NCD",
+    "route": null
+   }
+  ],
+  "enabled": 0,
+  "icon": "activity",
+  "label": "NCD",
+  "modified": "2026-11-12 14:42:09.026160",
+  "module_name": "NCD",
+  "name": "NCD",
+  "restrict_by_role": 0,
+  "roles": [],
+  "sort_order": 3
+ },
+ {
+  "docstatus": 0,
+  "doctype": "App Module Setting",
+  "doctypes": [
+   {
+    "doctype_name": "Mental Health",
+    "icon": null,
+    "label": "Mental Health",
+    "route": null
+   }
+  ],
+  "enabled": 0,
+  "icon": "brain",
+  "label": "Mental Health",
+  "modified": "2026-11-12 14:42:09.024167",
+  "module_name": "Mental Health",
+  "name": "Mental Health",
+  "restrict_by_role": 0,
+  "roles": [],
+  "sort_order": 4
  }
 ]
