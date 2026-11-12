@@ -21,8 +21,7 @@
       </div>
 
       <div class="mt-6 hidden lg:mt-0 lg:block">
-        <p class="text-sm font-medium italic text-white/80">{{ t('Healing hands, caring hearts in Christ · Since 1938') }}</p>
-        <p class="mt-1 text-xs text-white/40">
+        <p class="text-xs text-white/40">
           &copy; {{ new Date().getFullYear() }} {{ brandingResource.data?.app_name || 'CHW' }}
         </p>
       </div>

@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div :class="ui.PAGE">
-      <PageHeader :description="t('Program-wide records across every CHW form. Click a program to see its records.')">
+      <PageHeader :description="t('')">
         <template #title>
           <h1 class="text-lg font-semibold text-navy-900 dark:text-gray-100">{{ t('Program Overview') }}</h1>
         </template>
@@ -20,7 +20,7 @@
       <div v-else-if="!isPrivileged" :class="ui.EMPTY_STATE">
         {{ t('Program Overview is only available to coordinators.') }}
       </div>
-      <ProgramOverview v-else />
+      <OverviewDashboard v-else />
     </div>
   </AppLayout>
 </template>
@@ -31,7 +31,7 @@ import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import Skeleton from '@/components/Skeleton.vue'
 import LucideIcon from '@/components/LucideIcon.vue'
-import ProgramOverview from '@/components/ProgramOverview.vue'
+import OverviewDashboard from '@/components/OverviewDashboard.vue'
 import { userContextResource } from '@/data/userContext'
 import { setPageTitle } from '@/data/pageTitle'
 import * as ui from '@/data/ui'

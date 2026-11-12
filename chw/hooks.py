@@ -53,6 +53,16 @@ fixtures = [
 
 app_name = "chw"
 app_title = "CHW"
+
+# The app's common mark (white "caring hand" on a green tile - the Vue app's
+# AppMark) everywhere Frappe shows a logo: the Desk navbar, the Desk login
+# page, the loading splash and the browser tab. Website / Navbar Settings
+# can still set a site's own logo over it.
+app_logo_url = "/assets/chw/frontend/logo-mark.png?v=3"
+website_context = {
+	"favicon": "/assets/chw/frontend/favicon.png?v=3",
+	"splash_image": "/assets/chw/frontend/logo-mark.png?v=3",
+}
 app_publisher = "tech4socialsector@azimpremjifoundation.org"
 app_description = "Community Health Worker Application"
 app_email = "tech4socialsector@azimpremjifoundation.org"
@@ -67,7 +77,7 @@ app_license = "mit"
 add_to_apps_screen = [
 	{
 		"name": "chw",
-		"logo": "/assets/chw/frontend/favicon.png",
+		"logo": "/assets/chw/frontend/favicon.png?v=3",
 		"title": "CHW",
 		# With the trailing slash: the offline service worker covers /chw/...
 		# only - a page opened at /chw has no offline copy.

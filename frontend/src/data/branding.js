@@ -14,8 +14,8 @@ export const brandingResource = useCall({
 // literal /-rooted path - the built files are served from the app's assets
 // directory, not the site root (same as lucideSprite.js).
 //   DEFAULT_LOGO      - the mark alone (cross + hills), for small spots
-//   DEFAULT_LOGO_FULL - the mark with its "Healing hands..." tagline
-export const DEFAULT_LOGO = `${import.meta.env.BASE_URL}logo-mark.png`
-export const DEFAULT_LOGO_FULL = `${import.meta.env.BASE_URL}logo-full.png`
+//   DEFAULT_LOGO_FULL - the same mark (kept for anything still using it)
+export const DEFAULT_LOGO = `${import.meta.env.BASE_URL}logo-mark.png?v=3`
+export const DEFAULT_LOGO_FULL = `${import.meta.env.BASE_URL}logo-full.png?v=3`
 
 export const appLogo = computed(() => brandingResource.data?.app_logo || DEFAULT_LOGO)

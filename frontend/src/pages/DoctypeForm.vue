@@ -1070,9 +1070,17 @@ async function save() {
       if (existingDoc.setValue.error || !result) {
         throw existingDoc.setValue.error || new Error(t('The record could not be saved.'))
       }
-      // The saved doc has just been copied back into `values` (the load
-      // watcher, on the next tick) - that, server-side fills included, is
-      // the new "saved" state.
+      // The saved doc - server-side fills included (a status, "Finished
+      // on", an age) - is the new "saved" state. Copied in here, not left
+      // to the load watcher: frappe-ui updates existingDoc.doc only after
+      // writing it to the browser's storage, so that copy could land after
+      // markSaved() and every value the server changed read as an unsaved
+      // edit - "Not saved" right after saving, and a second save needed.
+      applyingHookChange = true
+      for (const [key, value] of Object.entries(result)) values[key] = value
+      lastLinkValues = Object.fromEntries(Object.keys(fetchFromMap.value).map((k) => [k, values[k] ?? null]))
+      initSnapshots()
+      applyingHookChange = false
       await nextTick()
       markSaved()
       afterLoadDone = false

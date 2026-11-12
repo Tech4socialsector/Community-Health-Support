@@ -2,7 +2,7 @@
  "actions": [],
  "allow_bulk_edit": 1,
  "allow_rename": 1,
- "creation": "2026-10-14 10:21:01.342744",
+ "creation": "2026-11-06 12:27:40.257308",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -64,7 +64,6 @@
   "tab_2_tab",
   "test_section",
   "oral_examination",
-  "oral_screening_status",
   "oral_questions_section",
   "tobacco_user",
   "symptoms",
@@ -137,23 +136,23 @@
   "oral_finished",
   "oral_finished_on",
   "oral_finished_by",
+  "oral_screening_status",
   "breast_screening__questionnaire_tab",
   "breast_screening_section",
-  "breast_screening_status",
   "breast_symptoms",
   "right_breast_on_palpation",
   "left_breast_on_palpation",
   "breast_nipple_discharge",
-  "column_break_breast",
   "breast_referral",
   "breast_referred_for",
+  "column_break_breast",
   "breast_screening_completed_note",
   "breast_finished",
   "breast_finished_on",
   "breast_finished_by",
+  "breast_screening_status",
   "cervical_screening_questionnaire_tab",
   "cervical_screening_section",
-  "cervical_screening_status",
   "cervical_screening",
   "cervical_not_done_reason",
   "cervical_reenter_date",
@@ -162,12 +161,12 @@
   "cervical_abnormal_bleeding_other",
   "cervical_visual_inspection",
   "cervical_visual_inspection_findings",
-  "column_break_cervical",
   "hr_hpv_dna",
   "hr_hpv_dna_report_date",
   "hr_hpv_dna_result",
   "hr_hpv_dna_report",
   "hr_hpv_genotype",
+  "column_break_cervical",
   "cytology",
   "cytology_report_date",
   "cytology_report",
@@ -179,7 +178,8 @@
   "cervical_screening_completed_note",
   "cervical_finished",
   "cervical_finished_on",
-  "cervical_finished_by"
+  "cervical_finished_by",
+  "cervical_screening_status"
  ],
  "fields": [
   {
@@ -204,10 +204,10 @@
    "options": "Family members"
   },
   {
+   "default": "Today",
    "fieldname": "date_of_examination",
    "fieldtype": "Date",
-   "label": "Date of Examination",
-   "default": "Today"
+   "label": "Date of Examination"
   },
   {
    "fetch_from": "fmid.family_member",
@@ -460,17 +460,17 @@
    "options": "\nYes\nNo"
   },
   {
+   "description": "Filled in with the name of the person logged in.",
    "fieldname": "completed_by",
    "fieldtype": "Data",
    "label": "Completed By",
-   "read_only": 1,
-   "description": "Filled in with the name of the person logged in."
+   "read_only": 1
   },
   {
+   "depends_on": "eval:doc.consent_given==\"Yes\"",
    "fieldname": "tab_2_tab",
    "fieldtype": "Tab Break",
-   "label": "Oral Screening Questionnaire",
-   "depends_on": "eval:doc.consent_given==\"Yes\""
+   "label": "Oral Screening Questionnaire"
   },
   {
    "fieldname": "test_section",
@@ -481,9 +481,8 @@
    "fieldname": "oral_examination",
    "fieldtype": "Select",
    "label": "Oral Examination",
-   "options": "\nYes\nNo\nNot now",
-   "reqd": 0,
    "mandatory_depends_on": "eval:doc.consent_given==\"Yes\"",
+   "options": "\nYes\nNo\nNot now",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -502,6 +501,7 @@
    "fieldname": "tobacco_user",
    "fieldtype": "Select",
    "label": "Tobacco User",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.oral_examination==\"Yes\"",
    "options": "\nYes\nNo",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
@@ -509,6 +509,7 @@
    "fieldname": "symptoms",
    "fieldtype": "Select",
    "label": "Symptoms",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.oral_examination==\"Yes\"",
    "options": "\nYes\nNo",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
@@ -586,6 +587,7 @@
    "fieldname": "dental_hygiene",
    "fieldtype": "Select",
    "label": "Dental Hygiene",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.oral_examination==\"Yes\"",
    "options": "\nGood\nPoor",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
@@ -593,6 +595,7 @@
    "fieldname": "clinical_findings",
    "fieldtype": "Select",
    "label": "Clinical Findings",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.oral_examination==\"Yes\"",
    "options": "\nI. Normal\nII. Oral malignant potential disease",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
@@ -932,12 +935,13 @@
    "label": "Referral"
   },
   {
+   "depends_on": "eval:doc.oral_examination==\"Yes\"",
    "fieldname": "refferal",
    "fieldtype": "Select",
    "label": "Referral",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.oral_examination==\"Yes\"",
    "options": "\nYes\nNo",
-   "read_only_depends_on": "eval:doc.oral_finished",
-   "depends_on": "eval:doc.oral_examination==\"Yes\""
+   "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
    "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.refferal==\"Yes\"",
@@ -945,6 +949,7 @@
    "fieldname": "if_refferal_yes",
    "fieldtype": "Select",
    "label": "Referred for",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.oral_examination==\"Yes\" && doc.refferal==\"Yes\"",
    "options": "\nTCC\nReferral for Oral Malignant Potential Disease\nReferral for Cancerous lesion",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
@@ -979,10 +984,10 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.oral_finished || [\"No\",\"Not now\"].includes(doc.oral_examination) || doc.breast_finished)",
    "fieldname": "breast_screening__questionnaire_tab",
    "fieldtype": "Tab Break",
-   "label": "Breast Screening  Questionnaire",
-   "depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\""
+   "label": "Breast Screening  Questionnaire"
   },
   {
    "fieldname": "breast_screening_section",
@@ -990,14 +995,13 @@
    "label": "Breast Screening – Questionnaire"
   },
   {
+   "description": "\"Not now\" keeps the breast screening pending until Yes or No is marked.",
    "fieldname": "breast_symptoms",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Symptoms",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.oral_finished || [\"No\",\"Not now\"].includes(doc.oral_examination) || doc.breast_finished)",
    "options": "\nYes\nNo\nNot now",
-   "reqd": 0,
-   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\"",
-   "description": "\"Not now\" keeps the breast screening pending until Yes or No is marked.",
    "read_only_depends_on": "eval:doc.breast_finished"
   },
   {
@@ -1005,7 +1009,7 @@
    "fieldname": "right_breast_on_palpation",
    "fieldtype": "Table MultiSelect",
    "label": "Right Breast on palpation",
-   "mandatory_depends_on": "eval:[\"Yes\",\"No\"].includes(doc.breast_symptoms)",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.oral_finished || [\"No\",\"Not now\"].includes(doc.oral_examination) || doc.breast_finished) && ([\"Yes\",\"No\"].includes(doc.breast_symptoms))",
    "options": "Breast Palpation Child",
    "read_only_depends_on": "eval:doc.breast_finished"
   },
@@ -1014,7 +1018,7 @@
    "fieldname": "left_breast_on_palpation",
    "fieldtype": "Table MultiSelect",
    "label": "Left Breast on palpation",
-   "mandatory_depends_on": "eval:[\"Yes\",\"No\"].includes(doc.breast_symptoms)",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.oral_finished || [\"No\",\"Not now\"].includes(doc.oral_examination) || doc.breast_finished) && ([\"Yes\",\"No\"].includes(doc.breast_symptoms))",
    "options": "Breast Palpation Child",
    "read_only_depends_on": "eval:doc.breast_finished"
   },
@@ -1023,7 +1027,7 @@
    "fieldname": "breast_nipple_discharge",
    "fieldtype": "Select",
    "label": "Nipple Discharge",
-   "mandatory_depends_on": "eval:[\"Yes\",\"No\"].includes(doc.breast_symptoms)",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.oral_finished || [\"No\",\"Not now\"].includes(doc.oral_examination) || doc.breast_finished) && ([\"Yes\",\"No\"].includes(doc.breast_symptoms))",
    "options": "\nYes for right breast\nYes for left breast\nYes for both breasts\nNo for both breasts",
    "read_only_depends_on": "eval:doc.breast_finished"
   },
@@ -1036,6 +1040,7 @@
    "fieldname": "breast_referral",
    "fieldtype": "Select",
    "label": "Referral",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.oral_finished || [\"No\",\"Not now\"].includes(doc.oral_examination) || doc.breast_finished) && (doc.breast_nipple_discharge)",
    "options": "\nYes\nNo",
    "read_only_depends_on": "eval:doc.breast_finished"
   },
@@ -1045,6 +1050,7 @@
    "fieldname": "breast_referred_for",
    "fieldtype": "Table MultiSelect",
    "label": "Referred for",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.oral_finished || [\"No\",\"Not now\"].includes(doc.oral_examination) || doc.breast_finished) && (doc.breast_referral==\"Yes\")",
    "options": "Breast Referral Child",
    "read_only_depends_on": "eval:doc.breast_finished"
   },
@@ -1056,10 +1062,10 @@
    "options": "<p><b>Screening is completed.</b> Patient will NOT move to clinical evaluation.</p>"
   },
   {
+   "depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished)",
    "fieldname": "cervical_screening_questionnaire_tab",
    "fieldtype": "Tab Break",
-   "label": "Cervical Screening Questionnaire",
-   "depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\""
+   "label": "Cervical Screening Questionnaire"
   },
   {
    "fieldname": "cervical_screening_section",
@@ -1067,7 +1073,6 @@
    "label": "Cervical Screening – Questionnaire"
   },
   {
-   "description": "Set automatically on save. Stays Pending while any answer is Not now.",
    "fieldname": "cervical_screening_status",
    "fieldtype": "Data",
    "label": "Cervical Screening Status",
@@ -1078,9 +1083,8 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Cervical Screening",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished)",
    "options": "\nDone\nNot Done\nNot now",
-   "reqd": 0,
-   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\"",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
   {
@@ -1088,6 +1092,7 @@
    "fieldname": "cervical_not_done_reason",
    "fieldtype": "Select",
    "label": "Reason",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Not Done\")",
    "options": "\nPatient in periods\nNot willing\nPost Hysterectomy\nOthers",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1104,7 +1109,7 @@
    "fieldname": "cervical_symptoms",
    "fieldtype": "Select",
    "label": "Symptoms",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\"",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\")",
    "options": "\nYes\nNo",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1113,7 +1118,7 @@
    "fieldname": "cervical_abnormal_bleeding",
    "fieldtype": "Select",
    "label": "Abnormal bleeding per vaginum",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.cervical_symptoms",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_symptoms)",
    "options": "\nNone\nPost Menopausal bleeding\nPost coital bleeding\nInter menstrual bleeding\nDUB\nOthers",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1122,7 +1127,7 @@
    "fieldname": "cervical_abnormal_bleeding_other",
    "fieldtype": "Data",
    "label": "Others (Specify)",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.cervical_abnormal_bleeding==\"Others\"",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_abnormal_bleeding==\"Others\")",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
   {
@@ -1130,7 +1135,7 @@
    "fieldname": "cervical_visual_inspection",
    "fieldtype": "Select",
    "label": "Visual Inspection",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.cervical_abnormal_bleeding",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_abnormal_bleeding)",
    "options": "\nYes\nNo\nNot now\nNot seen\nHysterectomy",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1139,6 +1144,7 @@
    "fieldname": "cervical_visual_inspection_findings",
    "fieldtype": "Table MultiSelect",
    "label": "Visual Inspection Findings",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection==\"Yes\")",
    "options": "Cervix Visual Finding Child",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1151,7 +1157,7 @@
    "fieldname": "hr_hpv_dna",
    "fieldtype": "Select",
    "label": "HR-HPV DNA",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection)",
    "options": "\nYes\nNo\nNot now",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1160,7 +1166,7 @@
    "fieldname": "hr_hpv_dna_report_date",
    "fieldtype": "Date",
    "label": "HR-HPV DNA Report Date",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.hr_hpv_dna==\"Yes\"",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.hr_hpv_dna==\"Yes\")",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
   {
@@ -1168,7 +1174,7 @@
    "fieldname": "hr_hpv_dna_result",
    "fieldtype": "Table MultiSelect",
    "label": "HR-HPV DNA Result",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.hr_hpv_dna==\"Yes\"",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.hr_hpv_dna==\"Yes\")",
    "options": "HPV DNA Result Child",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1177,7 +1183,7 @@
    "fieldname": "hr_hpv_dna_report",
    "fieldtype": "Select",
    "label": "HR-HPV DNA Report",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.hr_hpv_dna==\"Yes\"",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.hr_hpv_dna==\"Yes\")",
    "options": "\nPositive\nNegative\nInvalid\nOthers",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1193,7 +1199,7 @@
    "fieldname": "cytology",
    "fieldtype": "Select",
    "label": "Cytology",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection)",
    "options": "\nYes\nNo\nNot now",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1202,6 +1208,7 @@
    "fieldname": "cytology_report_date",
    "fieldtype": "Date",
    "label": "Cytology Report Date",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cytology==\"Yes\")",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
   {
@@ -1209,6 +1216,7 @@
    "fieldname": "cytology_report",
    "fieldtype": "Select",
    "label": "Cytology Report",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cytology==\"Yes\")",
    "options": "\nNILM\nASC-US\nLSIL\nASC-H\nHSIL\nAGC\nSquamous cell carcinoma\nUnsatisfactory\nOthers",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1217,7 +1225,7 @@
    "fieldname": "visual_test",
    "fieldtype": "Select",
    "label": "Visual Test",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection)",
    "options": "\nYes\nNo\nNot now",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1226,7 +1234,7 @@
    "fieldname": "visual_test_report_date",
    "fieldtype": "Date",
    "label": "Visual Test Report Date",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.visual_test==\"Yes\"",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.visual_test==\"Yes\")",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
   {
@@ -1234,7 +1242,7 @@
    "fieldname": "visual_test_report",
    "fieldtype": "Select",
    "label": "Visual Test Report",
-   "mandatory_depends_on": "eval:doc.cervical_screening==\"Done\" && doc.visual_test==\"Yes\"",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.visual_test==\"Yes\")",
    "options": "\nPositive\nNegative\nInconclusive",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1243,6 +1251,7 @@
    "fieldname": "cervical_referral",
    "fieldtype": "Select",
    "label": "Referral",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_visual_inspection && doc.hr_hpv_dna && doc.cytology && doc.visual_test)",
    "options": "\nYes\nNo",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1252,6 +1261,7 @@
    "fieldname": "cervical_referred_for",
    "fieldtype": "Table MultiSelect",
    "label": "Referred for",
+   "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.gender!=\"Male\" && (doc.breast_finished || doc.breast_symptoms==\"Not now\" || doc.cervical_finished) && (doc.cervical_screening==\"Done\" && doc.cervical_referral==\"Yes\")",
    "options": "Cervical Referral Child",
    "read_only_depends_on": "eval:doc.cervical_finished"
   },
@@ -1271,10 +1281,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Ask for consent before the screening. The Oral, Breast and Cervical screenings open only when consent is given.",
    "fieldname": "consent_section",
    "fieldtype": "Section Break",
-   "label": "Consent",
-   "description": "Ask for consent before the screening. The Oral, Breast and Cervical screenings open only when consent is given."
+   "label": "Consent"
   },
   {
    "fieldname": "consent_given",
@@ -1284,26 +1294,26 @@
    "reqd": 1
   },
   {
+   "default": "Today",
+   "depends_on": "eval:doc.consent_given==\"Yes\"",
    "fieldname": "consent_date",
    "fieldtype": "Date",
    "label": "Consent date",
-   "default": "Today",
-   "depends_on": "eval:doc.consent_given==\"Yes\"",
    "mandatory_depends_on": "eval:doc.consent_given==\"Yes\""
   },
   {
+   "depends_on": "eval:doc.consent_given==\"No\"",
    "fieldname": "consent_not_given_reason",
    "fieldtype": "Select",
    "label": "Reason consent not given",
-   "options": "\nNot willing\nWants to discuss with family\nOthers",
-   "depends_on": "eval:doc.consent_given==\"No\"",
-   "mandatory_depends_on": "eval:doc.consent_given==\"No\""
+   "mandatory_depends_on": "eval:doc.consent_given==\"No\"",
+   "options": "\nNot willing\nWants to discuss with family\nOthers"
   },
   {
+   "depends_on": "eval:doc.consent_given==\"No\" && doc.consent_not_given_reason==\"Others\"",
    "fieldname": "consent_other_reason",
    "fieldtype": "Data",
    "label": "Other reason",
-   "depends_on": "eval:doc.consent_given==\"No\" && doc.consent_not_given_reason==\"Others\"",
    "mandatory_depends_on": "eval:doc.consent_given==\"No\" && doc.consent_not_given_reason==\"Others\""
   },
   {
@@ -1311,23 +1321,23 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.consent_given==\"Yes\"",
    "fieldname": "consent_signature",
    "fieldtype": "Signature",
-   "label": "Signature / thumb impression",
-   "depends_on": "eval:doc.consent_given==\"Yes\""
+   "label": "Signature / thumb impression"
   },
   {
+   "depends_on": "eval:doc.consent_given==\"Yes\"",
    "fieldname": "consent_form",
    "fieldtype": "Attach",
-   "label": "Signed consent form (photo)",
-   "depends_on": "eval:doc.consent_given==\"Yes\""
+   "label": "Signed consent form (photo)"
   },
   {
+   "depends_on": "eval:doc.consent_given==\"Yes\"",
+   "description": "Filled in with your name - change it if someone else witnessed.",
    "fieldname": "consent_witness",
    "fieldtype": "Data",
-   "label": "Witness / staff name",
-   "depends_on": "eval:doc.consent_given==\"Yes\"",
-   "description": "Filled in with your name - change it if someone else witnessed."
+   "label": "Witness / staff name"
   },
   {
    "fieldname": "breast_screening_status",
@@ -1336,70 +1346,71 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "description": "Can be ticked once every required question is answered and nothing is \"Not now\". After finishing, this screening is locked; a Program Coordinator can untick it to make changes.",
    "fieldname": "oral_finished",
    "fieldtype": "Check",
    "label": "Finish oral screening",
-   "description": "Can be ticked once every required question is answered and nothing is \"Not now\". After finishing, this screening is locked; a Program Coordinator can untick it to make changes.",
    "read_only_depends_on": "eval:!doc.oral_finished && !(doc.oral_examination==\"No\" || (doc.oral_examination==\"Yes\" && doc.tobacco_user && doc.symptoms && doc.dental_hygiene && doc.clinical_findings && doc.refferal && (doc.refferal!=\"Yes\" || doc.if_refferal_yes)))"
   },
   {
+   "depends_on": "eval:doc.oral_finished",
    "fieldname": "oral_finished_on",
    "fieldtype": "Datetime",
    "label": "Finished on",
-   "read_only": 1,
-   "depends_on": "eval:doc.oral_finished"
+   "read_only": 1
   },
   {
+   "depends_on": "eval:doc.oral_finished",
    "fieldname": "oral_finished_by",
    "fieldtype": "Link",
-   "options": "User",
    "label": "Finished by",
-   "read_only": 1,
-   "depends_on": "eval:doc.oral_finished"
+   "options": "User",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "breast_finished",
    "fieldtype": "Check",
    "label": "Finish breast screening",
-   "description": "Can be ticked once every required question is answered and nothing is \"Not now\". After finishing, this screening is locked; a Program Coordinator can untick it to make changes.",
    "read_only_depends_on": "eval:!doc.breast_finished && !([\"Yes\",\"No\"].includes(doc.breast_symptoms) && (doc.right_breast_on_palpation||[]).length && (doc.left_breast_on_palpation||[]).length && doc.breast_nipple_discharge && doc.breast_referral && (doc.breast_referral!=\"Yes\" || (doc.breast_referred_for||[]).length))"
   },
   {
+   "depends_on": "eval:doc.breast_finished",
    "fieldname": "breast_finished_on",
    "fieldtype": "Datetime",
    "label": "Finished on",
-   "read_only": 1,
-   "depends_on": "eval:doc.breast_finished"
+   "read_only": 1
   },
   {
+   "depends_on": "eval:doc.breast_finished",
    "fieldname": "breast_finished_by",
    "fieldtype": "Link",
-   "options": "User",
    "label": "Finished by",
-   "read_only": 1,
-   "depends_on": "eval:doc.breast_finished"
+   "options": "User",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "cervical_finished",
    "fieldtype": "Check",
    "label": "Finish cervical screening",
-   "description": "Can be ticked once every required question is answered and nothing is \"Not now\". After finishing, this screening is locked; a Program Coordinator can untick it to make changes.",
    "read_only_depends_on": "eval:!doc.cervical_finished && !((doc.cervical_screening==\"Not Done\" && doc.cervical_not_done_reason) || (doc.cervical_screening==\"Done\" && doc.cervical_symptoms && doc.cervical_abnormal_bleeding && (doc.cervical_abnormal_bleeding!=\"Others\" || doc.cervical_abnormal_bleeding_other) && doc.cervical_visual_inspection && doc.cervical_visual_inspection!=\"Not now\" && (doc.cervical_visual_inspection!=\"Yes\" || (doc.cervical_visual_inspection_findings||[]).length) && [\"Yes\",\"No\"].includes(doc.hr_hpv_dna) && (doc.hr_hpv_dna!=\"Yes\" || (doc.hr_hpv_dna_report_date && (doc.hr_hpv_dna_result||[]).length && doc.hr_hpv_dna_report)) && [\"Yes\",\"No\"].includes(doc.cytology) && (doc.cytology!=\"Yes\" || (doc.cytology_report_date && doc.cytology_report)) && [\"Yes\",\"No\"].includes(doc.visual_test) && (doc.visual_test!=\"Yes\" || (doc.visual_test_report_date && doc.visual_test_report)) && doc.cervical_referral && (doc.cervical_referral!=\"Yes\" || (doc.cervical_referred_for||[]).length)))"
   },
   {
+   "depends_on": "eval:doc.cervical_finished",
    "fieldname": "cervical_finished_on",
    "fieldtype": "Datetime",
    "label": "Finished on",
-   "read_only": 1,
-   "depends_on": "eval:doc.cervical_finished"
+   "read_only": 1
   },
   {
+   "depends_on": "eval:doc.cervical_finished",
    "fieldname": "cervical_finished_by",
    "fieldtype": "Link",
-   "options": "User",
    "label": "Finished by",
-   "read_only": 1,
-   "depends_on": "eval:doc.cervical_finished"
+   "options": "User",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -1411,7 +1422,7 @@
    "link_fieldname": "main_screening_form"
   }
  ],
- "modified": "2026-11-06 16:00:00",
+ "modified": "2026-11-06 18:30:00",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Main Screening Form",

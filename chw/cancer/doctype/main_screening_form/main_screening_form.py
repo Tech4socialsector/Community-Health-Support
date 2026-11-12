@@ -34,6 +34,7 @@ class MainScreeningForm(Document):
 		self.check_first_questions()
 		self.keep_oral_no_closed()
 		self.check_finish()
+		self.check_finished_after_referral()
 		self.set_oral_screening_status()
 		self.set_breast_screening_status()
 		self.set_cervical_screening_status()
@@ -50,6 +51,19 @@ class MainScreeningForm(Document):
 			return False
 		return site == "oral" or not self.is_male()
 
+	def site_open(self, site):
+		"""The screenings open one after another - the form's tab depends_on:
+		Breast once Oral is finished, or Oral Examination is No / Not now;
+		Cervical once Breast is finished, or Breast Symptoms is Not now. A
+		finished screening always stays open (records from before)."""
+		if not self.site_applies(site) or self.get(f"{site}_finished"):
+			return self.site_applies(site)
+		if site == "breast":
+			return bool(self.oral_finished) or self.oral_examination in ("No", "Not now")
+		if site == "cervical":
+			return bool(self.breast_finished) or self.breast_symptoms == "Not now"
+		return True
+
 	def check_consent(self):
 		if self.consent_given == "No":
 			if any(self.get(f"{site}_finished") for site in SITE_TABS):
@@ -62,7 +76,7 @@ class MainScreeningForm(Document):
 		missing = [
 			self.meta.get_label(fieldname)
 			for site, fieldname in first.items()
-			if self.site_applies(site) and not self.get(fieldname)
+			if self.site_open(site) and not self.get(fieldname)
 		]
 		if missing:
 			frappe.throw(
@@ -195,6 +209,27 @@ class MainScreeningForm(Document):
 						),
 						title=_("Screening finished"),
 					)
+
+	def check_finished_after_referral(self):
+		# Once a screening's Referral is answered and nothing else is missing,
+		# it's saved finished: Referral and Finish go together. A screening
+		# still waiting on something (a "Not now", an empty answer) saves as
+		# before; so does the save that reopens it (a coordinator unticking
+		# Finish to correct it).
+		before = None if self.is_new() else self.get_doc_before_save()
+		for site, referral_field in REFERRAL_FIELDS.items():
+			if not self.site_open(site) or self.get(f"{site}_finished") or not self.get(referral_field):
+				continue
+			if before and before.get(f"{site}_finished"):
+				continue
+			if self.missing_to_finish(site):
+				continue
+			frappe.throw(
+				_("{0} screening: Referral is answered, so tick \"Finish {1} screening\" before saving.").format(
+					SITE_LABEL[site], SITE_LABEL[site].lower()
+				),
+				title=_("Finish the screening"),
+			)
 
 	# ---- Status per screening -------------------------------------------
 

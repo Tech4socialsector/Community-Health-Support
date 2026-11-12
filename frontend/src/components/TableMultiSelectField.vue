@@ -1,6 +1,6 @@
 <template>
   <div>
-    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}</label>
+    <label class="mb-1.5 block text-sm text-gray-700 dark:text-gray-300">{{ t(field.label) }}<span v-if="field.reqd" class="text-red-500"> *</span></label>
     <MultiSelect
       v-model:open="listOpen"
       :disabled="readOnly"

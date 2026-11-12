@@ -34,6 +34,7 @@ declare module 'vue' {
     NewIndicators: typeof import('./src/components/NewIndicators.vue')['default']
     NotificationPanel: typeof import('./src/components/NotificationPanel.vue')['default']
     NotificationSettingsPanel: typeof import('./src/components/NotificationSettingsPanel.vue')['default']
+    OverviewDashboard: typeof import('./src/components/OverviewDashboard.vue')['default']
     PageHeader: typeof import('./src/components/PageHeader.vue')['default']
     ProfilePanel: typeof import('./src/components/ProfilePanel.vue')['default']
     ProgrammePanel: typeof import('./src/components/home/ProgrammePanel.vue')['default']
