@@ -41,6 +41,8 @@
   "nurse_notified_danger_signs_mother",
   "baby_vitals_section",
   "baby_age",
+  "rr_bby",
+  "temp_bby",
   "column_break_bv1",
   "baby_current_weight",
   "baby_length",
@@ -176,7 +178,8 @@
   {
    "fieldname": "bmi",
    "fieldtype": "Data",
-   "label": "BMI"
+   "label": "BMI",
+   "read_only": 1
   },
   {
    "fieldname": "nurse_notified_abnormal_vitals",
@@ -573,13 +576,25 @@
    "fieldname": "signature_date",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "description": "40-60",
+   "fieldname": "rr_bby",
+   "fieldtype": "Data",
+   "label": "RR"
+  },
+  {
+   "description": "38\u00b0 C +",
+   "fieldname": "temp_bby",
+   "fieldtype": "Data",
+   "label": "Temp"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-29 22:36:30.796136",
+ "modified": "2026-11-18 16:20:00.548120",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Followup",

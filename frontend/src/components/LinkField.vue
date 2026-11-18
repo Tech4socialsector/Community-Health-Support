@@ -57,7 +57,17 @@
         role="listbox"
         @mousedown.prevent
       >
-        <li v-if="loading && !results.length" class="px-3 py-2 text-gray-400">{{ t('Searching…') }}</li>
+        <li v-if="loading && !results.length && !searchError" class="px-3 py-2 text-gray-400">{{ t('Searching…') }}</li>
+        <!-- The request failed or is taking too long (a dropped/weak
+        connection) - distinct from "this list is genuinely empty", so a
+        slow network isn't mistaken for no records, and retrying doesn't
+        need a full page reload. -->
+        <li v-else-if="searchError && !results.length" class="flex items-center justify-between gap-2 px-3 py-2 text-gray-500 dark:text-gray-400">
+          <span>{{ t("Couldn't load - check your connection") }}</span>
+          <button type="button" class="font-medium text-forest-700 hover:underline dark:text-forest-300" @mousedown.prevent="retry">
+            {{ t('Retry') }}
+          </button>
+        </li>
         <li v-else-if="!results.length" class="px-3 py-2 text-gray-400">{{ t('No {0} found', [t(field.options)]) }}</li>
         <li
           v-for="(r, i) in results"
@@ -159,6 +169,7 @@ const shownText = computed(() => (!focused.value && friendly.value && text.value
 const open = ref(false)
 const loading = ref(false)
 const results = ref([])
+const searchError = ref(false)
 const active = ref(0)
 const panelStyle = ref({})
 
@@ -195,9 +206,22 @@ watch(
 let timer = null
 let requestId = 0
 
+// How long to wait before treating the request as "stuck", not just slow -
+// a dropped/weak connection, same real-world failure the offline-sync code
+// elsewhere in this app is built around. The request itself is never
+// aborted (call() has no way to cancel it) - if it eventually does come
+// back, its results still land normally, clearing the retry state below.
+const SEARCH_TIMEOUT_MS = 8000
+
 async function search(txt) {
   const id = ++requestId
   loading.value = true
+  searchError.value = false
+  const timedOut = setTimeout(() => {
+    if (id !== requestId) return
+    loading.value = false
+    searchError.value = true
+  }, SEARCH_TIMEOUT_MS)
   try {
     const args = {
       doctype: props.field.options,
@@ -209,16 +233,24 @@ async function search(txt) {
     if (props.linkQuery?.query) args.query = props.linkQuery.query
     if (props.linkQuery?.filters) args.filters = JSON.stringify(props.linkQuery.filters)
     const rows = await call('frappe.desk.search.search_link', args)
+    clearTimeout(timedOut)
     if (id !== requestId) return
     results.value = rows || []
+    searchError.value = false
     active.value = 0
   } catch (e) {
+    clearTimeout(timedOut)
     if (id !== requestId) return
     results.value = []
+    searchError.value = true
     console.warn(`Link search failed for ${props.field.label}`, e)
   } finally {
     if (id === requestId) loading.value = false
   }
+}
+
+function retry() {
+  search(text.value === props.modelValue ? '' : text.value)
 }
 
 function place() {

@@ -213,7 +213,7 @@
   {
    "fieldname": "mch_nurse_noti_ed_of_abnormal_vital_signs",
    "fieldtype": "Select",
-   "label": "MCH nurse noti ed of abnormal vital signs",
+   "label": "MCH nurse noticed of abnormal vital signs",
    "options": "\nYes\nNo"
   },
   {
@@ -541,7 +541,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-23 11:57:58.887189",
+ "modified": "2026-11-18 16:09:09.651283",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "ANC Followup Child",

@@ -48,7 +48,27 @@ frappe.ui.form.on("Postpartum Followup", {
 	baby_condition(frm) {
 		highlight_risk_rows(frm);
 	},
+	height(frm, cdt, cdn) {
+		calculate_postpartum_followup_bmi(frm, cdt, cdn);
+	},
+	weight(frm, cdt, cdn) {
+		calculate_postpartum_followup_bmi(frm, cdt, cdn);
+	},
 });
+
+// Mirrors Preconception Reg and Followup's own calculate_preconception_followup_bmi -
+// live as the volunteer types, the server's calculate_followup_bmi() is the backstop.
+function calculate_postpartum_followup_bmi(frm, cdt, cdn) {
+	const row = locals[cdt][cdn];
+	let bmi = "";
+	if (row.height && row.weight) {
+		const height_m = flt(row.height) / 100;
+		if (height_m) {
+			bmi = (flt(row.weight) / (height_m * height_m)).toFixed(1);
+		}
+	}
+	frappe.model.set_value(cdt, cdn, "bmi", bmi);
+}
 
 // Last-resort fallback only, used if the Visit Schedule Master has no
 // Postpartum rows configured yet - the real policy always comes from that

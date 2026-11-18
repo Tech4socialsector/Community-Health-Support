@@ -154,7 +154,8 @@
                             :doc="editingRow"
                             :parent-doc="parentDoc"
                             :form-read-only="!writable"
-                            v-model="editingRow[sub.field.fieldname]"
+                            :model-value="editingRow[sub.field.fieldname]"
+                            @update:model-value="(v) => setEditingRowField(sub.field.fieldname, v)"
                           />
                         </div>
                       </div>
@@ -167,7 +168,8 @@
                         :parent-doc="parentDoc"
                         :form-read-only="!writable"
                         :link-query="item.field.fieldtype === 'Link' && linkQueryFor ? linkQueryFor(item.field.fieldname, editingRow) : null"
-                        v-model="editingRow[item.field.fieldname]"
+                        :model-value="editingRow[item.field.fieldname]"
+                        @update:model-value="(v) => setEditingRowField(item.field.fieldname, v)"
                       />
                     </template>
                   </div>
@@ -219,7 +221,7 @@ const { field, modelValue, doctype, docname, parentDoc, linkQueryFor, rowClass, 
   // configured" for a caller that doesn't pass this.
   permlevelWritable: { type: Array, default: () => [0] },
 })
-const emit = defineEmits(['update:modelValue', 'row-added', 'rows-removed'])
+const emit = defineEmits(['update:modelValue', 'row-added', 'rows-removed', 'field-input'])
 
 const writable = computed(() => permlevelWritable.includes(field.permlevel || 0))
 
@@ -306,6 +308,18 @@ function deleteSelected() {
 const showRowEditor = ref(false)
 const editingIdx = ref(null)
 const editingRow = computed(() => (editingIdx.value == null ? null : rows.value[editingIdx.value]))
+
+// Writes the row field straight away (same object DoctypeForm's `values`
+// holds, so this is what ends up saved) and tells it synchronously, in the
+// same tick as the keystroke - unlike DoctypeForm's own deferred diff watch
+// (which waits for Vue's next flush), a hook needing to react the instant a
+// field changes, e.g. a live BMI preview, can't wait for that. Most hook
+// modules don't define onChildFieldInput, so this is a no-op for them.
+function setEditingRowField(fieldname, value) {
+  if (!editingRow.value) return
+  editingRow.value[fieldname] = value
+  emit('field-input', field.fieldname, fieldname, editingRow.value)
+}
 
 // The row form shows what Desk's row form would: fields whose depends_on
 // holds for this row (`doc`) and the main record (`parent`), with

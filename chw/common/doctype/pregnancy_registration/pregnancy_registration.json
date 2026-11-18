@@ -208,7 +208,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.is_anyone_hurting==\"No\"",
+   "depends_on": "eval:doc.is_anyone_hurting==\"Yes\"",
    "fieldname": "usg_1",
    "fieldtype": "Small Text",
    "label": "If No Please Mention"
@@ -386,7 +386,7 @@
    "link_fieldname": "prid"
   }
  ],
- "modified": "2026-11-02 21:05:48.086363",
+ "modified": "2026-11-18 15:59:50.560514",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregnancy Registration",

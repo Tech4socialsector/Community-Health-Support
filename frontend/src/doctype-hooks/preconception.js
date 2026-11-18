@@ -44,4 +44,13 @@ export default {
       row.bmi = followupBmi(row.height, row.weight)
     }
   },
+
+  // Same calc, fired on every keystroke instead of waiting for the deferred
+  // diff watch above - so BMI fills in while typing, not only once the
+  // field is left (blurred) or the form is saved.
+  onChildFieldInput(tableField, fieldname, row) {
+    if (tableField === 'followup_visits' && (fieldname === 'height' || fieldname === 'weight')) {
+      row.bmi = followupBmi(row.height, row.weight)
+    }
+  },
 }

@@ -22,6 +22,12 @@ import pregnancyRegistration from './pregnancyRegistration'
 //   onChildFieldChange(tableField, fieldname, row, values, ctx)
 //                                    a field of an existing row changed;
 //                                    `row` is the live row - set values on it
+//   onChildFieldInput(tableField, fieldname, row, values, ctx)
+//                                    same, but fired synchronously on every
+//                                    keystroke (ChildTable's field editor),
+//                                    not deferred to the next reactive flush
+//                                    - for a live preview that can't wait
+//                                    (e.g. BMI). Most hooks don't need this.
 //   onChildRowAdd(tableField, row, idx, values, ctx)
 //                                    Desk <table>_add; row already has its
 //                                    field defaults (e.g. status "Pending")

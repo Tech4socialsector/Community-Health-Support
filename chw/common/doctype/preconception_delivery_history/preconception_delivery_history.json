@@ -5,10 +5,11 @@
  "engine": "InnoDB",
  "field_order": [
   "year",
-  "anc",
   "type_of_delivery",
   "problems",
   "baby_weight_sex_condition",
+  "sex",
+  "condition",
   "delivery_location"
  ],
  "fields": [
@@ -17,12 +18,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Year"
-  },
-  {
-   "fieldname": "anc",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "ANC"
   },
   {
    "fieldname": "type_of_delivery",
@@ -40,7 +35,7 @@
    "fieldname": "baby_weight_sex_condition",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Baby Weight / Sex / Condition"
+   "label": "Baby Weight"
   },
   {
    "fieldname": "delivery_location",
@@ -48,13 +43,24 @@
    "in_list_view": 1,
    "label": "Delivery Location",
    "options": "\nHome\nHospital"
+  },
+  {
+   "fieldname": "sex",
+   "fieldtype": "Select",
+   "label": "Sex",
+   "options": "\nMale\nFemale\nOthers"
+  },
+  {
+   "fieldname": "condition",
+   "fieldtype": "Data",
+   "label": "Condition"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-22 00:00:00.000000",
+ "modified": "2026-11-18 15:56:33.659401",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Preconception Delivery History",

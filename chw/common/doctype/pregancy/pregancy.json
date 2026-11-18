@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "year",
-  "anc",
   "type_of_delivery",
   "problems__heavy_bleeding_etc_",
   "baby_weight",
@@ -22,14 +21,6 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Year"
-  },
-  {
-   "fieldname": "anc",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "ANC"
   },
   {
    "fieldname": "type_of_delivery",
@@ -81,7 +72,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-05 20:52:31.704385",
+ "modified": "2026-11-18 15:56:36.032218",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Pregancy",

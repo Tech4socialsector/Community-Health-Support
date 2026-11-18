@@ -20,6 +20,18 @@
   "objective",
   "assessment",
   "plan",
+  "baby_section",
+  "hr_copy",
+  "rr_copy",
+  "temp_copy",
+  "length_copy",
+  "weight_copy",
+  "o2sat_copy",
+  "column_break_pyxe",
+  "subjective_copy",
+  "objective_copy",
+  "assessment_copy",
+  "plan_copy",
   "support_and_care_provided_section",
   "education_provided",
   "postpartum_self_care_nutrition_sleep_counseling_handout",
@@ -35,7 +47,7 @@
   {
    "fieldname": "preconception_nurse_notes_section",
    "fieldtype": "Section Break",
-   "label": "Postpartum Nurse Notes"
+   "label": "Mother "
   },
   {
    "fieldname": "visit_date",
@@ -200,13 +212,93 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Child Weight Gain Chart (0 to 1 year)"
+  },
+  {
+   "fieldname": "baby_section",
+   "fieldtype": "Section Break",
+   "label": "Baby"
+  },
+  {
+   "fieldname": "hr_copy",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "HR"
+  },
+  {
+   "fieldname": "rr_copy",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "RR"
+  },
+  {
+   "fieldname": "temp_copy",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Temp"
+  },
+  {
+   "fieldname": "length_copy",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Length"
+  },
+  {
+   "fieldname": "weight_copy",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Weight"
+  },
+  {
+   "fieldname": "o2sat_copy",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "O2Sat"
+  },
+  {
+   "fieldname": "column_break_pyxe",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "subjective_copy",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Subjective"
+  },
+  {
+   "fieldname": "objective_copy",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Objective"
+  },
+  {
+   "fieldname": "assessment_copy",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assessment"
+  },
+  {
+   "fieldname": "plan_copy",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Plan"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-20 14:21:21.943836",
+ "modified": "2026-11-18 16:48:13.086917",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Postpartum Nurse Notes",

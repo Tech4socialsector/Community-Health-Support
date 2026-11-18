@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import add_days, getdate
+from frappe.utils import add_days, flt, getdate
 
 from chw.api import sync_next_visit_todo
 from chw.chw_master import visit_schedule
@@ -27,8 +27,27 @@ def get_visit_schedule():
 
 class PostpartumRegandFollowup(Document):
 	def validate(self):
+		self.calculate_followup_bmi()
 		self.insert_urgent_followups_for_risk_rows()
 		self.set_next_visit_date()
+
+	def calculate_followup_bmi(self):
+		# Height is entered in cm, weight in kg - BMI = kg / (height in m)^2,
+		# rounded to 1 decimal. Mirrors Preconception Reg and Followup's own
+		# calculate_followup_bmi() - a backstop recalculation on every save
+		# (the row's own Vue/Desk trigger already does this live as the
+		# volunteer types) that also covers Data Import/API-created rows.
+		# Left blank, not guessed at, whenever either reading is missing.
+		for row in self.followup_visits:
+			if row.height and row.weight:
+				try:
+					height_m = flt(row.height) / 100
+					weight_kg = flt(row.weight)
+					row.bmi = str(round(weight_kg / (height_m ** 2), 1)) if height_m else ""
+				except (ValueError, ZeroDivisionError):
+					row.bmi = ""
+			else:
+				row.bmi = ""
 
 	def on_update(self):
 		sync_next_visit_todo(

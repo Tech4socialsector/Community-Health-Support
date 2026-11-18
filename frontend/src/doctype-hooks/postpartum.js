@@ -13,6 +13,34 @@
 import { addDays, cached, formatDate, isOpenUrgent, RISK_ALERT_FIELD_CLASS, URGENT_ROW_CLASS } from './utils'
 
 const TABLE = 'followup_visits'
+
+// frappe.utils.flt: commas ignored, anything unparseable is 0. Same helpers
+// as doctype-hooks/preconception.js's followupBmi - kept duplicated here as
+// this file already duplicates its own DEFAULT_VISIT_SCHEDULE rather than
+// share state across unrelated programs.
+function flt(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0
+  const s = String(value ?? '').replace(/,/g, '').trim()
+  return /^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(s) ? Number(s) : 0
+}
+
+// Python's round(x, 1) (half-even on exact .25/.75 ties), then str().
+function pyRound1Str(x) {
+  const q = x * 4
+  if (Number.isInteger(q) && q % 2 !== 0) {
+    const t = Math.floor(x * 10)
+    return ((t % 2 === 0 ? t : t + 1) / 10).toFixed(1)
+  }
+  return x.toFixed(1)
+}
+
+// kg / (cm/100)², as a 1-decimal string; '' when height or weight is missing
+// (or height reads as 0). Mirrors the server's calculate_followup_bmi().
+export function followupBmi(height, weight) {
+  if (!height || !weight) return ''
+  const heightM = flt(height) / 100
+  return heightM ? pyRound1Str(flt(weight) / heightM ** 2) : ''
+}
 const SCHEDULE_METHOD = 'chw.common.doctype.postpartum_reg_and_followup.postpartum_reg_and_followup.get_visit_schedule'
 
 // Last-resort fallback only, used if the Visit Schedule Master has no
@@ -228,11 +256,24 @@ export default {
     if (tableField === TABLE) calculateNextVisitDate(values)
   },
 
-  // Desk's Postpartum Followup status handler only - its mother_condition /
-  // baby_condition handlers just re-tint rows, which rowClass does live.
+  // Desk's Postpartum Followup status handler, plus the height/weight -> bmi
+  // trigger (ported from Preconception's own hook - Desk never had it
+  // either, see calculate_postpartum_followup_bmi). mother_condition /
+  // baby_condition just re-tint rows, which rowClass does live.
   onChildFieldChange(tableField, fieldname, row, values, ctx) {
     stateFor(values, ctx)
-    if (tableField === TABLE && fieldname === 'status') calculateNextVisitDate(values)
+    if (tableField !== TABLE) return
+    if (fieldname === 'status') calculateNextVisitDate(values)
+    if (fieldname === 'height' || fieldname === 'weight') row.bmi = followupBmi(row.height, row.weight)
+  },
+
+  // Same height/weight -> bmi calc, but fired on every keystroke rather
+  // than waiting for the deferred diff watch above - so BMI fills in while
+  // typing, not only once the field is left (blurred) or the form is saved.
+  onChildFieldInput(tableField, fieldname, row) {
+    if (tableField === TABLE && (fieldname === 'height' || fieldname === 'weight')) {
+      row.bmi = followupBmi(row.height, row.weight)
+    }
   },
 
   // Desk's highlight_risk_rows: only the open (not Completed) urgent row.

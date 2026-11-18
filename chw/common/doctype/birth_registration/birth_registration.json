@@ -299,6 +299,7 @@
    "label": "Birth Weight"
   },
   {
+   "description": "Low birth weight (less than 2.5 Kg)",
    "fieldname": "low_birth_status",
    "fieldtype": "Select",
    "label": "Low Birth Weight Status",
@@ -339,7 +340,7 @@
    "link_fieldname": "birth_registration_id"
   }
  ],
- "modified": "2026-10-22 22:35:32.143318",
+ "modified": "2026-11-18 15:58:28.361048",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Birth Registration",

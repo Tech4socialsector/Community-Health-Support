@@ -274,6 +274,7 @@
                   v-model="values[block.field.fieldname]"
                   @row-added="(row, idx) => onRowAdded(block.field.fieldname, row, idx)"
                   @rows-removed="(rows) => onRowsRemoved(block.field.fieldname, rows)"
+                  @field-input="(tableField, fieldname, row) => onChildFieldInput(tableField, fieldname, row)"
                 />
               </div>
               <!-- A columns block: Desk's own column split, preserved as
@@ -699,6 +700,23 @@ function onRowAdded(tableField, row, idx) {
   applyingHookChange = true
   try {
     trackHookCall(hooks.onChildRowAdd(tableField, row, idx, values, hookCtx()))
+  } finally {
+    lastChildSnapshot = childRowsSnapshot()
+    lastScalarSnapshot = scalarSnapshot()
+    applyingHookChange = false
+  }
+}
+
+// Fired straight from ChildTable's field editor on every keystroke (see
+// ChildTable's setEditingRowField), not through the deferred diff watch
+// below - for a hook that needs to react the instant a field changes, e.g.
+// a live BMI preview, rather than waiting for Vue's next flush. Most hook
+// modules don't define onChildFieldInput; this is a no-op for them.
+function onChildFieldInput(tableField, fieldname, row) {
+  if (!hooks?.onChildFieldInput) return
+  applyingHookChange = true
+  try {
+    trackHookCall(hooks.onChildFieldInput(tableField, fieldname, row, values, hookCtx()))
   } finally {
     lastChildSnapshot = childRowsSnapshot()
     lastScalarSnapshot = scalarSnapshot()
