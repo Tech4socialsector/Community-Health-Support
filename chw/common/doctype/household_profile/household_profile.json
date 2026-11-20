@@ -142,9 +142,11 @@
   },
   {
    "fieldname": "cattles",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Cattles",
-   "options": "\nNo\ncow, goat\ncow only\ngoat only"
+   "mask": 1,
+   "not_nullable": 1,
+   "options": "Livestock"
   },
   {
    "fieldname": "health_worker_name",
@@ -175,7 +177,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-10-29 20:00:00.000000",
+ "modified": "2026-11-20 10:29:47.870278",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",
@@ -235,7 +237,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Palliative Care Coordinator",
+   "role": "Palliative Care Docter",
    "share": 1,
    "write": 1
   }
