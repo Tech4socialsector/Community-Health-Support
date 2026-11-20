@@ -10,5 +10,4 @@ export default {
     if (fieldname === 'phone_no') warnIfNotDigits(values.phone_no)
   },
 }
-//test purpose
 // sample to test the updates
