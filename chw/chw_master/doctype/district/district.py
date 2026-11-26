@@ -8,4 +8,7 @@ from chw.places import fill_and_check_code
 
 class District(Document):
 	def validate(self):
+		# Named by the user: the name is the district's name.
+		if not (self.district or "").strip():
+			self.district = self.name
 		fill_and_check_code(self)

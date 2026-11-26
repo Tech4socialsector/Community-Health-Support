@@ -2,7 +2,7 @@
  "actions": [],
  "allow_bulk_edit": 1,
  "allow_rename": 1,
- "autoname": "autoincrement",
+ "autoname": "prompt",
  "creation": "2026-07-17 10:03:37.133755",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -24,11 +24,12 @@
   },
   {
    "allow_in_quick_entry": 1,
+   "description": "Filled from the name if left empty.",
    "fieldname": "district",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "District Name",
-   "reqd": 1
+   "reqd": 0
   },
   {
    "allow_in_quick_entry": 1,
@@ -42,11 +43,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-25 11:57:27.242932",
+ "modified": "2026-11-26 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "District",
- "naming_rule": "Autoincrement",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -116,9 +117,7 @@
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
  "search_fields": "state",
- "show_title_field_in_link": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
- "title_field": "district"
+ "states": []
 }

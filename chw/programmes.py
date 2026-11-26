@@ -115,7 +115,14 @@ PROGRAMMES = {
 		"number_cards": ["Cancer Screenings", "Clinical Evaluations"],
 		"shortcuts": ["Main Screening Form", "Clinical Evaluation"],
 		"common_sections": [
-			("Household profile", "cancer_survey_section"),
+			# Household profile's cancer survey questions (in Respondent
+			# Details since the form was rearranged) - hidden one by one.
+			("Household profile", "cancer_survey_done"),
+			("Household profile", "survey_not_done_reason"),
+			("Household profile", "cancer_screening_eligible"),
+			("Household profile", "not_eligible_reason"),
+			("Household profile", "mismatch_age_yrs"),
+			("Household profile", "not_eligible_other_reason"),
 			("Family members", "cancer_family_member_details_section"),
 		],
 		# The Outreach Clinic tick (App Setting -> Cancer Forms) also decides
@@ -132,8 +139,6 @@ PROGRAMMES = {
 				],
 				# required only while the form is in use
 				"require": [("Household profile", "outreach_clinic")],
-				# the Cancer Survey opens once a clinic is chosen
-				"depends_on": [("Household profile", "cancer_survey_section", "eval:doc.outreach_clinic")],
 			},
 		},
 		"masters": ["Medical History", "Breast Palpation Finding", "Breast Referral Type", "Cervix Visual Finding", "Cervical Referral Type", "HPV DNA Result Type", "Habit Master", "Occupation Master"],
