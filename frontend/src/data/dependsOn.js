@@ -8,6 +8,8 @@
 // Pregnancy Registration's high-risk factors appeared even when the woman
 // wasn't marked high risk.
 
+import { userContextResource } from '@/data/userContext'
+
 // Compiled once per expression: a form re-checks its conditions on every
 // keystroke.
 const compiled = new Map()
@@ -31,6 +33,15 @@ function compile(rawCode) {
 const frappeShim = {
   session: { get user() { return window.frappe?.session?.user } },
   utils: { now_date: () => new Date().toISOString().slice(0, 10) },
+  // Desk's frappe.user.has_role(role or [roles]) - true if the user has any
+  // of them. Used by role-based conditions (programmes.apply_role_visibility).
+  user: {
+    has_role(roles) {
+      const mine = userContextResource.data?.roles || []
+      if (mine.includes('Administrator')) return true
+      return (Array.isArray(roles) ? roles : [roles]).some((r) => mine.includes(r))
+    },
+  },
 }
 
 export function evaluateDependsOn(expression, doc, parent = doc) {

@@ -52,6 +52,25 @@ fixtures = [
 	# was) has no sidebar entry and no route on a new site, so its forms
 	# can't be opened in the Vue app at all.
 	{"dt": "App Module Setting", "filters": [["name", "in", ["CHW", "Cancer Screening", "NCD", "Mental Health"]]]},
+	# Cancer programme roles - only the roles; their permissions are given on
+	# each site by hand. "Cancer" in front of each, as the app is shared by
+	# several programmes.
+	{
+		"dt": "Role",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Cancer Program Coordinator",
+					"Cancer Outreach Clinic Coordinator",
+					"Cancer Social Worker",
+					"Cancer Doctor",
+					"Cancer Nurse",
+				],
+			]
+		],
+	},
 ]
 
 app_name = "chw"

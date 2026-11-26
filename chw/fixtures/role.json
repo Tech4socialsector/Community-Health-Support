@@ -1,0 +1,67 @@
+[
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-11-26 15:13:06.443236",
+  "name": "Cancer Program Coordinator",
+  "restrict_to_domain": null,
+  "role_name": "Cancer Program Coordinator",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-11-26 15:13:06.572235",
+  "name": "Cancer Outreach Clinic Coordinator",
+  "restrict_to_domain": null,
+  "role_name": "Cancer Outreach Clinic Coordinator",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-11-26 15:13:06.574515",
+  "name": "Cancer Social Worker",
+  "restrict_to_domain": null,
+  "role_name": "Cancer Social Worker",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-11-26 15:13:06.577222",
+  "name": "Cancer Doctor",
+  "restrict_to_domain": null,
+  "role_name": "Cancer Doctor",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-11-26 15:13:06.580941",
+  "name": "Cancer Nurse",
+  "restrict_to_domain": null,
+  "role_name": "Cancer Nurse",
+  "two_factor_auth": 0
+ }
+]

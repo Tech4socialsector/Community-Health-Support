@@ -88,11 +88,28 @@ def clinic_details(clinic):
 	}
 
 
+def outreach_in_use():
+	"""Cancer is on and its Outreach Clinic form is ticked."""
+	from chw.programmes import enabled_programmes, form_ticked
+
+	settings = frappe.db.get_singles_dict("App Setting", cast=True)
+	return "cancer" in enabled_programmes(settings) and form_ticked(settings, "Outreach Clinic")
+
+
 def check_household_clinic(doc, method=None):
 	"""Household profile validate: a new household goes only into an Active
 	clinic, and its village must be one the clinic covers."""
 	clinic = doc.get("outreach_clinic")
 	if not clinic:
+		# Required for Cancer Workers while the outreach is in use (the forms
+		# show the * through mandatory_depends_on, which the server doesn't
+		# evaluate) - other programmes' workers aren't asked for a clinic.
+		if outreach_in_use() and "Cancer Worker" in frappe.get_roles():
+			frappe.throw(
+				_("Choose the Outreach Clinic ID - every Cancer household is registered under a clinic."),
+				frappe.MandatoryError,
+				title=_("Outreach Clinic ID missing"),
+			)
 		return
 	if doc.is_new() and not frappe.db.get_value("Outreach Clinic", clinic, "active"):
 		frappe.throw(

@@ -243,6 +243,9 @@ def get_current_user_context():
     return {
         'is_privileged': bool(PRIVILEGED_ROLES & user_roles),
         'is_system_admin': bool(SYSTEM_ADMIN_ROLES & user_roles),
+        # The user's own roles, for form conditions like Desk's
+        # frappe.user.has_role(...) (see frontend data/dependsOn.js).
+        'roles': sorted(user_roles),
     }
 
 

@@ -1,3 +1,5 @@
+import json
+
 import frappe
 from frappe import _
 from frappe.utils import cint
@@ -137,9 +139,29 @@ PROGRAMMES = {
 					("Main Screening Form", "outreach_clinic"),
 					("Clinical Evaluation", "outreach_clinic"),
 				],
-				# required only while the form is in use
-				"require": [("Household profile", "outreach_clinic")],
+				# required only while the form is in use, and only for Cancer
+				# Workers - on a site with other programmes too, an MCH worker
+				# registering a household isn't asked for a clinic
+				"require_for_role": [("Household profile", "outreach_clinic", "Cancer Worker")],
 			},
+		},
+		# Cancer's parts of the shared forms show only to the people working
+		# in Cancer (and admins / coordinators): a site running MCH as well
+		# doesn't show them to MCH workers. Added to each field's own
+		# condition while Cancer is on - see apply_role_visibility.
+		"role_visible": {
+			"roles": ["Cancer Worker", "Program Coordinator", "System Manager"],
+			"fields": [
+				("Household profile", "outreach_section"),
+				("Household profile", "cancer_survey_done"),
+				("Household profile", "survey_not_done_reason"),
+				("Household profile", "cancer_screening_eligible"),
+				("Household profile", "not_eligible_reason"),
+				("Household profile", "mismatch_age_yrs"),
+				("Household profile", "not_eligible_other_reason"),
+				("Family members", "outreach_clinic"),
+				("Family members", "cancer_family_member_details_section"),
+			],
 		},
 		"masters": ["Medical History", "Breast Palpation Finding", "Breast Referral Type", "Cervix Visual Finding", "Cervical Referral Type", "HPV DNA Result Type", "Habit Master", "Occupation Master"],
 	},
@@ -564,6 +586,7 @@ def apply_common_sections(settings=None):
 			)
 			frappe.clear_cache(doctype=doctype)
 	apply_form_fields(settings)
+	apply_role_visibility(settings)
 
 
 def _set_property(doctype, fieldname, prop, value, prop_type):
@@ -587,6 +610,48 @@ def _set_property(doctype, fieldname, prop, value, prop_type):
 	return True
 
 
+def _json_condition(doctype, fieldname, prop):
+	"""A field's condition as its form JSON has it (without Property Setters)."""
+	value = frappe.db.get_value("DocField", {"parent": doctype, "fieldname": fieldname}, prop)
+	if value is None:
+		value = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": fieldname}, prop)
+	return (value or "").strip()
+
+
+def _js_expr(condition):
+	"""A depends_on value as a JavaScript expression (eval:... or a fieldname)."""
+	if condition.startswith("eval:"):
+		return condition[5:].strip()
+	return f"!!doc.{condition}"
+
+
+def apply_role_visibility(settings=None):
+	"""Programme parts of the shared forms shown only to the programme's
+	roles (PROGRAMMES[...]["role_visible"]) while the programme is on: the
+	role check is added to each field's own condition, through a Property
+	Setter on depends_on. Desk and the CHW app both evaluate it
+	(frappe.user.has_role). Runs with apply_common_sections."""
+	if settings is None:
+		settings = frappe.db.get_singles_dict("App Setting", cast=True)
+	on = set(enabled_programmes(settings))
+	for key, p in PROGRAMMES.items():
+		spec = p.get("role_visible")
+		if not spec:
+			continue
+		role_check = f"frappe.user.has_role({json.dumps(spec['roles'])})"
+		touched = set()
+		for doctype, fieldname in spec["fields"]:
+			if key in on:
+				own = _json_condition(doctype, fieldname, "depends_on")
+				cond = f"eval:({role_check}) && ({_js_expr(own)})" if own else f"eval:{role_check}"
+			else:
+				cond = None  # the programme's off: hidden anyway
+			if _set_property(doctype, fieldname, "depends_on", cond, "Code"):
+				touched.add(doctype)
+		for doctype in touched:
+			frappe.clear_cache(doctype=doctype)
+
+
 def apply_form_fields(settings=None):
 	"""Fields on other forms that belong to one programme form (e.g. the
 	Outreach Clinic ID on Household profile): shown, required and opening
@@ -604,6 +669,15 @@ def apply_form_fields(settings=None):
 					touched.add(doctype)
 			for doctype, fieldname in spec.get("require", []):
 				if _set_property(doctype, fieldname, "reqd", "1" if active else None, "Check"):
+					touched.add(doctype)
+			for doctype, fieldname, role in spec.get("require_for_role", []):
+				# Required by role: the forms show the * for that role
+				# (mandatory_depends_on); the server checks it on save (it
+				# doesn't evaluate these conditions itself).
+				cond = f"eval:frappe.user.has_role({json.dumps(role)})"
+				changed = _set_property(doctype, fieldname, "reqd", None, "Check")
+				changed |= _set_property(doctype, fieldname, "mandatory_depends_on", cond if active else None, "Code")
+				if changed:
 					touched.add(doctype)
 			for doctype, fieldname, condition in spec.get("depends_on", []):
 				if _set_property(doctype, fieldname, "depends_on", condition if active else None, "Data"):
