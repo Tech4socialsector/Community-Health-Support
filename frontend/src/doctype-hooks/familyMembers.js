@@ -7,6 +7,7 @@
 
 import { toast } from 'frappe-ui'
 import { warnIfNotDigits } from './utils'
+import { HOUSEHOLD_LEVELS, placeFieldChange, placeLinkQuery } from './places'
 import { t } from '@/data/i18n'
 
 // 'YYYY-MM-DD' as a local date - new Date('YYYY-MM-DD') is UTC midnight,
@@ -97,7 +98,17 @@ export default {
     if (ctx.isNew) setCancerEligibility(values, ctx)
   },
 
-  onFieldChange(fieldname, values, ctx) {
+  // Place: District -> Taluk/Block -> Panchayat -> Village (optional), as
+  // on Household profile. Filled from the household (fetch_from hhid.*);
+  // picked by hand, each list shows only the places under the level above,
+  // a lower pick fills the ones above, and a change clears what no longer
+  // fits (places.js).
+  getLinkQuery(fieldname, values) {
+    return placeLinkQuery(fieldname, { ...values, state: null, pincode: null })
+  },
+
+  async onFieldChange(fieldname, values, ctx) {
+    await placeFieldChange(fieldname, values, ctx, HOUSEHOLD_LEVELS)
     if (fieldname === 'date_of_birth') calculateAge(values)
     if (ELIGIBILITY_INPUTS.has(fieldname)) setCancerEligibility(values, ctx)
     if (fieldname === 'phone_number') warnIfNotDigits(values.phone_number)

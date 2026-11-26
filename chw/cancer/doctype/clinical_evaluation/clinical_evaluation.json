@@ -20,6 +20,7 @@
   "village",
   "grampanchayat",
   "sub_center",
+  "outreach_clinic",
   "date_of_evaluation",
   "oral_tab",
   "oral_clinical_evaluation",
@@ -127,38 +128,38 @@
    "label": "Patient Details"
   },
   {
+   "description": "Only people referred in at least one screening (Referral = Yes, finished). Only the referred screenings' tabs are shown.",
    "fieldname": "main_screening_form",
    "fieldtype": "Link",
    "label": "Main Screening Form",
-   "options": "Main Screening Form",
-   "description": "Only people referred in at least one screening (Referral = Yes, finished). Only the referred screenings' tabs are shown."
+   "options": "Main Screening Form"
   },
   {
+   "default": "0",
+   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form.",
    "fieldname": "oral_referred",
    "fieldtype": "Check",
-   "label": "Referred for Oral",
    "hidden": 1,
-   "read_only": 1,
-   "default": "0",
-   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form."
+   "label": "Referred for Oral",
+   "read_only": 1
   },
   {
+   "default": "0",
+   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form.",
    "fieldname": "breast_referred",
    "fieldtype": "Check",
-   "label": "Referred for Breast",
    "hidden": 1,
-   "read_only": 1,
-   "default": "0",
-   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form."
+   "label": "Referred for Breast",
+   "read_only": 1
   },
   {
+   "default": "0",
+   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form.",
    "fieldname": "cervical_referred",
    "fieldtype": "Check",
-   "label": "Referred for Cervical",
    "hidden": 1,
-   "read_only": 1,
-   "default": "0",
-   "description": "Set automatically: this screening was finished with Referral = Yes in the Main Screening Form."
+   "label": "Referred for Cervical",
+   "read_only": 1
   },
   {
    "fetch_from": "main_screening_form.name1",
@@ -218,18 +219,17 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.oral_referred",
    "fieldname": "oral_tab",
    "fieldtype": "Tab Break",
-   "label": "Oral",
-   "depends_on": "eval:doc.oral_referred"
+   "label": "Oral"
   },
   {
    "fieldname": "oral_clinical_evaluation",
    "fieldtype": "Select",
    "label": "Oral Clinical Evaluation",
-   "options": "\nYes\nNo",
-   "reqd": 0,
-   "mandatory_depends_on": "eval:doc.oral_referred"
+   "mandatory_depends_on": "eval:doc.oral_referred",
+   "options": "\nYes\nNo"
   },
   {
    "depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
@@ -364,7 +364,7 @@
    "fieldtype": "Select",
    "label": "Treatment",
    "mandatory_depends_on": "eval:doc.oral_clinical_evaluation=='Yes'",
-   "options": "\nCompleted\nPartially done\nPreferred other center"
+   "options": "\nCompleted\nNot Completed\nPartially done\nPreferred other center"
   },
   {
    "fieldname": "oral_column_break_outcome",
@@ -383,18 +383,17 @@
    "options": "\nNil\n3 months\n6 months\n12 months"
   },
   {
+   "depends_on": "eval:doc.breast_referred && doc.gender!=\"Male\"",
    "fieldname": "breast_tab",
    "fieldtype": "Tab Break",
-   "label": "Breast",
-   "depends_on": "eval:doc.breast_referred && doc.gender!=\"Male\""
+   "label": "Breast"
   },
   {
    "fieldname": "breast_clinical_evaluation",
    "fieldtype": "Select",
    "label": "Breast Clinical Evaluation",
-   "options": "\nYes\nNo",
-   "reqd": 0,
-   "mandatory_depends_on": "eval:doc.breast_referred && doc.gender!=\"Male\""
+   "mandatory_depends_on": "eval:doc.breast_referred && doc.gender!=\"Male\"",
+   "options": "\nYes\nNo"
   },
   {
    "depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
@@ -534,12 +533,12 @@
    "label": "Biopsy"
   },
   {
+   "description": "\"Not now\" lets you go on, but the evaluation can't be submitted until Yes or No.",
    "fieldname": "breast_biopsy",
    "fieldtype": "Select",
    "label": "Biopsy",
    "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
-   "options": "\nYes\nNo\nNot now",
-   "description": "\"Not now\" lets you go on, but the evaluation can't be submitted until Yes or No."
+   "options": "\nYes\nNo\nNot now"
   },
   {
    "depends_on": "eval:doc.breast_biopsy=='Yes'",
@@ -581,7 +580,7 @@
    "fieldtype": "Select",
    "label": "Treatment",
    "mandatory_depends_on": "eval:doc.breast_clinical_evaluation=='Yes'",
-   "options": "\nCompleted\nPartially done\nPreferred other center"
+   "options": "\nCompleted\nNot Completed\nPartially done\nPreferred other center"
   },
   {
    "fieldname": "breast_column_break_outcome",
@@ -600,18 +599,17 @@
    "options": "\nAnnual review\nOnce in 2 years\n3 months\n6 months\nOthers"
   },
   {
+   "depends_on": "eval:doc.cervical_referred && doc.gender!=\"Male\"",
    "fieldname": "cervical_tab",
    "fieldtype": "Tab Break",
-   "label": "Cervical",
-   "depends_on": "eval:doc.cervical_referred && doc.gender!=\"Male\""
+   "label": "Cervical"
   },
   {
    "fieldname": "cervical_clinical_evaluation",
    "fieldtype": "Select",
    "label": "Cervical Clinical Evaluation",
-   "options": "\nYes\nNo",
-   "reqd": 0,
-   "mandatory_depends_on": "eval:doc.cervical_referred && doc.gender!=\"Male\""
+   "mandatory_depends_on": "eval:doc.cervical_referred && doc.gender!=\"Male\"",
+   "options": "\nYes\nNo"
   },
   {
    "depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
@@ -780,7 +778,7 @@
    "fieldtype": "Select",
    "label": "Treatment",
    "mandatory_depends_on": "eval:doc.cervical_clinical_evaluation=='Yes'",
-   "options": "\nCompleted\nPartially done\nPreferred other center"
+   "options": "\nCompleted\nNot completed\nPartially done\nPreferred other center"
   },
   {
    "fieldname": "cervical_column_break_outcome",
@@ -821,13 +819,23 @@
    "fieldtype": "Link",
    "label": "Sub Center",
    "options": "Sub Centre"
+  },
+  {
+   "fetch_from": "main_screening_form.outreach_clinic",
+   "fieldname": "outreach_clinic",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Outreach Clinic ID",
+   "options": "Outreach Clinic",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-05 15:00:00.000000",
+ "modified": "2026-11-25 18:35:32.677565",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Clinical Evaluation",

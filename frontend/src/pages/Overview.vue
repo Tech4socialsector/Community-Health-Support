@@ -1,7 +1,7 @@
 <template>
   <AppLayout>
     <div :class="ui.PAGE">
-      <PageHeader :description="t('')">
+      <PageHeader :description="t('Program-wide records across every CHW form. Click a program to see its records.')">
         <template #title>
           <h1 class="text-lg font-semibold text-navy-900 dark:text-gray-100">{{ t('Program Overview') }}</h1>
         </template>

@@ -31,6 +31,7 @@
   "village",
   "panchayat",
   "sub_center",
+  "outreach_clinic",
   "town___area",
   "landmark_if_any",
   "mobile_number",
@@ -38,12 +39,10 @@
   "education",
   "occupation",
   "medical_history",
-  "family_history_of_cancer",
-  "if_yes",
   "age_at_menarche",
-  "column_break_ekhe",
   "when_did_you_have_your_last_menstruation_lmp",
   "have_you_undergone_surgical_removal_of_the_uterus",
+  "column_break_ekhe",
   "abnormal_bleeding_per_vaginum",
   "marital_status",
   "age_at_marriage",
@@ -59,6 +58,8 @@
   "habit_details",
   "have_you_ever_undergone_breast__cervix_screening_before",
   "yes",
+  "if_yes",
+  "family_history_of_cancer",
   "willingness_for_participation",
   "completed_by",
   "tab_2_tab",
@@ -280,6 +281,16 @@
    "options": "Sub Centre"
   },
   {
+   "fetch_from": "fmid.outreach_clinic",
+   "fieldname": "outreach_clinic",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Outreach Clinic ID",
+   "options": "Outreach Clinic",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
    "fieldname": "town___area",
    "fieldtype": "Data",
    "label": "Town /  Area"
@@ -353,6 +364,7 @@
    "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "have_you_undergone_surgical_removal_of_the_uterus",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Have you undergone surgical removal of the uterus",
    "options": "\nYes\nNo"
   },
@@ -424,6 +436,7 @@
    "depends_on": "eval:doc.gender==\"Female\"",
    "fieldname": "hormonal_therapy_how_long",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Hormonal Therapy, how long",
    "options": "\nNil\n< 6 months\n6-12 months\n1-2 yrs\n> 2 yrs"
   },
@@ -475,7 +488,7 @@
   {
    "fieldname": "test_section",
    "fieldtype": "Section Break",
-   "label": "Oral Screening – Questionnaire"
+   "label": "Oral Screening \u2013 Questionnaire"
   },
   {
    "fieldname": "oral_examination",
@@ -526,7 +539,7 @@
    "depends_on": "eval:doc.symptoms==\"Yes\"",
    "fieldname": "symptom_swelling_neck_oral_cavity",
    "fieldtype": "Check",
-   "label": "Swelling – neck/oral cavity",
+   "label": "Swelling \u2013 neck/oral cavity",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -580,7 +593,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Symptoms (old single choice)",
-   "options": "Ulcer in the mouth\nSwelling – neck/oral cavity\nDifficulty in swallowing\nChange in voice\nSharp teeth/ denture if yes (a open field to enter details)\nOthers",
+   "options": "Ulcer in the mouth\nSwelling \u2013 neck/oral cavity\nDifficulty in swallowing\nChange in voice\nSharp teeth/ denture if yes (a open field to enter details)\nOthers",
    "read_only": 1
   },
   {
@@ -596,7 +609,7 @@
    "fieldtype": "Select",
    "label": "Clinical Findings",
    "mandatory_depends_on": "eval:doc.consent_given==\"Yes\" && doc.oral_examination==\"Yes\"",
-   "options": "\nI. Normal\nII. Oral malignant potential disease",
+   "options": "\nI. Normal\nII. Oral malignant potential disease\nIII. Benign Lesion\nIV. Cancerous Lesion\nV. Significant Cervical Nodes",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -789,7 +802,7 @@
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
-   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"II. Oral malignant potential disease\"",
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"III. Benign Lesion\"",
    "fieldname": "benign_lesion_section",
    "fieldtype": "Section Break",
    "label": "III. Benign Lesion"
@@ -873,7 +886,7 @@
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
-   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"II. Oral malignant potential disease\"",
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"IV. Cancerous Lesion\"",
    "fieldname": "cancerous_lesion_section",
    "fieldtype": "Section Break",
    "label": "IV. Cancerous Lesion"
@@ -915,7 +928,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"II. Oral malignant potential disease\"",
+   "depends_on": "eval:doc.oral_examination==\"Yes\" && doc.clinical_findings==\"V. Significant Cervical Nodes\"",
    "fieldname": "cervical_nodes_section",
    "fieldtype": "Section Break",
    "label": "V. Significant Cervical Nodes"
@@ -992,7 +1005,7 @@
   {
    "fieldname": "breast_screening_section",
    "fieldtype": "Section Break",
-   "label": "Breast Screening – Questionnaire"
+   "label": "Breast Screening \u2013 Questionnaire"
   },
   {
    "description": "\"Not now\" keeps the breast screening pending until Yes or No is marked.",
@@ -1070,7 +1083,7 @@
   {
    "fieldname": "cervical_screening_section",
    "fieldtype": "Section Break",
-   "label": "Cervical Screening – Questionnaire"
+   "label": "Cervical Screening \u2013 Questionnaire"
   },
   {
    "fieldname": "cervical_screening_status",
@@ -1422,7 +1435,7 @@
    "link_fieldname": "main_screening_form"
   }
  ],
- "modified": "2026-11-06 18:30:00",
+ "modified": "2026-11-26 10:46:34.927482",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Main Screening Form",

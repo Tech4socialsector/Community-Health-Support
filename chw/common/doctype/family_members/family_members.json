@@ -9,8 +9,10 @@
   "primary_details_tab",
   "date",
   "hhid",
-  "village",
+  "district",
+  "taluk_block",
   "gram_panchayat",
+  "village",
   "sub_center",
   "head_of_the_family_member",
   "family_member",
@@ -28,6 +30,7 @@
   "health_worker_name",
   "status",
   "cancer_family_member_details_section",
+  "outreach_clinic",
   "spouse_father_name",
   "monthly_income",
   "tobacco_user",
@@ -45,12 +48,65 @@
    "label": "Primary Details"
   },
   {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
    "fieldname": "hhid",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "HHID",
    "options": "Household profile"
+  },
+  {
+   "fetch_from": "hhid.district",
+   "fieldname": "district",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "District",
+   "options": "District"
+  },
+  {
+   "fetch_from": "hhid.taluk_block",
+   "fieldname": "taluk_block",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Taluk / Block",
+   "options": "Taluk Block"
+  },
+  {
+   "fetch_from": "hhid.gram_panchayat",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "description": "Optional. Shows only the villages of the chosen panchayat.",
+   "fetch_from": "hhid.village",
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village"
+  },
+  {
+   "fetch_from": "hhid.subcenter",
+   "fieldname": "sub_center",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Sub Center",
+   "options": "Sub Centre"
+  },
+  {
+   "fetch_from": "hhid.household_head_name",
+   "fieldname": "head_of_the_family_member",
+   "fieldtype": "Data",
+   "label": "Head of the Family Member"
   },
   {
    "fieldname": "family_member",
@@ -66,6 +122,10 @@
    "in_list_view": 1,
    "label": "Relationship with the Head of the Family",
    "options": "Relationship with the Head of the Family"
+  },
+  {
+   "fieldname": "column_break_zdna",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "gender",
@@ -89,12 +149,6 @@
    "read_only_depends_on": "eval:doc.date_of_birth"
   },
   {
-   "fieldname": "marital_status",
-   "fieldtype": "Select",
-   "label": "Marital Status",
-   "options": "\nSingle\nMarried\nWidow\nWidower\nDivorced\nSeparated"
-  },
-  {
    "fieldname": "phone_number",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -103,39 +157,10 @@
    "length": 10
   },
   {
-   "fetch_from": "hhid.village",
-   "fieldname": "village",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Village",
-   "options": "Village",
-   "read_only": 1
-  },
-  {
-   "fieldname": "status",
+   "fieldname": "marital_status",
    "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "\nActive\nInactive"
-  },
-  {
-   "fieldname": "column_break_zdna",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.occupation==\"Studying\"",
-   "fieldname": "education",
-   "fieldtype": "Select",
-   "label": "Education",
-   "options": "\nBachelor's Degree\nMaster's Degree\nTechnical Education\nDiploma\n5th Standard Completed\n8th Standard Completed\n10th Standard Completed - SSLC\n12th Standard Completed - HSC\nBelow 5th Standard\nSchool Student (1 - 12)\nLKG\nUKG\nunder 5 years\nNot Studied"
-  },
-  {
-   "depends_on": "eval:doc.occupation==\"Studying\"",
-   "fieldname": "education_status",
-   "fieldtype": "Select",
-   "label": "Education Status",
-   "options": "\nStudying\nCompleted\nDiscontinued"
+   "label": "Marital Status",
+   "options": "\nSingle\nMarried\nWidow\nWidower\nDivorced\nSeparated"
   },
   {
    "fieldname": "occupation",
@@ -150,6 +175,20 @@
    "label": "If Other, please specify"
   },
   {
+   "depends_on": "eval:doc.occupation==\"Studying\"",
+   "fieldname": "education_status",
+   "fieldtype": "Select",
+   "label": "Education Status",
+   "options": "\nStudying\nCompleted\nDiscontinued"
+  },
+  {
+   "depends_on": "eval:doc.occupation==\"Studying\"",
+   "fieldname": "education",
+   "fieldtype": "Select",
+   "label": "Education",
+   "options": "\nBachelor's Degree\nMaster's Degree\nTechnical Education\nDiploma\n5th Standard Completed\n8th Standard Completed\n10th Standard Completed - SSLC\n12th Standard Completed - HSC\nBelow 5th Standard\nSchool Student (1 - 12)\nLKG\nUKG\nunder 5 years\nNot Studied"
+  },
+  {
    "fieldname": "health_worker_name",
    "fieldtype": "Link",
    "label": "Data Collector",
@@ -157,30 +196,26 @@
    "read_only": 1
   },
   {
-   "default": "Today",
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "label": "Date"
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nActive\nInactive"
   },
   {
-   "fetch_from": "hhid.household_head_name",
-   "fieldname": "head_of_the_family_member",
-   "fieldtype": "Data",
-   "label": "Head of the Family Member"
+   "fieldname": "cancer_family_member_details_section",
+   "fieldtype": "Section Break",
+   "label": "Cancer Family Member Details"
   },
   {
-   "fetch_from": "hhid.gram_panchayat",
-   "fieldname": "gram_panchayat",
+   "fetch_from": "hhid.outreach_clinic",
+   "fieldname": "outreach_clinic",
    "fieldtype": "Link",
-   "label": "Gram Panchayat",
-   "options": "Gram Panchayat"
-  },
-  {
-   "fetch_from": "hhid.subcenter",
-   "fieldname": "sub_center",
-   "fieldtype": "Link",
-   "label": "Sub Center",
-   "options": "Sub Centre"
+   "in_standard_filter": 1,
+   "label": "Outreach Clinic ID",
+   "options": "Outreach Clinic",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "spouse_father_name",
@@ -193,33 +228,28 @@
    "label": "Monthly Income"
   },
   {
-   "fieldname": "cancer_column_break",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "tobacco_user",
    "fieldtype": "Select",
    "label": "Tobacco User",
    "options": "\nYes\nNo"
   },
   {
-   "description": "Worked out automatically: women aged 30\u201365 and tobacco users of any age, unless a known cancer patient.",
+   "fieldname": "known_cancer_patient",
+   "fieldtype": "Select",
+   "label": "Known Cancer Patient",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "cancer_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Worked out automatically: women aged 30–65 and tobacco users of any age, unless a known cancer patient.",
    "fieldname": "cancer_screening_eligible",
    "fieldtype": "Select",
    "label": "Eligible for Cancer Screening",
    "options": "\nYes\nNo",
    "read_only_depends_on": "eval:!doc.cancer_eligibility_manual"
-  },
-  {
-   "fieldname": "cancer_family_member_details_section",
-   "fieldtype": "Section Break",
-   "label": "Cancer Family Member Details"
-  },
-  {
-   "fieldname": "known_cancer_patient",
-   "fieldtype": "Select",
-   "label": "Known Cancer Patient",
-   "options": "\nYes\nNo"
   },
   {
    "depends_on": "eval:doc.cancer_screening_eligible==\"No\"",
@@ -296,7 +326,7 @@
    "link_fieldname": "fmid"
   }
  ],
- "modified": "2026-11-06 11:51:09.407567",
+ "modified": "2026-11-26 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Family members",

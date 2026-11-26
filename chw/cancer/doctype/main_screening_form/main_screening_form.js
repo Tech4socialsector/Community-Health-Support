@@ -11,11 +11,6 @@ frappe.ui.form.on("Main Screening Form", {
 		if (!frm.doc.consent_witness) frm.set_value("consent_witness", name);
 	},
 	refresh(frm) {
-		// Oral Screening Questionnaire: once saved as "No", the oral screening
-		// can't be reopened (main_screening_form.py enforces the same on save).
-		const closed = !frm.is_new() && frm.doc.oral_examination === "No";
-		frm.set_df_property("oral_examination", "read_only", closed ? 1 : 0);
-
 		toggle_clinical_evaluation_link(frm);
 		highlight_finish(frm);
 	},

@@ -1,17 +1,8 @@
 // Ports chw/cancer/doctype/main_screening_form/main_screening_form.js (the
 // Desk form script) into the Vue app's hook contract - see
 // doctype-hooks/index.js and DoctypeForm.vue.
-//
-// Oral Screening Questionnaire: once the screening is saved with Oral
-// Examination = "No", it can't be reopened. Desk makes the field read-only;
-// here a change away from the saved "No" is put back with a message. The
-// server (main_screening_form.py) refuses it on save either way.
 
-import { toast } from 'frappe-ui'
-import { t } from '@/data/i18n'
 import { session } from '@/data/session'
-
-const savedOral = new WeakMap()
 
 // Finish sits at the end of each screening's Referral part - boxed in amber
 // so it's easy to spot.
@@ -69,7 +60,6 @@ export default {
   },
 
   async onAfterLoad(values, ctx) {
-    savedOral.set(values, ctx.isNew ? null : values.oral_examination || null)
     // New screening: Completed By and the consent witness are the person
     // logged in (their full name - "Administrator" for Administrator). The
     // witness can still be changed; the server fills both if left empty.
@@ -105,12 +95,6 @@ export default {
         values[`${site}_finished_by`] = null
       }
       return
-    }
-    if (fieldname !== 'oral_examination') return
-    if (savedOral.get(values) === 'No' && values.oral_examination !== 'No') {
-      values.oral_examination = 'No'
-      setScreeningStatuses(values)
-      toast.warning(t('Oral Examination was saved as No, so the oral screening can\'t be reopened for this person.'))
     }
   },
 }

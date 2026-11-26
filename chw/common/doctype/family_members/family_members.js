@@ -1,7 +1,77 @@
 // Copyright (c) 2026, tech4socialsector@azimpremjifoundation.org and contributors
 // For license information, please see license.txt
 
+// Place: District -> Taluk/Block -> Panchayat -> Village (optional), as on
+// Household profile - filled from the household, or picked by hand with
+// each list showing only the places under the level above.
+const FM_LEVELS = ["district", "taluk_block", "gram_panchayat", "village"];
+const FM_DOCTYPE = { district: "District", taluk_block: "Taluk Block", gram_panchayat: "Gram Panchayat", village: "Village" };
+
+function fm_place_changed(frm, fieldname) {
+	const value = frm.doc[fieldname];
+	if (!value || frm.__filling) return;
+	const i = FM_LEVELS.indexOf(fieldname);
+	const go = i > 0
+		? frappe.call({ method: "chw.places.parents_of", args: { doctype: FM_DOCTYPE[fieldname], name: value } })
+		: Promise.resolve({ message: {} });
+	go.then(async (r) => {
+		const above = r.message || {};
+		if (frm.doc[fieldname] !== value) return;
+		frm.__filling = true;
+		try {
+			for (const f of FM_LEVELS.slice(0, i)) {
+				if (above[f] && String(frm.doc[f] || "") !== String(above[f])) await frm.set_value(f, above[f]);
+			}
+			let cleared = false;
+			for (let j = i + 1; j < FM_LEVELS.length; j++) {
+				const below = FM_LEVELS[j];
+				if (!frm.doc[below]) continue;
+				if (cleared) {
+					await frm.set_value(below, "");
+					continue;
+				}
+				const p = await frappe.call({
+					method: "chw.places.parents_of",
+					args: { doctype: FM_DOCTYPE[below], name: frm.doc[below] },
+				});
+				const up = p.message || {};
+				if (FM_LEVELS.slice(0, j).some((f) => frm.doc[f] && up[f] && String(up[f]) !== String(frm.doc[f]))) {
+					await frm.set_value(below, "");
+					cleared = true;
+				}
+			}
+		} finally {
+			frm.__filling = false;
+		}
+	});
+}
+
 frappe.ui.form.on("Family members", {
+	setup(frm) {
+		frm.set_query("taluk_block", () => (frm.doc.district ? { filters: { district: frm.doc.district } } : {}));
+		frm.set_query("gram_panchayat", () =>
+			frm.doc.taluk_block
+				? { filters: { taluk_block: frm.doc.taluk_block } }
+				: frm.doc.district
+				? { filters: { district: frm.doc.district } }
+				: {}
+		);
+		frm.set_query("village", () => (frm.doc.gram_panchayat ? { filters: { village_code: frm.doc.gram_panchayat } } : {}));
+	},
+	refresh(frm) {
+		const defaults = {
+			taluk_block: () => ({ district: frm.doc.district }),
+			gram_panchayat: () => ({ taluk_block: frm.doc.taluk_block }),
+			village: () => ({ village_code: frm.doc.gram_panchayat }),
+		};
+		for (const [f, fn] of Object.entries(defaults)) {
+			if (frm.fields_dict[f]) frm.fields_dict[f].get_route_options_for_new_doc = fn;
+		}
+	},
+	district: (frm) => fm_place_changed(frm, "district"),
+	taluk_block: (frm) => fm_place_changed(frm, "taluk_block"),
+	gram_panchayat: (frm) => fm_place_changed(frm, "gram_panchayat"),
+	village: (frm) => fm_place_changed(frm, "village"),
 	onload(frm) {
 		if (frm.is_new() && !frm.doc.health_worker_name) {
 			frappe.call({

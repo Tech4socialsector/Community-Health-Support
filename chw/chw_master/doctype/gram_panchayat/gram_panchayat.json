@@ -6,18 +6,69 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_hnuw"
+  "section_break_hnuw",
+  "panchayat_code",
+  "taluk_block",
+  "pincode",
+  "column_break_gp_place",
+  "district",
+  "state"
  ],
  "fields": [
   {
    "fieldname": "section_break_hnuw",
    "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "taluk_block",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Taluk / Block",
+   "options": "Taluk Block"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "panchayat_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Panchayat Code",
+   "length": 3
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "Pincode",
+   "length": 6
+  },
+  {
+   "fieldname": "column_break_gp_place",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "taluk_block.district",
+   "fieldname": "district",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "District",
+   "options": "District",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "taluk_block.state",
+   "fieldname": "state",
+   "fieldtype": "Link",
+   "label": "State",
+   "options": "State List",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-20 15:00:00.000000",
+ "modified": "2026-11-25 12:05:00.737195",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "Gram Panchayat",
@@ -37,56 +88,58 @@
    "write": 1
   },
   {
-   "read": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
    "role": "MCH Worker"
   },
   {
-   "read": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
    "role": "Palliative Care Worker"
   },
   {
-   "read": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
    "role": "Mental Health Care Worker"
   },
   {
-   "read": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
    "role": "NCD Care Worker"
   },
   {
-   "read": 1,
+   "create": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
    "role": "Cancer Worker"
   },
   {
-   "read": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
    "role": "CHW Health Worker"
   },
   {
-   "read": 1,
-   "write": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
+   "role": "Program Coordinator",
    "share": 1,
-   "role": "Program Coordinator"
+   "write": 1
   }
  ],
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
+ "search_fields": "taluk_block,pincode",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

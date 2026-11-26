@@ -32,6 +32,9 @@
   "use_main_screening_form",
   "column_break_cancer_forms",
   "use_clinical_evaluation",
+  "use_outreach_clinic",
+  "choose_msf_fields",
+  "hidden_form_fields",
   "section_break_login",
   "login_headline",
   "login_description",
@@ -209,6 +212,27 @@
    "label": "Clinical Evaluation"
   },
   {
+   "default": "1",
+   "description": "Households for Cancer are registered under an Outreach Clinic ID, and the clinic's team sees only its own clinics.",
+   "fieldname": "use_outreach_clinic",
+   "fieldtype": "Check",
+   "label": "Outreach Clinic"
+  },
+  {
+   "depends_on": "eval:doc.enable_cancer && doc.use_main_screening_form",
+   "description": "Untick the questions this organisation doesn't use - they're hidden in Desk and the app. Questions the app needs stay shown.",
+   "fieldname": "choose_msf_fields",
+   "fieldtype": "Button",
+   "label": "Choose Main Screening Form fields"
+  },
+  {
+   "description": "Set with the Choose ... fields button: {\"Main Screening Form\": [fieldname, ...]}",
+   "fieldname": "hidden_form_fields",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Hidden form fields"
+  },
+  {
    "fieldname": "section_break_login",
    "fieldtype": "Section Break",
    "label": "Login Page"
@@ -221,7 +245,7 @@
    "label": "Login Headline"
   },
   {
-   "default": "Track visits, follow-ups, and growth monitoring in one place \u2014 built for community health workers on the ground.",
+   "default": "Track visits, follow-ups, and growth monitoring in one place — built for community health workers on the ground.",
    "description": "Supporting text shown below the headline on the login page.",
    "fieldname": "login_description",
    "fieldtype": "Small Text",
@@ -306,7 +330,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-27 16:23:04.208672",
+ "modified": "2026-11-25 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "CHW Master",
  "name": "App Setting",

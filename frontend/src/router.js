@@ -34,6 +34,11 @@ const routes = [
     component: () => import('@/pages/WorkOrders.vue'),
   },
   {
+    path: '/programme-setup',
+    name: 'ProgrammeSetup',
+    component: () => import('@/pages/ProgrammeSetup.vue'),
+  },
+  {
     path: '/overview',
     name: 'Overview',
     component: () => import('@/pages/Overview.vue'),

@@ -85,6 +85,12 @@
   "doctype": "App Module Setting",
   "doctypes": [
    {
+    "doctype_name": "Outreach Clinic",
+    "icon": null,
+    "label": "Outreach Clinic",
+    "route": null
+   },
+   {
     "doctype_name": "Main Screening Form",
     "icon": null,
     "label": "Main Screening Form",
@@ -100,7 +106,7 @@
   "enabled": 1,
   "icon": "stethoscope",
   "label": "Cancer Screening",
-  "modified": "2026-11-12 14:42:09.036021",
+  "modified": "2026-11-25 10:00:00.000000",
   "module_name": "Cancer Screening",
   "name": "Cancer Screening",
   "restrict_by_role": 0,

@@ -70,6 +70,10 @@
                 <LucideIcon name="chart-bar-big" :class="ICON" />
                 <span class="flex-1">{{ t('Overview') }}</span>
               </router-link>
+              <router-link v-if="isPrivileged" :to="{ name: 'ProgrammeSetup' }" :class="ROW" @click="close">
+                <LucideIcon name="sliders-horizontal" :class="ICON" />
+                <span class="flex-1">{{ t('Programme setup') }}</span>
+              </router-link>
               <router-link :to="{ name: 'Outbox' }" :class="ROW" @click="close">
                 <LucideIcon :name="offlineState.online ? 'cloud-check' : 'cloud-off'" :class="ICON" />
                 <span class="flex-1">{{ t('Offline & Sync') }}</span>

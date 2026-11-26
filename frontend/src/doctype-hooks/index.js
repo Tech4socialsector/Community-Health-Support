@@ -7,6 +7,7 @@ import familyMembers from './familyMembers'
 import householdProfile from './householdProfile'
 import mainScreeningForm from './mainScreeningForm'
 import ncd from './ncd'
+import outreachClinic from './outreachClinic'
 import pnc from './pnc'
 import postpartum from './postpartum'
 import preconception from './preconception'
@@ -51,6 +52,7 @@ const HOOKS = {
   'Household profile': householdProfile,
   'Main Screening Form': mainScreeningForm,
   NCD: ncd,
+  'Outreach Clinic': outreachClinic,
   PNC: pnc,
   'Postpartum Reg and Followup': postpartum,
   'Preconception Reg and Followup': preconception,

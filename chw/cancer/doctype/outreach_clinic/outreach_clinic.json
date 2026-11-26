@@ -1,0 +1,183 @@
+{
+ "actions": [],
+ "creation": "2026-11-25 10:00:00",
+ "description": "A Cancer outreach clinic: its place and dates.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "clinic_details_tab",
+  "outreach_clinic_name",
+  "outreach_clinic_id",
+  "active",
+  "column_break_dates",
+  "start_date",
+  "end_date",
+  "place_section",
+  "gram_panchayat",
+  "villages",
+  "pincode",
+  "column_break_place",
+  "state",
+  "district",
+  "taluk_block"
+ ],
+ "fields": [
+  {
+   "fieldname": "clinic_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Clinic Details"
+  },
+  {
+   "bold": 1,
+   "fieldname": "outreach_clinic_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Outreach Clinic Name",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "outreach_clinic_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Outreach Clinic ID",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "description": "Untick when this outreach is over: no new households can be added to it. Its data stays.",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Active"
+  },
+  {
+   "fieldname": "column_break_dates",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Outreach Clinic Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "Outreach Clinic End Date"
+  },
+  {
+   "fieldname": "place_section",
+   "fieldtype": "Section Break",
+   "label": "Place"
+  },
+  {
+   "description": "Start here: picking the Panchayat fills the State, District and Block.",
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Panchayat Name",
+   "options": "Gram Panchayat",
+   "reqd": 1
+  },
+  {
+   "description": "Leave empty to cover every village of the panchayat.",
+   "fieldname": "villages",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Villages Covered",
+   "options": "Outreach Clinic Village"
+  },
+  {
+   "description": "Filled from the Panchayat when it has one; a known pincode also fills the places.",
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "Pincode",
+   "length": 6,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_place",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Filled from the Panchayat (or pick it to narrow the lists).",
+   "fieldname": "state",
+   "fieldtype": "Link",
+   "label": "State Name",
+   "options": "State List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "district",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "District Name",
+   "options": "District",
+   "reqd": 1
+  },
+  {
+   "fieldname": "taluk_block",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Taluk / Block Name",
+   "options": "Taluk Block",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2026-11-26 12:40:00.000000",
+ "modified_by": "Administrator",
+ "module": "Cancer",
+ "name": "Outreach Clinic",
+ "naming_rule": "By script",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Program Coordinator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cancer Worker"
+  },
+  {
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CHW Health Worker"
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "outreach_clinic_name,gram_panchayat",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "outreach_clinic_name",
+ "track_changes": 1
+}

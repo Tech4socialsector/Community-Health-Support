@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="show" :options="{ size: '5xl', title: 'settings-dialog' }">
+  <Dialog v-model="show" :options="{ size: '7xl', title: 'settings-dialog' }">
     <template #body>
       <div class="settings-dialog-panel flex flex-col">
         <div class="flex h-12 flex-shrink-0 items-center justify-between border-b px-4 dark:border-gray-800">
@@ -113,8 +113,17 @@ from options.title) is the one hook it exposes for a per-dialog override. */
 
 .settings-dialog-panel {
   width: 100%;
-  height: 34rem;
-  max-height: 80vh;
+  height: 88vh;
+  max-height: 56rem;
+}
+
+/* Bigger on a computer: most of the screen, so long settings (a form's
+fields to choose) need less scrolling. */
+@media (min-width: 640px) and (min-height: 481px) {
+  [data-dialog='settings-dialog'] .dialog-content {
+    max-width: min(84rem, 94vw);
+    width: 94vw;
+  }
 }
 
 @media (max-width: 639px), (max-height: 480px) {

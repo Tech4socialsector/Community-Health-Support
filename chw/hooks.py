@@ -255,6 +255,13 @@ doc_events = {
 	"Birth Registration": {
 		"after_insert": "chw.api.close_anc_followup_from_birth_registration"
 	},
+	# Cancer outreach: a new household only into an Active clinic, and only
+	# a village that clinic covers - see chw.cancer.outreach.
+	"Household profile": {
+		"validate": ["chw.places.check_household_places", "chw.cancer.outreach.check_household_clinic"]
+	},
+	# Same place chain on Family members.
+	"Family members": {"validate": "chw.places.check_household_places"},
 	# A CHW form changed in Desk (new field, new label, Customize Form) ->
 	# its new texts are translated for the languages in use.
 	"DocType": {"on_update": "chw.translation_tool.on_form_change"},

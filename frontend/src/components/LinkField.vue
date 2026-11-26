@@ -67,9 +67,9 @@
           @mouseenter="active = i"
           @click="pick(r)"
         >
-          <span class="block font-medium text-gray-900 dark:text-gray-100">{{ isTempName(r.value) ? t('New (not synced)') : r.value }}</span>
-          <span v-if="r.label && r.label !== r.value" class="block truncate text-xs text-gray-600 dark:text-gray-300">{{ r.label }}</span>
-          <span v-if="r.description" class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ r.description }}</span>
+          <span class="block font-medium text-gray-900 dark:text-gray-100">{{ isTempName(r.value) ? t('New (not synced)') : titleInLink && r.label ? r.label : r.value }}</span>
+          <span v-if="!titleInLink && r.label && r.label !== r.value" class="block truncate text-xs text-gray-600 dark:text-gray-300">{{ r.label }}</span>
+          <span v-if="descriptionOf(r)" class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ descriptionOf(r) }}</span>
         </li>
         <!-- Desk's "+ Create a new ..." - for people allowed to create it,
         unless the hook turns it off (Desk's only_select), e.g. a list of
@@ -90,6 +90,7 @@
       v-model="createOpen"
       :doctype="field.options"
       :initial-name="createName"
+      :initial-values="linkQuery?.createDefaults || null"
       @created="onCreated"
     />
   </div>
@@ -102,6 +103,26 @@ import LucideIcon from '@/components/LucideIcon.vue'
 import { t } from '@/data/i18n'
 import { getMeta, getRecord, isTempName } from '@/data/offline/store'
 import { canCreateDoctype } from '@/data/createPermission'
+
+// The linked doctype's meta: the phone's offline copy, else the server's
+// (once per doctype per page load).
+const metaCache = new Map()
+function linkMeta(doctype) {
+  if (!metaCache.has(doctype)) {
+    metaCache.set(
+      doctype,
+      getMeta(doctype).then(
+        (m) =>
+          m ||
+          fetch(`/api/v2/doctype/${encodeURIComponent(doctype)}/meta`, { credentials: 'same-origin' })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((j) => j?.data || null)
+            .catch(() => null),
+      ),
+    )
+  }
+  return metaCache.get(doctype)
+}
 
 // Loaded when first needed - it renders fields itself (including Links),
 // so a plain import would be circular.
@@ -133,7 +154,21 @@ watch(
   () => [props.field.options, props.modelValue],
   async ([doctype, value]) => {
     friendly.value = ''
-    if (!doctype || !isTempName(value)) return
+    if (!doctype || !value) return
+    if (!isTempName(value)) {
+      // Desk's "show title in link": a numbered master (District 7) shows
+      // its name (Villupuram) instead of the number.
+      const meta = await linkMeta(doctype)
+      if (!meta?.show_title_field_in_link || !meta.title_field) return
+      let title = (await getRecord(doctype, value))?.[meta.title_field]
+      if (!title) {
+        title = await call('frappe.client.get_value', { doctype, filters: { name: value }, fieldname: meta.title_field })
+          .then((r) => r?.[meta.title_field])
+          .catch(() => '')
+      }
+      if (props.modelValue === value && title) friendly.value = title
+      return
+    }
     const [record, meta] = await Promise.all([getRecord(doctype, value), getMeta(doctype)])
     if (props.modelValue !== value) return
     const title = meta?.title_field ? record?.[meta.title_field] : ''
@@ -142,6 +177,23 @@ watch(
   { immediate: true },
 )
 const shownText = computed(() => (!focused.value && friendly.value && text.value === props.modelValue ? friendly.value : text.value))
+const titleInLink = ref(false)
+watch(
+  () => props.field.options,
+  async (doctype) => {
+    const meta = doctype ? await linkMeta(doctype) : null
+    titleInLink.value = !!(meta?.show_title_field_in_link && meta?.title_field)
+  },
+  { immediate: true },
+)
+// A numbered master's search result starts its description with the number
+// ("3, Tamil Nadu") - the number means nothing to a CHW.
+function descriptionOf(r) {
+  const d = r.description || ''
+  if (!titleInLink.value) return d
+  const prefix = String(r.value)
+  return d.startsWith(prefix) ? d.slice(prefix.length).replace(/^[,\s]+/, '') : d
+}
 const open = ref(false)
 const loading = ref(false)
 const results = ref([])
@@ -241,8 +293,10 @@ function move(step) {
 
 function pick(r) {
   if (!r) return
-  text.value = r.value
-  emit('update:modelValue', r.value)
+  // A numbered master (District) comes back as a number - a Link holds text.
+  const value = String(r.value)
+  text.value = value
+  emit('update:modelValue', value)
   close(false)
   input.value?.blur()
 }

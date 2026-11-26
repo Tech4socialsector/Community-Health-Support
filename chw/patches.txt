@@ -31,3 +31,5 @@ chw.patches.v1_0.tick_all_programme_forms
 chw.patches.v1_0.cancer_consent_and_head_of_family
 chw.patches.v1_0.recalculate_cancer_eligibility
 chw.patches.v1_0.seed_cancer_masters
+chw.patches.v1_0.tick_outreach_clinic_form
+chw.patches.v1_0.outreach_clinic_active_tick

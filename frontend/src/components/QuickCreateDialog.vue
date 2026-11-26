@@ -56,6 +56,9 @@ const props = defineProps({
   doctype: { type: String, required: true },
   // What was typed in the Link box - becomes the new record's name.
   initialName: { type: String, default: '' },
+  // Filled in from the form that asked, e.g. a new Taluk Block opened from
+  // Outreach Clinic already has the District chosen there.
+  initialValues: { type: Object, default: null },
 })
 const emit = defineEmits(['created'])
 const open = defineModel({ type: Boolean, default: false })
@@ -87,10 +90,17 @@ watch(
   },
   { immediate: true },
 )
+function applyInitialValues() {
+  for (const [k, v] of Object.entries(props.initialValues || {})) {
+    if (v != null && v !== '') values[k] = v
+  }
+}
+applyInitialValues()
 watch(open, (isOpen) => {
   if (isOpen) {
     newName.value = props.initialName || ''
     error.value = null
+    applyInitialValues()
   }
 })
 

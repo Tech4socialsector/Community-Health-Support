@@ -15,6 +15,20 @@
 
     <form v-else @submit.prevent="save">
       <div class="space-y-6">
+        <!-- Programmes, their forms and questions are set on their own
+        page (Administration -> Programme setup), not here. -->
+        <router-link
+          v-if="doctype === 'App Setting'"
+          :to="{ name: 'ProgrammeSetup' }"
+          class="flex items-center justify-between gap-3 rounded-xl px-4 py-3 ring-1 ring-gray-200 hover:ring-forest-300 dark:ring-gray-800"
+          @click="closeSettings"
+        >
+          <span class="flex flex-col">
+            <span class="text-sm font-semibold text-ink-gray-9">{{ t('Programmes, forms and questions') }}</span>
+            <span class="text-p-xs text-ink-gray-5">{{ t('Choose them on the Programme setup page') }}</span>
+          </span>
+          <LucideIcon name="arrow-right" class="h-4 w-4 text-forest-700" />
+        </router-link>
         <section v-for="(sec, i) in shownSections" :key="sec.key">
           <!-- Desk's Section Break headings ("Programmes", "MCH Forms",
           "Login Page" ...), so the settings read in groups as in Desk. -->
@@ -51,6 +65,10 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useDoc, Button, ErrorMessage, toast } from 'frappe-ui'
 import DynamicField from '@/components/DynamicField.vue'
+import LucideIcon from '@/components/LucideIcon.vue'
+import { showSettingsDialog } from '@/data/settingsDialog'
+
+const closeSettings = () => (showSettingsDialog.value = false)
 import Skeleton from '@/components/Skeleton.vue'
 import { useMeta, useFormFields } from '@/data/useMeta'
 import { t } from '@/data/i18n'
@@ -87,6 +105,9 @@ const shownSections = computed(() => {
       return { ...sec, fields: visible, allChecks: visible.length > 1 && visible.every((f) => f.fieldtype === 'Check') }
     })
     .filter((sec) => sec.fields.length)
+    // App Setting's programme switches and form ticks live on the
+    // Programme setup page.
+    .filter((sec) => props.doctype !== 'App Setting' || !(sec.key === 'section_break_programmes' || sec.key.endsWith('_forms')))
 })
 
 watch(
@@ -118,7 +139,10 @@ const programmeSwitches = (d) =>
 async function save() {
   saving.value = true
   saveError.value = null
-  const switchesChanged = props.doctype === 'App Setting' && programmeSwitches(values) !== programmeSwitches(doc.doc)
+  // Hidden questions change the forms' layout, loaded with the app too.
+  const switchesChanged =
+    props.doctype === 'App Setting' &&
+    (programmeSwitches(values) !== programmeSwitches(doc.doc) || (values.hidden_form_fields || '') !== (doc.doc?.hidden_form_fields || ''))
   try {
     await doc.setValue.submit(values)
     if (switchesChanged) {

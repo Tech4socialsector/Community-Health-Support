@@ -151,6 +151,12 @@ const sections = computed(() => {
           to: { name: 'Overview' },
           isActive: route.name === 'Overview',
         },
+        {
+          label: t('Programme setup'),
+          icon: moduleIcon('sliders'),
+          to: { name: 'ProgrammeSetup' },
+          isActive: route.name === 'ProgrammeSetup',
+        },
       ],
     })
   }

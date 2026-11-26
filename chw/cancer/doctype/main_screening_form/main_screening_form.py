@@ -32,7 +32,6 @@ class MainScreeningForm(Document):
 	def validate(self):
 		self.check_consent()
 		self.check_first_questions()
-		self.keep_oral_no_closed()
 		self.check_finish()
 		self.check_finished_after_referral()
 		self.set_oral_screening_status()
@@ -82,18 +81,6 @@ class MainScreeningForm(Document):
 			frappe.throw(
 				_("Answer these first: {0}").format(", ".join(_(m) for m in missing)),
 				title=_("Missing answers"),
-			)
-
-	def keep_oral_no_closed(self):
-		# Oral Screening Questionnaire: "No - the screening form doesn't open
-		# for the patient & once submitted cannot be reopened".
-		if self.is_new():
-			return
-		saved = frappe.db.get_value(self.doctype, self.name, "oral_examination")
-		if saved == "No" and self.oral_examination != "No":
-			frappe.throw(
-				_("Oral Examination was saved as No, so the oral screening can't be reopened for this person."),
-				title=_("Oral screening closed"),
 			)
 
 	# ---- Finish ----------------------------------------------------------

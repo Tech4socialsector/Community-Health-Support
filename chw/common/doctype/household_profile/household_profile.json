@@ -7,10 +7,14 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "outreach_section",
+  "outreach_clinic",
   "section_break_rmhx",
   "survay_date",
-  "village",
+  "district",
+  "taluk_block",
   "gram_panchayat",
+  "village",
   "subcenter",
   "household_head_name",
   "total_family_members",
@@ -51,9 +55,70 @@
  ],
  "fields": [
   {
+   "fieldname": "outreach_section",
+   "fieldtype": "Section Break",
+   "label": "Outreach Clinic"
+  },
+  {
+   "description": "The Cancer outreach clinic this household is registered under. Choose it first - the village list then shows only that clinic's villages.",
+   "fieldname": "outreach_clinic",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Outreach Clinic ID",
+   "options": "Outreach Clinic",
+   "search_index": 1
+  },
+  {
    "fieldname": "section_break_rmhx",
    "fieldtype": "Section Break",
    "label": "Repondent Details "
+  },
+  {
+   "default": "Today",
+   "fieldname": "survay_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Survey Date"
+  },
+  {
+   "fieldname": "district",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "District",
+   "options": "District"
+  },
+  {
+   "fieldname": "taluk_block",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Taluk / Block",
+   "options": "Taluk Block"
+  },
+  {
+   "fieldname": "gram_panchayat",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Gram Panchayat",
+   "options": "Gram Panchayat"
+  },
+  {
+   "description": "Optional. Shows only the villages of the chosen panchayat.",
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Village",
+   "options": "Village"
+  },
+  {
+   "fetch_from": "village.sub_center",
+   "fieldname": "subcenter",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Subcenter",
+   "options": "Sub Centre"
   },
   {
    "fieldname": "household_head_name",
@@ -70,6 +135,18 @@
    "non_negative": 1
   },
   {
+   "fieldname": "phone_no",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "length": 10
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nI live here\nI work outside\nout of town"
+  },
+  {
    "fieldname": "caste",
    "fieldtype": "Select",
    "label": "Caste the family belongs to ",
@@ -82,48 +159,14 @@
    "label": "Others, Please Specify"
   },
   {
-   "fieldname": "village",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Village",
-   "options": "Village"
-  },
-  {
-   "fetch_from": "village.village_code",
-   "fieldname": "gram_panchayat",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Gram Panchayat",
-   "options": "Gram Panchayat"
-  },
-  {
-   "fetch_from": "village.sub_center",
-   "fieldname": "subcenter",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Subcenter",
-   "options": "Sub Centre"
-  },
-  {
-   "fieldname": "phone_no",
-   "fieldtype": "Data",
-   "label": "Phone Number",
-   "length": 10
-  },
-  {
-   "default": "Today",
-   "fieldname": "survay_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Survey Date"
-  },
-  {
    "fieldname": "house",
    "fieldtype": "Select",
    "label": "House",
    "options": "\nHut\nTiled house\nTerraced house"
+  },
+  {
+   "fieldname": "column_break_kkvt",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "type_of_housing",
@@ -144,10 +187,6 @@
    "options": "\nYes\nNo"
   },
   {
-   "fieldname": "column_break_kkvt",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address"
@@ -160,12 +199,6 @@
    "label": "Data Collector",
    "options": "Health Worker",
    "read_only": 1
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "\nI live here\nI work outside\nout of town"
   },
   {
    "collapsible": 1,
@@ -303,7 +336,7 @@
    "link_fieldname": "hhid"
   }
  ],
- "modified": "2026-11-05 10:12:50.618449",
+ "modified": "2026-11-25 19:30:00.000000",
  "modified_by": "Administrator",
  "module": "Common",
  "name": "Household profile",

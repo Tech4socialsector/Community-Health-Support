@@ -110,14 +110,32 @@ PROGRAMMES = {
 		"label": "Cancer Screening",
 		"home_title": "Cancer Screening",
 		"icon": "stethoscope",
-		"doctypes": ["Main Screening Form", "Clinical Evaluation"],
-		"sidebar": ["Main Screening Form", "Clinical Evaluation"],
+		"doctypes": ["Outreach Clinic", "Main Screening Form", "Clinical Evaluation"],
+		"sidebar": ["Outreach Clinic", "Main Screening Form", "Clinical Evaluation"],
 		"number_cards": ["Cancer Screenings", "Clinical Evaluations"],
 		"shortcuts": ["Main Screening Form", "Clinical Evaluation"],
 		"common_sections": [
 			("Household profile", "cancer_survey_section"),
 			("Family members", "cancer_family_member_details_section"),
 		],
+		# The Outreach Clinic tick (App Setting -> Cancer Forms) also decides
+		# whether households are registered under a clinic - see
+		# apply_form_fields.
+		"form_fields": {
+			"Outreach Clinic": {
+				# shown only while the form is in use
+				"show": [
+					("Household profile", "outreach_section"),
+					("Family members", "outreach_clinic"),
+					("Main Screening Form", "outreach_clinic"),
+					("Clinical Evaluation", "outreach_clinic"),
+				],
+				# required only while the form is in use
+				"require": [("Household profile", "outreach_clinic")],
+				# the Cancer Survey opens once a clinic is chosen
+				"depends_on": [("Household profile", "cancer_survey_section", "eval:doc.outreach_clinic")],
+			},
+		},
 		"masters": ["Medical History", "Breast Palpation Finding", "Breast Referral Type", "Cervix Visual Finding", "Cervical Referral Type", "HPV DNA Result Type", "Habit Master", "Occupation Master"],
 	},
 }
@@ -540,3 +558,50 @@ def apply_common_sections(settings=None):
 				doctype, fieldname, "hidden", hidden, "Check", validate_fields_for_doctype=False
 			)
 			frappe.clear_cache(doctype=doctype)
+	apply_form_fields(settings)
+
+
+def _set_property(doctype, fieldname, prop, value, prop_type):
+	"""Property Setter `prop` = value; value None removes ours (back to the
+	form JSON). Returns True when something changed."""
+	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+	if not frappe.get_meta(doctype).get_field(fieldname):
+		return False
+	name = frappe.db.get_value(
+		"Property Setter", {"doc_type": doctype, "field_name": fieldname, "property": prop}, "name"
+	)
+	if value is None:
+		if not name:
+			return False
+		frappe.delete_doc("Property Setter", name, ignore_permissions=True)
+		return True
+	if name and frappe.db.get_value("Property Setter", name, "value") == value:
+		return False
+	make_property_setter(doctype, fieldname, prop, value, prop_type, validate_fields_for_doctype=False)
+	return True
+
+
+def apply_form_fields(settings=None):
+	"""Fields on other forms that belong to one programme form (e.g. the
+	Outreach Clinic ID on Household profile): shown, required and opening
+	the next section only while that form is in use - its programme on and
+	its App Setting tick ticked. Runs with apply_common_sections."""
+	if settings is None:
+		settings = frappe.db.get_singles_dict("App Setting", cast=True)
+	on = set(enabled_programmes(settings))
+	for key, p in PROGRAMMES.items():
+		for form, spec in (p.get("form_fields") or {}).items():
+			active = key in on and form_ticked(settings, form) and frappe.db.exists("DocType", form)
+			touched = set()
+			for doctype, fieldname in spec.get("show", []):
+				if _set_property(doctype, fieldname, "hidden", None if active else "1", "Check"):
+					touched.add(doctype)
+			for doctype, fieldname in spec.get("require", []):
+				if _set_property(doctype, fieldname, "reqd", "1" if active else None, "Check"):
+					touched.add(doctype)
+			for doctype, fieldname, condition in spec.get("depends_on", []):
+				if _set_property(doctype, fieldname, "depends_on", condition if active else None, "Data"):
+					touched.add(doctype)
+			for doctype in touched:
+				frappe.clear_cache(doctype=doctype)
