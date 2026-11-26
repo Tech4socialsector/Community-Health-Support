@@ -628,8 +628,9 @@
   {
    "depends_on": "eval:doc.leukoplakia==\"Yes\"",
    "fieldname": "if_site",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -689,8 +690,9 @@
   {
    "depends_on": "eval:doc.erthyroplakia==\"Yes\"",
    "fieldname": "if_site_copy",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -733,8 +735,9 @@
   {
    "depends_on": "eval:doc.non_healing_ulcer==\"Yes\"",
    "fieldname": "if_site_copy_copy",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -769,8 +772,9 @@
   {
    "depends_on": "eval:doc.lichen_planus==\"Yes\"",
    "fieldname": "if_lichen_planus_yes",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -783,8 +787,9 @@
   {
    "depends_on": "eval:doc.oral_lichenoid_reaction==\"Yes\"",
    "fieldname": "if_oral_lichenoid_reaction_yes",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -824,8 +829,9 @@
   {
    "depends_on": "eval:doc.nodule==\"Yes\"",
    "fieldname": "if_nodule_yes",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -838,8 +844,9 @@
   {
    "depends_on": "eval:doc.ulcer==\"Yes\"",
    "fieldname": "site_ulcer",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -867,8 +874,9 @@
   {
    "depends_on": "eval:doc.tobacco_pouch_keratosis==\"Yes\"",
    "fieldname": "if_tobacco_pouch_keratosi_yes",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -901,8 +909,9 @@
   {
    "depends_on": "eval:doc.cancerous_lesion==\"Yes\"",
    "fieldname": "site_can",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Site",
+   "options": "Site",
    "read_only_depends_on": "eval:doc.oral_finished"
   },
   {
@@ -1435,7 +1444,7 @@
    "link_fieldname": "main_screening_form"
   }
  ],
- "modified": "2026-11-26 10:46:34.927482",
+ "modified": "2026-11-26 21:25:33.972932",
  "modified_by": "Administrator",
  "module": "Cancer",
  "name": "Main Screening Form",
